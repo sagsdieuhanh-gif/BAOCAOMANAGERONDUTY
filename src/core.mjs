@@ -21,3 +21,22 @@ export function quickLimit(s){const arr=String(s||'').trim().split(/\s+/);if(arr
 export function draftKey(uid,flightId,formId){return ['sags-lite-draft-v1',uid,flightId,formId].join('::')}
 export function classifyField(f){let t=String(f.type||'text').toLowerCase();return t==='checkbox'||t==='check'?'checkbox':t==='signature'?'signature':['computed','display','displaycheck'].includes(t)?'read-only':t==='textarea'?'textarea':t==='number'?'number':t==='date'?'date':t==='time'?'time':'text'}
 export function sanitizeValues(form,values){const allowed=new Set((form.fields||[]).map(x=>x.key)),out={};for(const [k,v] of Object.entries(values||{})){if(!allowed.has(k))continue;if(typeof v==='string')out[k]=v.slice(0,3500);else if(typeof v==='boolean'||typeof v==='number')out[k]=v}return out}
+
+// Shared E-Report account identifiers: mirror firebaseLoginEmail from the legacy app.
+// The reserved AD alias must use its actual Firebase email, not a hardcoded bootstrap password.
+export function legacyLoginEmail(raw){
+  const value=String(raw||'').trim();
+  if(!value) return '';
+  if(value.includes('@')) return value.toLowerCase();
+  if(norm(value)==='AD') return '';
+  const slug=value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[Đđ]/g,'D')
+    .toLowerCase().replace(/[^a-z0-9._-]+/g,'.').replace(/^\.+|\.+$/g,'').replace(/\.{2,}/g,'.');
+  return slug ? `${slug}@ereport-sags.local` : '';
+}
+export function operationalRole(raw){
+  const role=String(raw||'').trim().toUpperCase();
+  if(role==='ADMIN'||role==='AD')return 'AD';
+  if(role==='ĐH'||role==='DH')return 'DH';
+  return role;
+}
+export function validOldRole(raw){return ['AD','DH','CBTT','KH','VIEWER'].includes(operationalRole(raw))}

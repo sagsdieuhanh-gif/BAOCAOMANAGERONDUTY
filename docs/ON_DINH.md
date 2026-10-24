@@ -51,3 +51,12 @@ Trạng thái: **BẢN PHÁT TRIỂN / DEMO**, CHƯA nghiệm thu khai thác. Kh
 ## 7. Kiểm tra bảo mật nguồn cũ
 
 Đối chiếu Firestore Rules hiện tại ở E-REPORT-SAGS cho thấy `match /sags_handovers/{document=**}` cho phép **activeUser đọc/tạo/sửa**; nghĩa là giao diện AD-only của Lite không tự bảo đảm cơ chế phân quyền ghi A/C LIMITS ở phía máy chủ. Để bảo đảm "chỉ AD sửa LIMITS", phải gia cố backend rules với điều kiện bảo toàn quyền nghiệp vụ E-Report cũ. Không được xem `enableLegacyLimitsWrites` là chốt bảo mật; đây chỉ là cờ phòng ngừa thao tác từ giao diện Lite.
+
+
+## Kiểm tra V1.3 (24/10/2026)
+
+- **26/26** unit/integration-mock logic test đạt. Bao gồm sáu form, 9 trang, tọa độ và tỷ lệ nền ảnh gốc, chữ ký giữ tỷ lệ, chữ ký lỗi phải chặn xuất.
+- Kiểm thử trực quan Chrome/Playwright trong môi trường biên dịch bị chặn bởi policy ERR_BLOCKED_BY_ADMINISTRATOR; **không xem là đã nghiệm thu trình duyệt**.
+- Workflow GitHub Pages phải kiểm tra SHA đầy đủ của tài nguyên mẫu E-Report gốc trước khi upload bản phát hành.
+- Chưa đo tốc độ tạo PDF / PDF UI thực tế trên iOS Safari/Android/PC và chưa đối chiếu bản in 9 trang; giữ trạng thái phát triển/kiểm duyệt.
+- Cảnh báo Firebase Rules: không thay đổi rules khi phát hành PDF preview.

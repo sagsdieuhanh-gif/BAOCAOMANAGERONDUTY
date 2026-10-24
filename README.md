@@ -1,4 +1,4 @@
-# SAGS FORM LITE · V1.1 · 24/10/2026
+# SAGS FORM LITE · V1.3 · 24/10/2026
 
 Ứng dụng độc lập, tối giản của Phòng Điều hành, lấy ý tưởng và Form Registry từ **E-REPORT-SAGS** commit `41ad37fc9033f160fd00c21008ff9711ddfd7294` / V2.5.47.
 
@@ -23,13 +23,13 @@ npm start
 
 Mở `http://localhost:8080/?demo=1` để kiểm tra giao diện với dữ liệu mẫu **HOÀN TOÀN CỤC BỘ**, chọn `admin_demo`, `dh_demo` hoặc `viewer_demo`. Không nhập mật khẩu thật. DEMO không ghi dữ liệu vào Firebase. Không dùng dữ liệu DEMO cho khai thác thực tế.
 
-Ứng dụng bình thường tại `http://localhost:8080/` dùng Firebase của E-Report trong `config.js`. Tài khoản phải tồn tại trong Firebase Authentication và được AD cấp role trong `lite_users/{uid}`.
+Ứng dụng bình thường tại `http://localhost:8080/` dùng Firebase của E-Report trong `config.js`. Tài khoản phải tồn tại trong Firebase Authentication và có hồ sơ `users/{uid}` đang hoạt động.
 
 ## Phân quyền / Firestore Rules
 
 **Tuyệt đối không triển khai tập tin `firebase/lite-firestore-fragment.rules` độc lập để ghi đè Firestore Rules hiện tại của E-Report.** Đây chỉ là đoạn rules cần gộp/thẩm định với rules hiện có; nếu ghi đè có thể phá quyền của E-Report cũ.
 
-Vai trò `AD` quản lý account, chuyến, tất cả biểu mẫu. `DH` tạo/nhận chuyến và sửa chuyến được nhận. `CBTT` / `VIEWER` xem biểu mẫu; CBTT vẫn nhận cảnh báo LIMITS khi catalog có gán vai trò. **Tài khoản Admin gốc** cần được bootstrap có kiểm soát qua Firebase Console/Admin SDK; không hard-code mật khẩu hoặc cấp ADMIN từ client.
+Vai trò `AD` xem danh sách tài khoản chung (chỉ đọc), quản lý chuyến và tất cả biểu mẫu; tạo/đổi quyền tài khoản thực hiện trên E-Report gốc. `DH` tạo/nhận chuyến và sửa chuyến được nhận. `CBTT` / `VIEWER` xem biểu mẫu; CBTT vẫn nhận cảnh báo LIMITS khi catalog có gán vai trò. **Tài khoản Admin gốc** cần được bootstrap có kiểm soát qua Firebase Console/Admin SDK; không hard-code mật khẩu hoặc cấp ADMIN từ client.
 
 ## Lưu ý vận hành A/C LIMITS
 
@@ -60,3 +60,21 @@ Tạo **repository riêng** (không ghi đè E-REPORT-SAGS), đưa toàn bộ c�
 Giao diện được thiết kế lại hoàn toàn: login hai vùng, header/desktop sidebar, mobile bottom navigation, flight dashboard thống kê, flight card, flight workspace 6 thẻ tài liệu và editor gọn. Không bổ sung thư viện UI hoặc gọi CDN khi mở trang, nhằm giảm chi phí khởi động. Không thay đổi nghiệp vụ SỔ TAY, A/C LIMITS hoặc nội dung Form Registry/PDF gốc. Đây là bản phát triển có Demo Local, **không triển khai Firebase Rules tự động**.
 
 Repo triển khai: https://github.com/sagsdieuhanh-gif/EREPORT . GitHub Pages qua GitHub Actions sẽ cần quyền Pages Settings / nguồn GitHub Actions; nếu bị tắt Pages, quản trị viên bật từ Settings → Pages → Build and deployment → GitHub Actions.
+
+## V1.2: đăng nhập dùng chung E-Report
+
+- Đăng nhập qua **cùng Firebase Authentication** với E-Report cũ; chấp nhận username (chuyển sang `username@ereport-sags.local` theo đúng thuật toán E-Report), hoặc email Firebase. Riêng tên `AD` phải đăng nhập bằng email Firebase thực tế như ứng dụng cũ.
+- Hồ sơ vai trò đọc **trực tiếp `users/{UID}`** thay cho `lite_users/{UID}`. Chỉ cho vào nếu `active===true`, chưa xóa và vai trò được hỗ trợ; ADMIN/AD → AD, ĐH/DH → DH.
+- `mustChangePassword=true` bắt buộc đặt mật khẩu mới trước khi vào ứng dụng. Đổi mật khẩu Firebase và cập nhật cờ trong hồ sơ chung.
+- Màn hình tài khoản Lite chỉ xem, quản trị nhân sự và reset mật khẩu sử dụng E-Report gốc; Lite không tự sửa tài khoản chung.
+- **Không tự động áp dụng Firestore Rules.** Fragment `firebase/lite-firestore-fragment.rules` đã đổi sang `users/{uid}`, nhưng quản trị viên cần tích hợp fragment vào Rules hiện hữu, triển khai và kiểm tra; nếu chưa cập nhật Rules, tính năng chuyến/mẫu Lite vẫn có thể báo permission-denied dù đăng nhập hợp lệ.
+- GitHub Pages và E-Report có thể sử dụng cùng hostname `sagsdieuhanh-gif.github.io` trên các đường dẫn khác nhau. Trạng thái đăng nhập của Firebase có thể được dùng lại trên cùng origin, nhưng không nên coi đây là SSO được bảo đảm trên các trình duyệt hoặc domain khác.
+
+## V1.3 · Xem trước PDF chuẩn biểu mẫu gốc
+
+- **XEM TRƯỚC PDF** có trong cả sáu mẫu 42.1, 42.3, 55.1, 54, 94, 208. PDF được dựng từ nền PNG E-Report gốc (file được xác minh SHA Git bằng GitHub Actions) và lớp dữ liệu theo tọa độ Form Registry; các trang nhiều trang được kết xuất đúng thứ tự.
+- Màn hình xem trước dùng **chính Blob PDF** mà nút **LƯU PDF** tải xuống; không có bộ dựng riêng gây sai khác giữa bản xem và bản xuất.
+- Chữ ký PNG lưu cho đúng biểu mẫu/chuyến giữ nguyên tỷ lệ khi đưa vào ô ký; chữ ký hỏng/không hợp lệ làm xuất PDF báo lỗi, không âm thầm bỏ chữ ký.
+- Cảnh báo nổi bật nếu PDF chứa nội dung chưa được lưu Firebase. Xem trước **không lưu dữ liệu** và không tự xác nhận hoàn tất biểu mẫu.
+- Mobile: có nút MỞ PDF dùng trình xem ngoài khi iframe của Safari/Android không hỗ trợ blob PDF. PDF engine chỉ tải khi cần.
+- Kiểm thử Node: 26/26; trong đó kiểm thử đầy đủ sáu mã mẫu/9 trang, tỷ lệ nền, chữ ký, nhiều trang, dữ liệu không lệch nhau. **Chưa được nghiệm thu bản in thực tế từng biểu mẫu** hoặc browser E2E trên thiết bị thật. Kiểm thử trình duyệt tự động trong môi trường hiện tại bị chặn bởi chính sách trình duyệt, không tính là đạt.

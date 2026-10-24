@@ -1,19 +1,19 @@
 // FRAGMENT ONLY -- merge inside existing E-Report Firestore Rules.
 // Never deploy alone: would overwrite permissions of E-Report.
+// This fragment belongs INSIDE current E-Report rules; never replace the existing rules file.
+// Share the exact same users/{UID} and Firebase Auth identities as E-Report.
 function liteSignedIn() { return request.auth != null; }
-function liteProfile() { return get(/databases/$(database)/documents/lite_users/$(request.auth.uid)); }
-function liteEnabled() { return liteSignedIn() && exists(/databases/$(database)/documents/lite_users/$(request.auth.uid)) && liteProfile().data.active == true; }
+function liteProfile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
+function liteEnabled() {
+  return liteSignedIn() && activeUser()
+    && liteProfile().data.get('deleted', false) != true
+    && liteProfile().data.get('mustChangePassword', false) != true;
+}
 function liteRole() { return liteProfile().data.role; }
-function liteAD() { return liteEnabled() && liteRole() == 'AD'; }
-function liteDH() { return liteEnabled() && liteRole() == 'DH'; }
+function liteAD() { return liteEnabled() && liteRole() in ['ADMIN','AD']; }
+function liteDH() { return liteEnabled() && liteRole() in ['DH','ĐH']; }
 function liteCanEdit() { return liteAD() || liteDH(); }
 function liteFormId(fid) { return fid in ['fsags421','fsags423','fsags551','fsags54','fsags94','fsags208']; }
-match /lite_users/{uid} {
-  allow get: if liteSignedIn() && (request.auth.uid == uid || liteAD());
-  allow list: if liteAD();
-  allow create, update: if liteAD() && request.resource.data.keys().hasOnly(['name','email','role','active','updatedAt']) && request.resource.data.role in ['AD','DH','CBTT','VIEWER'] && request.resource.data.active is bool;
-  allow delete: if false;
-}
 match /lite_flights/{id} {
   allow get, list: if liteEnabled();
   allow create: if liteCanEdit() && request.resource.data.createdBy == request.auth.uid && request.resource.data.claimedBy == null && request.resource.data.date is string;

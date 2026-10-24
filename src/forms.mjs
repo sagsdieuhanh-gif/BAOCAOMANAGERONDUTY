@@ -1,17 +1,47 @@
 import{esc,classifyField,sanitizeValues,draftKey,canEdit}from'./core.mjs';
 import{formRegistry,sourceImage}from'./assets.mjs';
-import{createPdf,downloadPdf}from'./pdf.mjs';
+import{createPdf,downloadPdf,openPdfPreview}from'./pdf.mjs';
 import{api}from'./backend.mjs';
 let editor=null,form=null,formId='',flight=null,profile=null,values={},revision=0,pageIdx=0,dirty=false,renderId=0;
+let lastPdf=null,pdfBusy=false;
 const $=id=>document.getElementById(id);
-export async function openForm(host,record,user,id,onBack,modal,toast){editor={host,onBack,modal,toast};flight=record;profile=user;formId=id;let reg=await formRegistry();form=reg.forms.find(f=>f.id===id);if(!form)throw Error('Không tìm thấy biểu mẫu gốc '+id);let saved=await api.readForm(record.id,id);values={...saved.values};revision=saved.revision;dirty=false;pageIdx=0;const dk=draftKey(user.uid,record.id,id);try{const local=JSON.parse(localStorage.getItem(dk)||'null');if(local&&Number(local.revision)===revision&&local.at>0&&Object.keys(local.values||{}).length){if(confirm('Máy này có dữ liệu nhập chưa lưu. Khôi phục bản nháp?')){values=local.values;dirty=true}}}catch{}render()}
+export async function openForm(host,record,user,id,onBack,modal,toast){editor={host,onBack,modal,toast};lastPdf=null;pdfBusy=false;flight=record;profile=user;formId=id;let reg=await formRegistry();form=reg.forms.find(f=>f.id===id);if(!form)throw Error('Không tìm thấy biểu mẫu gốc '+id);let saved=await api.readForm(record.id,id);values={...saved.values};revision=saved.revision;dirty=false;pageIdx=0;const dk=draftKey(user.uid,record.id,id);try{const local=JSON.parse(localStorage.getItem(dk)||'null');if(local&&Number(local.revision)===revision&&local.at>0&&Object.keys(local.values||{}).length){if(confirm('Máy này có dữ liệu nhập chưa lưu. Khôi phục bản nháp?')){values=local.values;dirty=true}}}catch{}render()}
 function saveLocal(){try{localStorage.setItem(draftKey(profile.uid,flight.id,formId),JSON.stringify({revision,values,at:Date.now()}))}catch(e){editor.toast('Bộ nhớ tạm đầy; hãy lưu ngay lên Firebase.')}}
-function setValue(k,value){values[k]=value;dirty=true;saveLocal();renderSideOnly()}
+function setValue(k,value){values[k]=value;lastPdf=null;dirty=true;saveLocal();renderSideOnly()}
 function back(){if(dirty&&!confirm('Dữ liệu chưa lưu lên Firebase. Vẫn quay lại?'))return;editor.onBack()}
 async function save(){if(!canEdit(profile.role))throw Error('Tài khoản chỉ được xem');if(flight.claimedBy!==profile.uid&&profile.role!=='AD')throw Error('Hãy NHẬN CHUYẾN trước khi sửa biểu mẫu');let next=sanitizeValues(form,values);const nextRevision=await api.saveForm(flight.id,formId,next,revision,profile);revision=nextRevision;dirty=false;localStorage.removeItem(draftKey(profile.uid,flight.id,formId));editor.toast('Đã lưu lên Firebase · Revision '+revision);renderHeader()}
-async function exportPdf(){let status=$('form-status');status.textContent='Đang chuẩn bị xuất PDF…';try{let f=await createPdf(form,values,flight,t=>status.textContent=t);downloadPdf(f);status.textContent='PDF đã tạo xong';editor.toast('Đã xuất PDF')}catch(e){status.textContent='Lỗi xuất PDF: '+e.message;editor.toast('Xuất PDF lỗi: '+e.message)}}
+async function buildPdf(){
+  const fingerprint=JSON.stringify({id:formId,flightId:flight.id,flightDate:flight.date,values});
+  if(lastPdf?.fingerprint===fingerprint)return lastPdf.file;
+  const snapshot=structuredClone(values);const status=$('form-status');
+  const file=await createPdf(form,snapshot,{...flight},text=>{if(status)status.textContent=text});
+  lastPdf={fingerprint,file};
+  return file;
+}
+async function pdfAction(action){
+  if(pdfBusy)return;
+  pdfBusy=true;
+  for(const id of ['form-preview','form-pdf']){const button=$(id);if(button)button.disabled=true}
+  let status=$('form-status');if(status)status.textContent='Đang chuẩn bị PDF từ mẫu gốc…';
+  try{
+    const file=await buildPdf();
+    if(action==='preview'){
+      openPdfPreview(file,{title:form.code||form.name,unsaved:dirty});
+      editor.toast(`Đã tạo bản xem trước PDF ${file.pageCount} trang`);
+    }else{
+      downloadPdf(file);editor.toast('Đã lưu PDF · '+file.name);
+    }
+    if(status)status.textContent=dirty?'PDF chứa dữ liệu chưa lưu Firebase':'PDF đã tạo · '+file.pageCount+' trang';
+  }catch(e){
+    if(status)status.textContent='Lỗi PDF: '+e.message;
+    editor.toast('Không tạo được PDF: '+e.message);
+  }finally{
+    pdfBusy=false;
+    for(const id of ['form-preview','form-pdf']){const button=$(id);if(button)button.disabled=false}
+  }
+}
 function render(){editor.host.innerHTML=`<section class="hero"><div class="row between"><div><h1>${esc(form.name||form.code)}</h1><p>${esc(flight.arrival||'')} / ${esc(flight.departure||'')} · ${esc(flight.date)} · ${esc(flight.reg||'Chưa có đăng bạ')}</p></div><span class="badge">${form.pages.length} trang · ${form.fields.length} trường</span></div></section><div class="tab-actions" id="form-actions"></div><div class="form-layout"><div><div class="row between"><div id="page-buttons" class="row"></div><span class="mini">Chạm ô tô xanh để nhập dữ liệu</span></div><div id="page-container"></div></div><aside id="form-side" class="card editor-side"></aside></div>`;renderHeader();renderPage();renderSideOnly()}
-function renderHeader(){let el=$('form-actions');if(!el)return;el.innerHTML=`<button id="form-back" class="btn subtle">← Quay lại</button>${canEdit(profile.role)?'<button id="form-save" class="btn success">💾 LƯU LÊN FIREBASE</button>':''}<button id="form-pdf" class="btn">⬇ XUẤT PDF</button><span id="form-status" class="statusline">${dirty?'● Có thay đổi chưa lưu':'Đã đồng bộ · revision '+revision}</span>`;el.querySelector('#form-back').onclick=back;el.querySelector('#form-save')?.addEventListener('click',()=>save().catch(e=>editor.toast(e.message)));el.querySelector('#form-pdf').onclick=exportPdf}
+function renderHeader(){let el=$('form-actions');if(!el)return;el.innerHTML=`<button id="form-back" class="btn subtle">← Quay lại</button>${canEdit(profile.role)?'<button id="form-save" class="btn success">💾 LƯU LÊN FIREBASE</button>':''}<button id="form-preview" class="btn subtle">👁 XEM TRƯỚC PDF</button><button id="form-pdf" class="btn">⬇ XUẤT PDF</button><span id="form-status" class="statusline">${dirty?'● Có thay đổi chưa lưu':'Đã đồng bộ · revision '+revision}</span>`;el.querySelector('#form-back').onclick=back;el.querySelector('#form-save')?.addEventListener('click',()=>save().catch(e=>editor.toast(e.message)));el.querySelector('#form-preview').onclick=()=>pdfAction('preview');el.querySelector('#form-pdf').onclick=()=>pdfAction('download');for(const id of ['form-preview','form-pdf'])el.querySelector('#'+id).disabled=pdfBusy}
 async function renderPage(){const key=++renderId;let n=pageIdx,p=form.pages[n];$('page-buttons').innerHTML=form.pages.map((p,i)=>`<button class="btn sm ${i===n?'':'subtle'}" data-p="${i}">Trang ${i+1}</button>`).join('');$('page-buttons').querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{pageIdx=+b.dataset.p;renderPage();renderSideOnly()});$('page-container').innerHTML='<p class="muted">Đang tải hình biểu mẫu…</p>';try{let src=await sourceImage(p.image);if(renderId!==key)return;const fields=form.fields.filter(f=>f.pageId===p.id);const holder=document.createElement('div');holder.className='paper';holder.style.aspectRatio=`${p.width}/${p.height}`;const img=document.createElement('img');img.src=src;img.alt='Trang mẫu biểu gốc '+form.code;img.decoding='async';holder.append(img);for(const f of fields){const bt=document.createElement('button');bt.type='button';bt.className='hotspot'+(values[f.key]?' filled':'');bt.style.cssText=`left:${f.x*100}%;top:${f.y*100}%;width:${f.w*100}%;height:${f.h*100}%`;bt.title=f.label||f.key;bt.textContent=values[f.key]&&classifyField(f)!=='signature'?String(values[f.key]).slice(0,36):'';if(!canEdit(profile.role)||flight.claimedBy!==profile.uid&&profile.role!=='AD')bt.disabled=true;bt.onclick=()=>editField(f);holder.append(bt)}$('page-container').replaceChildren(holder)}catch(e){if(renderId===key)$('page-container').innerHTML=`<div class="notice">Không tải được hình mẫu: ${esc(e.message)}. Hãy chạy npm run vendor hoặc kết nối mạng.</div>`}}
 function renderSideOnly(){const host=$('form-side');if(!host)return;const filtered=form.fields.filter(f=>f.pageId===form.pages[pageIdx].id);host.innerHTML=`<h3>Trường dữ liệu · Trang ${pageIdx+1}</h3><input id="form-filter" placeholder="Tìm tên trường, mã trường…"><div class="editor-fields" id="field-list"></div><p class="mini">Các trường có tọa độ gốc từ E-Report Form Registry. ${dirty?'ĐANG CÓ BẢN NHÁP CHƯA LƯU':'Dữ liệu đã tải xong'}.</p>`;const list=$('field-list');function draw(){let q=$('form-filter').value.toLowerCase();let arr=filtered.filter(x=>(x.key+' '+x.label).toLowerCase().includes(q));list.innerHTML=arr.map((f,i)=>`<button data-key="${esc(f.key)}"><span>${esc(f.label||f.key)}</span><strong>${esc(classifyField(f)==='signature'&&values[f.key]?'Đã ký':String(values[f.key]??'—').slice(0,48))}</strong></button>`).join('');list.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>{let f=filtered.find(x=>x.key===b.dataset.key);if(f)editField(f)})}draw();$('form-filter').oninput=draw;renderHeader()}
 function editField(f){if(!canEdit(profile.role)||flight.claimedBy!==profile.uid&&profile.role!=='AD')return;let type=classifyField(f);if(type==='read-only'){editor.toast('Trường hiển thị tự động, không nhập trực tiếp');return}if(type==='signature')return signField(f);let v=values[f.key]??'';let ctl=type==='checkbox'?`<select id="entry"><option value="">Chưa chọn</option><option value="✓" ${v==='✓'?'selected':''}>✓ Đã thực hiện</option><option value="X" ${v==='X'?'selected':''}>X Không đạt</option><option value="N/A" ${v==='N/A'?'selected':''}>N/A</option></select>`:type==='textarea'?`<textarea id="entry" rows="5">${esc(v)}</textarea>`:`<input id="entry" type="${['number','date','time'].includes(type)?type:'text'}" value="${esc(v)}">`;const close=editor.modal(`<header><h2>${esc(f.label||f.key)}</h2><button class="btn subtle sm" id="entry-cancel">Đóng</button></header><p class="muted">${esc(form.code)} · ${esc(f.key)}</p>${ctl}<div class="row" style="margin-top:12px"><button class="btn success" id="entry-save">ÁP DỤNG</button><button class="btn subtle" id="entry-clear">XÓA GIÁ TRỊ</button></div>`);$('entry-cancel').onclick=close;$('entry-save').onclick=()=>{setValue(f.key,$('entry').value);close();renderPage()};$('entry-clear').onclick=()=>{setValue(f.key,'');close();renderPage()};$('entry')?.focus()}
