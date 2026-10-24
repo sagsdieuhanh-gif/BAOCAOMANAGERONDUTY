@@ -1,9 +1,9 @@
 import {FORM_IDS,FORM_LABELS,localToday,esc,canEdit,canManage,cleanFlight,flightId} from './core.mjs';
-import {api,enableDemo,isDemo} from './backend.mjs?v=1.7.0';
+import {api,enableDemo,isDemo} from './backend.mjs?v=1.8.0';
 import {profileAccessMessage} from './access-status.mjs';
-import {openForm} from './forms.mjs';
-import {showNotebook} from './notebook.mjs';
-import {showLimits,startLimitAlerts,evaluate} from './limits.mjs';
+import {openForm} from './forms.mjs?v=1.8.0';
+import {showNotebook} from './notebook.mjs?v=1.8.0';
+import {showLimits,startLimitAlerts,evaluate} from './limits.mjs?v=1.8.0';
 const config=window.SAGS_LITE_CONFIG;const $=id=>document.getElementById(id);const state={user:null,profile:null,flights:[],date:localToday(),selected:null,nav:'flights',alertStop:null,flightError:null,legacyRecords:null,legacyRecordsFor:'',legacyRecordError:null};
 const DEMO=new URLSearchParams(location.search).has('demo');enableDemo(DEMO);
 function toast(message){let e=$('toast');e.textContent=String(message);e.style.display='block';clearTimeout(toast.id);toast.id=setTimeout(()=>e.style.display='none',4000)}
@@ -39,7 +39,10 @@ async function afterLogin(u,profile){
  $('nav').classList.remove('hidden');
  document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!canManage(state.profile.role)));
  await reloadFlights();
- state.alertStop?.();state.alertStop=startLimitAlerts(state.profile,()=>DEMO?state.flights:[],toast);
+ state.alertStop?.();state.alertStop=null;
+ // LIMITS is supplementary: a Firestore listener issue must never block the flight workspace.
+ try{state.alertStop=startLimitAlerts(state.profile,()=>DEMO?state.flights:[],toast)}
+ catch(e){console.warn('A/C LIMITS listener unavailable',e);toast('A/C LIMITS chưa sẵn sàng: '+String(e?.message||e))}
  navigate('flights')
 }
 function showRequiredPasswordChange(){

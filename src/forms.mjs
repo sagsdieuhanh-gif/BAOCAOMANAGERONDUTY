@@ -1,7 +1,7 @@
 import{esc,classifyField,sanitizeValues,draftKey,canEdit}from'./core.mjs';
 import{formRegistry,sourceImage}from'./assets.mjs';
 import{createPdf,downloadPdf,openPdfPreview}from'./pdf.mjs';
-import{api}from'./backend.mjs';
+import{api}from'./backend.mjs?v=1.8.0';
 let editor=null,form=null,formId='',flight=null,profile=null,values={},revision=0,pageIdx=0,dirty=false,renderId=0;
 let lastPdf=null,pdfBusy=false;
 const $=id=>document.getElementById(id);

@@ -1,5 +1,5 @@
 import{esc,norm,normalLimit,limitMatches,limitDue,eligibleAlerts,quickLimit,CATEGORY_OPTIONS,localToday}from'./core.mjs';
-import{api}from'./backend.mjs';
+import{api}from'./backend.mjs?v=1.8.0';
 let catalog={version:0,items:[]},stop=null,queue=[],active=null,ackSet=new Set();let currentUser=null,flightList=()=>[];
 function loadAck(){try{ackSet=new Set(JSON.parse(localStorage.getItem('sags-lite-limits-acks')||'[]'))}catch{ackSet=new Set()}}
 function persistAck(){try{localStorage.setItem('sags-lite-limits-acks',JSON.stringify([...ackSet].slice(-500)))}catch{}}

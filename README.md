@@ -1,28 +1,29 @@
-# SAGS FORM LITE V1.7 – KẾ THỪA DỮ LIỆU E-REPORT
+# SAGS FORM LITE V1.8 — ỔN ĐỊNH & KIỂM DUYỆT KẾ THỪA E-REPORT
 
-**Không tạo dữ liệu mới:** Auth / users của E-Report; toàn bộ RTDB dùng prefix `sags_live_v470` như hàm `sagsV470Ref` bản cũ. Dữ liệu `roster_mail` cho nhân viên, `roster_manifests` cho AD, `flight_records` gốc khi AD bấm xem. Không tạo `lite_flights`, không ghi thêm hồ sơ, không ghi vào roster hoặc form.
+**Ứng dụng kế thừa, chưa đạt toàn bộ yêu cầu vận hành.** SAGS FORM LITE dùng Firebase Auth, Firestore `users/{UID}` và vùng RTDB `sags_live_v470` gốc, không tạo kho chuyến bay/phân công mới. Mọi thao tác nghiệp vụ chưa nối trực tiếp vẫn dùng E-Report cũ, tránh ghi đè hoặc làm mất dữ liệu.
 
-## Sửa lỗi V1.7
+## Lỗi đã sửa V1.8
 
-- Sửa nguyên nhân RTDB permission denied từ V1.6: thiếu prefix bắt buộc `sags_live_v470` ở các đường dẫn phân công và hồ sơ chuyến.
-- Đồng bộ tiền tố cho RTDB A/C LIMITS (tính năng ghi vẫn khóa); không sửa Rules hoặc tài khoản.
-- Tăng phiên bản/cache-busting toàn bộ chuỗi import JS; thêm bài kiểm thử cho nhánh dữ liệu gốc.
+- **Đăng nhập/crash:** chuẩn hóa các import JavaScript về **cùng duy nhất** `backend.mjs?v=1.8.0` / `firebase.mjs?v=1.8.0`. V1.7 nạp 2 singleton dẫn đến lỗi `Cannot read properties of null (reading 'f')` khi A/C LIMITS khởi động.
+- **Lỗi SỔ TAY:** kiểm tra hai tệp dữ liệu cùng script; nếu asset Lite bị lỗi, thử tải phiên bản module gốc từ GitHub Pages E-Report, xác minh Git SHA1 blob trước khi thực thi, chỉ đổi 2 đường dẫn data sang nguồn gốc. Khi thất bại, hiển thị lỗi rõ và nút vào ứng dụng gốc. Không tạo danh mục mới.
+- Nếu watcher A/C LIMITS lỗi trong lúc đăng nhập, dashboard vẫn hoạt động; lỗi sẽ hiển thị riêng.
 
-## Sửa lỗi V1.6
+## Trạng thái phạm vi nghiệp vụ
 
-- Sửa alias `FSAGS` của E-Report = mẫu 42.3, kèm các mã mẫu có tiền tố `F/SAGS-CXR/`.
-- Không tự bỏ cả chuyến chỉ vì nhiệm vụ mang mã ngoài sáu biểu mẫu. Nhiệm vụ khác chỉ hiển thị nhãn nghiệp vụ gốc và không cho nhập trực tiếp.
-- Dùng đúng manifest cha `roster_manifests/{date}` cho AD, hộp thư `roster_mail/{username}/items` có query `opDate` cho cá nhân.
-- Bổ sung chẩn đoán số lượng bản ghi theo ngày/nhóm; nút chọn hôm qua/hôm nay, phân biệt không có phân công với không có hồ sơ chuyến.
-- AD có thể đọc (chỉ khi bấm) danh mục hồ sơ gốc `flight_records/{date}`, chỉ hiển thị nhãn và metadata, không tải/sao chép dữ liệu biểu mẫu ra kho mới.
-- Dùng cache-busting V1.6 cho các module JS đã thay đổi.
+- Đăng nhập: cùng hệ thống cũ, cần E2E Firebase thực tế.
+- Phân công, nhận chuyến: mới hiển thị danh sách phân công, **chưa nhận/chuyển việc trên Lite**.
+- 6 biểu mẫu: có tài nguyên registry gốc cho demo, **chưa đọc/ghi dữ liệu form gốc**.
+- Xem trước PDF: đã có bộ PDF mô phỏng từ form gốc, **chưa tích hợp dữ liệu biểu mẫu production**.
+- SỔ TAY: nạp module nguyên bản, thêm khả năng khôi phục tải.
+- A/C LIMITS: đọc danh mục; quản trị và popup nghiệp vụ chuẩn vẫn dùng E-Report cũ.
 
-## Giới hạn cần hiểu
+**Không đưa Demo vào vận hành.** Không có bản Lite nào được xác nhận tương đương toàn bộ E-Report cũ. Xem `docs/KIEM_DUYET_V1.8.md` và `docs/HDSD_V1.8.md` để phân biệt các hạng mục đạt/chưa đạt.
 
-V1.6 vẫn là bản chuyển tiếp. Hộp phân công không đồng nghĩa toàn bộ hồ sơ chuyến. Chỉ người có quyền RTDB phù hợp mới đọc được bản ghi. Không có truy cập tài khoản thật để xác minh quyền dữ liệu đã phát sinh ở Firebase. Nhận chuyến, sửa form và PDF có dữ liệu phải tiếp tục mở workflow E-Report gốc.
+## Kiểm thử cục bộ
 
-Không có quy trình tạo dữ liệu mới, không triển khai Firestore Rules riêng. Việc nhập nghiệp vụ thật trực tiếp trong giao diện Lite chưa hoàn thiện và không được tuyên bố đã xong.
+`npm test && npm run check` — 42 bài kiểm thử mã nguồn/quy tắc; KHÔNG thay thế thử nghiệm tài khoản dữ liệu thật hoặc PDF in thực tế.
 
-Xem thêm `docs/HDSD_V1.6.md` và `docs/KIEN_TRUC_KE_THUA_V1.5.md`.
+## Nguồn gốc
 
-Xem hướng dẫn V1.7: `docs/HDSD_V1.7.md`.
+- E-Report: `https://github.com/sagsdieuhanh-gif/E-REPORT-SAGS` commit `41ad37fc9033f160fd00c21008ff9711ddfd7294`.
+- Lite: `https://github.com/sagsdieuhanh-gif/EREPORT`.
