@@ -78,3 +78,10 @@ Repo triển khai: https://github.com/sagsdieuhanh-gif/EREPORT . GitHub Pages qu
 - Cảnh báo nổi bật nếu PDF chứa nội dung chưa được lưu Firebase. Xem trước **không lưu dữ liệu** và không tự xác nhận hoàn tất biểu mẫu.
 - Mobile: có nút MỞ PDF dùng trình xem ngoài khi iframe của Safari/Android không hỗ trợ blob PDF. PDF engine chỉ tải khi cần.
 - Kiểm thử Node: 26/26; trong đó kiểm thử đầy đủ sáu mã mẫu/9 trang, tỷ lệ nền, chữ ký, nhiều trang, dữ liệu không lệch nhau. **Chưa được nghiệm thu bản in thực tế từng biểu mẫu** hoặc browser E2E trên thiết bị thật. Kiểm thử trình duyệt tự động trong môi trường hiện tại bị chặn bởi chính sách trình duyệt, không tính là đạt.
+
+
+## V1.4 – Khắc phục thông báo sai `Missing or insufficient permissions`
+
+Đăng nhập dùng chung Firebase Auth + `users/{UID}`. Trong V1.3, ứng dụng bắt lỗi quyền truy cập `lite_flights` như thể đọc quyền hồ sơ thất bại. V1.4 xử lý riêng ba bước: xác thực Firebase, đọc hồ sơ E-Report và truy vấn dữ liệu chuyến Lite. Nếu Firestore chưa cấp quyền `lite_flights`, người dùng vẫn đăng nhập, xem lỗi cụ thể, thử kiểm tra lại và truy cập các module khác nếu có quyền; **không hiển thị giả rằng ngày khai thác không có chuyến**.
+
+Quan trọng: Bản sửa giao diện **không tự cấp quyền Firestore**, không thay đổi quy tắc của E-Report đang khai thác. Để tạo/nhận chuyến và lưu biểu mẫu trên Firebase, quản trị Firebase phải tích hợp và phát hành phần rules `firebase/lite-firestore-fragment.rules` vào rules hiện hành theo `docs/FIREBASE_ACCESS_V1.4.md`. Không triển khai file fragment độc lập, không mở quyền toàn bộ database.

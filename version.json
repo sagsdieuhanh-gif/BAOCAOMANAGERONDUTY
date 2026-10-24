@@ -1,7 +1,7 @@
 {
-  "version": "V1.3",
-  "build": "SAGS-FORM-LITE-20261024-ORIGINAL-PDF-PREVIEW-01",
+  "version": "V1.4",
+  "build": "SAGS-FORM-LITE-20261024-FIRESTORE-PERMISSION-DIAG-01",
   "source": "E-REPORT-SAGS V2.5.47",
   "sourceCommit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
-  "status": "DEVELOPMENT - 6 forms PDF preview ready for acceptance; requires Firebase rules and real PDF visual E2E validation"
+  "status": "DEVELOPMENT - precise permission diagnostics, live lite_flights rules still require Firebase deployment"
 }
