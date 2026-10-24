@@ -1,0 +1,28 @@
+// FRAGMENT ONLY -- merge inside existing E-Report Firestore Rules.
+// Never deploy alone: would overwrite permissions of E-Report.
+function liteSignedIn() { return request.auth != null; }
+function liteProfile() { return get(/databases/$(database)/documents/lite_users/$(request.auth.uid)); }
+function liteEnabled() { return liteSignedIn() && exists(/databases/$(database)/documents/lite_users/$(request.auth.uid)) && liteProfile().data.active == true; }
+function liteRole() { return liteProfile().data.role; }
+function liteAD() { return liteEnabled() && liteRole() == 'AD'; }
+function liteDH() { return liteEnabled() && liteRole() == 'DH'; }
+function liteCanEdit() { return liteAD() || liteDH(); }
+function liteFormId(fid) { return fid in ['fsags421','fsags423','fsags551','fsags54','fsags94','fsags208']; }
+match /lite_users/{uid} {
+  allow get: if liteSignedIn() && (request.auth.uid == uid || liteAD());
+  allow list: if liteAD();
+  allow create, update: if liteAD() && request.resource.data.keys().hasOnly(['name','email','role','active','updatedAt']) && request.resource.data.role in ['AD','DH','CBTT','VIEWER'] && request.resource.data.active is bool;
+  allow delete: if false;
+}
+match /lite_flights/{id} {
+  allow get, list: if liteEnabled();
+  allow create: if liteCanEdit() && request.resource.data.createdBy == request.auth.uid && request.resource.data.claimedBy == null && request.resource.data.date is string;
+  allow update: if liteAD() || (liteDH() && ((resource.data.claimedBy == null && request.resource.data.claimedBy == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedBy','claimedName','claimedAt'])) || (resource.data.claimedBy == request.auth.uid && request.resource.data.claimedBy == resource.data.claimedBy && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reg','sta','std','etd','pushback','updatedAt']))));
+  allow delete: if false;
+  match /forms/{formId} {
+    allow read: if liteEnabled() && liteFormId(formId);
+    allow create: if liteFormId(formId) && liteCanEdit() && (liteAD() || get(/databases/$(database)/documents/lite_flights/$(id)).data.claimedBy == request.auth.uid) && request.resource.data.revision == 1 && request.resource.data.values is map && request.resource.data.keys().hasOnly(['values','revision','updatedAt','updatedBy']) && request.resource.data.updatedBy == request.auth.uid;
+    allow update: if liteFormId(formId) && liteCanEdit() && (liteAD() || get(/databases/$(database)/documents/lite_flights/$(id)).data.claimedBy == request.auth.uid) && request.resource.data.revision == resource.data.revision + 1 && request.resource.data.values is map && request.resource.data.keys().hasOnly(['values','revision','updatedAt','updatedBy']) && request.resource.data.updatedBy == request.auth.uid;
+    allow delete: if false;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "commit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
+  "files": {
+    "app/modules/carrier-notebook.v1.js": {"sha": "70b822f2fde2b44e98076a9721e8a70f05034050", "size": 51899},
+    "data/carrier-guide-version.json": {"sha": "2357a64243e2fa35c156285c1974940598c76d70", "size": 324},
+    "data/carrier-service-guide.json": {"sha": "8c79c718c81b91fb0ded25ab207d66a05be85475", "size": 42292},
+    "forms/forms.registry.json": {"sha": "6dd5a5a525df71d13a4cec801690b26748021b6a", "size": 1011923},
+    "forms/fsags208/page-01.png": {"sha": "81fc6bad67baf841a5a015efec73fb77f20118dc", "size": 978212},
+    "forms/fsags42.1/page-01.png": {"sha": "05e589751837f3d6606e370be7f66371cd2cc4fb", "size": 304135},
+    "forms/fsags42.1/page-02.png": {"sha": "73162f19355d052afe391cb72a9bff3a4bbdf556", "size": 148501},
+    "forms/fsags42.3/page-01.png": {"sha": "d89cffad69693193aa086c25457d8d4aa3327445", "size": 390578},
+    "forms/fsags42.3/page-02.png": {"sha": "924665e74f81ad15e091278eb414427d28385778", "size": 208756},
+    "forms/fsags54/page-01.png": {"sha": "ca706963703cb9905ae75651e964453f8103487a", "size": 2058067},
+    "forms/fsags55.1/page-01.png": {"sha": "6e4e169e429d6315ad2d35468c58df7df5e66579", "size": 540544},
+    "forms/fsags55.1/page-02.png": {"sha": "c8e47053d77882d5b99c373e791dce830bf0c2b9", "size": 461776},
+    "forms/fsags94/page-01.png": {"sha": "3886be3c5190a27fb4f2af0dcc7d811759f2bb78", "size": 501947}
+  }
+}
