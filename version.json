@@ -1,7 +1,7 @@
 {
-  "version": "V1.8",
-  "build": "SAGS-FORM-LITE-20261024-SDK-SINGLETON-NOTEBOOK-RESCUE-01",
+  "version": "V1.9",
+  "build": "SAGS-FORM-LITE-20261024-NATIVE-OPERATIONAL-BRIDGE-01",
   "source": "E-REPORT-SAGS V2.5.47",
   "sourceCommit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
-  "status": "STABILIZATION: fixed duplicated Firebase module URLs and resilient native carrier notebook loading; legacy form editing, task actions and RTDB production E2E not yet certified"
+  "status": "INTEGRATION TEST: original pinned E-Report operations embedded same-origin; live Auth/assignment and native PDF E2E not yet accepted"
 }

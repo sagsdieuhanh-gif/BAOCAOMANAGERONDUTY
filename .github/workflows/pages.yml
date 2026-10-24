@@ -19,6 +19,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Checkout pinned original E-Report operational source
+        uses: actions/checkout@v4
+        with:
+          repository: sagsdieuhanh-gif/E-REPORT-SAGS
+          ref: 41ad37fc9033f160fd00c21008ff9711ddfd7294
+          path: upstream-old
+          persist-credentials: false
       - name: Node.js 22
         uses: actions/setup-node@v4
         with:
@@ -37,6 +44,7 @@ jobs:
           cp index.html style.css config.js manifest.webmanifest version.json _site/
           cp -R docs _site/
           cp -R src forms data app _site/
+          npm run build:native
           touch _site/.nojekyll
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

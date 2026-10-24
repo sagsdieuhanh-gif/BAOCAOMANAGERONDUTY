@@ -61,7 +61,7 @@ async function ensureLegacyNotebook(){
  loading=(async()=>{
   const localData=relativeURL('./'+DATA),localVersion=relativeURL('./'+VERSION);
   if(await assetAvailable(localData)&&await assetAvailable(localVersion)){
-   try{await appendScript(relativeURL('./'+SRC+'?v=1.8.0'));return}catch(e){console.warn('Local SỔ TAY file unavailable; checking pinned original',e)}
+   try{await appendScript(relativeURL('./'+SRC+'?v=1.9.0'));return}catch(e){console.warn('Local SỔ TAY file unavailable; checking pinned original',e)}
   }
   await loadPinnedOriginalFallback();
  })().catch(e=>{loading=null;throw e});

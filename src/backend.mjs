@@ -1,4 +1,4 @@
-import * as remote from './firebase.mjs?v=1.8.0';import{flightId,cleanFlight,localToday}from './core.mjs';
+import * as remote from './firebase.mjs?v=1.9.0';import{flightId,cleanFlight,localToday}from './core.mjs';
 const SEED='sags-lite-demo-v1';function store(){try{return JSON.parse(localStorage.getItem(SEED)||'{}')}catch{return{}}}function persist(x){localStorage.setItem(SEED,JSON.stringify(x))}let demo=false;export function enableDemo(v){demo=v}export const isDemo=()=>demo;
 const demoBackend={
  async login(email){return{uid:email.replace(/[^a-z0-9]/gi,'_'),email}},async logout(){},

@@ -1,4 +1,4 @@
-import{legacyRosterItems,groupLegacyRoster,rosterDiagnostics,projectLegacyFlightRecords,safeLegacyKey,legacyUsername,legacyRtdbPath}from './legacy-roster.mjs?v=1.8.0';
+import{legacyRosterItems,groupLegacyRoster,rosterDiagnostics,projectLegacyFlightRecords,safeLegacyKey,legacyUsername,legacyRtdbPath}from './legacy-roster.mjs?v=1.9.0';
 import{flightId,cleanFlight,legacyLoginEmail,operationalRole,validOldRole}from'./core.mjs';
 let sdk=null,fb=null,auth=null,db=null,rtdb=null;
 export async function initFirebase(config){if(fb)return;const [app,a,f,d]=await Promise.all([

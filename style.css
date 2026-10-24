@@ -42,3 +42,11 @@ body.pdf-preview-open{overflow:hidden}
 .legacy-task-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
 .legacy-task{border:1px solid #d9e2ef;border-radius:14px;padding:14px;background:#fff;display:grid;gap:8px}
 .legacy-task .mini{font-size:12px;opacity:.75}
+
+/* V1.9: contain the unchanged native E-Report production workspace inside Lite. */
+.native-ops {background:var(--card,#fff);border:1px solid #dbe3ee;border-radius:14px;padding:12px 15px;margin:12px 0;}
+.native-action-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.native-frame-wrap{width:100%;min-height:560px;background:#f2f5fa;border:1px solid #cdd8e8;border-radius:14px;overflow:hidden;position:relative;}
+.native-frame-wrap iframe{width:100%;height:max(76dvh,690px);min-height:560px;border:0;display:block;background:#fff;}
+.native-ops #native-status{font-weight:600;color:#26466e;white-space:normal;}
+@media(max-width:750px){.native-frame-wrap{border-radius:8px}.native-frame-wrap iframe{height:calc(100dvh - 115px);min-height:620px}.native-ops{padding:10px}.native-action-row>.btn{flex:1 1 auto;min-height:42px}}

@@ -1,3 +1,20 @@
+# SAGS FORM LITE V1.9 — TÍCH HỢP NGHIỆP VỤ E-REPORT GỐC
+
+Bản hiện tại tích hợp iframe cùng tên miền `/EREPORT/native/` từ code gốc cố định SHA để sử dụng quy trình phân công/nhận việc/chuyển giao, biểu mẫu 42.1/42.3/55.1/54/94/208, chữ ký và PDF gốc, A/C LIMITS. Không tạo Firestore/RTDB nghiệp vụ song song.
+
+**Lưu ý:** Có cơ chế tích hợp bằng mã nguồn, nhưng **chưa nghiệm thu E2E với tài khoản thực**; không được coi là đã triển khai hoàn thiện.
+
+- HDSD: [V1.9](docs/HDSD_V1.9.md)
+- Kiểm duyệt / giới hạn: [V1.9](docs/KIEM_DUYET_V1.9.md)
+- Ứng dụng thực tế ở `https://sagsdieuhanh-gif.github.io/EREPORT/`
+- Nguồn nghiệp vụ: `https://github.com/sagsdieuhanh-gif/E-REPORT-SAGS` commit `41ad37fc9033f160fd00c21008ff9711ddfd7294`.
+
+## Xuất bản
+
+CI `pages.yml` checkout source cũ theo SHA và chạy `npm run build:native` để sao chép nguồn sang `_site/native/`, chỉ bỏ lệnh redirect sang Vercel; tập tin app, biểu mẫu và script gốc không bị sửa. `npm test && npm run check` kiểm các phân đoạn không cần credentials.
+
+**Không cập nhật Firebase Rules, không tự nới quyền AD/CBTT/DH và không sửa repo cũ.**
+
 # SAGS FORM LITE V1.8 — ỔN ĐỊNH & KIỂM DUYỆT KẾ THỪA E-REPORT
 
 **Ứng dụng kế thừa, chưa đạt toàn bộ yêu cầu vận hành.** SAGS FORM LITE dùng Firebase Auth, Firestore `users/{UID}` và vùng RTDB `sags_live_v470` gốc, không tạo kho chuyến bay/phân công mới. Mọi thao tác nghiệp vụ chưa nối trực tiếp vẫn dùng E-Report cũ, tránh ghi đè hoặc làm mất dữ liệu.

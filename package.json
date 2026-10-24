@@ -1,14 +1,15 @@
 {
   "name": "sags-form-lite",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "type": "module",
   "description": "SAGS FORM LITE - 6 forms, carrier notebook and A/C LIMITS",
   "scripts": {
     "start": "node scripts/server.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/app.mjs && node --check src/forms.mjs && node --check src/limits.mjs && node --check src/notebook.mjs && node --check src/pdf.mjs && node --check src/firebase.mjs && node --check src/access-status.mjs && node --check src/legacy-roster.mjs",
+    "check": "node --check src/app.mjs && node --check src/forms.mjs && node --check src/limits.mjs && node --check src/notebook.mjs && node --check src/pdf.mjs && node --check src/firebase.mjs && node --check src/access-status.mjs && node --check src/legacy-roster.mjs && node --check src/native-workspace.mjs && node --check scripts/build-native.mjs",
     "vendor": "node scripts/vendor.mjs",
-    "verify:assets": "node scripts/verify-assets.mjs"
+    "verify:assets": "node scripts/verify-assets.mjs",
+    "build:native": "node scripts/build-native.mjs upstream-old _site/native"
   }
 }

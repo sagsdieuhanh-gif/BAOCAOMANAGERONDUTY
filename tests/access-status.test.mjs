@@ -23,7 +23,7 @@ test('real UI uses legacy E-Report assignments, not lite_flights',()=>{
  assert.match(code,/api\.flights\(state\.date,state\.profile\)/);
  assert.match(code,/if\(!DEMO\)return showLegacyFlights\(\)/);
  assert.match(code,/sags_live_v470\/roster_mail/);
- assert.match(code,/MỞ NHIỆM VỤ GỐC/);
+ assert.match(code,/NHẬN \/ MỞ MẪU/);
  assert.match(code,/blocked\?'—':flights\.length/);
 });
 
