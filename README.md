@@ -1,3 +1,9 @@
+# PHƯƠNG ÁN KẾ THỪA E-REPORT – V1.5 (24/10/2026)
+
+Định hướng mới: không tạo dữ liệu/tài khoản/phân công/biểu mẫu nghiệp vụ song song. Đọc tài khoản từ `users/{UID}`, phân công từ RTDB cũ, SỔ TAY chạy nguyên module gốc. Nhận việc, nhập form, PDF và quản lý LIMITS đang dùng logic gốc từ E-Report; V1.5 là giai đoạn chuyển tiếp, nhấn MỞ NHIỆM VỤ GỐC để tiếp tục trong app gốc. **Chưa thể xem V1.5 là phiên bản Lite thay thế hoàn toàn**. Xem `docs/KIEN_TRUC_KE_THUA_V1.5.md` và `docs/HDSD_V1.5.md`.
+
+---
+
 # SAGS FORM LITE · V1.3 · 24/10/2026
 
 Ứng dụng độc lập, tối giản của Phòng Điều hành, lấy ý tưởng và Form Registry từ **E-REPORT-SAGS** commit `41ad37fc9033f160fd00c21008ff9711ddfd7294` / V2.5.47.

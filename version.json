@@ -1,7 +1,7 @@
 {
-  "version": "V1.4",
-  "build": "SAGS-FORM-LITE-20261024-FIRESTORE-PERMISSION-DIAG-01",
+  "version": "V1.5",
+  "build": "SAGS-FORM-LITE-20261024-REUSE-OLD-EREPORT-01",
   "source": "E-REPORT-SAGS V2.5.47",
   "sourceCommit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
-  "status": "DEVELOPMENT - precise permission diagnostics, live lite_flights rules still require Firebase deployment"
+  "status": "TRANSITION: original roster read-only, native notebook, form workflows and LIMITS administration open in original E-Report"
 }

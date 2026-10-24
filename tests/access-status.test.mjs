@@ -18,10 +18,10 @@ test('Denied users read is a distinct profile issue',()=>{
  const m=profileAccessMessage({code:'permission-denied'});
  assert.match(m,/users\/\{UID\}/);
 });
-test('UI retains signed-in session on flight-read error and does not display false zero',()=>{
- assert.match(code,/try\{state\.flights=await api\.flights\(state\.date\);state\.flightError=null\}/);
- assert.match(code,/state\.flightError=flightAccessMessage\(e\)/);
- assert.match(code,/blocked\?'—':n/);
- assert.match(code,/retry-flight-access/);
- assert.match(code,/Không thể tải dữ liệu chuyến bay/);
+test('real UI uses legacy E-Report assignments, not lite_flights',()=>{
+ assert.match(code,/api\.flights\(state\.date,state\.profile\)/);
+ assert.match(code,/if\(!DEMO\)return showLegacyFlights\(\)/);
+ assert.match(code,/roster_mail\/roster_manifests/);
+ assert.match(code,/MỞ NHIỆM VỤ GỐC/);
+ assert.match(code,/blocked\?'—':flights\.length/);
 });

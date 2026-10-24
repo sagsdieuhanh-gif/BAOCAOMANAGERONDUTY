@@ -1,3 +1,11 @@
+# KHÔNG ÁP DỤNG TÀI LIỆU V1.4 (ĐÃ THAY BẰNG V1.5)
+
+**Tài liệu cũ không còn hiệu lực.** V1.5 không dùng `lite_flights`, `lite_users` hoặc hệ thống nhận chuyến mới. Không tích hợp Firestore Rules Lite và tuyệt đối không publish fragment từ bản V1.4.
+
+Xem `docs/KIEN_TRUC_KE_THUA_V1.5.md` và `docs/HDSD_V1.5.md`. Quyền thực tế phải theo E-Report gốc.
+
+---
+
 # FIREBASE ACCESS V1.4 – Bổ sung Rules SAGS FORM LITE không phá E-Report cũ
 
 ## Chẩn đoán mã nguồn

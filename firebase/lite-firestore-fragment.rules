@@ -1,28 +1,6 @@
-// FRAGMENT ONLY -- merge inside existing E-Report Firestore Rules.
-// Never deploy alone: would overwrite permissions of E-Report.
-// This fragment belongs INSIDE current E-Report rules; never replace the existing rules file.
-// Share the exact same users/{UID} and Firebase Auth identities as E-Report.
-function liteSignedIn() { return request.auth != null; }
-function liteProfile() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
-function liteEnabled() {
-  return liteSignedIn() && activeUser()
-    && liteProfile().data.get('deleted', false) != true
-    && liteProfile().data.get('mustChangePassword', false) != true;
-}
-function liteRole() { return liteProfile().data.role; }
-function liteAD() { return liteEnabled() && liteRole() in ['ADMIN','AD']; }
-function liteDH() { return liteEnabled() && liteRole() in ['DH','ĐH']; }
-function liteCanEdit() { return liteAD() || liteDH(); }
-function liteFormId(fid) { return fid in ['fsags421','fsags423','fsags551','fsags54','fsags94','fsags208']; }
-match /lite_flights/{id} {
-  allow get, list: if liteEnabled();
-  allow create: if liteCanEdit() && request.resource.data.createdBy == request.auth.uid && request.resource.data.claimedBy == null && request.resource.data.date is string;
-  allow update: if liteAD() || (liteDH() && ((resource.data.claimedBy == null && request.resource.data.claimedBy == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['claimedBy','claimedName','claimedAt'])) || (resource.data.claimedBy == request.auth.uid && request.resource.data.claimedBy == resource.data.claimedBy && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reg','sta','std','etd','pushback','updatedAt']))));
-  allow delete: if false;
-  match /forms/{formId} {
-    allow read: if liteEnabled() && liteFormId(formId);
-    allow create: if liteFormId(formId) && liteCanEdit() && (liteAD() || get(/databases/$(database)/documents/lite_flights/$(id)).data.claimedBy == request.auth.uid) && request.resource.data.revision == 1 && request.resource.data.values is map && request.resource.data.keys().hasOnly(['values','revision','updatedAt','updatedBy']) && request.resource.data.updatedBy == request.auth.uid;
-    allow update: if liteFormId(formId) && liteCanEdit() && (liteAD() || get(/databases/$(database)/documents/lite_flights/$(id)).data.claimedBy == request.auth.uid) && request.resource.data.revision == resource.data.revision + 1 && request.resource.data.values is map && request.resource.data.keys().hasOnly(['values','revision','updatedAt','updatedBy']) && request.resource.data.updatedBy == request.auth.uid;
-    allow delete: if false;
-  }
-}
+// DEPRECATED since SAGS FORM LITE V1.5. DO NOT DEPLOY.
+// No new lite_flights or lite_users are created for production.
+// The Lite project reuses E-Report Firebase Auth, users/{UID}, RTDB roster_mail,
+// roster_manifests, roster_sessions, flight_records and the native form workflows.
+// Keep the original E-Report Firestore/RTDB security rules unchanged until
+// separately reviewed and tested. There is NO new Lite rules fragment to publish.
