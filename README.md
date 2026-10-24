@@ -1,4 +1,4 @@
-# SAGS FORM LITE · V1.0 · 24/10/2026
+# SAGS FORM LITE · V1.1 · 24/10/2026
 
 Ứng dụng độc lập, tối giản của Phòng Điều hành, lấy ý tưởng và Form Registry từ **E-REPORT-SAGS** commit `41ad37fc9033f160fd00c21008ff9711ddfd7294` / V2.5.47.
 
