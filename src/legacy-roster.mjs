@@ -3,6 +3,15 @@
 const S=v=>String(v??'').trim();
 const U=v=>S(v).toUpperCase();
 export const safeLegacyKey=v=>S(v).replace(/[.#$\[\]\/]/g,'_');
+// Same absolute database namespace as the ORIGINAL E-Report sagsV470Ref():
+// app/boot/10-v470-hybrid-core.js: SAGS_V470_ROOT = 'sags_live_v470'.
+// Firebase Rules guard this namespace; never try an unscoped root-path fallback.
+export const LEGACY_RTDB_ROOT='sags_live_v470';
+export function legacyRtdbPath(child=''){
+ const relative=S(child).replace(/^\/+/, '');
+ if(!relative||relative===LEGACY_RTDB_ROOT)return LEGACY_RTDB_ROOT;
+ return relative.startsWith(LEGACY_RTDB_ROOT+'/')?relative:LEGACY_RTDB_ROOT+'/'+relative;
+}
 export const legacyUsername=v=>U(v).replace(/\s+/g,'').replace(/[^A-Z0-9._-]/g,'_').slice(0,40);
 
 // Mirror the actual canonicalForm aliases used by E-Report's daily-roster module.

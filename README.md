@@ -1,6 +1,12 @@
-# SAGS FORM LITE V1.6 – ĐỌC ĐÚNG DỮ LIỆU E-REPORT
+# SAGS FORM LITE V1.7 – KẾ THỪA DỮ LIỆU E-REPORT
 
-**Không tạo dữ liệu mới:** Auth / users của E-Report; RTDB `roster_mail` cho nhân viên và `roster_manifests` cho AD; AD có thể tải `flight_records` gốc khi bấm xem. Không tạo `lite_flights`, không ghi thêm hồ sơ, không ghi vào roster hoặc form.
+**Không tạo dữ liệu mới:** Auth / users của E-Report; toàn bộ RTDB dùng prefix `sags_live_v470` như hàm `sagsV470Ref` bản cũ. Dữ liệu `roster_mail` cho nhân viên, `roster_manifests` cho AD, `flight_records` gốc khi AD bấm xem. Không tạo `lite_flights`, không ghi thêm hồ sơ, không ghi vào roster hoặc form.
+
+## Sửa lỗi V1.7
+
+- Sửa nguyên nhân RTDB permission denied từ V1.6: thiếu prefix bắt buộc `sags_live_v470` ở các đường dẫn phân công và hồ sơ chuyến.
+- Đồng bộ tiền tố cho RTDB A/C LIMITS (tính năng ghi vẫn khóa); không sửa Rules hoặc tài khoản.
+- Tăng phiên bản/cache-busting toàn bộ chuỗi import JS; thêm bài kiểm thử cho nhánh dữ liệu gốc.
 
 ## Sửa lỗi V1.6
 
@@ -18,3 +24,5 @@ V1.6 vẫn là bản chuyển tiếp. Hộp phân công không đồng nghĩa to
 Không có quy trình tạo dữ liệu mới, không triển khai Firestore Rules riêng. Việc nhập nghiệp vụ thật trực tiếp trong giao diện Lite chưa hoàn thiện và không được tuyên bố đã xong.
 
 Xem thêm `docs/HDSD_V1.6.md` và `docs/KIEN_TRUC_KE_THUA_V1.5.md`.
+
+Xem hướng dẫn V1.7: `docs/HDSD_V1.7.md`.

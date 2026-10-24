@@ -1,7 +1,7 @@
 {
-  "version": "V1.6",
-  "build": "SAGS-FORM-LITE-20261024-READ-OLD-DATA-FIX-01",
+  "version": "V1.7",
+  "build": "SAGS-FORM-LITE-20261024-ORIGINAL-RTDB-ROOT-FIX-01",
   "source": "E-REPORT-SAGS V2.5.47",
   "sourceCommit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
-  "status": "TRANSITION: corrected legacy FSAGS/roster projection and on-demand AD flight_records summaries; production Auth/RTDB E2E unverified"
+  "status": "TRANSITION: fixed original E-Report sags_live_v470 prefix for roster, flight_records and RTDB LIMITS; live signed-in data verification still required"
 }

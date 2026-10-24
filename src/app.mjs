@@ -1,5 +1,5 @@
 import {FORM_IDS,FORM_LABELS,localToday,esc,canEdit,canManage,cleanFlight,flightId} from './core.mjs';
-import {api,enableDemo,isDemo} from './backend.mjs?v=1.6.0';
+import {api,enableDemo,isDemo} from './backend.mjs?v=1.7.0';
 import {profileAccessMessage} from './access-status.mjs';
 import {openForm} from './forms.mjs';
 import {showNotebook} from './notebook.mjs';
@@ -60,7 +60,7 @@ async function reloadFlights(){
  catch(e){
   console.warn('Original E-Report roster read failed; Auth remains signed in',e);
   state.flights=[];
-  state.flightError=String(e?.code||'')==='PERMISSION_DENIED'||/permission.denied|permission|insufficient/i.test(String(e?.message||e))?'Realtime Database từ chối đọc hộp phân công của tài khoản. Hãy kiểm tra quyền gốc roster_mail/roster_manifests.':String(e?.message||e);
+  state.flightError=String(e?.code||'')==='PERMISSION_DENIED'||/permission.denied|permission|insufficient/i.test(String(e?.message||e))?'Realtime Database từ chối đọc phân công tại sags_live_v470/roster_mail hoặc sags_live_v470/roster_manifests. Phiên đăng nhập vẫn hợp lệ; hãy kiểm tra quyền RTDB của tài khoản ở đúng nhánh gốc.':String(e?.message||e);
  }
  evaluate();return state.flights
 }

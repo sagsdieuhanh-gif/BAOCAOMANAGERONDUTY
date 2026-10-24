@@ -1,4 +1,4 @@
-import{legacyRosterItems,groupLegacyRoster,rosterDiagnostics,projectLegacyFlightRecords,safeLegacyKey,legacyUsername}from './legacy-roster.mjs?v=1.6.0';
+import{legacyRosterItems,groupLegacyRoster,rosterDiagnostics,projectLegacyFlightRecords,safeLegacyKey,legacyUsername,legacyRtdbPath}from './legacy-roster.mjs?v=1.7.0';
 import{flightId,cleanFlight,legacyLoginEmail,operationalRole,validOldRole}from'./core.mjs';
 let sdk=null,fb=null,auth=null,db=null,rtdb=null;
 export async function initFirebase(config){if(fb)return;const [app,a,f,d]=await Promise.all([
@@ -39,7 +39,7 @@ export async function listFlights(date,user){
  const username=legacyUsername(user?.username);
  if(!username)throw Error('E-Report chưa xác định được username để đọc phân công.');
  const isAdmin=user.role==='AD';
- const path=isAdmin?`roster_manifests/${safeLegacyKey(date)}`:`roster_mail/${safeLegacyKey(username)}/items`;
+ const path=legacyRtdbPath(isAdmin?`roster_manifests/${safeLegacyKey(date)}`:`roster_mail/${safeLegacyKey(username)}/items`);
  let q=sdk.d.ref(rtdb,path);
  if(!isAdmin)q=sdk.d.query(q,sdk.d.orderByChild('opDate'),sdk.d.equalTo(date));
  let snap;
@@ -52,7 +52,7 @@ export async function listFlights(date,user){
 
 export async function listLegacyFlightRecords(date,user){
  if(user?.role!=='AD')throw Error('Chỉ AD được mở tổng hợp hồ sơ chuyến gốc.');
- const snap=await sdk.d.get(sdk.d.ref(rtdb,`flight_records/${safeLegacyKey(date)}`));
+ const snap=await sdk.d.get(sdk.d.ref(rtdb,legacyRtdbPath(`flight_records/${safeLegacyKey(date)}`)));
  return projectLegacyFlightRecords(snap.val(),date);
 }
 function nativeOnly(){throw Error('Dữ liệu phân công và biểu mẫu dùng quy trình E-Report gốc. Không ghi vào kho Lite riêng. Hãy mở nhiệm vụ bằng E-Report gốc.');}
@@ -60,4 +60,4 @@ export const createFlight=nativeOnly,claimFlight=nativeOnly,updateFlight=nativeO
 const limitsDoc=()=>sdk.f.doc(db,'sags_handovers','AC_LIMITS_CATALOG_V1');
 export async function readLimits(){let r=await sdk.f.getDoc(limitsDoc());if(!r.exists())return{version:0,items:[]};return r.data()}
 export function watchLimits(onData,onError){return sdk.f.onSnapshot(limitsDoc(),s=>onData(s.exists()?s.data():{version:0,items:[]}),onError)}
-export async function updateLimits(catalog,user){const saved={...catalog,kind:'sags_ac_limits_catalog_v1',version:Date.now(),updatedAtMs:Date.now(),updatedBy:{username:user.name||user.email,uid:user.uid,role:user.role}};await sdk.f.setDoc(limitsDoc(),saved);try{await sdk.d.set(sdk.d.ref(rtdb,'ac_limits/catalog_public'),saved);await sdk.d.set(sdk.d.ref(rtdb,'ac_limits/catalog_signal'),{version:saved.version,updatedAtMs:saved.updatedAtMs,updatedBy:saved.updatedBy})}catch(e){throw Error('Firestore đã lưu nhưng không đồng bộ được RTDB với E-Report cũ: '+e.message)}return saved}
+export async function updateLimits(catalog,user){const saved={...catalog,kind:'sags_ac_limits_catalog_v1',version:Date.now(),updatedAtMs:Date.now(),updatedBy:{username:user.name||user.email,uid:user.uid,role:user.role}};await sdk.f.setDoc(limitsDoc(),saved);try{await sdk.d.set(sdk.d.ref(rtdb,legacyRtdbPath('ac_limits/catalog_public')),saved);await sdk.d.set(sdk.d.ref(rtdb,legacyRtdbPath('ac_limits/catalog_signal')),{version:saved.version,updatedAtMs:saved.updatedAtMs,updatedBy:saved.updatedBy})}catch(e){throw Error('Firestore đã lưu nhưng không đồng bộ được RTDB với E-Report cũ: '+e.message)}return saved}
