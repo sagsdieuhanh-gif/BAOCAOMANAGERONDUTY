@@ -1,4 +1,4 @@
-import{legacyRosterItems,groupLegacyRoster,safeLegacyKey}from './legacy-roster.mjs';
+import{legacyRosterItems,groupLegacyRoster,rosterDiagnostics,projectLegacyFlightRecords,safeLegacyKey,legacyUsername}from './legacy-roster.mjs?v=1.6.0';
 import{flightId,cleanFlight,legacyLoginEmail,operationalRole,validOldRole}from'./core.mjs';
 let sdk=null,fb=null,auth=null,db=null,rtdb=null;
 export async function initFirebase(config){if(fb)return;const [app,a,f,d]=await Promise.all([
@@ -32,14 +32,28 @@ export async function changePassword(next){
 }
 // Existing E-Report RTDB is authoritative for assignment and flight records.
 // Do not write a second lite_flights dataset.
+let lastRosterInfo=null;
+export function rosterInfo(){return lastRosterInfo}
 export async function listFlights(date,user){
- if(!user?.username)throw Error('E-Report chưa xác định được username để đọc phân công.');
+ // Same source and day scope as native E-Report, NOT a replacement Firestore collection.
+ const username=legacyUsername(user?.username);
+ if(!username)throw Error('E-Report chưa xác định được username để đọc phân công.');
  const isAdmin=user.role==='AD';
- const path=isAdmin?`roster_manifests/${safeLegacyKey(date)}/items`:`roster_mail/${safeLegacyKey(user.username)}/items`;
+ const path=isAdmin?`roster_manifests/${safeLegacyKey(date)}`:`roster_mail/${safeLegacyKey(username)}/items`;
  let q=sdk.d.ref(rtdb,path);
  if(!isAdmin)q=sdk.d.query(q,sdk.d.orderByChild('opDate'),sdk.d.equalTo(date));
- const snap=await sdk.d.get(q);
- return groupLegacyRoster(legacyRosterItems(snap.val(),date,user.username,isAdmin),date);
+ let snap;
+ try{snap=await sdk.d.get(q)}catch(e){lastRosterInfo={date,path,source:isAdmin?'MANIFEST':'MAILBOX',error:String(e?.message||e)};throw e}
+ const raw=snap.val(),stats=rosterDiagnostics(raw,date,username,isAdmin);
+ const flights=groupLegacyRoster(legacyRosterItems(raw,date,username,isAdmin),date);
+ lastRosterInfo={date,source:isAdmin?'MANIFEST':'MAILBOX',path,stats,flights:flights.length,empty:!stats.raw};
+ return flights;
+}
+
+export async function listLegacyFlightRecords(date,user){
+ if(user?.role!=='AD')throw Error('Chỉ AD được mở tổng hợp hồ sơ chuyến gốc.');
+ const snap=await sdk.d.get(sdk.d.ref(rtdb,`flight_records/${safeLegacyKey(date)}`));
+ return projectLegacyFlightRecords(snap.val(),date);
 }
 function nativeOnly(){throw Error('Dữ liệu phân công và biểu mẫu dùng quy trình E-Report gốc. Không ghi vào kho Lite riêng. Hãy mở nhiệm vụ bằng E-Report gốc.');}
 export const createFlight=nativeOnly,claimFlight=nativeOnly,updateFlight=nativeOnly,readForm=nativeOnly,saveForm=nativeOnly;

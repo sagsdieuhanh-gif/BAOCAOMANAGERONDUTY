@@ -1,7 +1,7 @@
 {
-  "version": "V1.5",
-  "build": "SAGS-FORM-LITE-20261024-REUSE-OLD-EREPORT-01",
+  "version": "V1.6",
+  "build": "SAGS-FORM-LITE-20261024-READ-OLD-DATA-FIX-01",
   "source": "E-REPORT-SAGS V2.5.47",
   "sourceCommit": "41ad37fc9033f160fd00c21008ff9711ddfd7294",
-  "status": "TRANSITION: original roster read-only, native notebook, form workflows and LIMITS administration open in original E-Report"
+  "status": "TRANSITION: corrected legacy FSAGS/roster projection and on-demand AD flight_records summaries; production Auth/RTDB E2E unverified"
 }
