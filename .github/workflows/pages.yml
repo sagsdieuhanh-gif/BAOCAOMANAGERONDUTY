@@ -43,6 +43,7 @@ jobs:
           mkdir -p _site
           cp index.html style.css config.js manifest.webmanifest version.json _site/
           cp -R docs _site/
+          cp -R radar-cxr _site/
           cp -R src forms data app _site/
           npm run build:native
           touch _site/.nojekyll
