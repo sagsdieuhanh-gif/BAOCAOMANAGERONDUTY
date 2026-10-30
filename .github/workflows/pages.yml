@@ -46,6 +46,8 @@ jobs:
           node --check radar-cxr/v24-shuttle-grid.js
           node --check radar-cxr/v27-report-alerts.js
           node radar-cxr/tests/v27-alerts.test.cjs
+          node --check radar-cxr/radar-report-v28.js
+          node radar-cxr/tests/v28-report.test.cjs
           node --check radar-cxr/rns-admin.js
           node radar-cxr/tests/rns-admin.test.cjs
           node radar-cxr/tests/v24-shuttle-grid.test.cjs
