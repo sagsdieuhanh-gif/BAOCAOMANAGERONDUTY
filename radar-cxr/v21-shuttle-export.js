@@ -45,7 +45,7 @@
    return {date:day,rows:normalize(dataResult.data||[],rowsResult.data||[])};
  }
 
- const LOGO_PATH='./assets/logo-ereport.png';
+ const LOGO_PATH='./assets/logo-sags.png';
  let logoPromise=null;
  function loadLogo(){
    if(logoPromise)return logoPromise;
@@ -185,7 +185,7 @@
    c.fillStyle=colors.background;c.fillRect(0,0,W,H);
    shape(30,23,W-60,H-46,22,colors.paper,'#E1E9EE');
    shape(30,23,W-60,9,4,colors.navy);
-   // Original unmodified EREPORT SAGS logo
+   // Official SAGS identity
    const maxW=126,maxH=117,ratio=Math.min(maxW/logo.naturalWidth,maxH/logo.naturalHeight);
    c.drawImage(logo,55+(maxW-logo.naturalWidth*ratio)/2,45+(maxH-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
    line(205,53,205,154,colors.line,2);
@@ -309,7 +309,10 @@
      const canvas=draw(data,logo);
      const image=document.createElement('img');
      image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVSĐ, PVHK, Kho Hàng, QA / IT.';
-     image.src=canvas.toDataURL('image/png');
+     const blob=await new Promise((resolve,reject)=>canvas.toBlob?.(b=>b?resolve(b):reject(Error('Không tạo được ảnh xem trước.')),'image/png')||reject(Error('Thiết bị không hỗ trợ ảnh PNG.')));
+     const url=URL.createObjectURL(blob);image.src=url;
+     image.onload=()=>URL.revokeObjectURL(url);
+     image.onerror=()=>URL.revokeObjectURL(url);
      image.className='v23-preview-image';
      const wrap=document.createElement('div');wrap.className='v23-preview-container';wrap.appendChild(image);
      el.replaceChildren(wrap);
