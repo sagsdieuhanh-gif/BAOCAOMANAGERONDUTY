@@ -15,7 +15,7 @@
  const wide=rs=>rs.filter(x=>/A\s?330|B\s?777/i.test(x.aircraft_type||''));
  const KOREAN_CARRIERS=['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'];
  const FAST_CARRIERS=['VJ','9G','VU','AK','FD'];
- const flightCarrier=f=>(f.airline||String(f.arrival||f.departure||'').match(/^[A-Z0-9]+?(?=\\d)/)?.[0]||'').toUpperCase();
+ const flightCarrier=f=>(f.airline||String(f.arrival||f.departure||'').match(/^[A-Z0-9]+?(?=\d)/)?.[0]||'').toUpperCase();
  const groundMinutes=f=>{
    if(!Number.isFinite(f.sta_min)||!Number.isFinite(f.std_min))return null;
    const duration=f.std_min<f.sta_min?f.std_min+1440-f.sta_min:f.std_min-f.sta_min;
@@ -139,8 +139,12 @@
      .sort((a,b)=>b.items.length-a.items.length||a.minute-b.minute)[0];
    const priorityNightFlights=priorityNight?.items.filter(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))||[];
    const priorityNightList=priorityNightFlights.slice(0,5).map(f=>(f.arrival||'—')+'/'+(f.departure||'—')).join(', ');
+   const nightGroups=items=>[
+     ...(['AK','FD'].filter(airline=>items.some(f=>flightCarrier(f)===airline))),
+     ...(items.some(f=>KOREAN_CARRIERS.includes(flightCarrier(f)))?['hãng Hàn Quốc']:[])
+   ].join(', ');
    const nightGuidance=priorityNight?
-     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' (AK/FD/Hàn Quốc theo lịch); tập trung xử lý từng chuyến rồi chuyển nguồn lực khi hoàn tất.':
+     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+'); tập trung xử lý từng chuyến rồi chuyển nguồn lực khi hoàn tất.':
      '';
 
    const observations=[
@@ -164,7 +168,7 @@
      'ĐH xác định các mốc phục vụ chồng lấn theo STA/STD; PVSĐ chuẩn bị GSE phù hợp loại tàu, PVHK chuẩn bị lực lượng đón khách/boarding theo giờ; điều chỉnh thứ tự ưu tiên khi lịch thay đổi.',
      'ĐH khoanh vùng '+sourcePeak+' và chốt thứ tự ưu tiên theo STD; PVSĐ tập trung bốc xếp, lái xe và GSE hoàn thành dứt điểm từng tàu, xác nhận công đoạn xong mới điều chuyển cuốn chiếu sang chuyến kế tiếp; PVHK phối hợp đón khách, cửa ra tàu và boarding.'+nightGuidance,
      'ĐH đối chiếu vị trí sau AOC, ưu tiên theo dõi cụm bãi 38–42, 56–71 nếu có; PVSĐ tính trước tuyến điều chuyển thiết bị giữa các chuyến, tránh dồn xe vào khu vực đường công vụ có khả năng phải dừng chờ; PVHK chủ động vị trí đón/boarding.',
-     'ĐH cân đối quân số PVSĐ/PVHK theo khung giờ chồng lấn; PVSĐ tổ chức nhóm bốc xếp và lái GSE phục vụ lần lượt từng chuyến, chỉ chuyển nhóm sau khi kết thúc công đoạn; PVHK ưu tiên đội đến, gate và boarding cho chuyến có giờ quay đầu sát.'+(priorityNight?' Chú ý tăng cường phối hợp ca tối với AK/FD/Hàn Quốc.':''),
+     'ĐH cân đối quân số PVSĐ/PVHK theo khung giờ chồng lấn; PVSĐ tổ chức nhóm bốc xếp và lái GSE phục vụ lần lượt từng chuyến, chỉ chuyển nhóm sau khi kết thúc công đoạn; PVHK ưu tiên đội đến, gate và boarding cho chuyến có giờ quay đầu sát.'+(priorityNight?' Tăng cường phối hợp ca tối cho '+nightGroups(priorityNight.items)+'.':''),
      activeIssues.length?
        'PVSĐ xác nhận xe còn khả dụng, phương tiện thay thế và GSE phù hợp tàu trước cao điểm; ĐH ưu tiên cấp cho chuyến sát giờ quay đầu, điều chuyển cuốn chiếu khi thiết bị được xác nhận có thể rời tàu.'+(issueAlternatives?' Phương án dự phòng đã khai báo: '+issueAlternatives+'.':''):
        'PVSĐ kiểm tra số xe và chủng loại GSE thực sự khả dụng trước cao điểm; ĐH ưu tiên thiết bị cho cặp quay đầu sát giờ, điều chuyển sau khi xác nhận hoàn tất công đoạn, không lấy STD làm mốc xe rảnh.',
@@ -188,7 +192,7 @@
      action:'ĐH chốt thứ tự theo STD; PVSĐ tập trung bốc xếp/GSE hoàn tất từng tàu rồi điều chuyển cuốn chiếu khi đủ điều kiện; PVHK ưu tiên đón khách, gate/boarding theo tiến độ.'+
        (x.items.some(isTightGround)?' Chú ý chuyến ground-time ngắn/sát.':'')+
        (x.minute>=1080&&x.items.some(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))?
-         ' Ưu tiên AK/FD/Hàn Quốc có trong khung tối.':'')
+         ' Ưu tiên '+nightGroups(x.items)+' trong khung tối.':'')
    }));
    if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Thiếu giờ lịch bay.',action:'Kiểm tra lại Excel nguồn.'});
    const coord=[
