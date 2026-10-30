@@ -10,7 +10,7 @@
  const no=v=>clean(v).toUpperCase().replace(/\s+/g,'');
  const reg=v=>no(v).replace(/[^A-Z0-9]/g,'');
  const aircraft=v=>no(v);
- const fields=['FlightNo','Registration','Aircraft','Route','ParkingBay','Gate','Booking','NatureOfFlight','SSR','FlightType','CkiRow','CKIN OPEN','CKIN CLS','BDG Start','BDG Finish','TotalPax','STA','STD','Belt','Remarks','Status'];
+ const fields=['FlightNo','Registration','Aircraft','Route','ParkingBay','Gate','Booking','NatureOfFlight','SSR','FlightType','CkiRow','CKIN OPEN','CKIN CLS','BDG Start','BDG Finish','TotalPax','STA','STD','ETA','ETD','Belt','Remarks','Status'];
  const canon=x=>String(x??'').toUpperCase().replace(/[^A-Z0-9]/g,'');
  function detectHeader(rows,kind){
    const needed=kind==='ARRIVAL'?'STA':'STD';
@@ -90,6 +90,7 @@
        route,t:scheduled,bay,gate:cell(r,'Gate'),booking,booking_parts:parts,booking_sum:parts?parts.reduce((a,b)=>a+b,0):null,
        ssr,nature,flight_type:flightType,ferry:/\bFERRY\b/i.test(ssr+' '+nature+' '+flightType),
        checkin_row:cell(r,'CkiRow'),checkin_open:time(cell(r,'CKIN OPEN')),checkin_close:time(cell(r,'CKIN CLS')),
+       eta:time(cell(r,'ETA')),etd:time(cell(r,'ETD')),
        boarding_start:time(cell(r,'BDG Start')),boarding_finish:time(cell(r,'BDG Finish')),
        pax,belt:cell(r,'Belt'),source_row:i+1,carrier});
    }
@@ -117,6 +118,7 @@
        departure_checkin_open:d?.checkin_open??null,departure_checkin_close:d?.checkin_close??null,
        departure_boarding_start:d?.boarding_start??null,departure_boarding_finish:d?.boarding_finish??null,
        booking_raw:d?.booking||null,booking_parts:d?.booking_parts||null,booking_sum:d?.booking_sum??null,
+       eta_min:a?.eta??null,etd_min:d?.etd??null,
        ferry:!!(a?.ferry||d?.ferry),arrival_nature:a?.nature||null,departure_nature:d?.nature||null,
        arrival_ssr:a?.ssr||null,departure_ssr:d?.ssr||null,arrival_flight_type:a?.flight_type||null,
        departure_flight_type:d?.flight_type||null,stand_mismatch:!!m,
