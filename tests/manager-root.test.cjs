@@ -2,7 +2,7 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 for(const p of ['index.html','v19-report.js','v211-unit-input.js','v212-personnel.js','v21-shuttle-export.js','v24-shuttle-grid.js','office-export-v29.js','report-export-v29.js','assets/logo-sags.png'])assert.ok(fs.existsSync(p),'Missing '+p);
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(/V2\.1[6-9]/.test(index),'Manager app must be at root and up to date');
+assert.ok(/V2\.2[0-9]/.test(index),'Manager app must be at root and up to date');
 assert.ok(!index.includes('SAGS FORM LITE')&&!index.includes('radar-cxr/'));
 assert.ok(index.includes('v21ShuttleExportStatus'));
 assert.ok(index.includes('v19ReportPreview'));
