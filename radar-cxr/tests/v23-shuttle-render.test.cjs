@@ -13,7 +13,7 @@ const assert=require('node:assert/strict');
  assert.equal(rows.length,10);
  const out=[];
  const c={};
- for(const method of ['beginPath','moveTo','lineTo','quadraticCurveTo','closePath','fill','stroke','fillRect','drawImage','save','restore','translate','arc','bezierCurveTo','setLineDash'])
+ for(const method of ['beginPath','moveTo','lineTo','quadraticCurveTo','closePath','fill','stroke','fillRect','strokeRect','drawImage','save','restore','translate','arc','bezierCurveTo','setLineDash'])
    c[method]=()=>{};
  c.fillText=(s)=>out.push(String(s));
  let canvas;
