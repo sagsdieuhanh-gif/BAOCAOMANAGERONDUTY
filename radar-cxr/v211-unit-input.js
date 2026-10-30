@@ -51,10 +51,34 @@
    if(info.type==='status')return '<label>'+esc(info.label)+'<select data-unit-field="'+esc(info.key)+'">'+statusOpts.map(([v,k])=>'<option value="'+v+'">'+k+'</option>').join('')+'</select></label>';
    return '<label>'+esc(info.label)+'<textarea data-unit-field="'+esc(info.key)+' rows="2" maxlength="350" placeholder="'+esc(info.hint||'Nhập thông tin có căn cứ')+'"></textarea></label>';
  }
+ function personnelFields(k){
+   if(!['DH','PVHK','KTS'].includes(k))return '';
+   const options='<option value="PENDING">CHỜ XÁC NHẬN</option><option value="READY">ĐẢM BẢO PHỤC VỤ BAY</option><option value="LIMITED">CHƯA ĐẢM BẢO PHỤC VỤ BAY</option>';
+   return '<div class="v212-personnel">'+
+     '<h4>TỔNG QUÂN SỐ PHỤC VỤ BAY · THEO CA</h4>'+
+     '<p class="note">Nhập tổng nhân sự phục vụ bay của phòng, không nhập riêng đội đến/đi hoặc từng vị trí. Tình trạng đảm bảo do phòng tự xác nhận; không tự kết luận từ số lượng.</p>'+
+     '<div class="v212-staff-grid">'+
+       '<label>Ca sáng – tổng quân số<input data-unit-field="pvb_morning" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Chưa có số liệu"></label>'+
+       '<label>Ca sáng – tình trạng<select data-unit-field="pvb_morning_status">'+options+'</select></label>'+
+       '<label>Ca đêm – tổng quân số<input data-unit-field="pvb_night" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Chưa có số liệu"></label>'+
+       '<label>Ca đêm – tình trạng<select data-unit-field="pvb_night_status">'+options+'</select></label>'+
+     '</div>'+
+     '<div class="v212-staff-preview"><b>CÂU TỔNG HỢP TẠI MỤC NHÂN SỰ</b><p data-v212-preview="'+k+'">CHỜ XÁC NHẬN quân số.</p><small>Bản xem trước khi nhập; báo cáo chính chỉ nhận số liệu sau khi phòng bấm XÁC NHẬN.</small></div>'+
+     '</div>';
+ }
+ function readFields(node){
+   const values={};
+   for(const el of node.querySelectorAll('[data-unit-field]'))values[el.dataset.unitField]=String(el.value||'').trim();
+   return values;
+ }
+ function refreshStaffPreview(k){
+   const node=document.querySelector('[data-unit-forecast="'+k+'"]'),out=node?.querySelector('[data-v212-preview]');
+   if(out&&root.SagsPersonnelV212)out.textContent=root.SagsPersonnelV212.formatUnit(k,readFields(node),true).line;
+ }
  function html(k,g){
    return '<section class="v20-panel v211-input" data-unit-forecast="'+k+'"><div class="row space"><h3>BỔ SUNG XÁC NHẬN PHỤC VỤ BÁO CÁO · '+g.label+'</h3><span class="status gray" data-v211-state="'+k+'">CHƯA CÓ DỮ LIỆU</span></div>'+
     '<p class="note">Chỉ nhập điểm cần bổ sung cho dự báo; quân số, PAX, KG/PCS, GSE và xe giao ca giữ nguyên ở các biểu mẫu hiện có. Ô chưa biết để trống hoặc CHƯA XÁC NHẬN. LƯU NHÁP không được coi là xác nhận chuyên môn.</p>'+
-    '<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div>'+
+    personnelFields(k)+'<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div>'+
     '<div class="btnbar"><button type="button" data-v211-save="'+k+'">LƯU NHÁP</button><button type="button" class="primary" data-v211-confirm="'+k+'">XÁC NHẬN DỮ LIỆU CỦA PHÒNG</button></div>'+
     '<p class="note" data-v211-message="'+k+'"></p></section>';
  }
@@ -68,6 +92,9 @@
      else target.appendChild(node);
      node.querySelector('[data-v211-save]').onclick=()=>save(key,false);
      node.querySelector('[data-v211-confirm]').onclick=()=>save(key,true);
+     node.querySelectorAll('[data-unit-field]').forEach(el=>el.addEventListener('input',()=>refreshStaffPreview(key)));
+     node.querySelectorAll('select[data-unit-field]').forEach(el=>el.addEventListener('change',()=>refreshStaffPreview(key)));
+     refreshStaffPreview(key);
    }
    updateRights();
  }
@@ -83,6 +110,7 @@
      const row=rows.find(r=>r.unit===key),data=row?.details||{};
      if(node.contains(document.activeElement))continue;
      for(const el of node.querySelectorAll('[data-unit-field]'))el.value=String(data[el.dataset.unitField]??(el.tagName==='SELECT'?'PENDING':''));
+     refreshStaffPreview(key);
      const el=node.querySelector('[data-v211-state]');
      if(el){el.textContent=labelFor(row)+(row?.confirmed_at?' · '+new Date(row.confirmed_at).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'');el.className='status '+(row?.status==='CONFIRMED'?'ok':'warn');}
    }
@@ -103,8 +131,16 @@
    if(loadedDate!==$('day').value)return alert('Ngày dữ liệu đã đổi; hãy tải lại trước khi lưu.');
    const node=document.querySelector('[data-unit-forecast="'+key+'"]'),data={},g=groups[key];
    if(!node||!g)return;
-   for(const el of node.querySelectorAll('[data-unit-field]')){
-     const value=String(el.value||'').trim();data[el.dataset.unitField]=value;
+   Object.assign(data,readFields(node));
+   if(['DH','PVHK','KTS'].includes(key)&&root.SagsPersonnelV212){
+     try{root.SagsPersonnelV212.validate(data);}catch(e){alert(e.message);return;}
+   }
+   if(confirm&&['DH','PVHK','KTS'].includes(key)){
+     const p=root.SagsPersonnelV212;
+     if(!p||['pvb_morning','pvb_night'].some(n=>p.parseCount(data[n])==null)||
+       ['pvb_morning_status','pvb_night_status'].some(n=>!['READY','LIMITED'].includes(data[n]))){
+       alert('Vui lòng nhập đầy đủ tổng quân số và chọn tình trạng phục vụ của cả ca sáng và ca đêm trước khi XÁC NHẬN. Có thể LƯU NHÁP nếu chưa đủ thông tin.');return;
+     }
    }
    const values=Object.entries(data).filter(([k,v])=>v&&v!=='PENDING');
    if(!values.length)return alert('Cần nhập ít nhất một thông tin có căn cứ trước khi lưu.');
