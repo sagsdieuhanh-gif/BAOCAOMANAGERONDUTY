@@ -265,7 +265,7 @@
      const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
      const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){
-       const blob=await new Promise((resolve,reject)=>img.toBlob?.(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png')||reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.')));
+       const blob=await new Promise((resolve,reject)=>{if(typeof img.toBlob!=='function')return reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.'));img.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png');});
        const url=URL.createObjectURL(blob);try{download(url,base+'.png');}finally{setTimeout(()=>URL.revokeObjectURL(url),15000);}
        if(status)status.textContent='Đã tạo ảnh PNG xe giao ca ('+Math.round(blob.size/1024)+' KB).';return;
      }
@@ -309,7 +309,7 @@
      const canvas=draw(data,logo);
      const image=document.createElement('img');
      image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVSĐ, PVHK, Kho Hàng, QA / IT.';
-     const blob=await new Promise((resolve,reject)=>canvas.toBlob?.(b=>b?resolve(b):reject(Error('Không tạo được ảnh xem trước.')),'image/png')||reject(Error('Thiết bị không hỗ trợ ảnh PNG.')));
+     const blob=await new Promise((resolve,reject)=>{if(typeof canvas.toBlob!=='function')return reject(Error('Thiết bị không hỗ trợ ảnh PNG.'));canvas.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh xem trước.')),'image/png');});
      const url=URL.createObjectURL(blob);image.src=url;
      image.onload=()=>URL.revokeObjectURL(url);
      image.onerror=()=>URL.revokeObjectURL(url);
