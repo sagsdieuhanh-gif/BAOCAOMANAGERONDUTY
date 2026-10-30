@@ -157,6 +157,8 @@
     staff:'NHÂN SỰ',gse:'THIẾT BỊ GSE',doorclose:'DOOR CLOSE',report:'BÁO CÁO TGĐ',
     quick:'CÔNG CỤ CHI TIẾT',admin:'PHÂN QUYỀN'};
    document.querySelectorAll('#tabs [data-tab]').forEach(b=>{if(labels[b.dataset.tab])b.textContent=labels[b.dataset.tab]});
+   const notes=document.getElementById('v19NoteEditor');
+   if(notes)notes.classList.toggle('hidden',!['DH','ADMIN'].includes(role));
    renderHome();
  }
  async function afterTab(tab){
