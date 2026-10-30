@@ -148,7 +148,7 @@ const roleUnit={KTS:['BAGGAGE','GSE_DRIVER','SKYONE_BAGGAGE','COBUS_DRIVER'],PVH
 const timeNum=x=>{if(x===null||x===undefined||x==='')return null;let s=String(x).trim(),next=/\+$/.test(s);s=s.replace('+','');if(/^\d{3,4}$/.test(s))s=s.padStart(4,'0').slice(0,2)+':'+s.padStart(4,'0').slice(2);if(!/^\d{1,2}:\d{2}$/.test(s))return NaN;let [hh,mm]=s.split(':').map(Number);return (hh>=0&&hh<=23&&mm<60)?hh*60+mm+(next?1440:0):NaN};
 const timeFmt=x=>x==null?'—':`${String(Math.floor(x%1440/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}${x>=1440?'+':''}`;
 const airline=f=>(f.airline||f.arrival?.match(/^[A-Z0-9]+?(?=\d)/)?.[0]||f.departure?.match(/^[A-Z0-9]+?(?=\d)/)?.[0]||'').toUpperCase();
-const serviceM=f=>['VJ','9G','VU','AK','FD'].includes(airline(f))?30:['KE','BX','TW','RF','LJ','ZE','RS','7C','TW','YP'].includes(airline(f))?60:Math.max(0,(f.std_min??f.sta_min)-(f.sta_min??f.std_min));
+const serviceM=f=>['VJ','9G','VU','AK','FD'].includes(airline(f))?30:['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(airline(f))?60:Math.max(0,(f.std_min??f.sta_min)-(f.sta_min??f.std_min));
 const hasBridge=f=>f.bay!=null&&[52,53,32,33,34,35,36].includes(+f.bay);
 const zone=f=>[31,32,33,34,35,36,37,51,52,53,54,55].includes(+f.bay)?'K1':[38,39,40,41,42].includes(+f.bay)?'K2':+f.bay>=56&&+f.bay<=71?'K3':'?';
 const wide=f=>/330|777|787|350|747|380/.test(f.aircraft_type||'');
