@@ -146,7 +146,7 @@
     return loading;
   }
   async function preview(){
-    const el=$('v19ReportPreview');if(!el)return;
+    const el=$('r28ReportPreview');if(!el)return;
     el.innerHTML='<p class="v19-small">Đang tổng hợp Radar theo lịch nguồn…</p>';
     const requested=$('day')?.value;
     try{
@@ -240,37 +240,23 @@
     a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),4000);
   }
-  async function exportWord(){
+  async function exportFile(format){
     if(!['ADMIN','DH'].includes(unit)){alert('Chỉ ĐH/ADMIN được xuất báo cáo.');return;}
-    const buttons=[...document.querySelectorAll('[data-v19-export]')];buttons.forEach(x=>{x.disabled=true;x.textContent='ĐANG TẠO WORD…'});
+    const button=$('r28Export'+(format==='pdf'?'Pdf':'Word'));
+    if(button){button.disabled=true;button.textContent='ĐANG TẠO '+format.toUpperCase()+'…';}
     try{
-      const d=await loadOnce(),D=await docxLib(),doc=await wordDoc(d,D),blob=await D.Packer.toBlob(doc);
-      if(blob.size<3000)throw Error('DOCX tạo ra không hợp lệ.');
-      download(blob,'SAGS_CXR_RADAR_'+d.c.date.replace(/-/g,'')+'_L'+d.c.revision+'.docx');
-      const el=$('v19ExportMessage');if(el)el.textContent='Đã tạo Word có Radar toàn ngày, các đợt ≥4 cặp và cảnh báo.';
-    }catch(e){alert('Không thể xuất Word: '+e.message);}
-    finally{buttons.forEach(x=>{x.disabled=false;x.textContent='XUẤT BÁO CÁO WORD · RADAR (.DOCX)'})}
+      const d=await loadOnce();ensureStyles();
+      if(!root.SagsOfficeExportV29)throw Error('Chưa nạp bộ xuất file nội bộ.');
+      const holder=document.createElement('div');holder.innerHTML=reportHtml(d);
+      const file='SAGS_CXR_RADAR_'+d.c.date.replace(/-/g,'')+'_L'+d.c.revision+'.'+format;
+      const done=await root.SagsOfficeExportV29.exportElement(holder.querySelector('.r28-sheet'),format,file);
+      const message=$('r28ExportMessage');if(message)message.textContent='Đã tạo '+file+' ('+Math.round(done.bytes/1024)+' KB).';
+    }catch(e){const message=$('r28ExportMessage');if(message)message.textContent='CHƯA XUẤT ĐƯỢC: '+e.message;alert('Không thể xuất báo cáo Radar: '+e.message);}
+    finally{if(button){button.disabled=false;button.textContent='XUẤT '+(format==='pdf'?'PDF':'WORD')+' RADAR (.'+format.toUpperCase()+')';}}
   }
-  async function exportPdf(){
-    if(!['ADMIN','DH'].includes(unit)){alert('Chỉ ĐH/ADMIN được xuất báo cáo.');return;}
-    const b=$('r28Pdf');if(b){b.disabled=true;b.textContent='ĐANG TẠO PDF…';}
-    let node,holder;
-    try{
-      const d=await loadOnce(),html2pdf=await pdfLib();ensureStyles();
-      node=document.createElement('div');node.innerHTML=reportHtml(d);
-      node.style.cssText='width:1120px;background:white;';
-      holder=document.createElement('div');holder.style.cssText='position:absolute;left:-20000px;top:0;width:1120px';
-      holder.appendChild(node);document.body.appendChild(holder);
-      await html2pdf().set({margin:[8,9,8,9],filename:'SAGS_CXR_RADAR_'+d.c.date.replace(/-/g,'')+'_L'+d.c.revision+'.pdf',
-        image:{type:'jpeg',quality:0.96},html2canvas:{scale:1.6,backgroundColor:'#ffffff',useCORS:true},
-        jsPDF:{unit:'mm',format:'a4',orientation:'landscape',compress:true},
-        pagebreak:{mode:['css','legacy'],avoid:['.r28-episode','.r28-table tr']}}).from(node).save();
-    }catch(e){alert('Không thể xuất PDF: '+e.message);}
-    finally{holder?.remove();if(b){b.disabled=false;b.textContent='XUẤT BÁO CÁO PDF · RADAR (.PDF)';}}
-  }
-  base.exportOne=exportWord;
-  base.preview=preview;
-  base.exportPdf=exportPdf;
-  const btn=$('r28Pdf');if(btn)btn.onclick=exportPdf;
+  const exportWord=()=>exportFile('docx'),exportPdf=()=>exportFile('pdf');
+  if($('r28ExportWord'))$('r28ExportWord').onclick=exportWord;
+  if($('r28ExportPdf'))$('r28ExportPdf').onclick=exportPdf;
+  if($('r28Refresh'))$('r28Refresh').onclick=preview;
   root.SagsRadarReportV28={analyze,model,preview,exportWord,exportPdf,_test:{interval,serviceMinutes,area,dailySvg,reportHtml}};
 })(window);
