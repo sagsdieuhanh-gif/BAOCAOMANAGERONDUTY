@@ -23,6 +23,7 @@ jobs:
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
           node tests/v216-shuttle-export.test.cjs
+          node tests/v217-second-forecast.test.cjs
       - name: Stage Manager On Duty
         run: |
           mkdir -p _site/assets
