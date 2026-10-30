@@ -57,7 +57,7 @@
      verified:slots.reduce((n,x)=>n+x.total,0),unverified,plusOne:events.filter(x=>x.minute>=1440).length};
  }
  function svg(chart){
-   const rows=chart.slots||[],W=1120,H=340,ml=61,mr=16,top=68,bottom=62,areaW=W-ml-mr,areaH=H-top-bottom;
+   const rows=chart.slots||[],W=1120,H=405,ml=65,mr=16,top=70,bottom=128,areaW=W-ml-mr,areaH=H-top-bottom;
    const mx=Math.max(1,...rows.map(x=>Math.max(x.ia,x.id,x.da,x.dd)));
    const upper=Math.max(2,Math.ceil(mx)),bar=7,pitch=areaW/24;
    const cols=[['ia','#3E68A0','Quốc tế đến'],['id','#F7AF62','Quốc tế đi'],['da','#1B987A','Quốc nội đến'],['dd','#C85638','Quốc nội đi']];
@@ -75,6 +75,8 @@
      });
      out+='<text transform="translate('+(center-2)+','+(top+areaH+16)+') rotate(-45)" text-anchor="end" font-size="10" font-family="Arial" fill="#34556a">'+String(r.hour).padStart(2,'0')+'–'+String(r.hour+1).padStart(2,'0')+'</text>';
    });
+   out+='<text x="'+(W/2)+'" y="351" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#34556a">Giờ (Hours)</text>'+
+     '<text transform="translate(20,'+(top+areaH/2)+') rotate(-90)" text-anchor="middle" font-family="Arial" font-size="13" font-weight="700" fill="#34556a">Lượt chuyến (Flights)</text>';
    cols.forEach(([_,color,label],i)=>{const x=ml+i*250;out+='<rect x="'+x+'" y="'+(H-15)+'" width="12" height="12" fill="'+color+'"/><text x="'+(x+17)+'" y="'+(H-5)+'" font-family="Arial" font-size="12" fill="#23475f">'+label+'</text>';});
    return out+'</svg>';
  }
