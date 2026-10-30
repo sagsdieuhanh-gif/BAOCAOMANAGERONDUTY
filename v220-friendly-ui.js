@@ -110,6 +110,7 @@
    const g=GROUPS.find(x=>x.id===group);
    if(!g||!allowedGroup(g))return;
    current=g.id;
+   if($('v220Advanced'))$('v220Advanced').open=false;
    if(openFirst)navigate(g.items[0][0]);else paint();
  }
  function navigate(tab){
@@ -126,7 +127,7 @@
    const g=currentGroupForTab(tab);
    current=g.id;selected=tab;paint();
  }
- root.SagsFriendlyUIV220={mount,navigate,sync,changeGroup,refresh:paint,groups:GROUPS.map(x=>x.id)};
+ root.SagsFriendlyUIV220={mount,navigate,sync,changeGroup,refresh:paint,groups:GROUPS.map(x=>x.id),routes:GROUPS.map(x=>({id:x.id,tabs:x.items.map(y=>y[0])}))};
  if(doc.readyState==='loading')doc.addEventListener('DOMContentLoaded',mount,{once:true});
  else mount();
 })(window);
