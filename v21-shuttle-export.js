@@ -164,7 +164,7 @@
    });
    t('Số 0 được tính là đã xác nhận. Số người trước khi đủ 4 phòng là tổng tạm tính.',outer+10,footY+107,15,C.ink);
    t('Mốc xe bổ sung được tô vàng nhạt, lý do ghi ngay trong cùng dòng. ĐH quyết định phương án xe.',outer+10,footY+133,14,C.muted);
-   t('GỢI Ý THEO SỨC CHỨA · CHƯA XÁC NHẬN SỐ XE KHẢ DỤNG',outer+10,footY+169,14,C.navy,true);
+   t('GỢI Ý LOẠI XE THEO SỨC CHỨA · CHƯA XÁC NHẬN SỐ XE KHẢ DỤNG',outer+10,footY+169,14,C.navy,true);
    if(vehicles.small?.naturalWidth)c.drawImage(vehicles.small,outer+450,footY+149,126,74);
    t('29 CHỖ',outer+580,footY+189,19,C.blue,true);
    if(vehicles.big?.naturalWidth)c.drawImage(vehicles.big,outer+760,footY+149,126,74);
