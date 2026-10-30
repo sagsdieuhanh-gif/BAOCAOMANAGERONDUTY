@@ -67,3 +67,8 @@ body.v19-unit-KTS #tab-quick >.panel:first-of-type,body.v19-unit-PVHK #tab-quick
 @media(max-width:900px){.v19-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.v19-main-grid{grid-template-columns:1fr}.v19-report-sheet{padding:10px}.v19-hero{align-items:flex-start;flex-direction:column}#tabs{top:0}}
 @media(max-width:520px){.v19-tile{padding:12px}.v19-tile .v19-big{font-size:23px}.v19-hero{padding:16px}.v19-main-grid{gap:10px}.v19-inline-form{grid-template-columns:1fr}.v19-shift .v19-inline-form{grid-template-columns:repeat(2,minmax(0,1fr))}.v19-step{flex-wrap:wrap}.v19-report-sheet{font-size:11px;overflow-x:auto}}
 @media print{#tabs,#tab-home,.v19-report-actions{display:none!important}}
+
+/* Keep obsolete comparison and long-form editor outside the new unit-first screens. */
+#app > #kpis,#app > #movementComparison{display:none!important}
+#tab-report > .panel{display:none!important}
+#tab-report > #v19ReportModern{display:block!important}
