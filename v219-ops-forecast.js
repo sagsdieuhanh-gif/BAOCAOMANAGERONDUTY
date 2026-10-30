@@ -193,6 +193,20 @@
    }
    return [...groups.values()].filter(x=>x.flights.length).sort((a,b)=>a.hour-b.hour||a.zone.localeCompare(b.zone));
  }
+ function handoffs(pairs){
+   const turns=(pairs||[]).filter(p=>p.sta_min!=null&&serviceM(p)!=null)
+     .map(p=>({name:p.departure||p.arrival,begin:p.sta_min,
+       expectedEnd:Math.min(p.sta_min+serviceM(p),p.std_min??Infinity)}))
+     .sort((a,b)=>a.begin-b.begin);
+   const result=[];
+   for(let i=0;i<turns.length-1;i++){
+     const from=turns[i],next=turns[i+1],gap=next.begin-from.expectedEnd;
+     result.push({from:from.name,to:next.name,fromEnd:from.expectedEnd,nextStart:next.begin,gap,
+       status:gap<0?'PHẢI PHỤC VỤ CHỒNG LẤN – KHÔNG THỂ DÙNG CHUNG MỘT TỔ/THIẾT BỊ':
+         'CÓ THỂ ĐIỀU CHUYỂN SAU KHI XÁC NHẬN HOÀN TẤT; CHƯA CÓ THỜI GIAN DI CHUYỂN'});
+   }
+   return result;
+ }
  function summarize(payload,rows,staff,gse,contracts){
    const detail=payload?.source_detail||{},pairs=payload?.flights?.length?payload.flights:rows||[];
    const hours=movements(payload,rows),deps=detail.departures||[];
@@ -201,9 +215,9 @@
    const attention=windows.filter(w=>w.unknownBay||w.unknownCargo||
      w.gse.some(x=>x.shortage>0)||w.baggage.shortage>0||w.driver.shortage>0||w.checkin.shortage>0);
    const top=windows.slice().sort((a,b)=>b.total-a.total||a.start-b.start).slice(0,6);
-   return {hours,gate,stand,windows,attention,top,contracts:(contracts||[]).length,
+   return {hours,gate,stand,windows,attention,top,handoffs:handoffs(pairs),contracts:(contracts||[]).length,
      unknown:hours.unverified};
  }
- root.SagsOpsForecastV219={movements,svg,boardingWindow,boardings,capacity,groupStand,summarize,serviceM,zone,domestic,carrier,time};
+ root.SagsOpsForecastV219={movements,svg,boardingWindow,boardings,capacity,groupStand,summarize,handoffs,serviceM,zone,domestic,carrier,time};
  if(typeof module!=='undefined'&&module.exports)module.exports=root.SagsOpsForecastV219;
 })(typeof window!=='undefined'?window:globalThis);
