@@ -26,6 +26,21 @@
    const contract=(c.contracts||[]).filter(verifiedContract);
    const agreed=new Map(contract.map(x=>[x.airline,x]));
    const lead=[],entries=[];
+   const staffNames={DH:'Phòng ĐH',PVHK:'PVHK',KTS:'PVSĐ'};
+   const confirmedStaff=(c.unitPlans||[]).filter(x=>staffNames[x.unit]&&x.status==='CONFIRMED'&&x.details);
+   const staffing=confirmedStaff.length?confirmedStaff.map(x=>{
+      const d=x.details,parts=['morning','night'].map((shift,i)=>{
+        const n=quantity(d['pvb_'+shift]),need=quantity(d['pvb_'+shift+'_required']),
+          status=d['pvb_'+shift+'_status'];
+        if(n==null)return null;
+        const delta=need!=null?' (nhu cầu '+need+', '+(n<need?'thiếu '+(need-n):'đáp ứng theo số đã đăng ký')+' người)':
+          status==='LIMITED'?' (phòng báo chưa đủ)':
+          status==='READY'?' (phòng báo đủ)':' (chưa có nhu cầu đối chiếu)';
+        return (i?'đêm ':'sáng ')+n+' người'+delta;
+      }).filter(Boolean);
+      return parts.length?staffNames[x.unit]+': '+parts.join(', '):null;
+   }).filter(Boolean).join('; '):'';
+
    const push=(key,title,observation,action,owner,weight=0)=>
      entries.push({key,title,observation:cap(observation),action:cap(action,720),owner,weight});
    const top=(op.top||[]).filter(w=>w.total>=2).slice().sort((a,b)=>b.total-a.total||a.start-b.start);
@@ -207,7 +222,7 @@
    if(arrs.length&&all.some(x=>x.bay==null))outstanding.push('còn chuyến chưa có bãi đỗ');
    const closing=outstanding.length?'Các nội dung cần chốt thêm trước ca: '+outstanding.slice(0,4).join('; ')+'.':
      'Những số liệu trên là dự kiến theo lịch đã cập nhật; ĐH tiếp tục đối chiếu tình hình thực tế trước từng đợt phục vụ.';
-   return {lead:lead.join(' '),entries:chosen,closing,sourceDate:c.date,signalKeys:chosen.map(x=>x.key)};
+   return {lead:lead.join(' '),entries:chosen,closing,staffing,sourceDate:c.date,signalKeys:chosen.map(x=>x.key)};
  }
  root.SagsL2BriefV223={make,verifiedContract};
  if(typeof module!=='undefined'&&module.exports)module.exports=root.SagsL2BriefV223;
