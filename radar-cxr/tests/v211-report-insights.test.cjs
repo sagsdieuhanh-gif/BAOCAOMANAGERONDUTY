@@ -42,6 +42,6 @@ const draft=confirm.map(x=>({...x,status:'DRAFT'}));
 topics=bank.enrich({...c,unitPlans:draft},core);
 assert.ok(!topics[2].action.includes('Cần loader phù hợp'),'Draft data must not be presented as confirmed');
 const noWide=bank.widebody({...c,rows:[{arrival:'VJ1',departure:'VJ2',aircraft_type:'A321'}]});
-assert.match(noWide.observation,/chưa ghi nhận A330\/B777/);
+assert.match(noWide.observation,/chưa ghi nhận tàu A330\/B777/);
 assert.ok(!noWide.observation.includes('KE467'));
 console.log('PASS V2.11 10 topics; A330/B777; high PAX; stand zones; confirmed-only inputs; no ungrounded statements');
