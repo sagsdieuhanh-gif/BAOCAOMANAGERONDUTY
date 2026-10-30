@@ -125,8 +125,8 @@
     events.forEach((e,i)=>{
       out+='<section class="r28-section r28-episode"><h3>III.'+(i+1)+' CAO ĐIỂM '+esc(clock(e.from))+'–'+esc(clock(e.to))+' · ĐỈNH '+e.peak.n+' CẶP <span class="r28-state">'+esc(e.level)+'</span></h3>';
       out+='<p>Khung đỉnh: '+esc(clock(e.peak.s))+'–'+esc(clock(e.peak.s+30))+'. Có '+e.items.length+' hồ sơ từng xuất hiện trong đợt, '+e.peak.items.length+' hồ sơ trong khung đỉnh.</p><div class="r28-chart">'+episodeSvg(e)+'</div>';
-      out+=table(['Cặp chuyến (đến / đi)','STA / STD','Bãi / khu','Loại tàu','Thời lượng quy ước'],e.peak.items.map(x=>[flightId(x.f),clock(x.f.sta_min)+' / '+clock(x.f.std_min),x.f.bay==null?'CHỜ XÁC NHẬN':x.f.bay+' / '+area(x.f),x.f.aircraft_type||'Chưa xác nhận',serviceMinutes(x.f)+' phút']));
-      out+='<h4>CẢNH BÁO VÀ HÀNH ĐỘNG – NGAY DƯỚI RADAR</h4>'+table(['Mức','Nội dung','Cơ sở / nguy cơ cần rà soát','Hành động điều phối'],alertRows(e))+'</section>';
+      out+='<h4>CẢNH BÁO VÀ HÀNH ĐỘNG – NGAY DƯỚI RADAR</h4>'+table(['Mức','Nội dung','Cơ sở / nguy cơ cần rà soát','Hành động điều phối'],alertRows(e));
+      out+='<h4>DANH SÁCH CẶP CHUYẾN TRONG KHUNG ĐỈNH</h4>'+table(['Cặp chuyến (đến / đi)','STA / STD','Bãi / khu','Loại tàu','Thời lượng quy ước'],e.peak.items.map(x=>[flightId(x.f),clock(x.f.sta_min)+' / '+clock(x.f.std_min),x.f.bay==null?'CHỜ XÁC NHẬN':x.f.bay+' / '+area(x.f),x.f.aircraft_type||'Chưa xác nhận',serviceMinutes(x.f)+' phút']))+'</section>';
     });
     out+='<section class="r28-section"><h3>III. TỔNG HỢP CẢNH BÁO TOÀN NGÀY</h3>'+(
       events.length?table(['Đợt cao điểm','Mức','Nhóm cảnh báo','Yêu cầu'],events.flatMap(e=>e.alerts.map(a=>[clock(e.from)+'–'+clock(e.to),a.level,a.kind,a.action]))):'<p>Không có đợt cao điểm thuộc ngưỡng báo cáo.</p>')+'</section>';
@@ -223,9 +223,10 @@
       children.push(hd('III.'+(i+1)+' ĐỢT '+clock(e.from)+'–'+clock(e.to)+' | ĐỈNH '+e.peak.n+' CẶP – '+e.level));
       children.push(para('Khung đỉnh '+clock(e.peak.s)+'–'+clock(e.peak.s+30)+'; '+e.items.length+' hồ sơ trong toàn đợt, '+e.peak.items.length+' hồ sơ ở khung đỉnh.'));
       children.push(await pic(episodeSvg(e)));
-      children.push(tab(['Cặp đến / đi','STA / STD','Vị trí / khu','Tàu','Thời lượng'],e.peak.items.map(x=>[flightId(x.f),clock(x.f.sta_min)+' / '+clock(x.f.std_min),x.f.bay==null?'CHỜ XÁC NHẬN':x.f.bay+' / '+area(x.f),x.f.aircraft_type||'Chưa rõ',serviceMinutes(x.f)+' phút']),[3380,2700,2920,2800,2900]));
       children.push(para('CẢNH BÁO NGAY DƯỚI RADAR',{bold:true,color:'A36518'}));
       children.push(tab(['Mức','Nội dung','Cơ sở / nguy cơ','Hành động'],alertRows(e),[2150,2800,5100,4650]));
+      children.push(para('DANH SÁCH CẶP CHUYẾN TRONG KHUNG ĐỈNH',{bold:true,color:'175477'}));
+      children.push(tab(['Cặp đến / đi','STA / STD','Vị trí / khu','Tàu','Thời lượng'],e.peak.items.map(x=>[flightId(x.f),clock(x.f.sta_min)+' / '+clock(x.f.std_min),x.f.bay==null?'CHỜ XÁC NHẬN':x.f.bay+' / '+area(x.f),x.f.aircraft_type||'Chưa rõ',serviceMinutes(x.f)+' phút']),[3380,2700,2920,2800,2900]));
     }
     children.push(hd('III. BẢNG TỔNG HỢP CẢNH BÁO CẢ NGÀY'));
     if(r.episodes.length)children.push(tab(['Đợt cao điểm','Mức','Nhóm','Hành động'],r.episodes.flatMap(e=>e.alerts.map(a=>[clock(e.from)+'–'+clock(e.to),a.level,a.kind,a.action])),[2750,2550,3150,6250]));
