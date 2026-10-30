@@ -34,6 +34,7 @@ jobs:
           node tests/v222-shuttle-layout.test.cjs
           node tests/v223-daily-brief.test.cjs
           node tests/v224-staff-ui.test.cjs
+          node tests/v225-role-permissions.test.cjs
       - name: Stage Manager On Duty
         run: |
           mkdir -p _site/assets
