@@ -1,0 +1,42 @@
+
+/* V2.0 – PVSĐ / PVHK / Kho Hàng as the only unit input screens */
+.v20-head{display:flex;justify-content:space-between;gap:12px;margin:4px 0 16px}
+.v20-head h2{font-size:22px;line-height:1.3;color:#143f5c;margin:0 0 4px}
+.v20-head p{color:#628095;font-size:13px;margin:0}
+.v20-column-grid{display:grid;grid-template-columns:1.12fr 1fr;gap:14px}
+.v20-panel{background:#fff;border:1px solid #dae7ee;border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:0 3px 15px #194b6410}
+.v20-panel h3{color:#153e58;font-size:16px;margin:0 0 9px}
+.v20-panel p{font-size:13px;line-height:1.5;color:#657e90;margin:0 0 12px}
+.v20-shifts{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.v20-shift{background:#f7fafc;border:1px solid #dbe7ed;border-radius:11px;padding:12px}
+.v20-shift-title{display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px;margin-bottom:9px;font-size:12px;color:#224d65}
+.v20-shift-title span{color:#6a879a}
+.v20-field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v20-incident-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.v20-field-row label,.v20-incident-grid label,.v20-transport-grid label{font-size:12px;font-weight:650;color:#45677a}
+.v20-field-row input,.v20-field-row select,.v20-incident-grid input,.v20-incident-grid select,.v20-transport-grid input{width:100%;font-size:14px;min-height:40px;margin-top:5px}
+.v20-incident-grid .v20-span-2{grid-column:span 2}
+.v20-panel button.primary{margin-top:11px}
+.v20-help,.v20-muted{font-size:12px;color:#71879a;margin-top:8px}
+.v20-list{display:grid;gap:7px;margin-top:12px}
+.v20-line{border:1px solid #dfeaf0;border-radius:9px;padding:10px 12px;background:#f8fbfd;display:flex;align-items:center;justify-content:space-between;gap:9px;font-size:12px}
+.v20-line b{color:#18445f}
+.v20-line button{white-space:nowrap;color:#246786;font-size:11px}
+.v20-transport-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.v20-transport-grid label{background:#f3f8fb;padding:11px;border-radius:10px;border:1px solid #d9e8f0}
+.v20-transport-grid small{display:block;font-size:10px;line-height:1.4;color:#648196;margin-top:5px}
+.v20-context-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:10px 0}
+.v20-context-grid>div{border:1px solid #d6e4ed;border-radius:12px;background:#f9fcff;padding:12px}
+.v20-context-grid b{font-size:12px;color:#174768}
+.v20-context-grid p{font-size:12px;color:#58798d;margin:6px 0 0;line-height:1.55}
+.v20-insight{font-size:13px;color:#165f7d;background:#edf7fa;border-left:3px solid #1596af;padding:10px;margin:10px 0}
+#v20GseMount .panel{margin-top:12px;box-shadow:none;border:0}
+#v20GseMount #gseTable{max-height:none}
+#tab-report>.panel{display:none!important}
+#tab-report #v19ReportModern{display:block!important}
+#tab-staff,#tab-gse,#tab-quick{display:none!important}
+.v20-locked{pointer-events:none}
+.v20-locked input,.v20-locked textarea,.v20-locked select,.v20-locked button{opacity:.6}
+@media(max-width:950px){.v20-column-grid{grid-template-columns:1fr}.v20-context-grid{grid-template-columns:1fr}.v20-transport-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.v20-incident-grid{grid-template-columns:1fr 1fr}.v20-shifts{grid-template-columns:1fr}.v20-head h2{font-size:18px}}
+@media(max-width:430px){.v20-incident-grid{grid-template-columns:1fr}.v20-field-row{grid-template-columns:1fr 1fr}.v20-transport-grid{grid-template-columns:1fr 1fr}}

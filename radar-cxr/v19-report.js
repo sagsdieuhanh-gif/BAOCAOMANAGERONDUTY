@@ -32,12 +32,18 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n]=await Promise.all([
+   const [s,n,cp,gi,bus]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
-    sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle()
+    sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
+    sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
+    sb.from('ops_gse_issues').select('*').eq('service_date',day),
+    sb.from('ops_shift_transport').select('*').eq('service_date',day)
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
+   if(cp.error)throw Error('Không tải được kế hoạch Kho Hàng: '+cp.error.message);
+   if(gi.error)throw Error('Không tải được danh sách xe hỏng: '+gi.error.message);
+   if(bus.error)throw Error('Không tải được xe giao ca: '+bus.error.message);
    const payload=s.data?.payload||null,arr=payload?.flights?.length?payload.flights:flights;
    if(!arr.length)throw Error('Chưa có lịch bay cho ngày '+dateVN(day)+'. Cần tải Excel trước khi xuất báo cáo.');
    if(!payload&&arr.some(x=>x.bay!=null))throw Error('Không có ảnh chụp lịch Lần 1; không dùng lịch có bãi để tái tạo Lần 1.');
@@ -50,7 +56,7 @@
    }
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
-    note:n.data||{},sourceFile:s.data?.source_filename||'',prior:prevTotals,controls};
+    note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],sourceFile:s.data?.source_filename||'',prior:prevTotals,controls};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -69,33 +75,71 @@
     '.\nPhòng PVHK: Đội đến ('+uStaff('PVHK','PVHK_ARRIVAL_TEAM')+'); Đội đi ('+uStaff('PVHK','PVHK_DEPARTURE_TEAM')+').';
    const notesGse=gse.filter(x=>x.note&&x.note.trim()).map(x=>(GSE_NAMES[x.code]||x.code)+': '+x.note).slice(0,7);
    const cargoKnown=c.rows.filter(x=>x.cargo_status==='CARGO').length,cargoUnknown=c.rows.filter(x=>!x.cargo_status||x.cargo_status==='UNKNOWN').length;
+
+   const plans=(c.cargoPlans||[]),activeIssues=(c.equipmentIssues||[]).filter(x=>x.issue_status!=='RETURNED');
+   const cargoKg=plans.reduce((n,x)=>n+(x.cargo_kg==null?0:Number(x.cargo_kg)),0);
+   const kgKnown=plans.filter(x=>x.cargo_kg!=null).length;
+   const cargoSlots=new Map();
+   for(const x of plans){
+     const f=c.rows.find(z=>z.departure===x.flight_no||z.arrival===x.flight_no);
+     if(!f)continue;
+     const minute=f.departure===x.flight_no?f.std_min:f.sta_min;
+     if(minute==null)continue;
+     const slot=Math.floor(minute/30)*30;
+     if(!cargoSlots.has(slot))cargoSlots.set(slot,[]);
+     cargoSlots.get(slot).push(x);
+   }
+   const heavyCargo=[...cargoSlots].filter(x=>x[1].length>=2)
+    .sort((a,b)=>b[1].length-a[1].length||a[0]-b[0]).slice(0,3);
+   const cargoRush=heavyCargo.map(x=>clock(x[0])+'–'+clock(x[0]+30)+': '+
+      x[1].map(y=>y.flight_no+(y.cargo_kg==null?'':' '+Number(y.cargo_kg).toLocaleString('vi-VN')+' KG')).join(', ')).join('; ');
+   const needConfirmed=plans.filter(x=>x.ready_by_min==null).length;
+   const issuesSummary=activeIssues.slice(0,5).map(x=>x.equipment_id+' ('+
+     (x.issue_status==='OUT_OF_SERVICE'?'tạm dừng':x.issue_status==='REPAIR'?'đang sửa':'hạn chế')+'): '+
+     x.fault+(x.impact?' – '+x.impact:'')+(x.expected_return?' – dự kiến '+x.expected_return:'')).join('; ');
+   const issueAlternatives=activeIssues.filter(x=>x.workaround).slice(0,3).map(x=>x.equipment_id+': '+x.workaround).join('; ');
+   const transportSummary=['KTS','PVHK','KHO'].map(u=>{const part=(c.transport||[]).filter(x=>x.unit===u);const last=part.map(x=>x.confirmed_at).sort().at(-1);return (u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG')+': '+(part.length?part.map(x=>({IN_1630:'về 16:30',IN_1845:'về 18:45',OUT_1730:'đi 17:30',OUT_1930:'đi 19:30'}[x.vehicle_slot]||x.vehicle_slot)+' '+x.quantity).join(', '):'chưa xác nhận')+(last?' (xác nhận '+new Date(last).toLocaleString('vi-VN')+')':'');}).join('; ');
+   const sourcePeak=p.length?clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+
+      p[0].items.map(z=>z.arrival||z.departure||'—').slice(0,7).join(', ')+')':'chưa xác định';
+   const shortF=short.slice(0,5).map(x=>x.arrival+'/'+x.departure).join(', ');
+
    const observations=[
-    'Dự kiến '+total+' lượt bay. '+(priorTotal!=null?'So ngày trước '+nsign(total-priorTotal)+' lượt. ':'Chưa có số liệu ngày trước để đối chiếu. ')+
-      (w.length?'Có '+w.length+' hồ sơ A330/B777: '+w.slice(0,7).map(x=>(x.arrival||'—')+'/'+(x.departure||'—')).join(', '):'Chưa xác định lượt A330/B777 từ dữ liệu hiện tại')+'.',
-    p.length?p.map(x=>clock(x.minute)+'–'+clock(x.minute+30)+': '+x.items.length+' cặp/chuyến').join('; ')+'.':'Chưa đủ lịch STA/STD để xác định khung cao điểm.',
-    'Lần 1 chưa có bãi đỗ. '+(c.note.aoc_note||'Chờ xác nhận vị trí đỗ sau cuộc họp AOC; chưa thể kết luận rủi ro theo khu vực bãi.'),
-    staffInfo,
-    notesGse.length?notesGse.join('; '):'Chưa có thông tin cụ thể về xe hỏng/xe tạm dừng. Có '+gse.filter(x=>x.ready_count==null).length+'/'+gse.length+' nhóm thiết bị chưa xác nhận khả dụng.',
-    'Có '+cargoKnown+' hồ sơ xác nhận có cargo; '+cargoUnknown+' hồ sơ chưa rõ cargo. Lịch bay không cung cấp KG hàng hóa: chờ dữ liệu từ đơn vị liên quan.',
-    short.length?'Các cặp ground-time theo lịch ≤35 phút: '+short.map(x=>x.arrival+'/'+x.departure+' ('+(x.std_min-x.sta_min)+' phút)').join('; ')+'. Cần theo dõi nguy cơ OTP.':'Chưa phát hiện cặp có ground-time theo lịch ≤35 phút trong dữ liệu hiện có; chưa kết luận OTP thực tế.',
-    c.note.weather_note||'Chưa có thông tin cảnh báo thời tiết, an ninh hoặc an toàn đã được xác nhận cho ngày dự báo.',
-    c.note.previous_issue||'Chưa có dữ liệu xác nhận về tồn tại của ca trước.'
+     'Dự kiến '+total+' lượt; '+(priorTotal==null?'chưa có số liệu ngày trước':nsign(total-priorTotal)+' lượt so ngày trước')+
+      '. '+(w.length?'Tàu A330/B777: '+w.slice(0,4).map(x=>x.arrival||x.departure).join(', ')+'.':'Chưa có tàu thân rộng được xác định.'),
+     'Khung tập trung: '+sourcePeak+'. '+(short.length?'Cặp quay đầu ngắn: '+shortF+'.':'Chưa có cặp ≤35 phút xác định.'),
+     'Lần 1 chưa có bãi; '+(c.note.aoc_note||'chờ AOC xác nhận vị trí đỗ, tuyến xe công vụ và cầu ống lồng.'),
+     staffInfo+' Xe giao ca: '+transportSummary+'.',
+     activeIssues.length?'Có '+activeIssues.length+' xe/thiết bị bị hạn chế: '+issuesSummary+'.':
+       'Chưa có thiết bị hư hỏng được PVSĐ khai báo; số xe khả dụng phải được PVSĐ xác nhận.',
+     plans.length?'Kho đã có kế hoạch '+plans.length+' chuyến; '+(kgKnown?cargoKg.toLocaleString('vi-VN')+' KG của '+kgKnown+' chuyến có số KG. ':'KG chưa xác nhận. ')+
+       (cargoRush?'Tập trung '+cargoRush+'.':'Chưa có ≥2 chuyến cargo cùng khung 30 phút.')+
+       (needConfirmed?' '+needConfirmed+' chuyến chưa có mốc hàng sẵn sàng.':''):
+       'Kho Hàng chưa nhập kế hoạch cargo theo chuyến; không thể xác định điểm nghẽn KG/giờ kéo hàng.',
+     short.length?'Ground-time theo lịch ≤35 phút: '+shortF+'. Tập trung kiểm soát OTP theo giờ đáp thực tế.':
+       'Chưa có cặp quay đầu ≤35 phút xác định; tiếp tục giám sát thay đổi STA/STD.',
+     c.note.weather_note||'Chưa có cảnh báo an ninh, an toàn hoặc thời tiết được xác minh; chờ thông tin TBĐH/AOC.',
+     c.note.previous_issue||'Chưa có tồn tại ca trước được xác nhận.'
    ];
    const actions=[
-    'Phòng ĐH: Phối hợp đảm bảo ground-time, rà soát biến động lịch và phục vụ tàu thân rộng; điều động theo giờ thực tế.',
-    'Phòng ĐH: Ưu tiên các mốc chồng lấn. KTSĐ kiểm tra GSE; PVHK bố trí đội đến/đi theo khung, chỉ chốt năng lực khi đã xác nhận.',
-    'Sau AOC cập nhật lịch có bãi (Dự báo Lần 2), kiểm tra tuyến đường công vụ, bãi ngoài và nhu cầu di chuyển thiết bị.',
-    'ĐH, KTSĐ và PVHK rà soát nhân sự thật; xác nhận bốc xếp, lái xe, SKYONE và hai đội PVHK theo ca/khung giờ.',
-    'KTSĐ xác nhận số thiết bị khả dụng, khả năng phục vụ tàu thân rộng, thiết bị hỏng và phương án thay thế; ĐH phối hợp ưu tiên chuyến.',
-    'ĐH và KTSĐ xác minh khối lượng hàng hóa; chủ động chuẩn bị kéo, chất xếp theo công đoạn, không tự giả định KG.',
-    'ĐH theo dõi giờ đáp thực tế, ưu tiên quay đầu ngắn và phối hợp khi mốc khai thác thay đổi.',
-    'TBĐH theo dõi cảnh báo đã xác nhận, thông báo kịp thời cho các đơn vị trong trường hợp điều kiện bất lợi hoặc divert.',
-    'Các đơn vị báo cáo kết quả khắc phục tồn tại nếu có; chưa xác minh thì ghi chờ xác nhận.'
+     'TBĐH: Đối chiếu biến động sản lượng, nhận diện tàu thân rộng và giao nhiệm vụ GSE đúng loại trước khung cao điểm.',
+     'TBĐH: Khoanh vùng '+sourcePeak+'; ưu tiên cặp quay đầu ngắn, phân ca PVSĐ/PVHK và thiết bị theo mốc phục vụ.',
+     'TBĐH: Sau AOC đối chiếu bãi ngoài và khu vực 38–42/56–71; chủ động tính tuyến xe và phương án điều chuyển trước Lần 2.',
+     'TBĐH: Đối chiếu PVSĐ/SKYONE và PVHK theo khung; chốt số người xe giao ca từng phòng trước cao điểm, bố trí hỗ trợ khi thiếu.',
+     activeIssues.length?'TBĐH: Căn cứ '+activeIssues.length+' thiết bị hạn chế, ưu tiên cấp xe cho chuyến chồng lấn/tàu thân rộng; '+
+       (issueAlternatives?'phương án thay thế: '+issueAlternatives+'.':'yêu cầu PVSĐ xác nhận xe thay thế và thời gian khắc phục.'):
+       'TBĐH: Yêu cầu PVSĐ chốt số xe khả dụng theo loại; sẵn phương án điều chuyển nếu cao điểm phát sinh thiếu.',
+     plans.length?'TBĐH: Chủ động báo Kho xác nhận giờ hàng sẵn sàng, phối hợp PVSĐ bố trí xe/nhân lực kéo hàng trước các chuyến '+
+       (heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+
+       '; không chờ gom đủ chuyến mới xử lý.':
+       'TBĐH: Yêu cầu Kho Hàng cung cấp KG/PCS và mốc sẵn sàng theo chuyến; sau đó xác định thứ tự ưu tiên kéo hàng và nhân sự PVSĐ.',
+     'TBĐH: Giám sát giờ đáp và Door Close; phối hợp xử lý ngay nguy cơ vượt ground-time, chỉ nhập lý do chậm khi đã xác minh.',
+     'TBĐH: Theo dõi bản tin đã xác minh, báo các đơn vị điều chỉnh phương án khi có mưa lớn/divert/sự cố an toàn.',
+     'TBĐH: Chốt các tồn tại được xác minh và giao đầu mối hoàn thành trước ca tiếp theo.'
    ];
    const topics=LABELS.map((label,i)=>{
      const override=c.controls.find(x=>x.topic===i+1)||{};
      return {title:String(i+1).padStart(2,'0')+'. '+label,
-       observation:known(override.observation)||observations[i],action:known(override.action)||actions[i]};
+       observation:(known(override.observation)||observations[i]).slice(0,420),action:(known(override.action)||actions[i]).slice(0,420)};
    });
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
@@ -140,23 +184,24 @@
      opts=opts||{};
      return new D.Paragraph({alignment:opts.center?D.AlignmentType.CENTER:D.AlignmentType.LEFT,
       spacing:{before:opts.before||0,after:opts.after??40},
-      children:String(s??'').split('\n').map((line,i)=>new D.TextRun({text:line,font:'Times New Roman',size:opts.size||20,bold:!!opts.bold,break:i?1:0}))});
+      children:String(s??'').split('\n').map((line,i)=>new D.TextRun({text:line,font:'Aptos',color:opts.color||'233B4B',size:opts.size||20,bold:!!opts.bold,break:i?1:0}))});
    }
    function c(s,head){
-     return new D.TableCell({borders:edges,shading:head?{fill:'E9EFF3'}:undefined,margin:{top:62,bottom:62,left:77,right:77},
-      children:[p(s,{bold:head,size:head?20:20,center:head})]});
+     return new D.TableCell({borders:edges,shading:head?{fill:'174865'}:undefined,margin:{top:62,bottom:62,left:77,right:77},
+      children:[p(s,{bold:head,size:head?19:19,center:head,color:head?'FFFFFF':'223746'})]});
    }
    function t(headers,rows,widths){
      return new D.Table({width:{size:10500,type:D.WidthType.DXA},columnWidths:widths,
       rows:[new D.TableRow({children:headers.map(x=>c(x,true))})]
        .concat(rows.map(row=>new D.TableRow({children:row.map(x=>c(x,false))})))});
    }
-   const hd=s=>p(s,{bold:true,size:24,before:160,after:65});
+   const hd=s=>new D.Paragraph({shading:{fill:'E7F2F7'},spacing:{before:175,after:90},border:{bottom:{style:D.BorderStyle.SINGLE,size:9,color:'1594B5'}},children:[new D.TextRun({text:s,font:'Aptos',bold:true,size:24,color:'154660'})]});
    return new D.Document({creator:'SAGS-CXR',title:'Dự báo khai thác hằng ngày - Lần 1',
-    styles:{default:{document:{run:{font:'Times New Roman',size:20}}}},
+    styles:{default:{document:{run:{font:'Aptos',size:20}}}},
     sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:600,bottom:600,left:600,right:600}}},
      children:[
-       p('DỰ BÁO KHAI THÁC HẰNG NGÀY',{bold:true,center:true,size:28,after:170}),
+       p('SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH',{bold:true,center:true,color:'167398',size:18,after:90}),
+       p('DỰ BÁO KHAI THÁC HẰNG NGÀY · LẦN 1',{bold:true,center:true,color:'15435F',size:28,after:140}),
        p('Ngày khai thác: '+dateVN(data.c.date),{size:22}),
        p('Người lập báo cáo: '+data.c.author,{size:22}),
        hd('I. TÓM TẮT KHAI THÁC'),

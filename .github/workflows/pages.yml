@@ -38,6 +38,7 @@ jobs:
           node --check radar-cxr/sags-auto.js
           node --check radar-cxr/v19-report.js
           node --check radar-cxr/v19-ui.js
+          node --check radar-cxr/v20-departments.js
           node radar-cxr/tests/v19-report.test.cjs
           node radar-cxr/tests/sags-schedule.test.cjs
           node radar-cxr/tests/excel-import.test.cjs

@@ -64,3 +64,17 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - **Ghi chú ngoại lệ**: Bên ĐH có 5 ô tùy chọn về AOC, thời tiết, tồn tại ca trước, kiến nghị và ghi chú điều hành; chỉ nhập khi có phát sinh. Lưu trong bảng Supabase ops_report_notes theo ngày.
 - **HDSD**: Đăng nhập RNS được cấp quyền → tải Excel nếu chưa có lịch → chọn ngày → bấm XUẤT DỰ BÁO LẦN 1 ở Tổng quan; tài khoản KTSĐ/PVHK chỉ cập nhật phần mình.
 - **Kiểm thử**: Kiểm tra cú pháp JS qua GitHub Actions; cần kiểm thử tải DOCX và ghi dữ liệu bằng tài khoản thực tế trước khi nghiệm thu vận hành chính thức.
+
+## V2.0 – 3 phòng ban, một nơi nhập số liệu, XE GIAO CA trong từng tab
+
+**Với tài khoản RNS đã được ADMIN cấp quyền Radar:**
+- PVSĐ (mã quyền nội bộ KTS): chỉ mở tab **PVSĐ**, gồm bốc xếp công ty/lái xe GSE theo hai ca 08:15–18:15 và 18:15–08:15, SKYONE theo khung giờ, nhật ký xe hỏng/đang sửa/phục hồi/ảnh hưởng/xe thay thế và khu vực GSE khả dụng (nâng cao).
+- PVHK: chỉ mở tab **PVHK**, gồm đội PVHK ĐẾN/đội PVHK ĐI theo hai ca và khung ngoài ca; không phải nhập lần hai ở tab Nhân sự cũ.
+- KHO HÀNG: chỉ mở tab **KHO HÀNG**, có kế hoạch theo chuyến (KG, PCS, giờ kho sẵn sàng, ghi chú) và **dán nhanh nhiều chuyến**. Dữ liệu không có không được tự tạo.
+- **Xe giao ca** đặt ngay trong mỗi tab PVSĐ, PVHK, KHO HÀNG, KHÔNG có tab XE riêng. 4 mốc chuẩn dùng để tổng hợp: xe về **16:30 / 18:45**, xe đi **17:30 / 19:30**. Mỗi phòng chỉ nhập người thuộc phòng mình. Dữ liệu xe được lưu riêng, kèm tài khoản xác nhận và ngày/giờ xác nhận; TAB ĐH/Radar/Báo cáo chỉ xem số cộng và trạng thái các phòng.
+- **Thời điểm xác nhận quân số** theo ca cũng được hiển thị từ confirmed_at của dữ liệu nghiệp vụ, không dùng giờ người dùng tự nhập.
+- Phòng Điều hành chỉ nhập Excel dự báo, ghi chú ngoại lệ và phát hành bản tin; không sửa dữ liệu PVSĐ/PVHK/Kho Hàng. ADMIN được quản lý toàn bộ đơn vị.
+- **Radar và Báo cáo**: tất cả các vai trò đã được cấp quyền (PVSĐ/PVHK/KHO/ĐH/VIEWER) đều đọc được, không sửa thông tin nghiệp vụ đơn vị khác. Quyền này do RLS Supabase áp dụng đối với nhân sự, GSE, cargo, thiết bị và xe giao ca; ẩn tab UI chỉ là lớp hỗ trợ.
+- **Nhận định TBĐH**: 9 mục ngắn, tập trung dữ liệu thật: nhóm chuyến/khoảng 30 phút chồng lấn, cặp ground-time ngắn, cargo theo STD/giờ sẵn sàng, số KG kế hoạch xác nhận, thiết bị hư hỏng ảnh hưởng nào, phương án xe thay thế/điều phối, quân số và xe giao ca. Không tự kết luận khối lượng, số xe sẵn sàng, mức độ đủ người khi thiếu dữ liệu. Cảnh báo thiếu thông tin phải ghi "CHƯA XÁC NHẬN".
+- **Bản Word Lần 1** vẫn xuất một chạm, đủ 5 phần của mẫu, bảng rõ ràng, tông xanh hàng không, tiêu đề chuyên nghiệp. Link Radar trực tuyến ở cuối Word; biểu đồ chi tiết không nhét vào văn bản.
+- Các tab dài kiểu NHÂN SỰ, GSE, CÔNG CỤ CHI TIẾT vẫn có cấu trúc kỹ thuật để không làm hỏng chương trình cũ nhưng không còn trong menu nghiệp vụ; bảng GSE khả dụng được chuyển vào mục nâng cao của tab PVSĐ.
