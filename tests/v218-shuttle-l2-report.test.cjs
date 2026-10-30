@@ -39,7 +39,7 @@ const src=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(src.includes("['DH','PVHK','KTS','QA_IT']"));
 assert.ok(!src.includes("['DH','KTS','PVHK','KHO','QA_IT']"));
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes('v218ReportStatus')&&index.includes('V2.19'));
+assert.ok(index.includes('v218ReportStatus')&&index.includes('V2.20'));
 assert.ok(index.includes('v21-shuttle-model.js?v=2.18'));
 const output=fs.readFileSync('v21-shuttle-export.js','utf8');
 assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complete?C.navy'));
