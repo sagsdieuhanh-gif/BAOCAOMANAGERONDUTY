@@ -13,11 +13,26 @@
  const shown=x=>x==null?'chưa xác nhận':x+' người';
  const uStaff=(u,role)=>'Sáng '+shown(byRole(u,role,'SÁNG'))+', Đêm '+shown(byRole(u,role,'ĐÊM'));
  const wide=rs=>rs.filter(x=>/A\s?330|B\s?777/i.test(x.aircraft_type||''));
- const lowGround=rs=>rs.filter(x=>x.arrival&&x.departure&&x.sta_min!=null&&x.std_min!=null&&x.std_min-x.sta_min>=0&&x.std_min-x.sta_min<=35)
-   .sort((a,b)=>(a.std_min-a.sta_min)-(b.std_min-b.sta_min)).slice(0,12);
+ const KOREAN_CARRIERS=['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'];
+ const FAST_CARRIERS=['VJ','9G','VU','AK','FD'];
+ const flightCarrier=f=>(f.airline||String(f.arrival||f.departure||'').match(/^[A-Z0-9]+?(?=\\d)/)?.[0]||'').toUpperCase();
+ const groundMinutes=f=>{
+   if(!Number.isFinite(f.sta_min)||!Number.isFinite(f.std_min))return null;
+   const duration=f.std_min<f.sta_min?f.std_min+1440-f.sta_min:f.std_min-f.sta_min;
+   return duration>=0&&duration<=1440?duration:null;
+ };
+ const serviceBenchmark=f=>FAST_CARRIERS.includes(flightCarrier(f))?30:KOREAN_CARRIERS.includes(flightCarrier(f))?60:null;
+ // Ngắn/sát: chuẩn 30/60 phút + 5 phút dự phòng; hãng khác chỉ cảnh báo khi ground-time <=35 phút.
+ // Đây là tín hiệu ưu tiên kiểm tra, không phải kết luận chuyến không thể phục vụ hoặc GSE sẽ rảnh tại STD.
+ const isTightGround=f=>{
+   const g=groundMinutes(f),standard=serviceBenchmark(f);
+   return !!(f.arrival&&f.departure&&g!=null&&g>0&&g<=(standard==null?35:standard+5));
+ };
+ const lowGround=rs=>rs.filter(isTightGround)
+   .sort((a,b)=>groundMinutes(a)-groundMinutes(b)).slice(0,12);
  function services(f,s){
-   const a=f.sta_min,b=f.std_min,carrier=(f.airline||String(f.arrival||f.departure||'').slice(0,2)).toUpperCase();
-   let n=['VJ','9G','VU','AK','FD'].includes(carrier)?30:['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(carrier)?60:a!=null&&b!=null?Math.max(0,b-a):0;
+   const a=f.sta_min,b=f.std_min,carrier=flightCarrier(f);
+   let n=FAST_CARRIERS.includes(carrier)?30:KOREAN_CARRIERS.includes(carrier)?60:a!=null&&b!=null?Math.max(0,b-a):0;
    if(!n)return false;
    const start=a!=null?a:b!=null?b-n:null;
    const end=start!=null?(b!=null?Math.min(b,start+n):start+n):null;
@@ -116,11 +131,22 @@
       const sourcePeak=p.length?clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+
       p[0].items.map(z=>z.arrival||z.departure||'—').slice(0,7).join(', ')+')':'chưa xác định';
    const shortF=short.slice(0,5).map(x=>x.arrival+'/'+x.departure).join(', ');
+   const nightWindows=Array.from({length:12},(_,i)=>{
+     const minute=1080+i*30;
+     return {minute,items:c.rows.filter(f=>services(f,minute))};
+   }).filter(x=>x.items.length>=4);
+   const priorityNight=nightWindows.filter(x=>x.items.some(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f))))
+     .sort((a,b)=>b.items.length-a.items.length||a.minute-b.minute)[0];
+   const priorityNightFlights=priorityNight?.items.filter(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))||[];
+   const priorityNightList=priorityNightFlights.slice(0,5).map(f=>(f.arrival||'—')+'/'+(f.departure||'—')).join(', ');
+   const nightGuidance=priorityNight?
+     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' (AK/FD/Hàn Quốc theo lịch); tập trung xử lý từng chuyến rồi chuyển nguồn lực khi hoàn tất.':
+     '';
 
    const observations=[
      'Dự kiến '+total+' lượt; '+(priorTotal==null?'chưa có số liệu ngày trước':nsign(total-priorTotal)+' lượt so ngày trước')+
       '. '+(w.length?'Tàu A330/B777: '+w.slice(0,4).map(x=>x.arrival||x.departure).join(', ')+'.':'Chưa có tàu thân rộng được xác định.'),
-     'Khung tập trung: '+sourcePeak+'. '+(short.length?'Cặp quay đầu ngắn: '+shortF+'.':'Chưa có cặp ≤35 phút xác định.'),
+     'Khung tập trung: '+sourcePeak+'. '+(short.length?'Cặp ground-time ngắn/sát thời lượng quy ước: '+shortF+'.':'Chưa xác định cặp ground-time ngắn theo tiêu chí dự báo.')+(priorityNight?' Cao điểm tối cần ưu tiên '+priorityNightList+' lúc '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+'.':''),
      'Lần 1 chưa có bãi; '+(c.note.aoc_note||'chờ AOC xác nhận vị trí đỗ, tuyến xe công vụ và cầu ống lồng.'),
      staffInfo+' Xe giao ca: '+transportSummary+'.',
      activeIssues.length?'Có '+activeIssues.length+' xe/thiết bị bị hạn chế: '+issuesSummary+'.':
@@ -129,38 +155,40 @@
        (cargoRush?'Tập trung '+cargoRush+'.':'Chưa có ≥2 chuyến cargo cùng khung 30 phút.')+
        (needConfirmed?' '+needConfirmed+' chuyến chưa có mốc hàng sẵn sàng.':''):
        'Kho Hàng chưa nhập kế hoạch cargo theo chuyến; không thể xác định điểm nghẽn KG/giờ kéo hàng.',
-     short.length?'Ground-time theo lịch ≤35 phút: '+shortF+'. Tập trung kiểm soát OTP theo giờ đáp thực tế.':
-       'Chưa có cặp quay đầu ≤35 phút xác định; tiếp tục giám sát thay đổi STA/STD.',
+     short.length?'Các cặp có ground-time ngắn/sát thời lượng phục vụ quy ước: '+shortF+'. Cần theo dõi giờ đến thực tế và mức hoàn tất công đoạn; không suy ra GSE rảnh tại STD.':
+       'Chưa xác định cặp có ground-time ngắn theo tiêu chí dự báo; tiếp tục cập nhật giờ đến/đi.',
      c.note.weather_note||'Chưa có cảnh báo an ninh, an toàn hoặc thời tiết được xác minh; chờ thông tin TBĐH/AOC.',
      c.note.previous_issue||'Chưa có tồn tại ca trước được xác nhận.'
    ];
    const actions=[
-     'TBĐH: Đối chiếu biến động sản lượng, nhận diện tàu thân rộng và giao nhiệm vụ GSE đúng loại trước khung cao điểm.',
-     'TBĐH: Khoanh vùng '+sourcePeak+'; ưu tiên cặp quay đầu ngắn, phân ca PVSĐ/PVHK và thiết bị theo mốc phục vụ.',
-     'TBĐH: Sau AOC đối chiếu bãi ngoài và khu vực 38–42/56–71; chủ động tính tuyến xe và phương án điều chuyển trước Lần 2.',
-     'TBĐH: Đối chiếu PVSĐ/SKYONE và PVHK theo khung; chốt số người xe giao ca từng phòng trước cao điểm, bố trí hỗ trợ khi thiếu.',
-     activeIssues.length?'TBĐH: Căn cứ '+activeIssues.length+' thiết bị hạn chế, ưu tiên cấp xe cho chuyến chồng lấn/tàu thân rộng; '+
-       (issueAlternatives?'phương án thay thế: '+issueAlternatives+'.':'yêu cầu PVSĐ xác nhận xe thay thế và thời gian khắc phục.'):
-       'TBĐH: Yêu cầu PVSĐ chốt số xe khả dụng theo loại; sẵn phương án điều chuyển nếu cao điểm phát sinh thiếu.',
-     plans.length?'TBĐH: Chủ động báo Kho xác nhận giờ hàng sẵn sàng, phối hợp PVSĐ bố trí xe/nhân lực kéo hàng trước các chuyến '+
-       (heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+
-       '; không chờ gom đủ chuyến mới xử lý.':
-       'TBĐH: Yêu cầu Kho Hàng cung cấp KG/PCS và mốc sẵn sàng theo chuyến; sau đó xác định thứ tự ưu tiên kéo hàng và nhân sự PVSĐ.',
-     'TBĐH: Giám sát giờ đáp và Door Close; phối hợp xử lý ngay nguy cơ vượt ground-time, chỉ nhập lý do chậm khi đã xác minh.',
-     'TBĐH: Theo dõi bản tin đã xác minh, báo các đơn vị điều chỉnh phương án khi có mưa lớn/divert/sự cố an toàn.',
-     'TBĐH: Chốt các tồn tại được xác minh và giao đầu mối hoàn thành trước ca tiếp theo.'
+     'ĐH xác định các mốc phục vụ chồng lấn theo STA/STD; PVSĐ chuẩn bị GSE phù hợp loại tàu, PVHK chuẩn bị lực lượng đón khách/boarding theo giờ; điều chỉnh thứ tự ưu tiên khi lịch thay đổi.',
+     'ĐH khoanh vùng '+sourcePeak+' và chốt thứ tự ưu tiên theo STD; PVSĐ tập trung bốc xếp, lái xe và GSE hoàn thành dứt điểm từng tàu, xác nhận công đoạn xong mới điều chuyển cuốn chiếu sang chuyến kế tiếp; PVHK phối hợp đón khách, cửa ra tàu và boarding.'+nightGuidance,
+     'ĐH đối chiếu vị trí sau AOC, ưu tiên theo dõi cụm bãi 38–42, 56–71 nếu có; PVSĐ tính trước tuyến điều chuyển thiết bị giữa các chuyến, tránh dồn xe vào khu vực đường công vụ có khả năng phải dừng chờ; PVHK chủ động vị trí đón/boarding.',
+     'ĐH cân đối quân số PVSĐ/PVHK theo khung giờ chồng lấn; PVSĐ tổ chức nhóm bốc xếp và lái GSE phục vụ lần lượt từng chuyến, chỉ chuyển nhóm sau khi kết thúc công đoạn; PVHK ưu tiên đội đến, gate và boarding cho chuyến có giờ quay đầu sát.'+(priorityNight?' Chú ý tăng cường phối hợp ca tối với AK/FD/Hàn Quốc.':''),
+     activeIssues.length?
+       'PVSĐ xác nhận xe còn khả dụng, phương tiện thay thế và GSE phù hợp tàu trước cao điểm; ĐH ưu tiên cấp cho chuyến sát giờ quay đầu, điều chuyển cuốn chiếu khi thiết bị được xác nhận có thể rời tàu.'+(issueAlternatives?' Phương án dự phòng đã khai báo: '+issueAlternatives+'.':''):
+       'PVSĐ kiểm tra số xe và chủng loại GSE thực sự khả dụng trước cao điểm; ĐH ưu tiên thiết bị cho cặp quay đầu sát giờ, điều chuyển sau khi xác nhận hoàn tất công đoạn, không lấy STD làm mốc xe rảnh.',
+     plans.length?
+       'Kho Hàng chủ động chuẩn bị, bàn giao hàng theo thứ tự STD, ưu tiên '+(heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+'; PVSĐ bố trí lái xe/thiết bị nhận và kéo hàng nối tiếp, tránh tập trung nhiều chuyến cùng lúc; ĐH theo dõi mốc hàng sẵn sàng.':
+       'Kho Hàng cập nhật kế hoạch hàng và giờ sẵn sàng từng chuyến; PVSĐ chuẩn bị lái xe/xe kéo để nhận hàng theo thứ tự ưu tiên; ĐH theo dõi, điều chỉnh trình tự khi các chuyến chồng lấn.',
+     'ĐH theo dõi giờ đáp, tiến độ quay đầu và Door Close; PVSĐ/PVHK tập trung hoàn thành từng công đoạn chuyến có ground-time sát, báo ngay nguy cơ kéo dài để ĐH điều chỉnh trình tự phục vụ chuyến tiếp theo. Chỉ ghi nhận nguyên nhân đã xác minh.',
+     'ĐH nhận thông tin thời tiết/an toàn chính thức, xác định các khung có thể ảnh hưởng và thông báo điều chỉnh; PVSĐ kiểm soát GSE, tuyến di chuyển an toàn; PVHK chủ động phương án đón/boarding khi điều kiện khai thác thay đổi.',
+     'ĐH rà soát tồn tại đã xác nhận từ ca trước, ưu tiên việc ảnh hưởng trực tiếp đến chuyến cao điểm; PVSĐ/PVHK/Kho Hàng xác nhận phần việc liên quan và phương án thay thế trước khi tiếp nhận chuyến.'
    ];
    const topics=LABELS.map((label,i)=>{
      const override=c.controls.find(x=>x.topic===i+1)||{};
      return {title:String(i+1).padStart(2,'0')+'. '+label,
-       observation:(known(override.observation)||observations[i]).slice(0,420),action:(known(override.action)||actions[i]).slice(0,420)};
+       observation:(known(override.observation)||observations[i]).slice(0,420),action:(known(override.action)||actions[i]).slice(0,620)};
    });
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
      slot:clock(x.minute)+' – '+clock(x.minute+30),
      flight:x.items.map(y=>(y.arrival||'—')+'/'+(y.departure||'—')).join(', '),
      risk:x.items.length+' cặp/chuyến đang phục vụ quy ước; kiểm tra chồng lấn '+(x.items.some(y=>/330|777/i.test(y.aircraft_type||''))?'và tàu thân rộng.':'.'),
-     action:'TBĐH rà soát; KTSĐ kiểm tra GSE/nhân lực; PVHK xác nhận đội đến/đi.'
+     action:'ĐH chốt thứ tự theo STD; PVSĐ tập trung bốc xếp/GSE hoàn tất từng tàu rồi điều chuyển cuốn chiếu khi đủ điều kiện; PVHK ưu tiên đón khách, gate/boarding theo tiến độ.'+
+       (x.items.some(isTightGround)?' Chú ý chuyến ground-time ngắn/sát.':'')+
+       (x.minute>=1080&&x.items.some(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))?
+         ' Ưu tiên AK/FD/Hàn Quốc có trong khung tối.':'')
    }));
    if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Thiếu giờ lịch bay.',action:'Kiểm tra lại Excel nguồn.'});
    const coord=[
