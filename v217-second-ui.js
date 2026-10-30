@@ -48,9 +48,9 @@
      '<h4>3. Khung tối – gate, bãi đỗ và booking</h4>'+
      (night.length?table(['Chuyến','STD','Tàu','Bãi','Gate','Booking'],night):'<p>Không có chuyến đi từ 18:00 theo file.</p>')+
      '<h4>4. Kiểm tra khả năng dồn gate / thay đổi so Lần 1</h4>'+
-     (analysis.gateCheck.length?table(['Gate','Chuyến 1','Chuyến 2','Chênh STD (phút)'],
-       analysis.gateCheck.slice(0,20).map(x=>[x.gate,x.a,x.b,x.minutes]))+
-       '<p>Đây là các chuyến gần giờ cùng gate, chưa đủ căn cứ kết luận trùng boarding khi thiếu BDG Start/Finish.</p>':
+     (analysis.gateCheck.length?table(['Gate','Chuyến 1','Chuyến 2','Chênh STD (phút)','Nhận định'],
+       analysis.gateCheck.slice(0,20).map(x=>[x.gate,x.a,x.b,x.minutes,x.kind]))+
+       '<p>Hệ thống sử dụng BDG Start/Finish khi có dữ liệu; trường hợp chưa đủ mốc boarding chỉ nhắc kiểm tra các chuyến gần giờ, không tự kết luận trùng gate.</p>':
        '<p>Chưa thấy các chuyến đi cách nhau tối đa 45 phút cùng gate đã xác nhận.</p>')+
      (diff.length?table(['Chuyến','Loại thay đổi','Cũ','Mới'],diff.slice(0,30).map(x=>[x.flight,x.type,x.from,x.to])):'<p>Chưa có thay đổi xác định được từ các trường đã đối chiếu.</p>')+
      '<p><b>Nguyên tắc:</b> Booking được giữ nguyên dạng nguồn (vd. 0/10/365); tổng ba thành phần không được coi là PAX thực đi. Bãi khu 2/3 cần kiểm tra đường xe, thiết bị; không tự suy ra xe sẵn sàng tại STD.</p>'+
