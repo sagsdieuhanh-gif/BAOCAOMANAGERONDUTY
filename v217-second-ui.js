@@ -21,14 +21,15 @@
  function render(parsed,base,filename){
    const {stats,payload,issues,fatal}=parsed,analysis=core.analyze(payload),diff=base?core.compare(payload,base.payload):[];
    const missing=!base?.payload?.flights?.length;
+   const blockers=core.validateForSave(parsed,base);
    const id=parsed.meta.service_date;
    const wide=analysis.wide.slice(0,12).map(x=>[x.no,core.clock(x.t),x.type,fmt(x.bay),fmt(x.gate),
      x.booking||'CHỜ XÁC NHẬN','PVSĐ chuẩn bị thiết bị tàu thân rộng; PVHK chủ động theo booking đã xác nhận']);
    const ferry=analysis.ferry.map(x=>[x.no,core.clock(x.t),x.ssr||'—',x.flight_type||'—',
      'Xác minh FERRY và nhu cầu phục vụ thực tế; không mặc định boarding như chuyến chở khách']);
    const night=analysis.night.slice(0,15).map(x=>[x.no,core.clock(x.t),x.type,fmt(x.bay),fmt(x.gate),fmt(x.booking)]);
-   const incidents=[...fatal.map(v=>'CẦN SỬA FILE: '+v),...issues,...(!base?.payload?.flights?.length?['Chưa có Lần 1 đã lưu cùng ngày; không phát hành Lần 2 khi chưa có mốc so sánh.']:[])];
-   const isReady=!fatal.length&&!missing;
+   const incidents=[...blockers.map(v=>'KHÔNG THỂ LƯU: '+v),...issues];
+   const isReady=blockers.length===0;
    $('exMapping')?.classList.add('hidden');
    $('forecastRevision').value='2';
    $('forecastSourceName').value=filename;
@@ -55,7 +56,7 @@
      (diff.length?table(['Chuyến','Loại thay đổi','Cũ','Mới'],diff.slice(0,30).map(x=>[x.flight,x.type,x.from,x.to])):'<p>Chưa có thay đổi xác định được từ các trường đã đối chiếu.</p>')+
      '<p><b>Nguyên tắc:</b> Booking được giữ nguyên dạng nguồn (vd. 0/10/365); tổng ba thành phần không được coi là PAX thực đi. Bãi khu 2/3 cần kiểm tra đường xe, thiết bị; không tự suy ra xe sẵn sàng tại STD.</p>'+
      '<div class="btnbar"><button type="button" class="primary" id="v218PreviewL2">XEM TRƯỚC BÁO CÁO LẦN 2 (CHƯA LƯU)</button><button class="primary" id="v217Approve" '+(isReady?'':'disabled')+'>DUYỆT VÀ LƯU LẦN 2</button>'+
-     '<span id="v217State">'+(isReady?'Dữ liệu chờ Điều hành xác nhận, chưa ghi vào Supabase.':'Phải xử lý các nội dung CẦN SỬA FILE / thiếu Lần 1 trước khi lưu.')+'</span></div><div id="v218DraftPreview"></div></div>';
+     '<span id="v217State">'+(isReady?'Đã đủ điều kiện kỹ thuật; ĐH kiểm tra và xác nhận lưu.':'Có '+blockers.length+' điều kiện chặn lưu; xem chi tiết phía trên.')+'</span></div><div id="v218DraftPreview"></div></div>';
    const draft=$('v218PreviewL2');if(draft)draft.onclick=async()=>{
      if(!staged?.parsed)return;
      const panel=$('v218DraftPreview');
@@ -82,7 +83,8 @@
    if(!staged||busy)return;
    if(!canEdit(['DH','ADMIN']))return alert('Chỉ ĐH/ADMIN được phát hành Lần 2.');
    const {parsed,hash,filename,baseline}=staged;
-   if(parsed.fatal.length||!baseline?.payload?.flights?.length)return alert('Chưa đủ điều kiện phát hành Lần 2.');
+   const blockers=core.validateForSave(parsed,baseline);
+   if(blockers.length)return alert('Chưa đủ điều kiện lưu Lần 2:\n- '+blockers.slice(0,8).join('\n- '));
    if($('day')?.value!==parsed.meta.service_date)return alert('Ngày đang chọn khác ngày của file; vui lòng đọc lại Excel.');
    if(!confirm('Xác nhận lưu LẦN 2 cho '+parsed.meta.service_date+'? Bản Lần 1 được giữ nguyên; lịch hiện hành sẽ nhận dữ liệu mới đã đối chiếu.'))return;
    const b=$('v217Approve'),state=$('v217State');busy=true;if(b)b.disabled=true;
@@ -93,8 +95,24 @@
        p_date:parsed.meta.service_date,p_revision:2,p_filename:filename,
        p_sheet:'ARRIVAL+DEPARTURE',p_hash:hash,p_payload:p
      });
-     if(error)throw Error(error.message);
-     if(state)state.textContent='ĐÃ LƯU LẦN 2 · '+String(data?.status||'IMPORTED')+'. Đang cập nhật Radar và báo cáo.';
+     if(error){
+       const errors={
+         SECOND_FORECAST_NEEDS_STANDS:'Lần 2 chưa có vị trí đỗ; kiểm tra cột ParkingBay.',
+         SECOND_FORECAST_NEEDS_FIRST_FORECAST:'Chưa có lịch bay Lần 1 được lưu cùng ngày.',
+         INVALID_FLIGHT_ROW:'Có chuyến ghi sai giờ, số hiệu hoặc thứ tự STA/STD. Kiểm tra các chuyến đi qua ngày (+1).',
+         COUNT_MISMATCH:'Số chuyến đến/đi không khớp tổng chuyến đã ghép.',
+         DUPLICATE_FLIGHT:'Có số hiệu chuyến bay trùng trong lịch.',
+         NOT_AUTHORIZED:'Tài khoản này không có quyền nhập lịch; chỉ ĐH/ADMIN được thực hiện.',
+         ALREADY_IMPORTED:'File này đã có trong lịch sử nhập.'
+       };
+       throw Error(errors[error.message]||error.message);
+     }
+     const saved=await sb.from('ops_forecast_snapshots').select('payload,source_filename')
+       .eq('service_date',parsed.meta.service_date).eq('revision',2).maybeSingle();
+     if(saved.error||!saved.data?.payload?.flights?.length)throw Error(
+       'Máy chủ chưa xác nhận đã có bản Lần 2 để xuất báo cáo. '+(saved.error?.message||'Vui lòng kiểm tra dữ liệu đã duyệt.'));
+     if(state)state.textContent='ĐÃ LƯU LẦN 2 · '+String(data?.status||'IMPORTED')+
+       '. Đã xác nhận bản Lần 2 trên máy chủ; có thể xuất báo cáo.';
      if(typeof load==='function')await load();
      if(typeof renderRadar==='function')renderRadar();
      window.SagsReportV19?.preview?.();
