@@ -220,6 +220,18 @@
        alert('Vui lòng nhập đầy đủ tổng quân số và chọn tình trạng phục vụ của cả ca sáng và ca đêm trước khi XÁC NHẬN. Có thể LƯU NHÁP nếu chưa đủ thông tin.');return;
      }
    }
+   if(confirm&&['DH','PVHK','KTS'].includes(key)){
+     for(const code of ['morning','night']){
+       const current=root.SagsPersonnelV212.parseCount(data['pvb_'+code]),
+             required=root.SagsPersonnelV212.parseCount(data['pvb_'+code+'_required']);
+       if(data['pvb_'+code+'_status']==='READY'&&required!=null&&current<required){
+         alert('Ca '+(code==='morning'?'sáng':'đêm')+': có '+current+
+           ' người, cần '+required+' người (thiếu '+(required-current)+
+           '). Vui lòng chọn CHƯA ĐỦ NHÂN SỰ hoặc kiểm tra lại định mức trước khi xác nhận.');
+         return;
+       }
+     }
+   }
    const values=Object.entries(data).filter(([k,v])=>v&&v!=='PENDING');
    if(!values.length)return alert('Cần nhập ít nhất một thông tin có căn cứ trước khi lưu.');
    const existing=rows.find(x=>x.unit===key);
