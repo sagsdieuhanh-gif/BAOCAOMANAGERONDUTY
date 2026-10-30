@@ -73,7 +73,7 @@
      item('2','Radar tự động theo khung 30 phút','Trực quan chuyến chồng lấn, tàu thân rộng, nguồn lực','MỞ RADAR','radar')+
      item('3','Bản tin Lần 1 theo mẫu Word','Đủ 5 phần: tóm tắt, kiểm soát, cao điểm, phối hợp, kiến nghị','XEM MẪU','report')+
      item('4','Lịch có bãi sau AOC – DỰ BÁO LẦN 2',two?'Đã có bản Lần 2':'Cập nhật sau 21h; giữ bản Lần 1 để đối chiếu','LỊCH CẬP NHẬT','sources')+
-    '</div><div class="v19-buttons"><button class="v19-primary" data-v19-export>XUẤT BÁO CÁO WORD · RADAR (.DOCX)</button>'+
+    '</div><div class="v19-buttons"><button class="v19-primary" data-v19-export>XUẤT WORD BẢN TIN V2.7 (.DOCX)</button>'+
     '<button class="v19-inline-btn" data-v19-go="report">XEM TRƯỚC BẢN TIN</button></div>'+
     '<div class="v19-small" id="v19ExportMessage">Thông tin chưa xác nhận sẽ ghi rõ là chờ xác nhận trong Word.</div></section>'+
     '<section class="v19-section"><h3>THÔNG TIN TỪ CÁC ĐƠN VỊ</h3>'+
@@ -154,7 +154,7 @@
      b.classList.toggle('v19-tab-off',!visible.includes(b.dataset.tab));
    });
    const labels={home:'TỔNG QUAN',sources:'LỊCH BAY / EXCEL',radar:'RADAR 30 PHÚT',
-    staff:'NHÂN SỰ',gse:'THIẾT BỊ GSE',doorclose:'DOOR CLOSE',report:'BÁO CÁO TGĐ',
+    staff:'NHÂN SỰ',gse:'THIẾT BỊ GSE',doorclose:'DOOR CLOSE',report:'BÁO CÁO TGĐ', 'radar-report':'BÁO CÁO RADAR', 'shuttle-report':'XE GIAO CA',
     quick:'CÔNG CỤ CHI TIẾT',admin:'PHÂN QUYỀN'};
    document.querySelectorAll('#tabs [data-tab]').forEach(b=>{if(labels[b.dataset.tab])b.textContent=labels[b.dataset.tab]});
    const notes=document.getElementById('v19NoteEditor');
@@ -166,12 +166,13 @@
      await window.SagsMissingV27?.refresh();
      try{await window.SagsReportV19?.loadNotes();}catch(e){const hint=$('v19NotesHint');if(hint)hint.textContent=e.message;}
      await window.SagsReportV19?.preview();
-     await window.SagsShuttleExport?.renderPreview();
    }
+   if(tab==='radar-report'&&me)await window.SagsRadarReportV28?.preview();
+   if(tab==='shuttle-report'&&me)await window.SagsShuttleExport?.renderPreview();
  }
  function attach(){
    const btn=$('v19ReportExport');if(btn)btn.onclick=()=>window.SagsReportV19?.exportOne();
-   const prev=$('v19ReportRefresh');if(prev)prev.onclick=()=>{window.SagsMissingV27?.refresh();window.SagsReportV19?.preview();window.SagsShuttleExport?.renderPreview();};
+   const prev=$('v19ReportRefresh');if(prev)prev.onclick=()=>{window.SagsMissingV27?.refresh();window.SagsReportV19?.preview();};
    const save=$('v19SaveNotes');if(save)save.onclick=async()=>{
      try{await window.SagsReportV19?.saveNotes();}catch(e){alert(e.message)}
    };
