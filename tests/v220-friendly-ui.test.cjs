@@ -18,7 +18,7 @@ for(const name of ['home','sources','pvhk','pvsd','staff','gse','warehouse','qa_
  assert.ok(routes.includes(name),'Missing original workflow: '+name);
 }
 assert.ok(js.includes('v220Advanced'),'Specialist tasks must be in advanced drawer');
-assert.ok(js.includes("tab==='admin'&&!isAdmin()"),'ADMIN permission must be enforced by navigation');
+assert.ok(js.includes('access()?.canOpen(role(),tab)')&&fs.readFileSync('v225-role-access.js','utf8').includes("tab==='admin'"),'ADMIN permission must be enforced by role map and navigation');
 assert.ok(html.includes('v220Hub')&&html.includes('v220-friendly-ui.js'),'Root app must load friendly shell');
 assert.ok(html.includes('v220-friendly-ui.css'),'Root app must load friendly styles');
 assert.ok(css.includes('@media(max-width:720px)'),'Phone layouts required');
