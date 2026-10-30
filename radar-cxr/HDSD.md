@@ -129,3 +129,17 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 **Tổng và xuất:** Tổng một dòng chỉ được chốt khi đủ **5/5 cột**; nếu thiếu ghi dấu **~** và CHỜ XÁC NHẬN. Đề xuất 29C cho 1–29 người, 45C cho 30–45 người, trên 45 người cảnh báo BỔ SUNG XE (không tự điều xe). Ảnh PNG và PDF được dựng từ đúng cùng bản vẽ xem trước, có cả cột QA / IT và các dòng bổ sung. Chỉ tài khoản ĐH/ADMIN có nút phát hành ở tab BÁO CÁO, các phòng được xem nhưng không tự phát hành.
 
 **Chú ý:** Tài khoản QA/IT hiện có phải được ADMIN gán vai trò QA hoặc IT tại mục Phân quyền Radar (không tạo tài khoản đăng nhập mới). Cần kiểm thử nhập/lưu trên tài khoản thực tế trước khi nghiệm thu chính thức.
+
+
+## V2.5 – ĐĂNG KÝ, QUẢN LÝ TÀI KHOẢN DÙNG CHUNG VỚI RNS
+
+**Nguồn đăng nhập:** Giữ nguyên **Supabase Authentication chung** của SAGSCXR-RNS và Radar. Không sử dụng username/password Firestore, không lưu mật khẩu trên trang QUẢN LÝ. Người dùng chỉ cần một email và một mật khẩu để đăng nhập hai website, với quyền nghiệp vụ mỗi hệ thống tách riêng.
+
+**Tại QUẢN LÝ TÀI KHOẢN (chỉ ADMIN):**
+1. **ĐĂNG KÝ TÀI KHOẢN MỚI:** Nhập email/họ tên/chọn một trong ĐH, PVSĐ, PVHK, KHO HÀNG, QA, IT, VIEWER, bấm **GỬI LỜI MỜI TẠO TÀI KHOẢN RNS**. Một Supabase Edge Function riêng `sagscxr-radar-register` xác thực phiên đăng nhập và kiểm tra ADMIN còn active. Function gửi email mời bằng Supabase Auth đến RNS `/secure.html`, tạo một Auth user, ghi `ops_members` theo quyền Radar và cấp RNS role `viewer` tối thiểu trong `sags_docs_members`. Khi có lỗi provision, function cố gắng thu hồi invite mới tạo; không chỉnh sửa tài khoản tồn tại.
+2. **DANH SÁCH TÀI KHOẢN RNS DÙNG CHUNG:** ADMIN được xem và tìm trong danh sách Auth user đã tồn tại, trạng thái kích hoạt email, vai trò RNS và vai trò Radar. Nút **CHỌN CẤP QUYỀN** điền thông tin vào form cấp quyền ở dưới. Danh sách tải qua cùng Edge Function và chỉ cho ADMIN.
+3. **TÀI KHOẢN RNS ĐÃ CÓ:** Tiếp tục dùng RPC `ops_assign_existing_account` để cấp/đổi quyền Radar. Không tạo user trùng, không đổi mật khẩu hay vai trò RNS của user sẵn có. `ops_disable_existing_account` chỉ khóa quyền Radar, không ảnh hưởng RNS.
+
+**Phân quyền an toàn:** API quản lý tài khoản yêu cầu Supabase JWT và `ops_members.unit = 'ADMIN'` cùng `active=true`, không dựa vào dữ liệu vai trò do trình duyệt gửi. Không đưa service-role hoặc key bí mật vào file HTML/JS. Tài khoản quản trị Radar không thể tạo tài khoản ADMIN mới từ biểu mẫu. Nhân viên nhận lời mời phải kích hoạt qua email; không khẳng định thư đã đến hộp thư cho đến khi người dùng xác nhận. Nếu email đã có tài khoản RNS, ADMIN chuyển sang mục cấp quyền hiện có, không lập tài khoản thứ hai.
+
+**Cách sử dụng:** Đăng nhập tài khoản ADMIN Radar → QUẢN LÝ → nếu nhân viên chưa có tài khoản, GỬI LỜI MỜI; nếu đã có tài khoản RNS, chọn từ danh sách hoặc điền email, CẤP QUYỀN RADAR. Sau khi kích hoạt, nhân viên đăng nhập Radar bằng cùng email và mật khẩu RNS.
