@@ -7,7 +7,7 @@
  const knownFlights=()=>flights.flatMap(f=>[f.arrival,f.departure]).filter(Boolean);
  const time=n=>n==null?'—':String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')+(n>=1440?' (+1)':'');
  const clock=s=>{const m=String(s||'').match(/^(\d\d):(\d\d)$/);return m?Number(m[1])*60+Number(m[2]):null};
- const allowed=r=>unit==='ADMIN'||unit===r;
+ const allowed=r=>['ADMIN','DH'].includes(unit)||unit===r;
  const shifts=[['SÁNG',495,1095,'08:15–18:15'],['ĐÊM',1095,1935,'18:15–08:15 (+1)']];
  const roleNames={KTS:[['BAGGAGE','Bốc xếp công ty'],['GSE_DRIVER','Lái xe GSE']],PVHK:[['PVHK_ARRIVAL_TEAM','Đội PVHK ĐẾN'],['PVHK_DEPARTURE_TEAM','Đội PVHK ĐI']]};
  let cargo=[],issues=[],transport=[],generation=0,initialized=false;
@@ -401,14 +401,14 @@
      if(home)home.innerHTML='<div class="panel"><h2>PHÒNG ĐIỀU HÀNH</h2><p>Không tải được phần tổng quan. Bảng xe giao ca vẫn sử dụng được ở bên dưới.</p></div>';
    }
    const allowedTabs={
-     DH:['home','sources','radar','report','radar-report','shuttle-report','doorclose'],
+     DH:['home','sources','pvsd','pvhk','warehouse','qa_it','gse','staff','radar','report','radar-report','shuttle-report','quick','doorclose'],
      KTS:['pvsd','radar','report','radar-report','shuttle-report'],
      PVHK:['pvhk','radar','report','radar-report','shuttle-report'],
      KHO:['warehouse','radar','report','radar-report','shuttle-report'],
      QA:['qa_it','radar','report','radar-report','shuttle-report'],
      IT:['qa_it','radar','report','radar-report','shuttle-report'],
      VIEWER:['radar','report','radar-report','shuttle-report'],
-     ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','radar','report','radar-report','shuttle-report','doorclose','admin']
+     ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','gse','staff','radar','report','radar-report','shuttle-report','quick','doorclose','admin']
    }[role]||['radar','report','radar-report'];
    const labels={home:'ĐIỀU HÀNH',sources:'LỊCH BAY',pvsd:'PVSĐ',pvhk:'PVHK',warehouse:'KHO HÀNG',qa_it:'QA / IT',
      radar:'RADAR',report:'BÁO CÁO', 'radar-report':'BÁO CÁO RADAR', 'shuttle-report':'XE GIAO CA',doorclose:'DOOR CLOSE',admin:'PHÂN QUYỀN'};
@@ -421,6 +421,7 @@
    $('v20Warehouse').closest('section').classList.toggle('v20-locked',!allowed('KHO'));
    window.SagsUnitInputV211?.updateRights();
    const dhPanel=$('v22DhShuttle');if(dhPanel)dhPanel.style.display=allowed('DH')?'':'none';
+   window.SagsRoleAccessV225?.apply();
    const note=$('v19NoteEditor');if(note)note.style.display=['DH','ADMIN'].includes(role)?'':'none';
    document.querySelectorAll('[data-v19-export],[data-v21-export]').forEach(button=>{button.hidden=!['DH','ADMIN'].includes(role);button.style.display=['DH','ADMIN'].includes(role)?'':'none';});
    switchTab(allowedTabs[0]);
