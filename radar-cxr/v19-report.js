@@ -17,7 +17,7 @@
    .sort((a,b)=>(a.std_min-a.sta_min)-(b.std_min-b.sta_min)).slice(0,12);
  function services(f,s){
    const a=f.sta_min,b=f.std_min,carrier=(f.airline||String(f.arrival||f.departure||'').slice(0,2)).toUpperCase();
-   let n=['VJ','9G','VU','AK','FD'].includes(carrier)?30:['KE','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(carrier)?60:a!=null&&b!=null?Math.max(0,b-a):0;
+   let n=['VJ','9G','VU','AK','FD'].includes(carrier)?30:['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(carrier)?60:a!=null&&b!=null?Math.max(0,b-a):0;
    if(!n)return false;
    const start=a!=null?a:b!=null?b-n:null;
    const end=start!=null?(b!=null?Math.min(b,start+n):start+n):null;
