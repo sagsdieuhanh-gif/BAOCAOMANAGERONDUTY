@@ -213,5 +213,5 @@
    if(error)throw error;
    await preview();
  }
- window.SagsReportV19={source,build,preview,exportOne,loadNotes,saveNotes};
+ window.SagsReportV19={source,build,preview,exportOne,loadNotes,saveNotes,_testCreateWord:word};
 })();
