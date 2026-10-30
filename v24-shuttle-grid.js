@@ -74,11 +74,11 @@
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small>'+
-       ((child||!x.defaultTime)&&(who==='ADMIN'||who==='DH')?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Xóa dòng xe bổ sung nếu chưa có phòng khác xác nhận" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
+       ((child||!x.defaultTime)&&(who==='ADMIN'||who==='DH')?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Chỉ ĐH/ADMIN được xóa giờ bổ sung; hệ thống ghi nhật ký dữ liệu đã xóa" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
-         (cls.kind==='small'?icon(29):cls.kind==='big'||cls.kind==='excess'?icon(45):'')+
+         (cls.kind==='small'?'<img src="./assets/shuttle-29.webp" alt="Xe SAGS 29 chỗ" class="v220-coach-img">':cls.kind==='big'?'<img src="./assets/shuttle-45.webp" alt="Xe SAGS 45 chỗ" class="v220-coach-img">':cls.kind==='excess'?'<span class="v220-coach-both"><img src="./assets/shuttle-45.webp" alt="Xe 45 chỗ" class="v220-coach-img"><img src="./assets/shuttle-29.webp" alt="Xe 29 chỗ" class="v220-coach-img"></span>':'')+
          '<span>'+cls.label+'</span></td>'+
        '</tr>'+
        (x.missing.length?'<tr class="v28-missing-row"><td colspan="7"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
@@ -100,7 +100,7 @@
    const editablePart=allowedRoles.has(who);
    const activeField=who==='ADMIN'?'TẤT CẢ CỘT':headings[V.indexOf(fieldOf(who))]||'CHỈ XEM';
    return '<div class="v24-wrap" data-v24-active="'+who+'"><div class="v24-heading">'+
-     '<div><div class="v24-eyebrow">SAGS  ·  XE GIAO CA</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
+     '<div><div class="v24-eyebrow">SAGS · CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
      '<p>Hai chiều xe · 04 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
      '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
      '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Muốn thêm giờ xe khác, mở mục <b>THÊM GIỜ XE KHÁC</b> phía dưới. Nhập xong cả hai chiều, bấm <b>LƯU TẤT CẢ THAY ĐỔI</b> một lần.</div>'+
