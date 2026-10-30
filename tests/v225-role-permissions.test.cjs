@@ -53,6 +53,6 @@ assert.ok(!sql.includes('DROP POLICY IF EXISTS ops_members_'),'Never loosen acco
 const css=fs.readFileSync('v225-role-access.css','utf8');
 assert.ok(css.includes('.v225-denied')&&css.includes('#tab-admin'));
 for(const file of ['v21-shuttle-export.js','report-export-v29.js','radar-report-v28.js']){
- assert.ok(fs.readFileSync(file,'utf8').includes("['ADMIN','DH']"),file+' should guard export');
+ assert.ok(/\['(?:ADMIN','DH|DH','ADMIN)'\]/.test(fs.readFileSync(file,'utf8')),file+' should guard export');
 }
 console.log('PASS V2.25: department ownership; read-only reports; DH operational superuser; ADMIN-only rights; RLS + UI gates');
