@@ -17,12 +17,12 @@ assert.ok(wide.observation.includes('VJ6876/VJ6877'));
 assert.ok(wide.observation.includes('377'));
 assert.ok(wide.action.includes('A330'));
 assert.ok(wide.action.includes('B777'));
-assert.ok(wide.action.includes('CHỜ XÁC NHẬN'));
+assert.ok(wide.action.includes('chưa có xác nhận'));
 let topics=bank.enrich(c,core);
 assert.equal(topics.length,10);
 assert.match(topics[2].title,/Tàu thân rộng/);
-assert.match(topics[3].observation,/khu 2–3/);
-assert.match(topics[5].observation,/CHỜ XÁC NHẬN/);
+assert.match(topics[3].observation,/khu bãi 2–3/);
+assert.match(topics[5].observation,/PVSĐ đang cập nhật/);
 assert.match(topics[6].observation,/KE467/);
 assert.equal(topics[0].owner,'ĐH · PVHK · PVSĐ');
 const confirm=[
@@ -32,7 +32,7 @@ const confirm=[
  {unit:'QA_IT',status:'CONFIRMED',details:{weather_fod:'FOD theo báo cáo chính thức',open_capa:'Đề nghị kiểm tra tồn tại ca trước'}}
 ];
 topics=bank.enrich({...c,unitPlans:confirm},core);
-assert.ok(topics[2].action.includes('CÓ HẠN CHẾ ĐÃ KHAI BÁO'));
+assert.ok(topics[2].action.includes('còn hạn chế, cần hỗ trợ'));
 assert.ok(topics[2].action.includes('Cần loader phù hợp'));
 assert.ok(topics[1].action.includes('Giải quyết dứt điểm'));
 assert.ok(topics[6].action.includes('Bàn giao AK647'));
