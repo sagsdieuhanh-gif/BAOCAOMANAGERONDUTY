@@ -17,13 +17,13 @@
    const names=roleNames[u];
    return '<div class="v20-shifts">'+shifts.map(sh=>'<article class="v20-shift"><div class="v20-shift-title"><b>CA '+sh[0]+'</b><span>'+sh[3]+'</span></div><div class="v20-field-row">'+names.map(x=>'<label>'+x[1]+'<input data-v20-quantity="'+u+'|'+sh[0]+'|'+x[0]+'" type="number" inputmode="numeric" min="0" placeholder="Chưa xác nhận" value="'+escape(staffFor(u,x[0],sh[0])??'')+'"></label>').join('')+'</div></article>').join('')+'</div>';
  }
- function tableRows(){return '<div class="v20-head"><div><h2>PVSĐ · NHÂN SỰ & TRANG THIẾT BỊ</h2><p>Nhập tại đây một lần. SKYONE được cộng vào bốc xếp theo đúng giờ thuê.</p></div></div>'+
-   '<div class="v20-column-grid"><section class="v20-panel"><h3>01 · Quân số PVSĐ</h3>'+fieldGroups('KTS')+
-   '<button class="primary" id="v20SaveKTS">LƯU QUÂN SỐ PVSĐ</button><div class="v20-help" id="v20KTSHelp"></div><div class="v20-help" data-v20-staff-confirm="KTS"></div></section>'+
-   '<section class="v20-panel"><h3>02 · SKYONE – BỐC XẾP THUÊ NGOÀI</h3>'+
+ function tableRows(){return '<div class="v20-head"><div><h2>PVSĐ · NHÂN SỰ & TRANG THIẾT BỊ</h2><p>Quân số tổng hợp nằm ngay bên dưới. Khi cần đánh giá cao điểm, mở phần phân bổ theo đội để nhập bốc xếp/lái GSE và SKYONE.</p></div></div>'+
+   '<div class="v20-column-grid"><details class="v20-panel v224-team-details"><summary>PHÂN BỔ THEO ĐỘI · PVSĐ <small>Dùng để đánh giá ca cao điểm</small></summary>'+fieldGroups('KTS')+
+   '<button class="primary" id="v20SaveKTS">LƯU PHÂN BỔ ĐỘI PVSĐ</button><div class="v20-help" id="v20KTSHelp"></div><div class="v20-help" data-v20-staff-confirm="KTS"></div></details>'+
+   '<details class="v20-panel v224-team-details"><summary>SKYONE · BỐC XẾP THUÊ NGOÀI <small>Chỉ nhập khi có tăng cường</small></summary>'+
    '<p>Chỉ thêm khung giờ thực tế có thuê; người SKYONE tính chung tổng bốc xếp.</p>'+
    '<div class="v20-field-row"><label>Từ giờ<input type="time" id="v20SkyFrom" value="09:00"></label><label>Đến giờ<input type="time" id="v20SkyTo" value="13:00"></label><label>Số SKYONE<input type="number" id="v20SkyPeople" min="0" placeholder="Số người"></label></div>'+
-   '<button class="primary" id="v20SaveSky">+ LƯU KHUNG GIỜ SKYONE</button><div id="v20SkyList" class="v20-list"></div></section></div>'+
+   '<button class="primary" id="v20SaveSky">+ LƯU KHUNG GIỜ SKYONE</button><div id="v20SkyList" class="v20-list"></div></details></div>'+
    '<section class="v20-panel"><h3>03 · Xe hỏng / đang sửa / hạn chế khai thác</h3>'+
    '<p>Ghi từng xe có vấn đề, tình trạng, ảnh hưởng và phương án thay thế. Xe phục hồi chỉ cần đổi trạng thái; không nhập lại cả danh mục mỗi ngày.</p>'+
    '<div class="v20-incident-grid"><label>Mã xe / thiết bị<input id="v20Vehicle" maxlength="55" placeholder="Ví dụ 31806"></label>'+
@@ -38,15 +38,15 @@
    '<p>Thông số danh mục giữ sẵn, chỉ cập nhật số xe sử dụng được và tương thích A330 khi có thay đổi. Không nhập trùng với tình trạng hư hỏng ở trên.</p>'+
    '<div id="v20GseMount"></div></details>';
  }
- function pvhk(){return '<div class="v20-head"><div><h2>PVHK · ĐỘI CHUYẾN ĐẾN / ĐI</h2><p>Hai ca chuẩn; thêm khung giờ riêng khi có người tăng cường. Chỉ một nơi nhập quân số PVHK.</p></div></div>'+
-  '<section class="v20-panel"><h3>01 · Nhân sự theo ca</h3>'+fieldGroups('PVHK')+
-  '<button class="primary" id="v20SavePVHK">LƯU QUÂN SỐ PVHK</button><div class="v20-help" id="v20PVHKHelp"></div><div class="v20-help" data-v20-staff-confirm="PVHK"></div></section>'+
-  '<section class="v20-panel"><h3>02 · Khung giờ ngoài hai ca chuẩn</h3><div class="v20-incident-grid">'+
+ function pvhk(){return '<div class="v20-head"><div><h2>PVHK · ĐỘI CHUYẾN ĐẾN / ĐI</h2><p>Xác nhận tổng quân số hai ca ở ngay dưới. Khi cần điều phối theo chuyến, mở phần phân bổ đội đến/đi và khung giờ tăng cường.</p></div></div>'+
+  '<details class="v20-panel v224-team-details"><summary>PHÂN BỔ ĐỘI ĐẾN / ĐI <small>Đánh giá khả năng phục vụ theo khung giờ</small></summary>'+fieldGroups('PVHK')+
+  '<button class="primary" id="v20SavePVHK">LƯU PHÂN BỔ ĐỘI PVHK</button><div class="v20-help" id="v20PVHKHelp"></div><div class="v20-help" data-v20-staff-confirm="PVHK"></div></details>'+
+  '<details class="v20-panel v224-team-details"><summary>KHUNG GIỜ PVHK TĂNG CƯỜNG <small>Ngoài hai ca chính, nếu có</small></summary><div class="v20-incident-grid">'+
   '<label>Đội<select id="v20PvTeam"><option value="PVHK_ARRIVAL_TEAM">PVHK ĐẾN</option><option value="PVHK_DEPARTURE_TEAM">PVHK ĐI</option></select></label>'+
   '<label>Từ giờ<input type="time" id="v20PvFrom" value="10:00"></label>'+
   '<label>Đến giờ<input type="time" id="v20PvTo" value="14:00"></label>'+
   '<label>Số người<input type="number" min="0" id="v20PvPeople"></label></div>'+
-  '<button class="primary" id="v20SavePvExtra">+ LƯU KHUNG GIỜ PVHK</button><div id="v20PvList" class="v20-list"></div></section>';
+  '<button class="primary" id="v20SavePvExtra">+ LƯU KHUNG GIỜ PVHK</button><div id="v20PvList" class="v20-list"></div></details>';
  }
  function warehouse(){const options=[...new Set(knownFlights())].map(x=>'<option value="'+escape(x)+'"></option>').join('');
   return '<div class="v20-head"><div><h2>KHO HÀNG · KẾ HOẠCH CARGO</h2>'+
