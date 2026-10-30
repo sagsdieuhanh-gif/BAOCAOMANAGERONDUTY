@@ -111,7 +111,7 @@
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất PDF.');
     const {width:W,height:H,margin:M}=paper;
     let page,ctx,y;const pages=[];
-    const ctxFont=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px Arial, sans-serif';};
+    const ctxFont=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px "Times New Roman", serif';};
     function newPage(){
       page=document.createElement('canvas');page.width=W;page.height=H;
       ctx=page.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
@@ -130,10 +130,11 @@
     function table(rows,header){
       if(!rows.length)return;
       const cols=Math.max(1,...rows.map(x=>x.length)),wid=W-2*M;
-      const ratios=cols===2?[.27,.73]:cols===3?[.20,.40,.40]:cols===4?[.18,.20,.28,.34]:cols===5?[.23,.19,.17,.20,.21]:Array(cols).fill(1/cols);
+      const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
+      const ratios=cols===2?[.27,.73]:cols===3?[.20,.40,.40]:cols===4?(control?[.17,.28,.43,.12]:[.18,.20,.28,.34]):cols===5?[.23,.19,.17,.20,.21]:Array(cols).fill(1/cols);
       const widths=ratios.map(x=>x*wid);
       const renderRow=(values,isHeader)=>{
-        const fs=isHeader?19:18,lh=24,pad=10;
+        const fs=isHeader?18:17,lh=22,pad=8;
         ctxFont(fs,isHeader);
         const cellLines=Array.from({length:cols},(_,i)=>lines(ctx,String(values[i]??''),widths[i]-2*pad));
         const rh=Math.max(42,...cellLines.map(x=>x.length*lh+2*pad));
@@ -176,13 +177,14 @@
   }
   function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false}={}){
     const lines=String(v??'').split('\n');
-    const run=lines.map((line,i)=>'<w:r><w:rPr>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/></w:rPr>'+(i?'<w:br/>':'')+'<w:t xml:space="preserve">'+xml(line)+'</w:t></w:r>').join('');
+    const run=lines.map((line,i)=>'<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/></w:rPr>'+(i?'<w:br/>':'')+'<w:t xml:space="preserve">'+xml(line)+'</w:t></w:r>').join('');
     return '<w:p><w:pPr><w:spacing w:before="'+(breakBefore?180:50)+'" w:after="90"/></w:pPr>'+run+'</w:p>';
   }
   function wordTable(rows,header){
     if(!rows.length)return '';
     const cols=Math.max(1,...rows.map(x=>x.length));
-    const widths=(cols===2?[3900,10800]:cols===3?[2800,5900,6000]:cols===4?[2800,3150,4200,4550]:cols===5?[3550,2750,2500,3000,2900]:Array(cols).fill(Math.floor(14700/cols)));
+    const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
+    const widths=(cols===2?[3900,10800]:cols===3?[2800,5900,6000]:cols===4?(control?[2500,4100,6350,1750]:[2800,3150,4200,4550]):cols===5?[3550,2750,2500,3000,2900]:Array(cols).fill(Math.floor(14700/cols)));
     let table='<w:tbl><w:tblPr><w:tblW w:w="14700" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="5" w:color="B7CBD8"/><w:bottom w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideH w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideV w:val="single" w:sz="5" w:color="B7CBD8"/></w:tblBorders></w:tblPr><w:tblGrid>'+widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join('')+'</w:tblGrid>';
     rows.forEach((r,ri)=>{
       table+='<w:tr>'+(Array.from({length:cols},(_,i)=>{
