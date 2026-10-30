@@ -3,37 +3,35 @@
    Navigation delegates to the existing #tabs, never duplicates business logic. */
 (function(root){
  const GROUPS=[
-  {id:'overview',title:'TỔNG QUAN',icon:'⌂',subtitle:'Tình hình khai thác và những việc cần làm',items:[
-    ['home','Bảng điều hành','⌂','Theo dõi nhanh'],
-    ['quick','Bản tin nhanh','▤','Tổng hợp trong ngày']
+  {id:'overview',title:'TỔNG QUAN',icon:'⌂',subtitle:'Sản lượng, tình hình khai thác và công việc cần chú ý',items:[
+    ['home','Tổng quan ngày','⌂','Thông tin tổng hợp']
   ]},
-  {id:'input',title:'CẬP NHẬT',icon:'✎',subtitle:'Mỗi đơn vị cập nhật dữ liệu của mình',items:[
-    ['sources','Lịch bay / Excel','▦','Nhập Lần 1 và Lần 2'],
-    ['pvhk','Phòng PVHK','♙','Nhân sự, gate, booking'],
-    ['pvsd','Phòng PVSĐ','⚙','Nhân sự, thiết bị phục vụ'],
-    ['gse','Trang thiết bị','▣','Số xe khả dụng'],
-    ['staff','Nhân sự theo ca','♧','Bố trí nguồn lực'],
-    ['warehouse','Kho hàng','◫','Hành lý và hàng hóa'],
-    ['qa_it','QA & IT','◇','Tình hình an toàn, kỹ thuật'],
-    ['doorclose','Door Close','◷','Kiểm tra ngày trước']
+  {id:'input',title:'CẬP NHẬT',icon:'✎',subtitle:'Chọn đúng đơn vị hoặc dữ liệu cần nhập',items:[
+    ['sources','Lịch bay / Excel','▦','Lần 1, Lần 2',false],
+    ['pvhk','Phòng PVHK','♙','Khách và check-in',false],
+    ['pvsd','Phòng PVSĐ','⚙','Phục vụ sân đỗ',false],
+    ['gse','Trang thiết bị','▣','Xe thang, Cobus, GSE',true],
+    ['staff','Quân số theo ca','♧','Định biên và phân ca',true],
+    ['warehouse','Kho hàng','◫','Hàng hóa, hành lý',true],
+    ['qa_it','QA & IT','◇','An toàn, CNTT',true],
+    ['doorclose','Door Close','◷','Ngày khai thác trước',true],
+    ['admin','Phân quyền','⚙','Chỉ dành cho ADMIN',true]
   ]},
-  {id:'analysis',title:'PHÂN TÍCH',icon:'◷',subtitle:'Nhận diện giờ cao điểm và nguy cơ chồng lấn',items:[
-    ['radar','Peak Hours & Radar','▥','Theo giờ và theo 30 phút'],
-    ['radar-report','Phân tích Radar','⌁','Báo cáo cao điểm chuyên biệt']
+  {id:'analysis',title:'PHÂN TÍCH',icon:'◷',subtitle:'Peak Hours và Radar 30 phút',items:[
+    ['radar','Peak Hours & Radar','▥','Cao điểm từng giờ / 30 phút']
   ]},
-  {id:'report',title:'BÁO CÁO',icon:'▤',subtitle:'Xem trước, kiểm tra và xuất file',items:[
-    ['report','Báo cáo điều hành','▤','Word / PDF · Lần 1 và 2'],
-    ['shuttle-report','Xe giao ca','▰','Bảng xe · PNG / PDF'],
-    ['quick','Bản tin nhanh','▷','Bản tin trong ngày']
-  ]},
-  {id:'admin',title:'QUẢN TRỊ',icon:'⚙',subtitle:'Cấp quyền và quản lý tài khoản',items:[
-    ['admin','Tài khoản','⚙','Dành riêng cho ADMIN']
+  {id:'report',title:'BÁO CÁO',icon:'▤',subtitle:'Xem trước và xuất đầy đủ Word, PDF, PNG',items:[
+    ['report','Báo cáo điều hành','▤','Word / PDF · Lần 1–2'],
+    ['shuttle-report','Xe giao ca','▰','PNG / PDF · Gợi ý xe'],
+    ['quick','Bản tin nhanh','▷','Phát hành sơ bộ'],
+    ['radar-report','Báo cáo Radar','⌁','Chi tiết cao điểm']
   ]}
  ];
  const $=id=>document.getElementById(id);
  const doc=document;
  let current='overview',selected='home',mounted=false;
- const allowedGroup=g=>g.id!=='admin'||(typeof unit!=='undefined'&&unit==='ADMIN');
+ const isAdmin=()=>typeof unit!=='undefined'&&unit==='ADMIN';
+ const allowedGroup=g=>true;
  function makeButton(label,cls,meta){
    const b=doc.createElement('button');b.type='button';b.className=cls;b.textContent=label;
    Object.entries(meta||{}).forEach(([k,v])=>b.dataset[k]=v);
@@ -47,7 +45,7 @@
    const bar=doc.createElement('div');bar.className='v220-nav-panel';bar.id='v220Nav';
    bar.innerHTML='<div class="v220-nav-head"><div><span class="v220-eyebrow">MANAGER ON DUTY</span><h2>Điều hành khai thác</h2><p>Chọn công việc cần thực hiện</p></div><span class="v220-nav-date">CXR · SAGS</span></div><div class="v220-groups" id="v220Groups"></div>'+
     '<div class="v220-current"><div><b id="v220GroupTitle"></b><span id="v220GroupSubtitle"></span></div><span id="v220PageLabel"></span></div>'+
-    '<div class="v220-menu" id="v220Menu"></div>';
+    '<div class="v220-menu" id="v220Menu"></div><details id="v220Advanced" class="v220-advanced" hidden><summary>Nâng cao · Các chức năng ít dùng</summary><div class="v220-menu v220-advanced-grid" id="v220AdvancedMenu"></div></details>';
    rootNode.appendChild(bar);
    const groups=$('v220Groups');
    for(const g of GROUPS){
@@ -59,10 +57,8 @@
      if(!b||!groups.contains(b))return;
      changeGroup(b.dataset.group,true);
    });
-   $('v220Menu').addEventListener('click',e=>{
-     const b=e.target.closest('[data-go]');
-     if(!b)return;
-     navigate(b.dataset.go);
+   for(const list of [$('v220Menu'),$('v220AdvancedMenu')])list.addEventListener('click',e=>{
+     const b=e.target.closest('[data-go]');if(b)navigate(b.dataset.go);
    });
    const shown=legacy.querySelector('[data-tab].active')?.dataset.tab||'home';
    sync(shown);
@@ -83,9 +79,9 @@
      b.hidden=!allowedGroup(GROUPS.find(x=>x.id===b.dataset.group));
      b.setAttribute('aria-pressed',String(active));
    }
-   $('v220Menu').replaceChildren();
-   const seen=new Set();
-   for(const [tab,label,icon,description] of g.items){
+   $('v220Menu').replaceChildren();$('v220AdvancedMenu').replaceChildren();
+   const seen=new Set();let advancedCount=0;
+   for(const [tab,label,icon,description,isAdvanced=false] of g.items){
      if(seen.has(tab))continue;seen.add(tab);
      const old=$('tabs').querySelector('[data-tab="'+tab+'"]');
      if(!old)continue;
@@ -96,9 +92,11 @@
      b.querySelector('strong').textContent=label;
      b.querySelector('small').textContent=description;
      b.classList.toggle('is-selected',selected===tab);
-     if(old.classList.contains('hidden'))b.hidden=true;
-     $('v220Menu').appendChild(b);
+     if(old.classList.contains('hidden')||(tab==='admin'&&!isAdmin()))continue;
+     if(isAdvanced){$('v220AdvancedMenu').appendChild(b);advancedCount++;}else $('v220Menu').appendChild(b);
    }
+   $('v220Advanced').hidden=advancedCount===0;
+   if(g.items.find(x=>x[0]===selected)?.[4])$('v220Advanced').open=true;
    const chosen=g.items.find(x=>x[0]===selected);
    $('v220PageLabel').textContent=chosen?.[1]||'';
    updateKpis();
