@@ -143,3 +143,11 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 **Phân quyền an toàn:** API quản lý tài khoản yêu cầu Supabase JWT và `ops_members.unit = 'ADMIN'` cùng `active=true`, không dựa vào dữ liệu vai trò do trình duyệt gửi. Không đưa service-role hoặc key bí mật vào file HTML/JS. Tài khoản quản trị Radar không thể tạo tài khoản ADMIN mới từ biểu mẫu. Nhân viên nhận lời mời phải kích hoạt qua email; không khẳng định thư đã đến hộp thư cho đến khi người dùng xác nhận. Nếu email đã có tài khoản RNS, ADMIN chuyển sang mục cấp quyền hiện có, không lập tài khoản thứ hai.
 
 **Cách sử dụng:** Đăng nhập tài khoản ADMIN Radar → QUẢN LÝ → nếu nhân viên chưa có tài khoản, GỬI LỜI MỜI; nếu đã có tài khoản RNS, chọn từ danh sách hoặc điền email, CẤP QUYỀN RADAR. Sau khi kích hoạt, nhân viên đăng nhập Radar bằng cùng email và mật khẩu RNS.
+
+
+## V2.6 – KHẮC PHỤC TAB ĐIỀU HÀNH TRỐNG, KHÔI PHỤC BẢNG NHẬP XE GIAO CA ĐH
+
+- **Nguyên nhân:** Từ V2.4, module tổng quan cũ `SagsUIV19.renderHome` không được gọi trong vòng đời đăng nhập và tải ngày; module bảng xe `SagsShuttleGridV24.setUnit` cũng không được khởi tạo. Giao diện trống là lỗi nối module, không phải thiếu quyền Supabase.
+- **ĐIỀU HÀNH:** Khi tài khoản ĐH đăng nhập, khởi tạo dashboard với các ô chuyến đến, chuyến đi, đỉnh Radar, quy trình Dự báo Lần 1/Lần 2, tình trạng nguồn lực theo phòng và nút xem báo cáo. Khi chọn ngày hoặc tải lại dữ liệu, dashboard tự làm mới.
+- **Xe giao ca:** Bảng nhập 5 cột ĐH, PVSĐ, PVHK, KHO HÀNG, QA/IT được khởi tạo ở tab ĐIỀU HÀNH ngay sau khi đăng nhập; tài khoản ĐH chỉ nhập cột ĐH. Mỗi khung giờ có nút + dòng bổ sung, lưu và xác nhận ngay trên đúng hàng. Khi tải ngày mới bảng tự nạp dữ liệu đúng ngày.
+- **Ổn định:** Nếu riêng phần tổng quan lỗi hiển thị, hệ thống không chặn khởi tạo bảng xe. Đã thêm kiểm thử vòng đời cho role ĐH, QA, IT và đường đi dự phòng. Không thay đổi schema, dữ liệu, quyền RNS hoặc quyền ghi Supabase.

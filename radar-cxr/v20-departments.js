@@ -391,15 +391,24 @@
  }
  function setUnit(role){
    init();
+   // Restore the full Điều hành overview, which was never initialized by V2.4.
+   // Keep the shuttle entry independent if the overview encounters a display error.
+   try{window.SagsUIV19?.setUnit(role)}
+   catch(error){console.error('Không hiển thị được tổng quan ĐH:',error);
+     const home=$('v19Home');
+     if(home)home.innerHTML='<div class="panel"><h2>PHÒNG ĐIỀU HÀNH</h2><p>Không tải được phần tổng quan. Bảng xe giao ca vẫn sử dụng được ở bên dưới.</p></div>';
+   }
    const allowedTabs={
      DH:['home','sources','radar','report','doorclose'],
      KTS:['pvsd','radar','report'],
      PVHK:['pvhk','radar','report'],
      KHO:['warehouse','radar','report'],
+     QA:['qa_it','radar','report'],
+     IT:['qa_it','radar','report'],
      VIEWER:['radar','report'],
      ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','radar','report','doorclose','admin']
    }[role]||['radar','report'];
-   const labels={home:'ĐIỀU HÀNH',sources:'LỊCH BAY',pvsd:'PVSĐ',pvhk:'PVHK',warehouse:'KHO HÀNG',
+   const labels={home:'ĐIỀU HÀNH',sources:'LỊCH BAY',pvsd:'PVSĐ',pvhk:'PVHK',warehouse:'KHO HÀNG',qa_it:'QA / IT',
      radar:'RADAR',report:'BÁO CÁO',doorclose:'DOOR CLOSE',admin:'PHÂN QUYỀN'};
    document.querySelectorAll('#tabs [data-tab]').forEach(b=>{
      b.classList.toggle('v19-tab-off',!allowedTabs.includes(b.dataset.tab));
@@ -411,7 +420,10 @@
    const dhPanel=$('v22DhShuttle');if(dhPanel)dhPanel.style.display=allowed('DH')?'':'none';
    const note=$('v19NoteEditor');if(note)note.style.display=['DH','ADMIN'].includes(role)?'':'none';
    document.querySelectorAll('[data-v19-export],[data-v21-export]').forEach(button=>{button.hidden=!['DH','ADMIN'].includes(role);button.style.display=['DH','ADMIN'].includes(role)?'':'none';});
-   switchTab(allowedTabs[0]);refresh();
+   switchTab(allowedTabs[0]);
+   // The new five-column entry grid must mount on first login, not only after a refresh.
+   window.SagsShuttleGridV24?.setUnit(role);
+   refresh();
  }
  window.SagsUIV20={setUnit,refresh,render};
 })();
