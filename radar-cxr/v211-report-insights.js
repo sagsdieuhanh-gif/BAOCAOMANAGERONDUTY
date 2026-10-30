@@ -11,7 +11,7 @@
  const shorten=(s,n=340)=>{const t=String(s||'').trim();if(t.length<=n)return t;const head=t.slice(0,n-1);return head.replace(/\s+\S*$/,'').trimEnd()+'…';};
  const plans=c=>new Map((c.unitPlans||[]).filter(r=>r.status==='CONFIRMED').map(r=>[r.unit,r.details||{}]));
  const values=(c,unit)=>plans(c).get(unit)||null;
- const flag=(data,key)=>data?.[key]==='READY'?'ĐÃ XÁC NHẬN SẴN SÀNG':data?.[key]==='LIMITED'?'CÓ HẠN CHẾ ĐÃ KHAI BÁO':'CHỜ XÁC NHẬN';
+ const flag=(data,key)=>data?.[key]==='READY'?'đã chuẩn bị sẵn sàng':data?.[key]==='LIMITED'?'còn hạn chế, cần hỗ trợ':'chưa có xác nhận';
  const clean=s=>String(s||'').trim();
  const append=(base,extra,max=470)=>extra?shorten(base+' '+extra,max):shorten(base,max);
  function widebody(c){
@@ -20,8 +20,8 @@
    if(!wide.length){
      const unknown=rows.filter(x=>!x.aircraft_type).length;
      return {
-       observation:unknown?'Chưa xác định A330/B777 trong các hồ sơ đã có loại tàu; '+unknown+' hồ sơ thiếu loại tàu – CHỜ XÁC NHẬN.':'Theo lịch nguồn chưa ghi nhận A330/B777; tiếp tục theo dõi đổi loại tàu hoặc bổ sung chuyến.',
-       action:'ĐH tiếp tục theo dõi thay đổi loại tàu; PVSĐ/PVHK chỉ kích hoạt phương án riêng khi có chuyến thân rộng được xác nhận.',
+       observation:unknown?'Theo lịch, chưa ghi nhận A330/B777; còn '+unknown+' chuyến chưa có thông tin loại tàu.':'Theo lịch hiện có chưa ghi nhận tàu A330/B777.',
+       action:'Phòng ĐH theo dõi thay đổi loại tàu; nếu có tàu thân rộng, PVSĐ chuẩn bị thiết bị phù hợp và PVHK bố trí người phục vụ.',
        owner:'ĐH · PVSĐ · PVHK'
      };
    }
@@ -34,20 +34,20 @@
    const night=wide.filter(f=>(f.sta_min!=null&&f.sta_min>=1080)||(f.std_min!=null&&f.std_min>=1080));
    const observed=[
      group('A330',a),group('B777',b),
-     high.length?'Tải PAX đáng chú ý: '+high.slice(0,4).map(x=>x.no+' '+x.pax+' khách '+x.kind).join(', ')+'. ':'',
-     noPax.length?noPax.length+' hồ sơ còn PAX chưa xác nhận. ':'',
-     night.length?'Có '+night.length+' hồ sơ thân rộng liên quan khung tối/qua ngày. ':''
+     high.length?'Số khách dự kiến: '+high.slice(0,4).map(x=>x.no+' '+x.pax+' khách '+x.kind).join(', ')+'. ':'',
+     noPax.length?noPax.length+' chuyến chưa có số khách dự kiến. ':'',
+     night.length?'Có '+night.length+' chuyến tàu thân rộng phục vụ ca tối. ':''
    ].join('');
    const ktsFlags=[...(a.length?['A330: '+flag(kts,'a330_ready')]:[]),...(b.length?['B777: '+flag(kts,'b777_ready')]:[])].join('; ');
    const actions=[
-    'ĐH dự kiến kiểm soát riêng '+wide.slice(0,4).map(pair).join(', ')+', ưu tiên giám sát mốc STA/STD, stand và luồng GSE.',
-    'PVSĐ xác nhận năng định, xe thang/loader/kéo đẩy, khả dụng theo đúng cấu hình tàu; '+ktsFlags+'.',
-    'PVHK đối chiếu tải khách, đội đón/gate/boarding và khả năng xử lý hành lý; '+flag(pvhk,'widebody_ready')+'.'
+    'Phòng ĐH theo dõi sát '+wide.slice(0,4).map(pair).join(', ')+', lưu ý giờ tàu về, vị trí đỗ và tiến độ phục vụ.',
+    'Phòng PVSĐ chuẩn bị nhân sự và thiết bị phù hợp tàu thân rộng. Tình hình: '+ktsFlags+'.',
+    'Phòng PVHK chủ động đón khách, cửa ra tàu và xử lý hành lý theo lượng khách dự kiến; lực lượng phục vụ '+flag(pvhk,'widebody_ready')+'.'
    ];
-   if(a.length&&b.length)actions.push('Nếu trùng khung A330/B777, tách GSE tương thích và bố trí phục vụ lần lượt theo tiến độ, không tự coi thiết bị dùng chung là sẵn sàng.');
-   if(night.length)actions.push('Ca tối chuẩn bị người, GSE và thời gian di chuyển trước khi tàu đến.');
-   if(kts?.widebody_note)actions.push('PVSĐ xác nhận: '+shorten(kts.widebody_note,160)+'.');
-   if(pvhk?.widebody_note)actions.push('PVHK xác nhận: '+shorten(pvhk.widebody_note,140)+'.');
+   if(a.length&&b.length)actions.push('Nếu A330/B777 trùng giờ, PVSĐ ưu tiên thiết bị cho chuyến cần phục vụ trước, sau đó điều chuyển cuốn chiếu khi hoàn tất công việc.');
+   if(night.length)actions.push('Ca tối chuẩn bị người và thiết bị trước khi tàu về, tránh bị động khi các chuyến tập trung.');
+   if(kts?.widebody_note)actions.push('PVSĐ báo: '+shorten(kts.widebody_note,160)+'.');
+   if(pvhk?.widebody_note)actions.push('PVHK báo: '+shorten(pvhk.widebody_note,140)+'.');
    return {observation:shorten(observed,500),action:shorten(actions.join(' '),630),owner:'ĐH · PVSĐ · PVHK'};
  }
  function enrich(c,baseTopics){
@@ -67,26 +67,26 @@
    const noStand=rows.filter(f=>f.bay==null).length,farStand=rows.filter(f=>['K2','K3'].includes(zone(f.bay)));
    const longWide=rows.filter(isWide);
    const highPax=rows.flatMap(f=>[Number.isInteger(f.arrival_pax)&&f.arrival_pax>=300?f.arrival:null,Number.isInteger(f.departure_pax)&&f.departure_pax>=300?f.departure:null].filter(Boolean));
-   if(highPax.length)pts[6].observation=append(pts[6].observation,'Khách dự kiến từ 300 người/chuyến: '+highPax.slice(0,5).join(', ')+'.',440);
-   if(!readyCount)pts[5].observation=append(pts[5].observation,'CHỜ XÁC NHẬN số lượng GSE khả dụng theo ca.',440);
-   else pts[5].observation=append(pts[5].observation,readyCount+' nhóm GSE có số khả dụng đã xác nhận; cần đối chiếu theo khung khai thác.',440);
-   if(affectedWide)pts[5].action=append(pts[5].action,'Ưu tiên rà soát GSE tương thích '+(longWide.some(is777)?'B777':'A330')+' trước các khung phục vụ tàu rộng.',520);
-   if(noStand===rows.length&&rows.length)pts[3].observation='CHỜ XÁC NHẬN vị trí đỗ cho '+noStand+' hồ sơ lịch; chưa thể xác định khu vực ảnh hưởng di chuyển GSE.';
-   else if(farStand.length)pts[3].observation='Theo vị trí đỗ đã có, '+farStand.length+' hồ sơ thuộc khu 2–3 ('+farStand.slice(0,5).map(f=>pair(f)+' bãi '+f.bay).join('; ')+'); '+(noStand?noStand+' hồ sơ còn CHỜ XÁC NHẬN bãi.':'chưa tự kết luận đường công vụ đang gián đoạn.');
-   if(dh?.stand_notes)pts[3].observation=append(pts[3].observation,'ĐH xác nhận: '+shorten(dh.stand_notes,160)+'.',470);
-   if(dh?.peak_priority)pts[1].action=append(pts[1].action,'ĐH bổ sung: '+shorten(dh.peak_priority,140)+'.',620);
-   if(kts?.rolling_support)pts[1].action=append(pts[1].action,'PVSĐ xác nhận: '+shorten(kts.rolling_support,140)+'.',620);
-   if(pv?.peak_staff)pts[4].action=append(pts[4].action,'PVHK xác nhận: '+shorten(pv.peak_staff,160)+'.',600);
+   if(highPax.length)pts[6].observation=append(pts[6].observation,'Các chuyến có số khách từ 300 người cần lưu ý phục vụ hành lý: '+highPax.slice(0,5).join(', ')+'.',440);
+   if(!readyCount)pts[5].observation=append(pts[5].observation,'PVSĐ đang cập nhật số xe, thiết bị sẵn sàng phục vụ.',440);
+   else pts[5].observation=append(pts[5].observation,readyCount+' nhóm xe, thiết bị; tiếp tục bố trí theo lịch bay.',440);
+   if(affectedWide)pts[5].action=append(pts[5].action,'Ưu tiên chuẩn bị thiết bị phục vụ tàu '+(longWide.some(is777)?'B777':'A330')+' trước các chuyến thân rộng.',520);
+   if(noStand===rows.length&&rows.length)pts[3].observation='Chưa có vị trí đỗ của '+noStand+' chuyến; Phòng ĐH sẽ cập nhật sau thông tin AOC.';
+   else if(farStand.length)pts[3].observation='Theo lịch dự kiến, '+farStand.length+' chuyến phục vụ tại khu bãi 2–3 ('+farStand.slice(0,5).map(f=>pair(f)+' vị trí '+f.bay).join('; ')+'); '+(noStand?noStand+' chuyến còn chờ xác nhận vị trí đỗ.':'cần lưu ý thời gian di chuyển xe, thiết bị giữa các bãi.');
+   if(dh?.stand_notes)pts[3].observation=append(pts[3].observation,'ĐH cập nhật: '+shorten(dh.stand_notes,160)+'.',470);
+   if(dh?.peak_priority)pts[1].action=append(pts[1].action,'Phương án ĐH: '+shorten(dh.peak_priority,140)+'.',620);
+   if(kts?.rolling_support)pts[1].action=append(pts[1].action,'PVSĐ báo: '+shorten(kts.rolling_support,140)+'.',620);
+   if(pv?.peak_staff)pts[4].action=append(pts[4].action,'PVHK báo: '+shorten(pv.peak_staff,160)+'.',600);
    if(kts?.staff_shortage)pts[4].observation=append(pts[4].observation,'PVSĐ báo: '+shorten(kts.staff_shortage,150)+'.',480);
-   if(!confirmedStaff)pts[4].observation=append(pts[4].observation,'CHỜ XÁC NHẬN quân số theo ca.',485);
-   if(kts?.gse_risk)pts[5].observation=append(pts[5].observation,'PVSĐ xác nhận: '+shorten(kts.gse_risk,140)+'.',470);
-   if(kho?.special_cargo)pts[6].observation=append(pts[6].observation,'Kho xác nhận: '+shorten(kho.special_cargo,150)+'.',480);
+   if(!confirmedStaff)pts[4].observation=append(pts[4].observation,'Quân số từng ca đang được các phòng cập nhật.',485);
+   if(kts?.gse_risk)pts[5].observation=append(pts[5].observation,'PVSĐ báo: '+shorten(kts.gse_risk,140)+'.',470);
+   if(kho?.special_cargo)pts[6].observation=append(pts[6].observation,'Kho Hàng báo: '+shorten(kho.special_cargo,150)+'.',480);
    if(kho?.handover_priority)pts[6].action=append(pts[6].action,'Kho Hàng ưu tiên: '+shorten(kho.handover_priority,150)+'.',565);
    if(pv?.bag_risk)pts[6].action=append(pts[6].action,'PVHK: '+shorten(pv.bag_risk,120)+'.',565);
    if(pv?.special_pax)pts[6].observation=append(pts[6].observation,'Khách đặc biệt: '+shorten(pv.special_pax,110)+'.',480);
-   if(qa?.weather_fod)pts[8].observation=append(pts[8].observation,'QA/IT xác nhận: '+shorten(qa.weather_fod,170)+'.',470);
+   if(qa?.weather_fod)pts[8].observation=append(pts[8].observation,'QA/IT báo: '+shorten(qa.weather_fod,170)+'.',470);
    if(qa?.followup)pts[8].action=append(pts[8].action,'QA/IT: '+shorten(qa.followup,140)+'.',580);
-   if(qa?.open_capa)pts[9].observation=append(pts[9].observation,'Tồn tại xác nhận: '+shorten(qa.open_capa,170)+'.',490);
+   if(qa?.open_capa)pts[9].observation=append(pts[9].observation,'Tồn tại từ ca trước: '+shorten(qa.open_capa,170)+'.',490);
    if(qa?.operational_impact)pts[9].action=append(pts[9].action,'QA/IT: '+shorten(qa.operational_impact,150)+'.',530);
    if(dh?.escalation)pts[9].action=append(pts[9].action,'ĐH kiến nghị xem xét: '+shorten(dh.escalation,120)+'.',540);
    return pts;
