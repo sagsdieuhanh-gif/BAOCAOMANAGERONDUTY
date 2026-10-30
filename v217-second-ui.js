@@ -25,6 +25,7 @@
    const id=parsed.meta.service_date;
    const wide=analysis.wide.slice(0,12).map(x=>[x.no,core.clock(x.t),x.type,fmt(x.bay),fmt(x.gate),
      x.booking||'CHỜ XÁC NHẬN','PVSĐ chuẩn bị thiết bị tàu thân rộng; PVHK chủ động theo booking đã xác nhận']);
+   const charter=(parsed.departures||[]).filter(x=>x.charter);
    const ferry=analysis.ferry.map(x=>[x.no,core.clock(x.t),x.ssr||'—',x.flight_type||'—',
      'Xác minh FERRY và nhu cầu phục vụ thực tế; không mặc định boarding như chuyến chở khách']);
    const night=analysis.night.slice(0,15).map(x=>[x.no,core.clock(x.t),x.type,fmt(x.bay),fmt(x.gate),fmt(x.booking)]);
@@ -39,13 +40,15 @@
      ' Kiểm tra kết quả trước khi duyệt lưu.</p>'+
      '<div class="quickTags">'+[['Đến',stats.arrival_count],['Đi',stats.departure_count],['Ghép theo đăng bạ',stats.matched_reg],
        ['Ghép theo chặng',stats.matched_route],['Chưa ghép',stats.unmatched],['Tàu rộng đi',stats.widebody],
-       ['Booking 3 thành phần',stats.booked],['FERRY',stats.ferry],['Thay đổi so L1',diff.length]]
+       ['Booking 3 thành phần',stats.booked],['FERRY',stats.ferry],['CHARTER (##)',charter.length],['Thay đổi so L1',diff.length]]
        .map(([label,n])=>'<span class="quickTag">'+esc(label)+': <b>'+n+'</b></span>').join('')+'</div>'+
      (incidents.length?'<div class="issue"><b>CẦN KIỂM TRA TRƯỚC KHI PHÁT HÀNH:</b><ul>'+incidents.slice(0,48).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>':'')+
      '<h4>1. Tàu thân rộng – bố trí bãi, gate và booking</h4>'+
      (wide.length?table(['Chuyến','STD','Tàu','Bãi','Gate','Booking nguồn','Lưu ý'],wide):'<p>Không ghi nhận chuyến đi A330/B777.</p>')+
      '<h4>2. Chuyến có ký hiệu FERRY / tính chất đặc biệt</h4>'+
      (ferry.length?table(['Chuyến','STD','SSR','FlightType','Phương án cần xác minh'],ferry):'<p>Chưa ghi nhận FERRY trong bảng đi.</p>')+
+     (charter.length?'<p><b>CHARTER (##):</b> '+esc(charter.map(x=>'##'+x.no).join(', '))+
+       '. Đây là chuyến thuê chuyến không thường lệ, không mặc định là FERRY. ĐH xác nhận yêu cầu phục vụ riêng từ hãng/AOC.</p>':'')+
      '<h4>3. Khung tối – gate, bãi đỗ và booking</h4>'+
      (night.length?table(['Chuyến','STD','Tàu','Bãi','Gate','Booking'],night):'<p>Không có chuyến đi từ 18:00 theo file.</p>')+
      '<h4>4. Kiểm tra khả năng dồn gate / thay đổi so Lần 1</h4>'+
