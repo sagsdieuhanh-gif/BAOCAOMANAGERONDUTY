@@ -97,3 +97,17 @@ body.v19-unit-KTS #tab-quick >.panel:first-of-type,body.v19-unit-PVHK #tab-quick
 .v212-staff-preview p{margin:6px 0;white-space:pre-wrap;line-height:1.3}
 .v212-staff-preview small{font-size:11px;color:#66798b}
 @media(max-width:620px){.v212-staff-grid{grid-template-columns:1fr}}
+
+/* V2.16: fixed personnel rows, responsive 3 data cells; no misaligned labels */
+.v216-staff-rows{display:flex;flex-direction:column;gap:10px}
+.v216-staff-row{display:grid;grid-template-columns:minmax(84px,.7fr) minmax(105px,1fr) minmax(120px,1fr) minmax(175px,1.5fr);gap:10px;align-items:end;padding:12px;border:1px solid #d2e3eb;border-radius:10px;background:white}
+.v216-shift-label{align-self:center;font-size:14px;color:#185373;white-space:nowrap}
+.v216-staff-row label{min-width:0;max-width:100%;display:block!important;line-height:1.35;align-self:stretch}
+.v216-staff-row input,.v216-staff-row select{width:100%!important;max-width:100%!important;min-width:0;min-height:39px;margin-top:6px;box-sizing:border-box}
+.v215-fast-report{margin:13px 0;padding:12px;border:1px solid #cbdce6;background:#f6f9fc;border-radius:10px}
+.v215-fast-report h4{font-size:14px;margin:0 0 8px;color:#20506e}
+.v215-fast-report textarea{min-height:104px;resize:vertical;white-space:pre-wrap}
+.v215-quick-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:9px;font-size:12px}
+.v215-quick-actions button{min-height:40px}
+@media(max-width:780px){.v216-staff-row{grid-template-columns:minmax(78px,.85fr) minmax(0,1fr);gap:10px}.v216-shift-label{grid-column:1/-1;border-bottom:1px solid #d9e8ee;padding-bottom:5px}.v216-staff-row label:last-child{grid-column:1/-1}}
+@media(max-width:375px){.v216-staff-row{grid-template-columns:1fr}.v216-staff-row label:last-child{grid-column:auto}}
