@@ -7,7 +7,7 @@ const context={
  prevDate:d=>{const x=new Date(d+'T12:00:00Z');x.setUTCDate(x.getUTCDate()-1);return x.toISOString().slice(0,10)}
 };
 for(const module of ['v211-report-insights.js','v212-personnel.js','v19-report.js']){
- vm.runInNewContext(fs.readFileSync('radar-cxr/'+module,'utf8'),context,{filename:module});
+ vm.runInNewContext(fs.readFileSync(''+module,'utf8'),context,{filename:module});
 }
 const P=context.window.SagsPersonnelV212;
 const report=context.window.SagsReportV19;
@@ -57,9 +57,9 @@ for(const not of [/hồ sơ/i,/mốc STD/i,/không suy ra/i,/theo quy ước/i,/
 const missing=report.build({...c,unitPlans:[]});
 assert.ok(missing.topics[4].action.includes('CHỜ XÁC NHẬN'));
 assert.ok(!missing.topics[4].action.includes('59 NS'));
-const inputs=fs.readFileSync('radar-cxr/v211-unit-input.js','utf8');
+const inputs=fs.readFileSync('v211-unit-input.js','utf8');
 for(const term of ['pvb_morning','pvb_night','pvb_morning_status','pvb_night_status','data-v212-preview','root.SagsPersonnelV212.validate'])assert.ok(inputs.includes(term));
-const html=fs.readFileSync('radar-cxr/index.html','utf8');
+const html=fs.readFileSync('index.html','utf8');
 assert.ok(html.indexOf('v212-personnel.js')<html.indexOf('v211-unit-input.js'));
 assert.ok(html.indexOf('v212-personnel.js')<html.indexOf('v19-report.js'));
 console.log('PASS V2.12 per-unit staffing totals, draft protection, live preview fields and manager-style report language');
