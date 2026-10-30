@@ -74,7 +74,7 @@
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small>'+
-       ((child||!x.defaultTime)&&active?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Xóa dòng xe bổ sung nếu chưa có phòng khác xác nhận" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
+       ((child||!x.defaultTime)&&(who==='ADMIN'||who==='DH')?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Xóa dòng xe bổ sung nếu chưa có phòng khác xác nhận" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
@@ -248,13 +248,15 @@
        const [dir,min,line]=b.dataset.v27Delete.split('|');
        const isMain=Number(line)===0;
        const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
-       if(!confirm('XÓA '+label+'? Nếu chỉ phòng bạn đã nhập thì số liệu của phòng bạn cũng sẽ được xóa. Nếu phòng khác đã xác nhận thì không xóa được. Giờ gốc không thể xóa.'))return;
+       if(!['ADMIN','DH'].includes(own))throw Error('Chỉ ĐH hoặc ADMIN được xóa xe đã thêm.');
+       const affected=rows.filter(x=>x.direction===dir&&x.departure_min===Number(min)&&(isMain||x.line_no===Number(line)));
+       const impacted=[...new Set(affected.map(x=>x.unit))];
+       if(!confirm('XÁC NHẬN XÓA '+label+'?\\nSẽ xóa số người đã nhập của '+impacted.length+' đơn vị ('+impacted.join(', ')+') và các dòng xe bổ sung liên quan. Hệ thống lưu nhật ký để truy xuất.\\nKhông thể hoàn tác trên màn hình.'))return;
        const {error}=await sb.rpc('ops_remove_shuttle_addition',{
          p_date:$('day').value,p_direction:dir,p_minute:Number(min),p_line:Number(line)
        });
        if(error){
-         if(/OTHER_DEPARTMENTS_HAVE_CONFIRMED_PEOPLE/.test(error.message||''))
-           throw Error('Không xóa được: đã có phòng khác xác nhận số người. Chỉ phòng đó được sửa/xóa số liệu của họ; bạn không được xóa dữ liệu phòng khác.');
+         if(/ONLY_DH_ADMIN/.test(error.message||''))throw Error('Chỉ ĐH hoặc ADMIN được xóa các giờ xe bổ sung.');
          throw Error(error.message);
        }
        await refresh();
