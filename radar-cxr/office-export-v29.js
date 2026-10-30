@@ -222,6 +222,21 @@
     ];
     return zip(files);
   }
+  function exportCanvasPdf(canvas,filename){
+    if(!canvas||!canvas.width||!canvas.height)throw Error('Ảnh báo cáo xe không hợp lệ.');
+    // Preserve pixel readability by segmenting exceptionally tall shuttle tables.
+    const pageH=Math.max(500,Math.round(canvas.width*595/842));
+    const num=Math.ceil(canvas.height/pageH),pages=[];
+    for(let i=0;i<num;i++){
+      const from=i*pageH,height=Math.min(pageH,canvas.height-from);
+      const part=document.createElement('canvas');part.width=canvas.width;part.height=pageH;
+      const ctx=part.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,part.width,part.height);
+      ctx.drawImage(canvas,0,from,canvas.width,height,0,0,canvas.width,height);
+      pages.push({bytes:toBytes(part.toDataURL('image/jpeg',.92)),width:part.width,height:part.height});
+    }
+    const blob=pdfFromJpegs(pages);download(blob,filename);
+    return {bytes:blob.size,pages:num};
+  }
   function download(blob,filename){
     const u=URL.createObjectURL(blob),a=document.createElement('a');
     a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();
@@ -236,5 +251,5 @@
     download(blob,filename);
     return {bytes:blob.size,blocks:blocks.length,format};
   }
-  root.SagsOfficeExportV29={blocksFromDOM,exportDocx,exportPdf,exportElement,_test:{zip,pdfFromJpegs,crc32}};
+  root.SagsOfficeExportV29={blocksFromDOM,exportDocx,exportPdf,exportCanvasPdf,exportElement,_test:{zip,pdfFromJpegs,crc32}};
 })(window);
