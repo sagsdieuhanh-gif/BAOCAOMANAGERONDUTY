@@ -235,7 +235,9 @@
          if(['KHU 2','KHU 3'].includes(api.zone(d.bay)))risks.push('Bãi xa: lưu ý tuyến xe, thiết bị');
          if(d.t>=1080&&['AK','FD','KE','OZ','BX','TW','RF','LJ','WE','ZE','7C'].includes(d.carrier))risks.push('Chuyến tối: chủ động chuẩn bị nhân sự, thiết bị trước giờ phục vụ');
          return {flight:d.no,clock:api.clock(d.t),type:d.type,bay:d.bay,gate:d.gate||'CHỜ XÁC NHẬN',
-           booking:d.booking||'CHỜ XÁC NHẬN',nature:d.ferry?'FERRY · CẦN XÁC NHẬN':d.flight_type||'CHƯA XÁC NHẬN',
+           booking:d.booking||'CHỜ XÁC NHẬN',checkin:d.checkin_row?'Quầy '+d.checkin_row+(d.checkin_open!=null?', mở '+api.clock(d.checkin_open):''):'Chưa có quầy Ck-in',
+           boarding:d.boarding_start!=null?'Boarding '+api.clock(d.boarding_start)+(d.boarding_finish!=null?'–'+api.clock(d.boarding_finish):''):'Chưa có giờ boarding',
+           nature:d.ferry?'FERRY · CẦN XÁC NHẬN':d.flight_type||'CHƯA XÁC NHẬN',
            action:risks.join('. ')+'.'};
        }),
        gateCheck:review.gateCheck.slice(0,10),source:c.sourceFile,
@@ -275,8 +277,8 @@
     (data.l2Details?'<h3>PHÂN TÍCH CHI TIẾT LẦN 2 · BẾN BÃI / GATE / BOOKING / FERRY</h3>'+
        '<p>Đối chiếu '+esc(data.l2Details.source)+': '+data.l2Details.bookingCount+' chuyến có booking dạng ba thành phần; '+
        data.l2Details.wideCount+' chuyến đi tàu thân rộng; '+data.l2Details.ferryCount+' chuyến có ký hiệu FERRY.</p>'+
-       '<table>'+tr(['Chuyến/STD','Tàu – bãi đỗ','Gate / Booking nguồn','Tính chất và phương án phục vụ'],true)+
-       data.l2Details.rows.map(x=>tr([x.flight+' · '+x.clock,x.type+' · '+fmtBay(x.bay),x.gate+' / '+x.booking,
+       '<table>'+tr(['Chuyến/STD','Tàu – bãi đỗ','Gate / Ck-in / Booking','Tính chất và phương án phục vụ'],true)+
+       data.l2Details.rows.map(x=>tr([x.flight+' · '+x.clock,x.type+' · '+fmtBay(x.bay),'Gate '+x.gate+' · '+x.checkin+' · '+x.boarding+' · Booking '+x.booking,
          x.nature+'. '+x.action])).join('')+'</table>'+
        (data.l2Details.gateCheck.length?'<p><b>GATE CẦN KIỂM TRA:</b> '+
          esc(data.l2Details.gateCheck.map(x=>x.gate+' ('+x.a+' / '+x.b+', cách '+x.minutes+' phút)').join('; '))+
