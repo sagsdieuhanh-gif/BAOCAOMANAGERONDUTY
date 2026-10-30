@@ -45,7 +45,7 @@
  const selected=(unit)=>unit==='QA'||unit==='IT'?'QA_IT':unit;
  let rows=[],quickRows=[],bound=false,token=0,loading=false,loadedDate='',lastError='';
  const labelFor=(row)=>row?.status==='CONFIRMED'?'ĐÃ XÁC NHẬN':row?.status==='DRAFT'?'ĐÃ LƯU NHÁP':'CHƯA CÓ DỮ LIỆU';
- const mayEdit=(key)=>typeof unit!=='undefined'&&(unit==='ADMIN'||unit===key||(key==='QA_IT'&&['QA','IT'].includes(unit)));
+ const mayEdit=(key)=>typeof unit!=='undefined'&&(['ADMIN','DH'].includes(unit)||unit===key||(key==='QA_IT'&&['QA','IT'].includes(unit)));
  const statusOpts=[['PENDING','CHƯA XÁC NHẬN'],['READY','ĐÃ SẴN SÀNG'],['LIMITED','CÓ HẠN CHẾ']]; 
  function createField(info){
    if(info.type==='status')return '<label>'+esc(info.label)+'<select data-unit-field="'+esc(info.key)+'">'+statusOpts.map(([v,k])=>'<option value="'+v+'">'+k+'</option>').join('')+'</select></label>';
