@@ -201,9 +201,16 @@
    const found={};
    for(const name of book.SheetNames||[]){
      const rows=xlsx.utils.sheet_to_json(book.Sheets[name],{header:1,raw:true,defval:'',blankrows:true});
-     const label=(rows[3]||[]).map(x=>trim(x).toUpperCase()).join(' ');
-     if(/\bARRIVAL\b/.test(label)&&detectHeader(rows,'ARRIVAL'))found.ARRIVAL=rows;
-     if(/\bDEPARTURE\b/.test(label)&&detectHeader(rows,'DEPARTURE'))found.DEPARTURE=rows;
+     // Workbook editions may omit the ARRIVAL/DEPARTURE title in row 4.
+     // The actual FlightNo + STA/STD + ParkingBay headers are authoritative.
+     const hasArr=!!detectHeader(rows,'ARRIVAL'),hasDep=!!detectHeader(rows,'DEPARTURE');
+     const title=(name+' '+rows.slice(0,10).map(row=>(row||[]).slice(0,8).map(x=>trim(x)).join(' ')).join(' ')).toUpperCase();
+     if(hasArr&&!hasDep&&!found.ARRIVAL)found.ARRIVAL=rows;
+     if(hasDep&&!hasArr&&!found.DEPARTURE)found.DEPARTURE=rows;
+     if(hasArr&&hasDep){
+       if(/\bARRIVAL\b/.test(title)&&!found.ARRIVAL)found.ARRIVAL=rows;
+       if(/\bDEPARTURE\b/.test(title)&&!found.DEPARTURE)found.DEPARTURE=rows;
+     }
    }
    return found.ARRIVAL&&found.DEPARTURE?found:null;
  }
