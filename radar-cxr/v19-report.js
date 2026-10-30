@@ -98,14 +98,14 @@
      (x.issue_status==='OUT_OF_SERVICE'?'tạm dừng':x.issue_status==='REPAIR'?'đang sửa':'hạn chế')+'): '+
      x.fault+(x.impact?' – '+x.impact:'')+(x.expected_return?' – dự kiến '+x.expected_return:'')).join('; ');
    const issueAlternatives=activeIssues.filter(x=>x.workaround).slice(0,3).map(x=>x.equipment_id+': '+x.workaround).join('; ');
-   const transportSummary=['DH','KTS','PVHK','KHO'].map(u=>{
-     const label=u==='DH'?'ĐH':u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG';
+   const transportSummary=['DH','KTS','PVHK','KHO','QA_IT'].map(u=>{
+     const label=u==='DH'?'ĐH':u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':u==='QA_IT'?'QA / IT':'KHO HÀNG';
      const part=(c.transport||[]).filter(x=>x.unit===u);
      if(!part.length)return label+': chưa xác nhận xe giao ca';
      const segments=['NHA_CXR','CXR_NHA'].map(dir=>{
        const selection=part.filter(x=>x.direction===dir).sort((a,b)=>a.departure_min-b.departure_min);
        if(!selection.length)return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+': chưa có';
-       const names=selection.map(x=>clock(x.departure_min)+' '+x.quantity+' người').join(', ');
+       const names=selection.map(x=>clock(x.departure_min)+(x.line_no>0?' [Bổ sung '+x.line_no+']':'')+' '+x.quantity+' người').join(', ');
        return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+' ('+names+')';
      });
      const last=part.map(x=>x.confirmed_at).sort().at(-1);

@@ -116,3 +116,16 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - **PNG:** tải một hình ảnh đúng như ảnh xem trước.
 - **PDF:** in raster từ cùng Canvas, mặc định một trang A3 ngang nếu bảng có kích thước chuẩn; nếu số chuyến bổ sung quá lớn, tự chia trang để giữ kích thước chữ. Cả hai nút xuất chỉ nằm trong BÁO CÁO và chỉ ĐH/ADMIN được bấm.
 - Nếu logo EREPORT chưa tải thành công, thông báo lỗi rõ ràng thay vì âm thầm thay bằng logo giả hoặc xuất file thiếu nhận diện.
+
+
+## V2.4 – Một bảng nhập xe giao ca đẹp, phân quyền cột theo đơn vị, QA & IT chung cột
+
+**Các tab:** ĐH, PVSĐ, PVHK, KHO HÀNG và QA / IT đều có một **bảng nhập xe giao ca chung**, đúng hai chiều Nha Trang → Cam Ranh và Cam Ranh → Nha Trang, đủ 10 giờ mẫu và giờ tự bổ sung. Bảng hiện 5 cột **ĐH | PVSĐ | PVHK | KHO HÀNG | QA / IT**. Tài khoản QA và IT được cấp quyền RNS riêng nhưng cùng nhập một cột QA / IT. Các cột không thuộc phòng mình vẫn xem được, nhưng chỉ đọc; ADMIN được quản trị tất cả. Tài khoản VIEWER được xem bảng xuất chung trong BÁO CÁO, không sửa.
+
+**Thao tác:** Nhập số người trực tiếp trong ô dưới đúng mốc giờ. Nhấn **LƯU** ở dòng đó (hoặc Enter) để ghi đúng cột thuộc quyền và giờ máy chủ; không cập nhật lại mốc xác nhận khi dữ liệu không thay đổi. Ô để trống nghĩa là chưa xác nhận, nhập số 0 là xác nhận không có người. Bấm dấu **+** ở ngay cạnh giờ chính để chèn dòng **Bổ sung 1, Bổ sung 2...** ngay dưới cùng mốc giờ, vẫn trong bảng. Dòng mới được tạo tập trung cho mọi phòng cùng thấy. Dòng chính khi có thêm dòng con sẽ hiện **tổng cả khung giờ**. Có vùng **+ THÊM GIỜ XE KHÁC** trong từng chiều, chọn giờ và ngày +1, tạo mốc giờ mới ngay vào bảng.
+
+**Quyền và dữ liệu:** Supabase `ops_shift_transport_v2` thêm `line_no` vào khóa chính để không ghi đè dữ liệu lịch sử; `ops_shift_transport_rows` lưu các dòng bổ sung kể cả khi chưa có phòng nào nhập. Các hàm `ops_add_shuttle_row` và `ops_add_shuttle_slot` xác thực quyền trực tiếp trên máy chủ. RLS của `ops_shift_transport_v2` chỉ cho phép ghi đúng đơn vị, riêng QA và IT đều được sửa hàng có `unit='QA_IT'`; ĐH không sửa số của các phòng khác. Giờ xác nhận máy chủ và người xác nhận được giữ nguyên.
+
+**Tổng và xuất:** Tổng một dòng chỉ được chốt khi đủ **5/5 cột**; nếu thiếu ghi dấu **~** và CHỜ XÁC NHẬN. Đề xuất 29C cho 1–29 người, 45C cho 30–45 người, trên 45 người cảnh báo BỔ SUNG XE (không tự điều xe). Ảnh PNG và PDF được dựng từ đúng cùng bản vẽ xem trước, có cả cột QA / IT và các dòng bổ sung. Chỉ tài khoản ĐH/ADMIN có nút phát hành ở tab BÁO CÁO, các phòng được xem nhưng không tự phát hành.
+
+**Chú ý:** Tài khoản QA/IT hiện có phải được ADMIN gán vai trò QA hoặc IT tại mục Phân quyền Radar (không tạo tài khoản đăng nhập mới). Cần kiểm thử nhập/lưu trên tài khoản thực tế trước khi nghiệm thu chính thức.

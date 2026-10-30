@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
  await import('../v21-shuttle-export.js');
  const m=globalThis.SagsShuttleModel,exp=globalThis.SagsShuttleExport;
  const stamp='2026-10-30T02:32:00Z';
- const roles=['DH','KTS','PVHK','KHO'];
+ const roles=['DH','KTS','PVHK','KHO','QA_IT'];
  const input=[];
  for(const [minute,qty] of [[390,5],[420,9],[540,14],[1050,16],[1170,1]]){
    roles.forEach((unit,i)=>input.push({unit,direction:'NHA_CXR',departure_min:minute,quantity:unit==='DH'?0:qty,confirmed_at:stamp}));
@@ -33,6 +33,8 @@ const assert=require('node:assert/strict');
  assert.ok(out.includes('BỔ SUNG XE'));
  assert.ok(out.includes('ĐH'));
  assert.ok(out.includes('KHO HÀNG'));
+ assert.ok(out.includes('QA / IT'));
+ assert.ok(out.includes('ĐÃ XÁC NHẬN 5/5'));
  assert.ok(out.includes('NGÀY KHAI THÁC'));
  assert.throws(()=>exp._test.draw({date:'2026-10-30',rows},null),/logo/);
  console.log('V2.3 preview / PNG / PDF shared artwork, SAGS logo, 29/45 types: OK');

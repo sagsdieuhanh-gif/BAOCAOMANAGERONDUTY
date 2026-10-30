@@ -15,9 +15,16 @@ const assert=require('node:assert/strict');
  assert.equal(rows.length,11);
  const first=rows.find(x=>x.direction==='NHA_CXR'&&x.departure_min===390);
  assert.equal(first.total,31);
- assert.equal(first.confirmed,4);
+ assert.equal(first.confirmed,4); // still waiting for QA/IT
  assert.equal(first.units[3].quantity,0);
  assert.equal(first.units[0].quantity,5);
+ assert.equal(first.units.length,5);
+ assert.equal(first.units[4],null);
+ const add=e._test.normalize(records,[{direction:'NHA_CXR',departure_min:390,line_no:1}]);
+ assert.equal(add.length,12);
+ const extra=add.find(x=>x.direction==='NHA_CXR'&&x.departure_min===390&&x.line_no===1);
+ assert.equal(extra.confirmed,0);
+ assert.equal(extra.note,'Xe bổ sung 1');
  const custom=rows.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1380);
  assert.equal(custom.total,7);
  assert.equal(custom.is_custom,true);

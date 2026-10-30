@@ -42,6 +42,8 @@ jobs:
           node --check radar-cxr/v20-departments.js
           node --check radar-cxr/v21-shuttle-model.js
           node --check radar-cxr/v21-shuttle-export.js
+          node --check radar-cxr/v24-shuttle-grid.js
+          node radar-cxr/tests/v24-shuttle-grid.test.cjs
           node radar-cxr/tests/v23-shuttle-render.test.cjs
           node radar-cxr/tests/v21-shuttle.test.cjs
           node radar-cxr/tests/v21-shuttle-export.test.cjs

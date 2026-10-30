@@ -397,7 +397,7 @@
      PVHK:['pvhk','radar','report'],
      KHO:['warehouse','radar','report'],
      VIEWER:['radar','report'],
-     ADMIN:['home','sources','pvsd','pvhk','warehouse','radar','report','doorclose','admin']
+     ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','radar','report','doorclose','admin']
    }[role]||['radar','report'];
    const labels={home:'ĐIỀU HÀNH',sources:'LỊCH BAY',pvsd:'PVSĐ',pvhk:'PVHK',warehouse:'KHO HÀNG',
      radar:'RADAR',report:'BÁO CÁO',doorclose:'DOOR CLOSE',admin:'PHÂN QUYỀN'};
