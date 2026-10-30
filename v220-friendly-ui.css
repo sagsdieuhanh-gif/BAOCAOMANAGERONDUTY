@@ -90,3 +90,10 @@ main.layout{padding:9px!important}
 }
 @media(max-width:380px){.v220-menu{grid-template-columns:1fr 1fr}.v220-task-icon{display:none}.v220-task-text strong{font-size:11px}}
 @media print{#v220Hub{display:none!important}#tabs{display:none!important}#app>section[id^="tab-"] .panel{box-shadow:none!important}}
+
+/* User-supplied SAGS vehicles in the on-screen recommendation column */
+.v24-coach .v220-coach-img{display:block;width:85px;height:55px;object-fit:contain;max-width:100%;margin:1px auto;mix-blend-mode:multiply}
+.v24-coach .v220-coach-both{display:flex;justify-content:center;gap:1px}
+.v24-coach .v220-coach-both .v220-coach-img{width:46px;height:37px}
+.v24-coach .v220-coach-both+span,.v24-coach>span{display:block;font-size:12px;font-weight:800}
+@media(max-width:720px){.v24-coach .v220-coach-img{width:65px;height:43px}}
