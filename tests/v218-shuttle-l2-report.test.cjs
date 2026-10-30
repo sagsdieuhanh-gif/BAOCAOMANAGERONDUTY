@@ -6,8 +6,8 @@ require('../v24-shuttle-grid.js');
 require('../v21-shuttle-export.js');
 const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=globalThis.SagsShuttleExport._test;
 assert.deepEqual(m.defaults.map(x=>[x.direction,x.departure_min]),[
- ['NHA_CXR',420],['NHA_CXR',1050],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1935]
-],'Only five confirmed fixed times');
+ ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1935]
+],'All six confirmed fixed times');
 assert.equal(m.clock(1935),'08:15 (+1)');
 assert.equal(m.isDefault('NHA_CXR',390),false);
 assert.equal(m.isDefault('CXR_NHA',495),false);
@@ -26,7 +26,7 @@ assert.equal(main.confirmed,4);
 assert.equal(main.total,45,'Warehouse must not affect total');
 assert.equal(main.cells.length,4);
 assert.equal(g.classify(main).label,'45 CHỖ');
-assert.equal(rows.filter(x=>x.direction==='NHA_CXR').length,2,'No old NHA fixed hours');
+assert.equal(rows.filter(x=>x.direction==='NHA_CXR').length,3,'Three NHA fixed hours, including 19:30');
 const oldTime=rows.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1125);
 assert.ok(oldTime&&!oldTime.defaultTime,'Old saved time must be extra, not deleted');
 const exp=e.normalize(v);
