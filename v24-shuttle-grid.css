@@ -66,14 +66,28 @@
 .v28-custom-reason input{width:100%;min-height:37px;border:1px solid #d7a152!important;border-radius:8px;padding:7px}
 
 /* V2.14: one save button after both directions, no per-row '+' or save columns */
-.v24-table{min-width:880px}
+.v24-table{min-width:770px}
 .v24-table thead th:nth-child(1){width:124px}
-.v24-table thead th:nth-child(n+2):nth-child(-n+6){width:122px}
-.v24-table thead th:nth-child(7){width:82px}
-.v24-table thead th:nth-child(8){width:145px}
+.v24-table thead th:nth-child(n+2):nth-child(-n+5){width:122px}
+.v24-table thead th:nth-child(6){width:112px}
+.v24-table thead th:nth-child(7){width:135px}
 .v214-delete-slot{display:block;margin:5px auto 0;font-size:10px!important;min-height:24px!important;padding:2px 7px!important;background:#fff6ed!important;color:#a15b21!important;border:1px solid #deb685!important;border-radius:5px!important}
 .v214-actions{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:sticky;bottom:0;z-index:3;background:#eaf5f9;border:1px solid #bbd8e4;box-shadow:0 -3px 16px #22475d24;border-radius:12px;padding:12px 15px;margin:18px 0 8px}
 .v214-actions span{flex:1;min-width:200px;font-size:12px;font-weight:600;line-height:1.4;color:#2b5a75}
 .v214-actions button{background:#146589!important;color:white!important;border:1px solid #146589!important;border-radius:9px!important;font-size:14px!important;font-weight:800!important;letter-spacing:.2px;padding:11px 18px!important;min-height:44px!important}
 .v214-actions button:focus-visible{outline:3px solid #57a1c1;outline-offset:2px}
-@media(max-width:780px){.v24-table{min-width:860px}.v214-actions{padding:9px 11px;bottom:env(safe-area-inset-bottom,0px)}.v214-actions button{flex:1}}
+@media(max-width:780px){.v24-table{min-width:760px}.v214-actions{padding:9px 11px;bottom:env(safe-area-inset-bottom,0px)}.v214-actions button{flex:1}}
+
+/* V2.18: four-unit shuttle, clear totals and minimal reading effort */
+.v24-table{table-layout:fixed!important}
+.v24-table thead th:nth-child(1){width:125px}
+.v24-table thead th:nth-child(n+2):nth-child(-n+5){width:112px}
+.v24-table thead th:nth-child(6){width:110px}
+.v24-table thead th:nth-child(7){width:155px}
+.v24-table .v24-total{background:#e6f1f7!important;text-align:center!important}
+.v24-table .v24-total b{font-size:30px!important;line-height:1.15!important;font-weight:900!important;letter-spacing:-.5px;color:#123b56!important}
+.v24-table .v24-total small{font-size:11px}
+.v28-missing-row td{font-size:12px!important;padding:7px 13px!important}
+.v24-table .v24-time b{font-weight:900}
+.v24-table tr.v28-extra-slot .v24-total{background:#fff0d8!important}
+@media(max-width:780px){.v24-table{min-width:760px!important}.v24-table .v24-total b{font-size:27px!important}}
