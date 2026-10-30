@@ -73,8 +73,7 @@
      item('2','Radar tự động theo khung 30 phút','Trực quan chuyến chồng lấn, tàu thân rộng, nguồn lực','MỞ RADAR','radar')+
      item('3','Bản tin Lần 1 theo mẫu Word','Đủ 5 phần: tóm tắt, kiểm soát, cao điểm, phối hợp, kiến nghị','XEM MẪU','report')+
      item('4','Lịch có bãi sau AOC – DỰ BÁO LẦN 2',two?'Đã có bản Lần 2':'Cập nhật sau 21h; giữ bản Lần 1 để đối chiếu','LỊCH CẬP NHẬT','sources')+
-    '</div><div class="v19-buttons"><button class="v19-primary" data-v19-export>XUẤT WORD BẢN TIN V2.7 (.DOCX)</button>'+
-    '<button class="v19-inline-btn" data-v19-go="report">XEM TRƯỚC BẢN TIN</button></div>'+
+    '</div><div class="v19-buttons"><button class="v19-primary" data-v19-go="report">XEM / XUẤT BÁO CÁO WORD – PDF</button></div>'+
     '<div class="v19-small" id="v19ExportMessage">Thông tin chưa xác nhận sẽ ghi rõ là chờ xác nhận trong Word.</div></section>'+
     '<section class="v19-section"><h3>THÔNG TIN TỪ CÁC ĐƠN VỊ</h3>'+
     countStatus().map(x=>'<div class="v19-status '+(x.ok?'ok':'warn')+'"><span class="dot"></span><b>'+x.name+':</b> '+x.label+'</div>').join('')+
