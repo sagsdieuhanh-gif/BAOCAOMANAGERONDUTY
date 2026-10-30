@@ -6,6 +6,7 @@
   {direction:'NHA_CXR',departure_min:1170,label:'19:30'},
   {direction:'CXR_NHA',departure_min:990,label:'16:30'},
   {direction:'CXR_NHA',departure_min:1110,label:'18:30'},
+  {direction:'CXR_NHA',departure_min:1560,label:'02:00 (+1)'},
   {direction:'CXR_NHA',departure_min:1935,label:'08:15 (+1)'}
  ];
  const directionLabel={NHA_CXR:'NHA → CXR · XE ĐI LÀM',CXR_NHA:'CXR → NHA · XE VỀ'};
