@@ -1,6 +1,0 @@
-// DEPRECATED since SAGS FORM LITE V1.5. DO NOT DEPLOY.
-// No new lite_flights or lite_users are created for production.
-// The Lite project reuses E-Report Firebase Auth, users/{UID}, RTDB roster_mail,
-// roster_manifests, roster_sessions, flight_records and the native form workflows.
-// Keep the original E-Report Firestore/RTDB security rules unchanged until
-// separately reviewed and tested. There is NO new Lite rules fragment to publish.

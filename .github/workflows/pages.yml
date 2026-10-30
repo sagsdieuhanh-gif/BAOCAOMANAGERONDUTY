@@ -1,120 +1,36 @@
-name: Publish SAGS FORM LITE (GitHub Pages)
+name: Publish BAOCAOMANAGERONDUTY
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
   pages: write
   id-token: write
-concurrency:
-  group: github-pages
-  cancel-in-progress: false
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Checkout pinned original E-Report operational source
-        uses: actions/checkout@v4
-        with:
-          repository: sagsdieuhanh-gif/E-REPORT-SAGS
-          ref: 41ad37fc9033f160fd00c21008ff9711ddfd7294
-          path: upstream-old
-          persist-credentials: false
-      - name: Node.js 22
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate Radar Excel importer
+      - name: Check syntax
         run: |
-          node --check radar-cxr/excel-import.js
-          node --check radar-cxr/excel-ui.js
-          node --check radar-cxr/sags-schedule.js
-          node --check radar-cxr/sags-auto.js
-          node --check radar-cxr/v211-report-insights.js
-          node --check radar-cxr/v211-unit-input.js
-          node --check radar-cxr/v212-personnel.js
-          node --check radar-cxr/v212-personnel.js
-          node --check radar-cxr/v19-report.js
-          node --check radar-cxr/v19-ui.js
-          node --check radar-cxr/v20-departments.js
-          node radar-cxr/tests/v26-dh-overview.test.cjs
-          node --check radar-cxr/v21-shuttle-model.js
-          node --check radar-cxr/v21-shuttle-export.js
-          node --check radar-cxr/v24-shuttle-grid.js
-          node --check radar-cxr/v27-report-alerts.js
-          node radar-cxr/tests/v27-alerts.test.cjs
-          node --check radar-cxr/radar-report-v28.js
-          node radar-cxr/tests/v28-report.test.cjs
-          node --check radar-cxr/office-export-v29.js
-          node --check radar-cxr/report-export-v29.js
-          node radar-cxr/tests/v29-office-export.test.cjs
-          node --check radar-cxr/rns-admin.js
-          node radar-cxr/tests/rns-admin.test.cjs
-          node radar-cxr/tests/v24-shuttle-grid.test.cjs
-          node radar-cxr/tests/v213-shuttle-reasons.test.cjs
-          node radar-cxr/tests/v23-shuttle-render.test.cjs
-          node radar-cxr/tests/v21-shuttle.test.cjs
-          node radar-cxr/tests/v21-shuttle-export.test.cjs
-          node radar-cxr/tests/v211-report-insights.test.cjs
-          node radar-cxr/tests/v212-personnel-human-report.test.cjs
-          node radar-cxr/tests/v212-personnel-human-report.test.cjs
-          node radar-cxr/tests/v210-service-plans.test.cjs
-          node radar-cxr/tests/v19-report.test.cjs
-          node radar-cxr/tests/sags-schedule.test.cjs
-          node radar-cxr/tests/excel-import.test.cjs
-          node -e "const fs=require('fs');const s=fs.readFileSync('radar-cxr/index.html','utf8');fs.writeFileSync('/tmp/radar-inline.js',s.split('<script>')[1].split('</script>')[0]);"
-          node --check /tmp/radar-inline.js
-      - name: Check source
+          for f in ./*.js; do node --check "$f"; done
+      - name: Stage Manager On Duty
         run: |
-          npm test
-          npm run check
-      - name: Retrieve and verify original E-Report form assets
-        run: |
-          npm run vendor
-          npm run verify:assets
-      - name: Prepare static site
-        run: |
-          mkdir -p _site
-          cp index.html style.css config.js manifest.webmanifest version.json _site/
-          cp -R docs _site/
-          cp -R radar-cxr _site/
-          mkdir -p _site/radar-cxr/assets
-          cp upstream-old/assets/branding/logo.png _site/radar-cxr/assets/logo-ereport.png
-          test "$(git hash-object _site/radar-cxr/assets/logo-ereport.png)" = "c5674a77f84b0bd9359d8eed423c074842ecc31a"
-          cp -R src forms data app _site/
-          npm run build:native
+          mkdir -p _site/assets
+          cp index.html ./*.js ./*.css _site/
+          cp assets/logo-sags.png _site/assets/
           touch _site/.nojekyll
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-      - name: Wait for automatic Pages branch build
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # The legacy branch-based Pages workflow can be running for the same commit.
-          # GitHub only permits one Pages deployment at a time.
-          for attempt in $(seq 1 30); do
-            active=$(gh run list -R "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --limit 20 --json name,status |
-              jq '[.[] | select(.name == "pages build and deployment" and .status != "completed")] | length')
-            if [ "$active" = "0" ]; then
-              echo "No competing Pages deployment is active."
-              exit 0
-            fi
-            echo "Automatic Pages workflow still active; verifying before deploying custom artifact..."
-            sleep 10
-          done
-          echo "::error::Pages branch build did not settle; refusing to race deployments."
-          exit 1
-      - name: Deploy GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    environment: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4
