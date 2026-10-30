@@ -30,8 +30,6 @@
 .v24-table .v24-time b{display:block;font-size:18px;letter-spacing:.1px;color:#143f5a;font-variant-numeric:tabular-nums}
 .v24-table .v24-time small{display:block;font-size:10px;color:#6b8a99;white-space:nowrap;margin-top:4px}
 .v24-child .v24-time b{font-size:15px;color:#367c96}
-.v24-plus button{width:29px;height:29px;border:1px solid #bad7e4!important;background:#e9f5f9!important;border-radius:8px!important;color:#197598!important;font-size:21px!important;line-height:1!important;font-weight:600}
-.v24-plus button:hover{background:#d4ebf4!important}
 .v24-cell{min-height:66px}
 .v24-cell strong{display:block;font-size:20px;font-weight:700;color:#244759;line-height:1.3}
 .v24-cell small{font-size:10px;line-height:1.4;display:block;margin-top:4px;color:#738c9c;white-space:normal}
@@ -45,8 +43,6 @@
 .v24-coach svg{display:block;margin:auto}
 .v24-coach.v24-excess span{color:#a85c26}
 .v24-coach.v24-pending span{color:#af7a26}
-.v24-save button{background:#1b7498!important;color:white!important;border:0!important;border-radius:7px!important;font-size:11px!important;padding:8px 11px;min-height:34px;font-weight:750}
-.v24-save button:hover{background:#125979!important}
 .v24-custom{padding:10px 17px;background:#f8fbfd}
 .v24-custom summary{font-size:12px;cursor:pointer;font-weight:700;color:#276f90}
 .v24-custom>div{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:13px 0}
@@ -68,3 +64,16 @@
 .v28-reason-wrap button{border-radius:7px;padding:7px 12px;background:#bd7830!important;color:white!important;font-weight:700}
 .v28-custom-reason{min-width:270px;flex:1}
 .v28-custom-reason input{width:100%;min-height:37px;border:1px solid #d7a152!important;border-radius:8px;padding:7px}
+
+/* V2.14: one save button after both directions, no per-row '+' or save columns */
+.v24-table{min-width:880px}
+.v24-table thead th:nth-child(1){width:124px}
+.v24-table thead th:nth-child(n+2):nth-child(-n+6){width:122px}
+.v24-table thead th:nth-child(7){width:82px}
+.v24-table thead th:nth-child(8){width:145px}
+.v214-delete-slot{display:block;margin:5px auto 0;font-size:10px!important;min-height:24px!important;padding:2px 7px!important;background:#fff6ed!important;color:#a15b21!important;border:1px solid #deb685!important;border-radius:5px!important}
+.v214-actions{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:sticky;bottom:0;z-index:3;background:#eaf5f9;border:1px solid #bbd8e4;box-shadow:0 -3px 16px #22475d24;border-radius:12px;padding:12px 15px;margin:18px 0 8px}
+.v214-actions span{flex:1;min-width:200px;font-size:12px;font-weight:600;line-height:1.4;color:#2b5a75}
+.v214-actions button{background:#146589!important;color:white!important;border:1px solid #146589!important;border-radius:9px!important;font-size:14px!important;font-weight:800!important;letter-spacing:.2px;padding:11px 18px!important;min-height:44px!important}
+.v214-actions button:focus-visible{outline:3px solid #57a1c1;outline-offset:2px}
+@media(max-width:780px){.v24-table{min-width:860px}.v214-actions{padding:9px 11px;bottom:env(safe-area-inset-bottom,0px)}.v214-actions button{flex:1}}
