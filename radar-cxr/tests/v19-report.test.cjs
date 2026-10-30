@@ -9,6 +9,7 @@ const globals={
  prevDate:d=>{const z=new Date(d+'T12:00:00Z');z.setUTCDate(z.getUTCDate()-1);return z.toISOString().slice(0,10)},
  setTimeout,console
 };
+vm.runInNewContext(fs.readFileSync('radar-cxr/v211-report-insights.js','utf8'),globals);
 vm.runInNewContext(fs.readFileSync('radar-cxr/v19-report.js','utf8'),globals);
 const api=globals.window.SagsReportV19;
 assert.equal(typeof api.build,'function');
@@ -23,8 +24,8 @@ const c={
  ],note:{},controls:[]
 };
 const data=api.build(c);
-assert.equal(data.topics.length,9);
-assert.equal(data.coord.length,2);
+assert.equal(data.topics.length,10);
+assert.equal(data.coord.length,4);
 assert.ok(data.peakRows.length>0);
 assert.ok(data.summary.includes('Đến: 29'));
 assert.ok(data.comparison.includes('Ngày 29/10/2026'));
