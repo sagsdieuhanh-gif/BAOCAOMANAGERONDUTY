@@ -200,11 +200,11 @@
    });
    if(window.SagsPersonnelV212){
      const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
-     topics[4].observation=people.complete?
+     topics[3].observation=people.complete?
        'Các phòng đã xác nhận quân số phục vụ bay theo ca. Phương án bố trí cụ thể sẽ điều chỉnh theo lịch bay thực tế.':
        'Các phòng đã cập nhật hoặc đang rà soát quân số phục vụ bay cho từng ca; số liệu chưa xác nhận được ghi rõ bên cạnh.';
-     topics[4].action=people.lines.join('\n');
-     topics[4].owner='ĐH · PVHK · KTSĐ';
+     topics[3].action=people.lines.join('\n');
+     topics[3].owner='ĐH · PVHK · PVSĐ';
    }
    let l2Details=null,l2Changes=[];
    if(c.revision===2&&window.SagsSecondForecast&&c.sourcePayload?.source_detail){
