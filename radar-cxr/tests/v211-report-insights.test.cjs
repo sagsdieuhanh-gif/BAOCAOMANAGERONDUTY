@@ -12,8 +12,8 @@ const f=(airline,arrival,departure,pax,stand)=>({arrival,departure,airline,aircr
 const rows=[f('KE','KE467','KE468',377,56),f('VJ','VJ6876','VJ6877',366,38),f('AK','AK646','AK647',170,null)];
 const c={rows,staff:[],gse:[],unitPlans:[],cargoPlans:[],note:{},controls:[]};
 const wide=bank.widebody(c);
-assert.ok(wide.observation.includes('KE467 / KE468'));
-assert.ok(wide.observation.includes('VJ6876 / VJ6877'));
+assert.ok(wide.observation.includes('KE467/KE468'));
+assert.ok(wide.observation.includes('VJ6876/VJ6877'));
 assert.ok(wide.observation.includes('377'));
 assert.ok(wide.action.includes('A330'));
 assert.ok(wide.action.includes('B777'));
