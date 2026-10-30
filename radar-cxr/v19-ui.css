@@ -72,3 +72,19 @@ body.v19-unit-KTS #tab-quick >.panel:first-of-type,body.v19-unit-PVHK #tab-quick
 #app > #kpis,#app > #movementComparison{display:none!important}
 #tab-report > .panel{display:none!important}
 #tab-report > #v19ReportModern{display:block!important}
+
+/* V2.11: compact landscape report consistent with the supplied 10-control reference. */
+.v19-report-sheet.v211-compact{max-width:1180px;padding:16px 20px;font-family:'Times New Roman',serif;font-size:12.5px;line-height:1.25}
+.v211-compact h2{font-size:17px!important;margin:3px 0 7px!important}
+.v211-compact h3{font-size:13.2px!important;margin:10px 0 5px!important;break-after:avoid}
+.v211-compact p{margin:4px 0 6px}
+.v211-compact table{table-layout:fixed;width:100%;font-family:'Times New Roman',serif;font-size:11.5px;line-height:1.23;margin-bottom:8px}
+.v211-compact th,.v211-compact td{padding:4px 5px;vertical-align:top;overflow-wrap:anywhere}
+.v211-compact tr{break-inside:avoid}
+.v211-compact table:nth-of-type(2) th:nth-child(1){width:17%}
+.v211-compact table:nth-of-type(2) th:nth-child(2){width:28%}
+.v211-compact table:nth-of-type(2) th:nth-child(3){width:43%}
+.v211-compact table:nth-of-type(2) th:nth-child(4){width:12%}
+.v211-compact .v19-footnote{font-size:10.5px}
+.v211-input{margin-top:14px}.v211-input textarea{min-height:66px;resize:vertical}
+@media print{.v211-compact{max-width:unset!important;padding:0!important;margin:0!important;box-shadow:none!important;border:none!important}.v211-compact table{font-size:10.3px}.v211-compact th,.v211-compact td{padding:3px 4px}}
