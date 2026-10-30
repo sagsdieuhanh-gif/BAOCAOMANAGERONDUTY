@@ -26,7 +26,7 @@ let data=api.build({...base,rows:evening});
 assert.equal(data.topics.length,10);
 assert.equal(data.coord.length,4);
 assert.ok(data.topics[1].action.includes('cuốn chiếu'),'Need a rolling crew/equipment strategy');
-assert.ok(data.topics[1].action.includes('hoàn thành dứt điểm'),'Need completion-first service plan');
+assert.ok(data.topics[1].action.includes('làm dứt điểm'),'Need completion-first service plan');
 assert.ok(data.topics[1].action.includes('PVSĐ')&&data.topics[1].action.includes('PVHK')&&data.topics[1].action.includes('ĐH'),'Need responsible departments');
 for(const code of ['AK100','FD200','KE300'])assert.ok(data.topics[1].action.includes(code),code+' needs specific evening priority');
 assert.ok(data.topics[1].action.includes('19:00'),'Evening priority must name the actual peak window');
@@ -40,7 +40,7 @@ data=api.build({...base,rows:[f(100,'KE',1100,1160),f(200,'VJ',1100,1130),f(300,
 assert.ok(data.topics[1].action.includes('hãng Hàn Quốc'),'Korean night peak needs prioritization');
 assert.ok(!data.topics[1].action.includes('(AK, FD,'),'Do not invent absent AK and FD');
 data=api.build({...base,rows:[f(100,'AK',1150,1180),f(200,'FD',1155,1185)]});
-assert.ok(!data.topics[1].action.includes('Khung tối'),'Two flights do not constitute a >=4 pair evening peak');
+assert.ok(!data.topics[1].action.includes('Trong cao điểm tối'),'Two flights do not constitute a >=4 pair evening peak');
 data=api.build({...base,rows:[f(100,'AK',1150,1180)],controls:[{topic:2,action:'ĐH đã nhập phương án riêng'}]});
 assert.equal(data.topics[1].action,'ĐH đã nhập phương án riêng','Never overwrite operator-provided action');
 console.log('PASS V2.10: actionable-by-unit forecast plans, rolling service, conditional evening priorities, preserved overrides and separate shuttle');
