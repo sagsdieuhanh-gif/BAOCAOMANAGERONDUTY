@@ -14,7 +14,7 @@ const html=grid.makeGrid('NHA_CXR',confirmed,'DH');
 assert.equal((html.match(/<col class="v222-col-/g)||[]).length,7,'exactly 7 column dimensions');
 assert.equal((html.match(/<th scope="col"/g)||[]).length,7,'exactly seven headers');
 const rows=[...html.matchAll(/<tr class="v24-time-row[^>]*>[\s\S]*?<\/tr>/g)];
-assert.equal(rows.length,2,'two fixed departures on NHA_CXR');
+assert.equal(rows.length,3,'three fixed departures on NHA_CXR including 19:30');
 for(const row of rows)assert.equal((row[0].match(/<td\b/g)||[]).length,7,'each run must have seven cells');
 assert.ok(html.includes('<td class="v24-cell v24-edit">'),'editable cell remains in correct column');
 assert.ok(html.includes('2 XE: 45C + 29C'),'vehicle recommendation shown in a fixed column');
@@ -39,7 +39,7 @@ assert.ok(css.includes('overflow-x:auto!important'),'horizontal scroll required 
 assert.ok(css.includes('input[data-v24-value]')&&css.includes('max-width:100%!important'),'input cannot cross cell boundaries');
 assert.ok(css.includes('.v214-actions{position:relative!important'),'save toolbar should not cover rows on phone');
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes('Báo cáo điều hành V2.22'));
+assert.ok(index.includes('Báo cáo điều hành V2.23'));
 assert.ok(index.includes('v24-shuttle-grid.js?v=2.22'));
 assert.ok(index.includes('v222-shuttle-layout.css?v=2.22'));
 assert.ok(index.indexOf('v222-shuttle-layout.css')>index.indexOf('rns-admin.css'),'alignment overrides must load last');
