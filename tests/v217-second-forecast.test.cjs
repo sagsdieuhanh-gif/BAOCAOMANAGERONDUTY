@@ -73,7 +73,7 @@ assert.ok(p.compare(result.payload,before).some(x=>x.flight==='VJ782'&&x.type===
 const files={html:fs.readFileSync('index.html','utf8'),report:fs.readFileSync('v19-report.js','utf8'),ui:fs.readFileSync('v217-second-ui.js','utf8')};
 assert.ok(files.html.indexOf('v217-second-ui.js')<files.html.indexOf('sags-auto.js'),'L2 must intercept before L1 auto-import');
 assert.ok(files.ui.includes('p_revision:2')&&files.ui.includes('DUYỆT VÀ LƯU LẦN 2'));
-assert.ok(files.report.includes("eq('revision',2)")&&files.report.includes('data.l2Details'));
-assert.ok(files.report.includes('x.boarding')&&files.report.includes('x.checkin'));
+assert.ok(files.report.includes("eq('revision',2)")&&files.report.includes('data.operational'));
+assert.ok(files.report.includes('data.operational.gate')&&files.report.includes('Quầy check-in / nhân sự PVHK'));
 assert.ok(files.report.includes('Lần 1 được giữ làm mốc so sánh'));
 console.log('PASS L2: paired ARRIVAL/DEPARTURE, stands, gate, booking vs pax, ferry, midnight and L1 preservation');
