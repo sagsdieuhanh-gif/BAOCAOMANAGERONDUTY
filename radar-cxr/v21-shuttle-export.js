@@ -51,14 +51,14 @@
    if(logoPromise)return logoPromise;
    logoPromise=new Promise((resolve,reject)=>{
      const image=new Image();
-     image.onload=()=>{if(image.naturalWidth>0)resolve(image);else reject(Error('Logo EREPORT không hợp lệ.'))};
-     image.onerror=()=>reject(Error('Chưa tải được logo gốc EREPORT; kiểm tra kết nối và thử lại.'));
+     image.onload=()=>{if(image.naturalWidth>0)resolve(image);else reject(Error('Logo SAGS không hợp lệ.'))};
+     image.onerror=()=>reject(Error('Chưa tải được logo SAGS trong ứng dụng. Vui lòng tải lại trang.'));
      image.src=LOGO_PATH;
    }).catch(e=>{logoPromise=null;throw e});
    return logoPromise;
  }
  function draw(input,logo){
-   if(!logo||!logo.naturalWidth)throw Error('Thiếu logo SAGS gốc của EREPORT.');
+   if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất báo cáo.');
    const rows=input.rows, left=rows.filter(x=>x.direction==='NHA_CXR'),right=rows.filter(x=>x.direction==='CXR_NHA');
    const count=Math.max(left.length,right.length);
    if(count>65)throw Error('Quá nhiều mốc xe, cần rút gọn dữ liệu trước khi xuất.');
@@ -258,13 +258,19 @@
  async function exportFile(type){
    if(typeof unit==='undefined'||!['DH','ADMIN'].includes(unit))throw new Error('Chỉ tài khoản ĐH/ADMIN được xuất bản báo cáo xe giao ca.');
    const buttons=[...document.querySelectorAll('[data-v21-export]')];
+   const status=document.getElementById('v21ShuttleExportStatus');
    buttons.forEach(b=>b.disabled=true);
+   if(status)status.textContent='Đang tạo '+type.toUpperCase()+'…';
    try{
      const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
      const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
-     if(type==='png'){download(img.toDataURL('image/png'),base+'.png');return;}
+     if(type==='png'){
+       const blob=await new Promise((resolve,reject)=>img.toBlob?.(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png')||reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.')));
+       const url=URL.createObjectURL(blob);try{download(url,base+'.png');}finally{setTimeout(()=>URL.revokeObjectURL(url),15000);}
+       if(status)status.textContent='Đã tạo ảnh PNG xe giao ca ('+Math.round(blob.size/1024)+' KB).';return;
+     }
      if(type!=='pdf')throw Error('Định dạng không hợp lệ.');
-     if(root.SagsOfficeExportV29?.exportCanvasPdf){root.SagsOfficeExportV29.exportCanvasPdf(img,base+'.pdf');return;}
+     if(root.SagsOfficeExportV29?.exportCanvasPdf){const result=root.SagsOfficeExportV29.exportCanvasPdf(img,base+'.pdf');if(status)status.textContent='Đã tạo PDF xe giao ca ('+Math.round(result.bytes/1024)+' KB, '+result.pages+' trang).';return;}
      const jsPDF=await pdfLib();
      const single=img.height<=2000;
      // For an ordinary day, preserve exactly the preview image's dimensions and aspect.
@@ -289,7 +295,7 @@
        }
      }
           pdf.save(base+'.pdf');
-   }catch(e){alert('Không xuất được '+type.toUpperCase()+': '+e.message);}
+   }catch(e){if(status)status.textContent='CHƯA XUẤT ĐƯỢC: '+e.message;alert('Không xuất được '+type.toUpperCase()+': '+e.message);}
    finally{buttons.forEach(b=>b.disabled=false);}
  }
 
