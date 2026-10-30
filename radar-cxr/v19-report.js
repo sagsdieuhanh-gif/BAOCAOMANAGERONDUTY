@@ -140,40 +140,43 @@
       (priorityNight?'; ưu tiên '+nightGroups(priorityNight.items)+' tại '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30):'')+
       (hasAfterMidnight?'; chuyến qua ngày (+1)':'')+'.';
    const nightGuidance=priorityNight?
-     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+'); ĐH theo dõi chặt tiến độ bàn giao.':
+     ' Trong cao điểm tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+', ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+').':
      '';
 
    const observations=[
-     'Dự kiến '+total+' lượt; '+(priorTotal==null?'chưa có số liệu ngày trước':nsign(total-priorTotal)+' lượt so ngày trước')+
-      '. '+(w.length?'Tàu A330/B777: '+w.slice(0,4).map(x=>x.arrival||x.departure).join(', ')+'.':'Chưa có tàu thân rộng được xác định.'),
-     'Khung tập trung: '+sourcePeak+'. '+(short.length?'Cặp ground-time ngắn/sát thời lượng quy ước: '+shortF+'.':'Chưa xác định cặp ground-time ngắn theo tiêu chí dự báo.')+(priorityNight?' Cao điểm tối cần ưu tiên '+priorityNightList+' lúc '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+'.':''),
-     'Lần 1 chưa có bãi; '+(c.note.aoc_note||'chờ AOC xác nhận vị trí đỗ, tuyến xe công vụ và cầu ống lồng.'),
-     staffInfo,
-     activeIssues.length?'Có '+activeIssues.length+' xe/thiết bị bị hạn chế: '+issuesSummary+'.':
-       'Chưa có thiết bị hư hỏng được PVSĐ khai báo; số xe khả dụng phải được PVSĐ xác nhận.',
-     plans.length?'Kho đã có kế hoạch '+plans.length+' chuyến; '+(kgKnown?cargoKg.toLocaleString('vi-VN')+' KG của '+kgKnown+' chuyến có số KG. ':'KG chưa xác nhận. ')+
-       (cargoRush?'Tập trung '+cargoRush+'.':'Chưa có ≥2 chuyến cargo cùng khung 30 phút.')+
-       (needConfirmed?' '+needConfirmed+' chuyến chưa có mốc hàng sẵn sàng.':''):
-       'Kho Hàng chưa nhập kế hoạch cargo theo chuyến; không thể xác định điểm nghẽn KG/giờ kéo hàng.',
-     short.length?'Các cặp có ground-time ngắn/sát thời lượng phục vụ quy ước: '+shortF+'. Cần theo dõi giờ đến thực tế và mức hoàn tất công đoạn; không suy ra GSE rảnh tại STD.':
-       'Chưa xác định cặp có ground-time ngắn theo tiêu chí dự báo; tiếp tục cập nhật giờ đến/đi.',
-     c.note.weather_note||'Chưa có cảnh báo an ninh, an toàn hoặc thời tiết được xác minh; chờ thông tin TBĐH/AOC.',
-     c.note.previous_issue||'Chưa có tồn tại ca trước được xác nhận.'
+     'Theo lịch, dự kiến phục vụ '+total+' lượt chuyến bay'+(priorTotal==null?'. Chưa có số liệu ngày trước để so sánh.':
+       (total>priorTotal?', tăng '+(total-priorTotal)+' lượt so với ngày trước.':total<priorTotal?', giảm '+(priorTotal-total)+' lượt so với ngày trước.':', tương đương ngày trước.'))+
+       (w.length?' Trong ngày có tàu thân rộng '+w.slice(0,4).map(x=>x.arrival||x.departure).join(', ')+'.':''),
+     (p.length?'Các chuyến tập trung trong khung '+sourcePeak+'. ':'Theo lịch, chưa ghi nhận khung có nhiều chuyến phục vụ đồng thời. ')+
+       (short.length?'Các chuyến quay đầu ngắn cần chú ý: '+shortF+'.':'Chưa có chuyến quay đầu ngắn cần lưu ý theo lịch hiện có.')+
+       (priorityNight?' Buổi tối lưu ý nhóm chuyến '+priorityNightList+'.':''),
+     c.note.aoc_note||'Vị trí đỗ và các thay đổi khai thác đang chờ thông tin cập nhật từ AOC.',
+     'Quân số phục vụ bay của các phòng được tổng hợp theo ca sáng và ca đêm ở cột Phương án phục vụ.',
+     activeIssues.length?'PVSĐ báo có '+activeIssues.length+' xe, thiết bị đang hạn chế sử dụng: '+issuesSummary+'.':
+       'Chưa ghi nhận thiết bị hư hỏng được PVSĐ báo về; tiếp tục kiểm tra khả năng đáp ứng trước cao điểm.',
+     plans.length?'Kho Hàng đã cập nhật hàng hóa của '+plans.length+' chuyến'+(kgKnown?', tổng '+cargoKg.toLocaleString('vi-VN')+' KG đã kê khai. ':'. ')+
+       (cargoRush?'Hàng tập trung: '+cargoRush+'. ':'')+
+       (needConfirmed?'Còn '+needConfirmed+' chuyến chờ xác nhận giờ hàng sẵn sàng.':''):
+       'Kho Hàng chưa cập nhật kế hoạch hàng hóa; cần bổ sung trước các chuyến có hàng.',
+     short.length?'Theo lịch, các chuyến '+shortF+' có thời gian quay đầu sát. Nếu tàu về muộn, công tác phục vụ và giờ khởi hành có thể bị ảnh hưởng.':
+       'Chưa có chuyến quay đầu ngắn nổi bật theo lịch; tiếp tục theo dõi thay đổi giờ đến và giờ đi.',
+     c.note.weather_note||'Chưa có thông tin thời tiết, an ninh, an toàn bất thường được các đơn vị báo về.',
+     c.note.previous_issue||'Chưa ghi nhận tồn tại từ ca trước cần xử lý trong ngày.'
    ];
    const actions=[
-     'ĐH xác định các mốc phục vụ chồng lấn theo STA/STD; PVSĐ chuẩn bị GSE phù hợp loại tàu, PVHK chuẩn bị lực lượng đón khách/boarding theo giờ; điều chỉnh thứ tự ưu tiên khi lịch thay đổi.',
-     'ĐH khoanh vùng '+sourcePeak+' và chốt thứ tự ưu tiên theo STD; PVSĐ tập trung bốc xếp, lái xe và GSE hoàn thành dứt điểm từng tàu, xác nhận công đoạn xong mới điều chuyển cuốn chiếu sang chuyến kế tiếp; PVHK phối hợp đón khách, cửa ra tàu và boarding.'+nightGuidance,
-     'ĐH đối chiếu vị trí sau AOC, ưu tiên theo dõi cụm bãi 38–42, 56–71 nếu có; PVSĐ tính trước tuyến điều chuyển thiết bị giữa các chuyến, tránh dồn xe vào khu vực đường công vụ có khả năng phải dừng chờ; PVHK chủ động vị trí đón/boarding.',
-     'ĐH cân đối quân số PVSĐ/PVHK theo khung giờ chồng lấn; PVSĐ tổ chức nhóm bốc xếp và lái GSE phục vụ lần lượt từng chuyến, chỉ chuyển nhóm sau khi kết thúc công đoạn; PVHK ưu tiên đội đến, gate và boarding cho chuyến có giờ quay đầu sát.'+(priorityNight?' Tăng cường phối hợp ca tối cho '+nightGroups(priorityNight.items)+'.':''),
+     'Phòng ĐH theo dõi giờ đến, giờ đi và các chuyến tập trung; phối hợp PVSĐ chuẩn bị trang thiết bị, PVHK bố trí người đón, tiễn khách. Khi lịch thay đổi, điều chỉnh thứ tự phục vụ phù hợp.',
+     'Phòng ĐH ưu tiên các chuyến quay đầu ngắn và các chuyến sát giờ khởi hành. PVSĐ tập trung nhân sự, thiết bị làm dứt điểm từng chuyến; hoàn thành chuyến trước mới chuyển lực lượng sang chuyến tiếp theo. PVHK phối hợp để bảo đảm tiến độ đón, tiễn khách.'+nightGuidance,
+     'Phòng ĐH cập nhật vị trí đỗ sau thông tin AOC, lưu ý các bãi xa khu vực trung tâm nếu có. PVSĐ chủ động tuyến di chuyển xe, thiết bị; PVHK bố trí lực lượng tại khu vực phục vụ phù hợp.',
+     'Phòng ĐH tổng hợp quân số từng phòng theo ca sáng và ca đêm; các đơn vị chủ động sắp xếp lực lượng theo giờ cao điểm và tăng cường cho những chuyến quay đầu ngắn.',
      activeIssues.length?
-       'PVSĐ xác nhận xe còn khả dụng, phương tiện thay thế và GSE phù hợp tàu trước cao điểm; ĐH ưu tiên cấp cho chuyến sát giờ quay đầu, điều chuyển cuốn chiếu khi thiết bị được xác nhận có thể rời tàu.'+(issueAlternatives?' Phương án dự phòng đã khai báo: '+issueAlternatives+'.':''):
-       'PVSĐ kiểm tra số xe và chủng loại GSE thực sự khả dụng trước cao điểm; ĐH ưu tiên thiết bị cho cặp quay đầu sát giờ, điều chuyển sau khi xác nhận hoàn tất công đoạn, không lấy STD làm mốc xe rảnh.',
+       'PVSĐ rà soát các xe đang hạn chế sử dụng, bố trí thiết bị thay thế và ưu tiên chuyến có thời gian quay đầu ngắn.'+(issueAlternatives?' Phương án thay thế đã báo: '+issueAlternatives+'.':' ĐH phối hợp điều chỉnh thiết bị khi cần.'):
+       'PVSĐ kiểm tra thiết bị sẵn sàng trước ca, ưu tiên xe cho các chuyến quay đầu ngắn và chủ động chuyển sang chuyến kế tiếp sau khi hoàn tất phục vụ.',
      plans.length?
-       'Kho Hàng chủ động chuẩn bị, bàn giao hàng theo thứ tự STD, ưu tiên '+(heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+'; PVSĐ bố trí lái xe/thiết bị nhận và kéo hàng nối tiếp, tránh tập trung nhiều chuyến cùng lúc; ĐH theo dõi mốc hàng sẵn sàng.':
-       'Kho Hàng cập nhật kế hoạch hàng và giờ sẵn sàng từng chuyến; PVSĐ chuẩn bị lái xe/xe kéo để nhận hàng theo thứ tự ưu tiên; ĐH theo dõi, điều chỉnh trình tự khi các chuyến chồng lấn.',
-     'ĐH theo dõi giờ đáp, tiến độ quay đầu và Door Close; PVSĐ/PVHK tập trung hoàn thành từng công đoạn chuyến có ground-time sát, báo ngay nguy cơ kéo dài để ĐH điều chỉnh trình tự phục vụ chuyến tiếp theo. Chỉ ghi nhận nguyên nhân đã xác minh.',
-     'ĐH nhận thông tin thời tiết/an toàn chính thức, xác định các khung có thể ảnh hưởng và thông báo điều chỉnh; PVSĐ kiểm soát GSE, tuyến di chuyển an toàn; PVHK chủ động phương án đón/boarding khi điều kiện khai thác thay đổi.',
-     'ĐH rà soát tồn tại đã xác nhận từ ca trước, ưu tiên việc ảnh hưởng trực tiếp đến chuyến cao điểm; PVSĐ/PVHK/Kho Hàng xác nhận phần việc liên quan và phương án thay thế trước khi tiếp nhận chuyến.'
+       'Kho Hàng ưu tiên chuẩn bị, bàn giao hàng cho '+(heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+'; PVSĐ bố trí xe kéo hàng và nhân sự tiếp nhận theo tiến độ từng chuyến. ĐH phối hợp khi các chuyến dồn giờ.':
+       'Kho Hàng cập nhật hàng sẵn sàng trước giờ phục vụ; PVSĐ chủ động xe kéo và người nhận hàng. ĐH phối hợp điều chỉnh khi nhiều chuyến tập trung.',
+     'Phòng ĐH theo dõi giờ đáp thực tế, chủ động điều phối khi tàu về muộn. PVSĐ và PVHK ưu tiên hoàn thành công việc cho chuyến quay đầu ngắn, báo sớm khi có nguy cơ ảnh hưởng giờ đi.',
+     'Phòng ĐH cập nhật các cảnh báo thời tiết, an toàn và thông báo kịp thời cho đơn vị phục vụ. PVSĐ kiểm soát an toàn xe, thiết bị; PVHK chuẩn bị phương án điều chỉnh khi cần.',
+     'Các phòng tiếp tục xử lý các tồn tại đã được xác nhận từ ca trước, ưu tiên những nội dung ảnh hưởng trực tiếp đến chuyến bay; báo ĐH kết quả và khó khăn phát sinh.'
    ];
    const core=LABELS.map((label,i)=>({title:label,observation:observations[i],action:actions[i]}));
    const enhanced=window.SagsReportInsightsV211?.enrich(c,core);
@@ -183,25 +186,34 @@
        observation:crop(known(override.observation)||x.observation||'CHỜ XÁC NHẬN',490),
        action:crop(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.',620)};
    });
+   if(window.SagsPersonnelV212){
+     const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
+     topics[4].observation=people.complete?
+       'Các phòng đã xác nhận quân số phục vụ bay theo ca. Phương án bố trí cụ thể sẽ điều chỉnh theo lịch bay thực tế.':
+       'Các phòng đã cập nhật hoặc đang rà soát quân số phục vụ bay cho từng ca; số liệu chưa xác nhận được ghi rõ bên cạnh.';
+     topics[4].action=people.lines.join('\n');
+     topics[4].owner='ĐH · PVHK · KTSĐ';
+   }
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
      slot:clock(x.minute)+' – '+clock(x.minute+30),
      flight:x.items.map(y=>(y.arrival||'—')+'/'+(y.departure||'—')).join(', '),
-     risk:x.items.length+' cặp/chuyến đang phục vụ quy ước; kiểm tra chồng lấn '+(x.items.some(y=>/330|777/i.test(y.aircraft_type||''))?'và tàu thân rộng.':'.'),
-     action:'ĐH chốt thứ tự theo STD; PVSĐ tập trung bốc xếp/GSE hoàn tất từng tàu rồi điều chuyển cuốn chiếu khi đủ điều kiện; PVHK ưu tiên đón khách, gate/boarding theo tiến độ.'+
-       (x.items.some(isTightGround)?' Chú ý chuyến ground-time ngắn/sát.':'')+
+     risk:'Có '+x.items.length+' cặp chuyến tập trung trong cùng thời điểm'+
+       (x.items.some(y=>/330|777/i.test(y.aircraft_type||''))?', gồm tàu thân rộng.':'.')+
+       (x.items.some(isTightGround)?' Một số chuyến có thời gian quay đầu ngắn.':''),
+     action:'Phòng ĐH theo dõi giờ đến thực tế và thống nhất thứ tự ưu tiên. PVSĐ tập trung làm dứt điểm từng chuyến rồi điều chuyển nhân sự, thiết bị sang chuyến tiếp theo; PVHK phối hợp đón, tiễn khách.'+
        (x.minute>=1080&&x.items.some(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))?
-         ' Ưu tiên '+nightGroups(x.items)+' trong khung tối.':'')
+         ' Ca tối ưu tiên '+nightGroups(x.items)+' trong khung giờ này.':'')
    }));
-   if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Thiếu giờ lịch bay.',action:'Kiểm tra lại Excel nguồn.'});
+   if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Chưa đủ lịch giờ để xác định khung cao điểm.',action:'ĐH tiếp tục cập nhật và đối chiếu lịch bay.'});
    const coord=[
-    ['Cao điểm và các chuyến quay đầu sát','PVHK/PVSĐ xác nhận nhân sự, GSE và phương án cuốn chiếu theo từng khung.','ĐH · PVHK · PVSĐ','Trước khung cao điểm / chờ phản hồi'],
-    ['Tàu rộng A330/B777','Xác nhận GSE tương thích, người có năng định và phương án dự phòng theo từng chuyến.','PVSĐ · PVHK · ĐH','Trước chuyến thân rộng / chờ phản hồi'],
-    ['Bãi đỗ, cầu ống và đường công vụ','Sau khi có AOC, xác nhận vị trí và các chuyến có thể chịu ảnh hưởng di chuyển.','ĐH · AOC/Cảng · PVSĐ','Trước chuyến liên quan / chờ phản hồi'],
-    ['Hành lý, cargo và tồn tại từ ca trước','Kho xác nhận hàng sẵn sàng; PVHK/PVSĐ điều phối theo chuyến; QA/IT cập nhật tồn tại.','Kho · PVHK · PVSĐ · QA/IT','Trước ca / chờ phản hồi']
+    ['Cao điểm và các chuyến quay đầu sát','PVHK, PVSĐ xác nhận quân số và phương án tăng cường; tập trung phục vụ dứt điểm từng chuyến, sau đó điều chuyển lực lượng sang chuyến kế tiếp.','ĐH · PVHK · PVSĐ','Trước giờ cao điểm; cập nhật khi lịch thay đổi'],
+    ['Tàu rộng A330/B777','PVSĐ kiểm tra xe, thiết bị và nhân sự đáp ứng tàu A330/B777; PVHK chủ động người phục vụ khách và hành lý theo từng chuyến.','PVSĐ · PVHK · ĐH','Trước khi phục vụ chuyến tàu thân rộng'],
+    ['Bãi đỗ, cầu ống và đường công vụ','Sau họp AOC, cập nhật bãi đỗ và thông báo sớm các vị trí cần bố trí lại tuyến xe, thiết bị.','ĐH · AOC/Cảng · PVSĐ','Sau thông tin AOC, trước giờ phục vụ'],
+    ['Hành lý, cargo và tồn tại từ ca trước','Kho Hàng báo giờ hàng sẵn sàng; PVHK, PVSĐ phối hợp theo tiến độ phục vụ; QA/IT cập nhật vấn đề an toàn hoặc tồn tại cần lưu ý.','Kho · PVHK · PVSĐ · QA/IT','Trước ca và khi có thay đổi']
    ];
    const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có cơ sở xác định vấn đề vượt thẩm quyền từ lịch bay đơn thuần. Các phòng cần xác nhận khả năng đáp ứng theo khung; ĐH tổng hợp và chỉ trình Ban TGĐ khi có nguy cơ hoặc thiếu hụt đã xác minh, kèm phương án xử lý.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
  function html(data){
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
