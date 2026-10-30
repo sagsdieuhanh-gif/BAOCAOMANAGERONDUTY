@@ -1,0 +1,34 @@
+/* V2.25 — explicit role boundaries; server RLS is authoritative. */
+.v225-denied,[hidden].v225-denied{display:none!important;visibility:hidden!important}
+body[data-access-role="KTS"] #tab-sources,
+body[data-access-role="PVHK"] #tab-sources,
+body[data-access-role="KHO"] #tab-sources,
+body[data-access-role="QA"] #tab-sources,
+body[data-access-role="IT"] #tab-sources,
+body[data-access-role="VIEWER"] #tab-sources{display:none!important}
+body[data-access-role="KTS"] [data-v19-export],
+body[data-access-role="PVHK"] [data-v19-export],
+body[data-access-role="KHO"] [data-v19-export],
+body[data-access-role="QA"] [data-v19-export],
+body[data-access-role="IT"] [data-v19-export],
+body[data-access-role="VIEWER"] [data-v19-export],
+body[data-access-role="KTS"] [data-main-pdf],
+body[data-access-role="PVHK"] [data-main-pdf],
+body[data-access-role="KHO"] [data-main-pdf],
+body[data-access-role="QA"] [data-main-pdf],
+body[data-access-role="IT"] [data-main-pdf],
+body[data-access-role="VIEWER"] [data-main-pdf],
+body[data-access-role="KTS"] [data-v21-export],
+body[data-access-role="PVHK"] [data-v21-export],
+body[data-access-role="KHO"] [data-v21-export],
+body[data-access-role="QA"] [data-v21-export],
+body[data-access-role="IT"] [data-v21-export],
+body[data-access-role="VIEWER"] [data-v21-export],
+body[data-access-role="KTS"] #v19NoteEditor,
+body[data-access-role="PVHK"] #v19NoteEditor,
+body[data-access-role="KHO"] #v19NoteEditor,
+body[data-access-role="QA"] #v19NoteEditor,
+body[data-access-role="IT"] #v19NoteEditor,
+body[data-access-role="VIEWER"] #v19NoteEditor{display:none!important}
+body:not([data-access-role="ADMIN"]) #tab-admin{display:none!important}
+.v225-role-note{font-weight:650;color:#37637d}
