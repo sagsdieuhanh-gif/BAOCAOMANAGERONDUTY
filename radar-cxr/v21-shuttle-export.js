@@ -251,6 +251,7 @@
      const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){download(img.toDataURL('image/png'),base+'.png');return;}
      if(type!=='pdf')throw Error('Định dạng không hợp lệ.');
+     if(root.SagsOfficeExportV29?.exportCanvasPdf){root.SagsOfficeExportV29.exportCanvasPdf(img,base+'.pdf');return;}
      const jsPDF=await pdfLib();
      const single=img.height<=2000;
      // For an ordinary day, preserve exactly the preview image's dimensions and aspect.
