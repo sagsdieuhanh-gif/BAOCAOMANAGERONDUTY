@@ -74,6 +74,6 @@ const files={html:fs.readFileSync('index.html','utf8'),report:fs.readFileSync('v
 assert.ok(files.html.indexOf('v217-second-ui.js')<files.html.indexOf('sags-auto.js'),'L2 must intercept before L1 auto-import');
 assert.ok(files.ui.includes('p_revision:2')&&files.ui.includes('DUYỆT VÀ LƯU LẦN 2'));
 assert.ok(files.report.includes("eq('revision',2)")&&files.report.includes('data.operational'));
-assert.ok(files.report.includes('data.operational.gate')&&files.report.includes('Quầy check-in / nhân sự PVHK'));
+assert.ok(files.report.includes('data.dailyBrief.entries.map')&&files.report.includes('SagsL2BriefV223?.make'));
 assert.ok(files.report.includes('Lần 1 được giữ làm mốc so sánh'));
 console.log('PASS L2: paired ARRIVAL/DEPARTURE, stands, gate, booking vs pax, ferry, midnight and L1 preservation');
