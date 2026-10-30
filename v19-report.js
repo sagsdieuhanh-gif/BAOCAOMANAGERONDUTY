@@ -298,6 +298,10 @@
        tr(['Nhân sự / GSE theo đợt',data.operational.top.length?
           data.operational.top.slice(0,5).map(x=>window.SagsOpsForecastV219.time(x.start)+'–'+window.SagsOpsForecastV219.time(x.start+30)+' ('+x.total+' cặp; '+x.active.slice(0,5).join(', ')+')'+
            (x.gse.some(g=>g.shortage>0)?' · thiếu theo số xe xác nhận: '+x.gse.filter(g=>g.shortage>0).map(g=>g.key+' '+g.shortage).join(', '):'')+
+           (x.baggage.shortage>0?' · thiếu bốc xếp '+x.baggage.shortage:'')+
+           (x.driver.shortage>0?' · thiếu lái xe GSE '+x.driver.shortage:'')+
+           (x.cobusDrivers.shortage>0?' · thiếu lái Cobus '+x.cobusDrivers.shortage:'')+
+           (x.gateStaff.shortage>0?' · thiếu nhân sự gate '+x.gateStaff.shortage:'')+
            (x.unknownCargo?' · '+x.unknownCargo+' chuyến chưa rõ cargo':'')+
            (x.unknownBay?' · '+x.unknownBay+' chuyến chưa rõ bãi':'')).join('; '):
           'Chưa có đủ cặp chuyến để đánh giá chồng lấn.',
