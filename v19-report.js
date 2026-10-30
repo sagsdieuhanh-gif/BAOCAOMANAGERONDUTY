@@ -302,7 +302,7 @@
            (x.driver.shortage>0?' · thiếu lái xe GSE '+x.driver.shortage:'')+
            (x.cobusDrivers.shortage>0?' · thiếu lái Cobus '+x.cobusDrivers.shortage:'')+
            (x.gateStaff.shortage>0?' · thiếu nhân sự gate '+x.gateStaff.shortage:'')+
-           (x.unknownCargo?' · '+x.unknownCargo+' chuyến chưa rõ cargo':'')+
+           (x.unknownCargo?' · '+x.unknownCargo+' chuyến chưa rõ cargo; kịch bản bốc xếp '+x.baggage.scenarioMin+'–'+x.baggage.scenarioMax+' NS, lái GSE '+x.driver.scenarioMin+'–'+x.driver.scenarioMax+' NS (chưa đủ dữ liệu kết luận)':'')+
            (x.unknownBay?' · '+x.unknownBay+' chuyến chưa rõ bãi':'')).join('; '):
           'Chưa có đủ cặp chuyến để đánh giá chồng lấn.',
           'PVSĐ và PVHK tập trung phục vụ dứt điểm chuyến quay đầu ngắn rồi điều chuyển nhân sự, xe thang, Cobus và thiết bị cuốn chiếu sang chuyến tiếp theo. Không mặc định xe rảnh ngay tại STD; cần xác nhận hoàn tất công đoạn, thời gian di chuyển và khả năng phục vụ A330/B777.'])+
