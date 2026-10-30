@@ -2,13 +2,13 @@
 (function(root){
  const model=()=>root.SagsShuttleModel;
  const $=id=>document.getElementById(id);
- const V=['DH','KTS','PVHK','KHO','QA_IT'];
- const headings=['ĐH','PVSĐ','PVHK','KHO HÀNG','QA / IT'];
- const missingUnits=x=>V.filter((_,i)=>!x.cells[i]).map((v)=>({'DH':'ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[v]));
+ const V=['DH','PVHK','KTS','QA_IT'];
+ const headings=['ĐH','PVHK','PVSĐ','QA & IT'];
+ const missingUnits=x=>V.filter((_,i)=>!x.cells[i]).map((v)=>({'DH':'ĐH','PVHK':'PVHK','KTS':'PVSĐ','QA_IT':'QA & IT'}[v]));
  const short=(s)=>String(s??'');
  const escape=s=>short(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const fixed=[...model().defaults];
- const allowedRoles=new Set(['ADMIN','DH','KTS','PVHK','KHO','QA','IT']);
+ const allowedRoles=new Set(['ADMIN','DH','KTS','PVHK','QA','IT']);
  const fieldOf=r=>r==='QA'||r==='IT'?'QA_IT':r;
  const editable=(who,field)=>who==='ADMIN'||fieldOf(who)===field;
  const partKey=(x)=>x.direction+'|'+x.departure_min+'|'+Number(x.line_no||0);
@@ -81,8 +81,8 @@
          (cls.kind==='small'?icon(29):cls.kind==='big'||cls.kind==='excess'?icon(45):'')+
          '<span>'+cls.label+'</span></td>'+
        '</tr>'+
-       (x.missing.length?'<tr class="v28-missing-row"><td colspan="8"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
-       (custom?'<tr class="v28-reason-row"><td colspan="8"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason?
+       (x.missing.length?'<tr class="v28-missing-row"><td colspan="7"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
+       (custom?'<tr class="v28-reason-row"><td colspan="7"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason?
          '<input maxlength="220" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'">':
          '<span>'+escape(x.reason||'Chưa ghi lý do thêm xe')+'</span>')+'</div></td></tr>':'');
    }).join('');
@@ -101,18 +101,18 @@
    const activeField=who==='ADMIN'?'TẤT CẢ CỘT':headings[V.indexOf(fieldOf(who))]||'CHỈ XEM';
    return '<div class="v24-wrap" data-v24-active="'+who+'"><div class="v24-heading">'+
      '<div><div class="v24-eyebrow">SAGS  ·  XE GIAO CA</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
-     '<p>Hai chiều xe · 05 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
+     '<p>Hai chiều xe · 04 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
      '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
      '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Muốn thêm giờ xe khác, mở mục <b>THÊM GIỜ XE KHÁC</b> phía dưới. Nhập xong cả hai chiều, bấm <b>LƯU TẤT CẢ THAY ĐỔI</b> một lần.</div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
      (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
-     '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 5 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
+     '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 4 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
      '<div class="v24-status" role="status"></div></div>';
  }
  function mount(){
    if(ready)return;ready=true;
    const placements=[
-     ['DH','tab-home'],['KTS','tab-pvsd'],['PVHK','tab-pvhk'],['KHO','tab-warehouse'],
+     ['DH','tab-home'],['KTS','tab-pvsd'],['PVHK','tab-pvhk'],
      ['QA','tab-qa-it'],['IT','tab-qa-it']
    ];
    const done=new Set();
@@ -128,7 +128,7 @@
  function show(){
    if(!ready)return;
    const role=typeof unit==='undefined'?viewRole:unit;
-   const mapping=[['tab-home','DH'],['tab-pvsd','KTS'],['tab-pvhk','PVHK'],['tab-warehouse','KHO'],['tab-qa-it',role==='IT'?'IT':'QA']];
+   const mapping=[['tab-home','DH'],['tab-pvsd','KTS'],['tab-pvhk','PVHK'],['tab-qa-it',role==='IT'?'IT':'QA']];
    for(const [tab,who] of mapping){
      const div=$('v24-'+tab);if(!div)continue;
      const adjusted=role==='ADMIN'?'ADMIN':who;
