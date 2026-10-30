@@ -48,7 +48,7 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts]=await Promise.all([
+   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
@@ -58,11 +58,13 @@
     sb.from('ops_unit_forecasts').select('*').eq('service_date',day),
     sb.from('ops_unit_quick_reports').select('unit,report_text,updated_at').eq('service_date',day),
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',2).maybeSingle(),
-    sb.from('ops_service_contracts').select('*').eq('service_date',day)
+    sb.from('ops_service_contracts').select('*').eq('service_date',day),
+    sb.from('ops_flights').select('arrival,departure,cargo_status').eq('service_date',day)
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(s2.error)throw Error('Không tải được lịch bay Lần 2: '+s2.error.message);
    if(contracts.error)throw Error('Không đọc được định mức hãng do PVHK xác nhận: '+contracts.error.message);
+   if(flightCargo.error)throw Error('Không đọc được tình trạng cargo phục vụ dự báo nguồn lực: '+flightCargo.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
    if(cp.error)throw Error('Không tải được kế hoạch Kho Hàng: '+cp.error.message);
    if(gi.error)throw Error('Không tải được danh sách xe hỏng: '+gi.error.message);
@@ -83,7 +85,7 @@
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
     note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:(s2.data||s.data)?.source_filename||'',revision:s2.data?2:1,sourcePayload:payload,firstPayload:s.data?.payload||null,
-    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],staff,gse};
+    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],staff,gse};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -265,7 +267,10 @@
     ['Hành lý, cargo và tồn tại từ ca trước','Kho Hàng báo giờ hàng sẵn sàng; PVHK, PVSĐ phối hợp theo tiến độ phục vụ; QA/IT cập nhật vấn đề an toàn hoặc tồn tại cần lưu ý.','Kho · PVHK · PVSĐ · QA/IT','Trước ca và khi có thay đổi']
    ];
    const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
-   const operational=window.SagsOpsForecastV219?.summarize(c.sourcePayload,c.rows,c.staff,c.gse,c.contracts||[])||null;
+   const cargo=new Map((c.flightCargo||[]).flatMap(x=>[x.arrival,x.departure].filter(Boolean).map(no=>[no,x.cargo_status])));
+   const enhancedPairs=(c.rows||[]).map(x=>({...x,cargo_status:cargo.get(x.departure)||cargo.get(x.arrival)||x.cargo_status||'UNKNOWN'}));
+   const operationalSource=c.sourcePayload?{...c.sourcePayload,flights:enhancedPairs}:null;
+   const operational=window.SagsOpsForecastV219?.summarize(operationalSource,enhancedPairs,c.staff,c.gse,c.contracts||[])||null;
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
  function html(data){
@@ -297,6 +302,13 @@
            (x.unknownBay?' · '+x.unknownBay+' chuyến chưa rõ bãi':'')).join('; '):
           'Chưa có đủ cặp chuyến để đánh giá chồng lấn.',
           'PVSĐ và PVHK tập trung phục vụ dứt điểm chuyến quay đầu ngắn rồi điều chuyển nhân sự, xe thang, Cobus và thiết bị cuốn chiếu sang chuyến tiếp theo. Không mặc định xe rảnh ngay tại STD; cần xác nhận hoàn tất công đoạn, thời gian di chuyển và khả năng phục vụ A330/B777.'])+
+
+       tr(['Điều chuyển cuốn chiếu',data.operational.handoffs.length?
+         data.operational.handoffs.filter(x=>x.gap<0).slice(0,6).map(x=>x.from+' → '+x.to+
+           ' (chồng lấn theo phục vụ quy ước '+Math.abs(x.gap)+' phút)').join('; ')||
+           'Các cặp đang theo thứ tự, nhưng chưa có thời gian xác nhận kết thúc công đoạn và di chuyển thiết bị.':
+           'Chưa đủ dữ liệu thời gian ghép chuyến để đánh giá chuyển tiếp.',
+         'ĐH phân công theo từng nhóm chuyến. Cặp chồng lấn phải có tổ/xe riêng hoặc phương án bổ sung; cặp liền kề chỉ chuyển quân số, xe thang, Cobus sau khi công đoạn trước hoàn tất và có thời gian tiếp cận bãi tiếp theo.'])+
        tr(['Quầy check-in / nhân sự PVHK',
          data.operational.windows.some(x=>x.checkin.openFlights.length)?
           data.operational.windows.filter(x=>x.checkin.openFlights.length).sort((a,b)=>b.checkin.openFlights.length-a.checkin.openFlights.length).slice(0,4).map(x=>
@@ -307,6 +319,13 @@
           'Chưa có đủ số quầy, định mức nhân viên/quầy và lịch mở quầy do PVHK xác nhận để kết luận số người đủ/thiếu.',
          'PVHK cập nhật định mức quầy của từng hãng theo hợp đồng/SLA trong tab PVHK, đối chiếu với quân số theo ca và thời gian các quầy mở chồng lấn. Chỉ kết luận đủ/thiếu khi đã có cả định mức và quân số xác nhận.'])+
        '</table>'+
+       (data.c.unitPlans?.length?'<p><b>QUÂN SỐ CÁC PHÒNG ĐÃ NHẬP:</b> '+esc(
+          data.c.unitPlans.filter(x=>['PVHK','KTS','DH'].includes(x.unit)).map(x=>
+            ({PVHK:'PVHK',KTS:'PVSĐ',DH:'ĐH'}[x.unit]||x.unit)+
+            ': sáng '+(x.details?.pvb_morning??'chờ xác nhận')+
+            ', đêm '+(x.details?.pvb_night??'chờ xác nhận')+' người'+
+            (x.status==='CONFIRMED'?' (đã xác nhận)':' (chưa xác nhận)')).join('; '))+
+         '. Đây là tổng quân số theo ca; nếu chưa có phân bổ từng vị trí quầy/gate/bốc xếp/lái xe thì chưa thể khẳng định đủ nhân lực cho các chuyến chồng lấn.</p>':'')+
        (data.operational.gate.risky.length?'<p><strong>CHUYẾN QUAY ĐẦU SÁT:</strong> '+esc(data.operational.gate.risky.slice(0,8).map(x=>x.flight+' (STA '+window.SagsOpsForecastV219.time(x.sta)+', STD '+window.SagsOpsForecastV219.time(x.std)+', '+x.ground+' phút so với thời lượng phục vụ quy ước '+x.reference+' phút)').join('; '))+'. Nếu đến trễ, cần bố trí ưu tiên và rà soát tiến độ boarding.</p>':'')+
        (data.l2Changes.length?'<p><b>THAY ĐỔI SO VỚI LẦN 1:</b> '+esc(data.l2Changes.slice(0,10).map(x=>x.flight+' '+x.type+(x.from!=null?' '+x.from+' → '+x.to:'')).join('; '))+'</p>':'')+
        '<p><b>Lưu ý:</b> Booking là số đặt chỗ dự kiến, không thay PAX thực đi. Khả dụng thiết bị là số được báo sẵn sàng, không đồng nghĩa có thể di chuyển ngay; kết quả kiểm tra chỉ phản ánh nhu cầu theo các khung quy ước. Ngày/giờ giao ca và số quầy chưa xác nhận không được suy đoán.</p>':'')+
