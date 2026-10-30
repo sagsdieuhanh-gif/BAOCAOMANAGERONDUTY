@@ -21,7 +21,7 @@
    [38,39,40,41,42].includes(Number(bay))?'K2':bay!=null&&bay>=56&&bay<=71?'K3':'?');
  function movements(payload,live=[]){
    const detailed=payload?.source_detail,events=[],unverified=[];
-   if(detailed?.arrivals?.length||detailed?.departures?.length){
+   if([...(detailed?.arrivals||[]),...(detailed?.departures||[])].some(x=>Number.isFinite(x.t)&&x.no&&x.route)){
      for(const [direction,items] of [['arrival',detailed.arrivals||[]],['departure',detailed.departures||[]]]){
        for(const f of items){
          const international=domestic(f.route);
