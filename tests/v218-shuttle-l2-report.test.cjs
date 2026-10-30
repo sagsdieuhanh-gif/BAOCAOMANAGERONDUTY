@@ -44,7 +44,7 @@ assert.ok(index.includes('v21-shuttle-model.js?v=2.18'));
 const output=fs.readFileSync('v21-shuttle-export.js','utf8');
 assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complete?C.navy'));
 const report=fs.readFileSync('v19-report.js','utf8');
-const early=report.indexOf("    (data.l2Details?'<h3>PHÂN TÍCH CHI TIẾT LẦN 2");
+const early=report.indexOf("    (data.c.revision===2&&data.operational?'<h3>ĐÁNH GIÁ ĐIỀU PHỐI LẦN 2");
 const ten=report.indexOf("    '<h3>II. BẢNG KIỂM SOÁT");
 assert.ok(early>=0&&early<ten,'L2 analysis must be visible before 10-topic report');
 assert.ok(report.includes("renderHtml:html")&&report.includes('v218ReportStatus'));
