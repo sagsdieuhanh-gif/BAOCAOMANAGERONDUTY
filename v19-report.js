@@ -281,8 +281,8 @@
        data.l2Details.rows.map(x=>tr([x.flight+' · '+x.clock,x.type+' · '+fmtBay(x.bay),'Gate '+x.gate+' · '+x.checkin+' · '+x.boarding+' · Booking '+x.booking,
          x.nature+'. '+x.action])).join('')+'</table>'+
        (data.l2Details.gateCheck.length?'<p><b>GATE CẦN KIỂM TRA:</b> '+
-         esc(data.l2Details.gateCheck.map(x=>x.gate+' ('+x.a+' / '+x.b+', cách '+x.minutes+' phút)').join('; '))+
-         '. Chưa kết luận trùng giờ boarding nếu chưa có thời điểm bắt đầu/kết thúc.</p>':'')+
+         esc(data.l2Details.gateCheck.map(x=>x.gate+' ('+x.a+' / '+x.b+', cách '+x.minutes+' phút: '+x.kind+')').join('; '))+
+         '. Các chuyến thiếu giờ bắt đầu/kết thúc boarding chỉ được đưa vào diện cần kiểm tra.</p>':'')+
        (data.l2Changes.length?'<p><b>THAY ĐỔI SO LẦN 1:</b> '+esc(data.l2Changes.slice(0,25).map(x=>x.flight+' '+x.type+
         (x.from!=null?' '+x.from+' → '+x.to:'')).join('; '))+'</p>':''):'')+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
