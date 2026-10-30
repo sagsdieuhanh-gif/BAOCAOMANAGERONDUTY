@@ -115,19 +115,6 @@
      (x.issue_status==='OUT_OF_SERVICE'?'tạm dừng':x.issue_status==='REPAIR'?'đang sửa':'hạn chế')+'): '+
      x.fault+(x.impact?' – '+x.impact:'')+(x.expected_return?' – dự kiến '+x.expected_return:'')).join('; ');
    const issueAlternatives=activeIssues.filter(x=>x.workaround).slice(0,3).map(x=>x.equipment_id+': '+x.workaround).join('; ');
-   const transportSummary=['DH','KTS','PVHK','KHO','QA_IT'].map(u=>{
-     const label=u==='DH'?'ĐH':u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':u==='QA_IT'?'QA / IT':'KHO HÀNG';
-     const part=(c.transport||[]).filter(x=>x.unit===u);
-     if(!part.length)return label+': chưa xác nhận xe giao ca';
-     const segments=['NHA_CXR','CXR_NHA'].map(dir=>{
-       const selection=part.filter(x=>x.direction===dir).sort((a,b)=>a.departure_min-b.departure_min);
-       if(!selection.length)return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+': chưa có';
-       const names=selection.map(x=>clock(x.departure_min)+(x.line_no>0?' [Bổ sung '+x.line_no+']':'')+' '+x.quantity+' người').join(', ');
-       return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+' ('+names+')';
-     });
-     const last=part.map(x=>x.confirmed_at).sort().at(-1);
-     return label+': '+segments.join('; ')+(last?' (xác nhận '+new Date(last).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'})+')':'');
-   }).join('. ');
       const sourcePeak=p.length?clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+
       p[0].items.map(z=>z.arrival||z.departure||'—').slice(0,7).join(', ')+')':'chưa xác định';
    const shortF=short.slice(0,5).map(x=>x.arrival+'/'+x.departure).join(', ');
@@ -144,7 +131,7 @@
      ...(items.some(f=>KOREAN_CARRIERS.includes(flightCarrier(f)))?['hãng Hàn Quốc']:[])
    ].join(', ');
    const nightGuidance=priorityNight?
-     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+'); tập trung xử lý từng chuyến rồi chuyển nguồn lực khi hoàn tất.':
+     ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+'); ĐH theo dõi chặt tiến độ bàn giao.':
      '';
 
    const observations=[
@@ -152,7 +139,7 @@
       '. '+(w.length?'Tàu A330/B777: '+w.slice(0,4).map(x=>x.arrival||x.departure).join(', ')+'.':'Chưa có tàu thân rộng được xác định.'),
      'Khung tập trung: '+sourcePeak+'. '+(short.length?'Cặp ground-time ngắn/sát thời lượng quy ước: '+shortF+'.':'Chưa xác định cặp ground-time ngắn theo tiêu chí dự báo.')+(priorityNight?' Cao điểm tối cần ưu tiên '+priorityNightList+' lúc '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+'.':''),
      'Lần 1 chưa có bãi; '+(c.note.aoc_note||'chờ AOC xác nhận vị trí đỗ, tuyến xe công vụ và cầu ống lồng.'),
-     staffInfo+' Xe giao ca: '+transportSummary+'.',
+     staffInfo,
      activeIssues.length?'Có '+activeIssues.length+' xe/thiết bị bị hạn chế: '+issuesSummary+'.':
        'Chưa có thiết bị hư hỏng được PVSĐ khai báo; số xe khả dụng phải được PVSĐ xác nhận.',
      plans.length?'Kho đã có kế hoạch '+plans.length+' chuyến; '+(kgKnown?cargoKg.toLocaleString('vi-VN')+' KG của '+kgKnown+' chuyến có số KG. ':'KG chưa xác nhận. ')+
@@ -199,7 +186,7 @@
     ['Xác nhận năng lực cao điểm, quay đầu ngắn','Rà soát nhân sự, định mức, GSE, SKYONE, phương án bổ sung.','PVHK; KTSĐ; ĐH','Trước 16:00 ngày '+dateVN(prevDate(c.date))+'; cập nhật 08:30 ngày '+dateVN(c.date)+'.'],
     ['Cập nhật quầy, kệ, bãi đỗ; hạn chế','Sau AOC kiểm tra bãi đỗ, tuyến GSE và phát hành Lần 2.','TBĐH; các đơn vị','Sau AOC; xác nhận trước 08:30 ngày '+dateVN(c.date)+'.']
    ];
-   const alerts=window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[];
+   const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
    return {c,alerts,summary,comparison,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị bổ sung được nhập.'};
  }
  function html(data){
