@@ -90,8 +90,11 @@
    }).join('');
    return '<section class="v24-direction" data-v24-direction="'+direction+'"><div class="v24-route-title"><div><b>'+route+'</b><small>'+what+'</small></div>'+
      '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' mốc giờ</div></div>'+
-     '<div class="v24-table-scroll"><table class="v24-table"><thead><tr><th>GIỜ XE</th>'+
-       headings.map(t=>'<th>'+t+'</th>').join('')+'<th>TỔNG</th><th>GỢI Ý XE</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+     '<p class="v222-scroll-hint">Cuộn ngang để xem đủ 4 phòng, tổng số người và gợi ý xe <span aria-hidden="true">↔</span></p>'+
+     '<div class="v24-table-scroll" role="region" aria-label="Bảng xe '+route+'; vuốt ngang để xem đầy đủ 7 cột" tabindex="0"><table class="v24-table"><colgroup>'+
+       '<col class="v222-col-time"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-total"><col class="v222-col-bus">'+
+       '</colgroup><thead><tr><th scope="col">GIỜ XE</th>'+
+       headings.map(t=>'<th scope="col">'+t+'</th>').join('')+'<th scope="col">TỔNG</th><th scope="col">GỢI Ý XE</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
      (active?'<details class="v24-custom"><summary>+ THÊM GIỜ XE KHÁC CHO CHIỀU NÀY</summary>'+
        '<div><label>Giờ chạy <input type="time" data-v24-time="'+direction+'" value="12:00"></label>'+
        '<label><input type="checkbox" data-v24-next="'+direction+'"> Ngày hôm sau (+1)</label>'+ '<label class="v28-custom-reason">Lý do thêm xe <input maxlength="220" data-v28-custom-reason="'+direction+'" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" required></label>'+
