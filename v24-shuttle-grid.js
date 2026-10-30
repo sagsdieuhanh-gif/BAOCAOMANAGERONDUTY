@@ -46,10 +46,9 @@
  };
  function classify(row){
    if(row.confirmed<V.length)return {label:'CHỜ XÁC NHẬN',kind:'pending'};
-   if(row.total===0)return {label:'KHÔNG CẦN XE',kind:'zero'};
-   if(row.total<=29)return {label:'29 CHỖ',kind:'small'};
-   if(row.total<=45)return {label:'45 CHỖ',kind:'big'};
-   return {label:'CẦN BỔ SUNG XE',kind:'excess'};
+   const plan=model().suggestVehicles(row.total);
+   if(!plan)return {label:'CHƯA THỂ TÍNH',kind:'pending'};
+   return {...plan,kind:plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'};
  }
  function makeGrid(direction,all,who){
    const active=allowedRoles.has(who);
@@ -78,8 +77,11 @@
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
-         (cls.kind==='small'?'<img src="./assets/shuttle-29.webp" alt="Xe SAGS 29 chỗ" class="v220-coach-img">':cls.kind==='big'?'<img src="./assets/shuttle-45.webp" alt="Xe SAGS 45 chỗ" class="v220-coach-img">':cls.kind==='excess'?'<span class="v220-coach-both"><img src="./assets/shuttle-45.webp" alt="Xe 45 chỗ" class="v220-coach-img"><img src="./assets/shuttle-29.webp" alt="Xe 29 chỗ" class="v220-coach-img"></span>':'')+
-         '<span>'+cls.label+'</span></td>'+
+         (cls.units?.length?'<span class="v221-bus-types">'+cls.units.map(x=>
+           '<span class="v221-bus-type"><img src="./assets/shuttle-'+x.seats+'.webp" alt="Xe SAGS '+x.seats+' chỗ" class="v220-coach-img"><b>×'+x.quantity+'</b></span>'
+         ).join('')+'</span>':'')+
+         '<span><b>'+escape(cls.label)+'</b></span>'+
+         (cls.seats?'<small>'+escape(cls.details)+'</small>':'')+'</td>'+
        '</tr>'+
        (x.missing.length?'<tr class="v28-missing-row"><td colspan="7"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
        (custom?'<tr class="v28-reason-row"><td colspan="7"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason?
