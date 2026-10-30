@@ -34,10 +34,12 @@ const payloadA={service_date:'2026-10-31',revision:2,flights:rowsA,
 const cA={date:'2026-10-31',revision:2,rows:rowsA,sourcePayload:payloadA,contracts,
  staff,gse,equipmentIssues:[{equipment_id:'ST-09',issue_status:'REPAIR'}],
  cargoPlans:[{flight_no:'KE402',cargo_kg:820,ready_by_min:1100},{flight_no:'KE405',cargo_kg:1260,ready_by_min:null}],
- unitPlans:[]};
+ unitPlans:[{unit:'PVHK',status:'CONFIRMED',details:{pvb_morning:59,pvb_night:52,pvb_night_required:54,pvb_night_status:'LIMITED'}}]};
 const reportA=writer.make({c:cA,operational:ops.summarize(payloadA,rowsA,staff,gse,contracts),
  changes:[{flight:'VJ701',type:'THAY ĐỔI BÃI ĐỖ',from:51,to:39}]});
 assert.ok(reportA.entries.length>=5&&reportA.entries.length<=7);
+assert.ok(reportA.staffing.includes('PVHK: sáng 59 người')&&reportA.staffing.includes('thiếu 2 người'));
+
 assert.ok(reportA.lead.includes('19:00')||reportA.lead.includes('19:30'));
 assert.ok(reportA.entries.some(x=>x.key==='stands'&&x.observation.includes('K2')));
 assert.ok(reportA.entries.some(x=>x.key==='gate'&&x.observation.includes('G2')));
