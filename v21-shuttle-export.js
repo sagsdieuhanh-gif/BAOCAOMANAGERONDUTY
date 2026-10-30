@@ -5,8 +5,8 @@
  const when=s=>s?new Date(s).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'Chưa xác nhận';
  const navy='#15405F',blue='#116C93',ink='#233D51',border='#DDE9EF',muted='#6C8797',green='#16735B';
  const W=1490;
- const UNITS=['DH','KTS','PVHK','KHO','QA_IT'];
- const UNIT_LABELS=['ĐH','PVSĐ','PVHK','Kho Hàng','QA/IT'];
+ const UNITS=['DH','PVHK','KTS','QA_IT'];
+ const UNIT_LABELS=['ĐH','PVHK','PVSĐ','QA & IT'];
  const missingUnits=row=>UNIT_LABELS.filter((_,i)=>!row.units[i]);
  function normalize(data,children=[]){
    const getkey=x=>x.direction+'|'+x.departure_min+'|'+Number(x.line_no||0);
@@ -58,185 +58,86 @@
    return logoPromise;
  }
  function draw(input,logo){
-   if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất báo cáo.');
-   const rows=input.rows, left=rows.filter(x=>x.direction==='NHA_CXR'),right=rows.filter(x=>x.direction==='CXR_NHA');
-   const count=Math.max(left.length,right.length);
-   if(count>65)throw Error('Quá nhiều mốc xe, cần rút gọn dữ liệu trước khi xuất.');
-   const W=1600,cardH=167,startY=410,step=177;
-   const bottomY=startY+count*step+24,H=bottomY+194;
+   if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
+   const rows=input.rows||[],a=rows.filter(x=>x.direction==='NHA_CXR'),b=rows.filter(x=>x.direction==='CXR_NHA');
+   const max=Math.max(a.length,b.length);
+   if(max>65)throw Error('Quá nhiều mốc xe cho một ảnh, vui lòng kiểm tra các giờ bổ sung.');
+   const W=1420,outer=34,col=660,gap=30,cardH=158,step=169,startY=241;
+   const footY=startY+step*max+12,H=footY+156;
    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
    const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
-   const colors={
-     background:'#F3F7FA',paper:'#FFFFFF',navy:'#113852',ink:'#203B50',
-     steel:'#6A8192',teal:'#077F9E',line:'#DCE7ED',soft:'#EAF3F7',
-     mint:'#E9F6F2',green:'#178166',warning:'#A85F29',warnbg:'#FFF2E7'
+   const C={navy:'#173C56',blue:'#136D90',ink:'#203D53',muted:'#637D8D',line:'#D9E5EB',
+     soft:'#F0F6F9',green:'#18715B',red:'#A93740',orange:'#B16D26',pale:'#FFF5E6',white:'#FFFFFF'};
+   const shape=(x,y,w,h,r,fill,stroke)=>{
+     c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
+     c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+     c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+     if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}
    };
-   const cardW=738,leftX=49,rightX=813,pad=18;
-   const t=(s,x,y,sz=18,color=colors.ink,bold=false,align='left',max)=>{
-     c.fillStyle=color;c.font=(bold?'700 ':'400 ')+sz+'px Arial, sans-serif';
-     c.textAlign=align;c.textBaseline='middle';
-     if(max)c.fillText(String(s),x,y,max);else c.fillText(String(s),x,y);
+   const t=(v,x,y,size=16,color=C.ink,bold=false,align='left',maxWidth)=>{
+     c.fillStyle=color;c.font=(bold?'700 ':'400 ')+size+'px Arial, sans-serif';c.textAlign=align;c.textBaseline='middle';
+     if(maxWidth)c.fillText(String(v??''),x,y,maxWidth);else c.fillText(String(v??''),x,y);
      c.textAlign='left';
    };
-   const shape=(x,y,w,h,r,fill,stroke)=>{
-     r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);
-     c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
-     c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-     c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
-     c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
-     if(fill){c.fillStyle=fill;c.fill();}
-     if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}
-   };
-   const line=(x1,y1,x2,y2,color=colors.line,width=1)=>{
-     c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
-   };
-   function coast(x,y){
-     c.save();c.strokeStyle=colors.teal;c.lineWidth=4;c.lineCap='round';
-     for(let i=0;i<3;i++){c.beginPath();c.moveTo(x,y+i*12);
-       c.bezierCurveTo(x+13,y-11+i*12,x+24,y+11+i*12,x+38,y+i*12);
-       c.bezierCurveTo(x+48,y-8+i*12,x+60,y+8+i*12,x+72,y+i*12);c.stroke();}
-     c.fillStyle='#EEBE72';c.beginPath();c.arc(x+62,y-26,11,0,Math.PI*2);c.fill();c.restore();
+   const line=(x,y,w,color=C.line)=>{c.beginPath();c.strokeStyle=color;c.lineWidth=1;c.moveTo(x,y);c.lineTo(w,y);c.stroke();};
+   const day=input.date?input.date.slice(8,10)+'/'+input.date.slice(5,7)+'/'+input.date.slice(0,4):'—';
+   c.fillStyle='#F4F8FA';c.fillRect(0,0,W,H);
+   shape(18,18,W-36,H-36,18,C.white,'#D9E4EB');
+   shape(18,18,W-36,7,4,C.blue);
+   const ratio=Math.min(90/logo.naturalWidth,87/logo.naturalHeight);
+   c.drawImage(logo,54+(90-logo.naturalWidth*ratio)/2,41+(87-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
+   t('SAGS · PHÒNG ĐIỀU HÀNH KHAI THÁC CXR',166,52,17,C.blue,true);
+   t('BẢNG TỔNG HỢP XE GIAO CA',166,89,32,C.navy,true);
+   t('04 đơn vị: ĐH · PVHK · PVSĐ · QA & IT',166,125,16,C.muted);
+   shape(1139,44,232,95,11,C.soft);
+   t('NGÀY KHAI THÁC',1255,70,14,C.muted,true,'center');
+   t(day,1255,110,26,C.navy,true,'center');
+   line(48,157,1374);
+   function heading(x,title,sub,count){
+     shape(x,176,col,51,10,C.soft);
+     shape(x,176,5,51,2,C.blue);
+     t(title,x+17,194,21,C.navy,true);
+     t(sub+' · '+count+' mốc',x+17,216,14,C.muted);
    }
-   function airport(x,y){
-     c.save();c.strokeStyle=colors.teal;c.lineWidth=3;c.lineCap='round';
-     // terminal + control tower silhouette, rather than emoji fonts
-     c.strokeRect(x+7,y+9,72,29);line(x,y+42,x+90,y+42,colors.teal,3);
-     for(let i=0;i<4;i++)shape(x+16+i*16,y+19,9,11,2,'#C9E5EE');
-     line(x+73,y+9,x+73,y-9,colors.teal,3);
-     line(x+66,y-9,x+80,y-9,colors.teal,3);
-     // small aircraft silhouette at upper-left
-     c.beginPath();c.moveTo(x+23,y-22);c.lineTo(x+34,y-18);
-     c.lineTo(x+52,y-32);c.lineTo(x+58,y-29);c.lineTo(x+42,y-14);
-     c.lineTo(x+47,y-6);c.lineTo(x+41,y-4);c.lineTo(x+31,y-12);
-     c.lineTo(x+22,y-10);c.closePath();c.fillStyle=colors.navy;c.fill();c.restore();
-   }
-   function vehicle(x,y,seats,alert=false){
-     const w=seats===45?88:68;
-     c.save();c.translate(x,y);
-     c.lineWidth=2;c.strokeStyle=alert?colors.warning:colors.teal;
-     shape(-w/2,-18,w,31,7,alert?'#FFF0E1':'#D9EBF1',alert?colors.warning:colors.teal);
-     const n=seats===45?6:4;for(let k=0;k<n;k++){
-       shape(-w/2+7+k*(w-17)/n,-10,(w-23)/n,9,2,alert?'#E4BD97':'#7EAFC1');
+   heading(outer,'NHA TRANG → CAM RANH','XE ĐI LÀM',a.length);
+   heading(outer+col+gap,'CAM RANH → NHA TRANG','XE VỀ',b.length);
+   function card(v,x,y){
+     const special=v.is_custom||v.line_no>0,complete=v.confirmed===UNITS.length;
+     const total=Number(v.total)||0;
+     shape(x,y,col,cardH,11,special?C.pale:C.white,special?'#D6AC73':C.line);
+     shape(x,y,5,cardH,2,special?C.orange:complete?C.green:C.blue);
+     t(model().clock(v.departure_min),x+18,y+30,29,C.navy,true);
+     if(special){shape(x+151,y+14,96,28,10,'#FCE4C0');t(v.line_no>0?'BỔ SUNG':'GIỜ THÊM',x+199,y+29,12,C.orange,true,'center');}
+     t(String(total),x+col-26,y+35,53,complete?C.navy:C.orange,true,'right');
+     t(complete?'TỔNG SỐ NGƯỜI':'NGƯỜI · TẠM TÍNH',x+col-26,y+67,12,complete?C.green:C.orange,true,'right');
+     line(x+18,y+74,x+col-18,'#E0E9EE');
+     const bandW=(col-40)/4;
+     for(let i=0;i<4;i++){
+       const unit=v.units[i],ux=x+20+i*bandW;
+       if(i){c.beginPath();c.strokeStyle='#E5EDF1';c.lineWidth=1;c.moveTo(ux-9,y+81);c.lineTo(ux-9,y+117);c.stroke();}
+       t(UNIT_LABELS[i],ux,y+87,12,C.muted,true);
+       t(unit?String(unit.quantity):'—',ux,y+110,24,unit?C.ink:'#AAB8C1',!!unit);
      }
-     c.fillStyle=colors.navy;for(const xx of [-w/2+17,w/2-17]){
-       c.beginPath();c.arc(xx,14,5.5,0,Math.PI*2);c.fill();
-     }
-     c.restore();
-   }
-   const roleNames=['ĐH','PVSĐ','PVHK','KHO HÀNG','QA / IT'];
-   const confirmedTime=s=>{
-     if(!s)return 'Chưa xác nhận';
-     const dt=new Date(s);
-     if(!Number.isFinite(dt.getTime()))return 'Chưa xác nhận';
-     return dt.toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-   };
-   function tripCard(r,x,y){
-     const done=r.confirmed===5;
-     const special=r.is_custom||r.line_no>0;
-     shape(x,y,cardW,cardH,15,special?'#FFF8ED':colors.paper,special?'#DEAE67':colors.line);
-     shape(x+1,y+1,5,cardH-2,3,special?'#C47C26':done?colors.green:'#D7A467');
-     t(model().clock(r.departure_min),x+22,y+30,27,colors.navy,true);
-     if(special)shape(x+142,y+15,96,24,12,'#FCE2B9');
-     if(special)t(r.line_no>0?'BỔ SUNG '+r.line_no:'GIỜ THÊM',x+190,y+27,11,'#A45F15',true,'center');
-     const totalX=x+280;
-     t(done?String(r.total):'~'+r.total,totalX,y+30,29,done?colors.navy:colors.warning,true,'center');
-     t(done?'ĐÃ CHỐT 5/5':'CHƯA ĐỦ '+r.confirmed+'/5',totalX,y+53,12,done?colors.green:colors.steel,true,'center');
-     const iconX=x+465,wordX=x+555;
-     if(done){
-       if(r.total===0){
-         t('KHÔNG CẦN XE',iconX,y+32,14,colors.steel,true);
-       }else if(r.total<=29){
-         vehicle(iconX+34,y+38,29);
-         t('29 CHỖ',wordX,y+28,17,colors.teal,true);
-         t('GỢI Ý',wordX,y+50,11,colors.steel);
-       }else if(r.total<=45){
-         vehicle(iconX+34,y+38,45);
-         t('45 CHỖ',wordX,y+28,17,colors.teal,true);
-         t('GỢI Ý',wordX,y+50,11,colors.steel);
-       }else{
-         vehicle(iconX+34,y+38,45,true);
-         t('TRÊN 45',wordX,y+27,15,colors.warning,true);
-         t('BỔ SUNG XE',wordX,y+50,12,colors.warning,true);
-       }
-     }else{
-       shape(x+450,y+18,cardW-470,39,9,'#FFF0F0');
-       t('CHƯA ĐỦ 5 ĐƠN VỊ',x+465,y+37,13,'#B12B31',true);
-     }
-     line(x+22,y+69,x+cardW-22,y+69);
-     const colW=(cardW-44)/5;
-     for(let i=0;i<5;i++){
-       const u=r.units[i],ux=x+22+i*colW;
-       if(i)line(ux-8,y+82,ux-8,y+125,'#E4ECF1');
-       t(roleNames[i],ux,y+83,11,colors.steel,true);
-       t(u?String(u.quantity):'—',ux,y+107,23,u?colors.ink:'#A3B2BC',!!u);
-       t(u?confirmedTime(u.confirmed_at):'CHƯA NHẬP',ux+32,y+109,10,u?colors.green:'#B12B31',false,'left',colW-35);
-     }
-     line(x+22,y+130,x+cardW-22,y+130,special?'#E6C48F':'#E2EAF0');
-     if(r.missing?.length){
-       t('CHƯA XÁC NHẬN: '+r.missing.join(', '),x+22,y+144,13,'#AD313B',true,'left',cardW-44);
-     }else t('Đã có số liệu của đủ 5 đơn vị',x+22,y+144,12,colors.green,false,'left',cardW-44);
+     if(v.missing?.length){
+       t('CHƯA XÁC NHẬN: '+v.missing.join(', '),x+19,y+131,12,C.red,true,'left',col-40);
+     }else t('Đã đủ 4 đơn vị xác nhận',x+19,y+131,12,C.green,true);
      if(special){
-       t('LÝ DO THÊM XE: '+(r.note||'Chưa ghi lý do'),x+22,y+159,12,'#AC671D',true,'left',cardW-44);
-     }else if(r.note){
-       t('GHI CHÚ: '+String(r.note).slice(0,80),x+22,y+159,10,colors.steel,false,'left',cardW-44);
+       t('LÝ DO THÊM XE: '+(v.note||'Chưa ghi lý do'),x+19,y+148,12,C.orange,true,'left',col-40);
      }
    }
-   // Print-white canvas, no gradients/large decorative icons
-   c.fillStyle=colors.background;c.fillRect(0,0,W,H);
-   shape(30,23,W-60,H-46,22,colors.paper,'#E1E9EE');
-   shape(30,23,W-60,9,4,colors.navy);
-   // Official SAGS identity
-   const maxW=126,maxH=117,ratio=Math.min(maxW/logo.naturalWidth,maxH/logo.naturalHeight);
-   c.drawImage(logo,55+(maxW-logo.naturalWidth*ratio)/2,45+(maxH-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
-   line(205,53,205,154,colors.line,2);
-   t('PHÒNG ĐIỀU HÀNH KHAI THÁC · CXR',232,66,15,colors.teal,true);
-   t('BẢNG TỔNG HỢP XE GIAO CA',232,113,35,colors.navy,true);
-   t('Số liệu xác nhận từ 05 đơn vị  /  Phát hành bởi ĐH',232,151,17,colors.steel);
-   shape(1292,62,226,84,14,colors.soft);
-   t('NGÀY KHAI THÁC',1405,83,13,colors.steel,true,'center');
-   t(name(input.date),1405,118,26,colors.navy,true,'center');
-   line(50,177,1550,177);
-   // Place markers at both ends; route-direction explicitly repeated below
-   shape(49,195,1502,115,16,'#F0F7F9');
-   coast(90,254);
-   t('NHA TRANG',201,234,21,colors.navy,true);
-   t('THÀNH PHỐ',201,260,13,colors.steel);
-   c.strokeStyle='#A3C5D2';c.lineWidth=3;c.setLineDash([6,9]);
-   line(450,251,1110,251,'#7DAFC3',3);c.setLineDash([]);
-   shape(734,228,132,44,22,colors.paper,'#C9DFE8');
-   t('NHA  ↔  CXR',800,250,18,colors.teal,true,'center');
-   airport(1280,244);
-   t('SÂN BAY CAM RANH',1240,233,20,colors.navy,true,'right');
-   t('CẢNG HKQT CXR',1240,260,13,colors.steel,false,'right');
-   const hdr=(x,code,nameText,sub,qty)=>{
-     shape(x,336,cardW,58,11,code==='NHA_CXR'?'#E8F3F7':'#EAF4F0');
-     shape(x,336,6,58,3,code==='NHA_CXR'?colors.teal:colors.green);
-     t(nameText,x+20,357,19,colors.navy,true);
-     t(sub,x+20,378,13,colors.steel);
-     t(qty+' mốc xe',x+cardW-20,368,16,colors.teal,true,'right');
-   };
-   hdr(leftX,'NHA_CXR','NHA TRANG → CAM RANH','CHIỀU ĐI LÀM',left.length);
-   hdr(rightX,'CXR_NHA','CAM RANH → NHA TRANG','CHIỀU XE VỀ',right.length);
-   left.forEach((r,i)=>tripCard(r,leftX,startY+i*step));
-   right.forEach((r,i)=>tripCard(r,rightX,startY+i*step));
-   const confirmed=rows.filter(r=>r.confirmed===5).length;
-   const incomplete=rows.length-confirmed;
-   const warn=rows.filter(r=>r.confirmed===5&&r.total>45).length;
-   shape(49,bottomY,1502,98,15,'#EDF4F8');
-   const metrics=[
-     ['SỐ MỐC XE',String(rows.length)],
-     ['ĐÃ XÁC NHẬN 5/5',String(confirmed)],
-     ['CHỜ PHÒNG XÁC NHẬN',String(incomplete)],
-     ['MỐC TRÊN 45 NGƯỜI',String(warn)]
-   ];
-   const metW=1502/4;
-   metrics.forEach((m,i)=>{
-     const x=70+metW*i;if(i)line(x-17,bottomY+18,x-17,bottomY+80,'#CCDCE6');
-     t(m[0],x,bottomY+30,13,colors.steel,true);
-     t(m[1],x,bottomY+64,29,i===3&&warn?colors.warning:colors.navy,true);
+   a.forEach((v,i)=>card(v,outer,startY+i*step));
+   b.forEach((v,i)=>card(v,outer+col+gap,startY+i*step));
+   const confirmed=rows.filter(x=>x.confirmed===4).length,custom=rows.filter(x=>x.is_custom||x.line_no>0).length;
+   const overload=rows.filter(x=>x.confirmed===4&&x.total>45).length;
+   shape(outer,footY,W-outer*2,84,11,C.soft);
+   const stats=[['TỔNG MỐC XE',rows.length],['ĐỦ 4/4 ĐƠN VỊ',confirmed],['CHỜ XÁC NHẬN',rows.length-confirmed],['XE THÊM',custom],['TRÊN 45 NGƯỜI',overload]];
+   stats.forEach(([label,n],i)=>{
+     const x=outer+25+i*260;
+     t(label,x,footY+24,13,C.muted,true);
+     t(n,x,footY+58,29,i===4&&n?C.orange:C.navy,true);
    });
-   t('29 CHỖ  ·  45 CHỖ  ·  Trên 45 người: TBĐH phải xác nhận phương án bổ sung xe.',60,bottomY+131,16,colors.navy,true);
-   t('Dấu ~: tổng tạm tính; mỗi mốc ghi rõ phòng chưa xác nhận. Giờ xe bổ sung và lý do được tô màu cam.',60,bottomY+162,14,colors.steel);
+   t('Số 0 được tính là đã xác nhận. Số người trước khi đủ 4 phòng là tổng tạm tính.',outer+10,footY+107,15,C.ink);
+   t('Mốc xe bổ sung được tô vàng nhạt, lý do ghi ngay trong cùng dòng. ĐH quyết định phương án xe.',outer+10,footY+133,14,C.muted);
    return canvas;
  }
  function download(url,filename){
@@ -308,7 +209,7 @@
      const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
      const canvas=draw(data,logo);
      const image=document.createElement('img');
-     image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVSĐ, PVHK, Kho Hàng, QA / IT.';
+     image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVHK, PVSĐ, QA & IT.';
      const blob=await new Promise((resolve,reject)=>{if(typeof canvas.toBlob!=='function')return reject(Error('Thiết bị không hỗ trợ ảnh PNG.'));canvas.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh xem trước.')),'image/png');});
      const url=URL.createObjectURL(blob);image.src=url;
      image.onload=()=>URL.revokeObjectURL(url);
