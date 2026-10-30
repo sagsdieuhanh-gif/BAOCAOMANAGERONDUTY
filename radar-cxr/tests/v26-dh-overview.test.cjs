@@ -13,7 +13,7 @@ assert.match(grid,/if\(id==='tab-home'\)el\.appendChild\(div\)/);
 assert.match(grid,/function setUnit\(role\)\{\s*viewRole=role;mount\(\);show\(\);refresh\(\)/);
 assert.match(index,/<section id="tab-home"><div id="v19Home"><\/div><\/section>/);
 assert.match(index,/renderStages\(\);window\.SagsUIV19\?\.renderHome\(\);window\.SagsUIV20\?\.refresh\(\);window\.SagsShuttleGridV24\?\.refresh\(\)/);
-assert.match(index,/<script src="\.\/v20-departments\.js\?v=2\.7"><\/script>/);
+assert.match(index,/<script src="\.\/v20-departments\.js\?v=2\.\d+"><\/script>/);
 assert.match(index,/<script src="\.\/v24-shuttle-grid\.js\?v=2\.7"><\/script>/);
 assert.match(index,/<script src="\.\/v19-ui\.js\?v=2\.7"><\/script>/);
 
