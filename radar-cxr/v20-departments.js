@@ -253,6 +253,7 @@
    window.SagsShuttleExport?.bind();
    $('v20Issues').onclick=e=>{const b=e.target.closest('[data-v20-fix]');if(b)fixIssue(b.dataset.v20Fix)};
    $('v20CargoRows').onclick=e=>{const b=e.target.closest('[data-v20-remove]');if(b)removeCargo(b.dataset.v20Remove)};
+   window.SagsUnitInputV211?.init();
  }
  function status(id,msg,error=false){const el=$(id);if(el){el.textContent=msg;el.style.color=error?'#b92835':'#257b67'}}
  async function saveStaff(target){
@@ -388,6 +389,7 @@
    cargo=p.data||[];issues=q.data||[];transport=b.data||[];
    window.SagsCargoPlanCache=cargo;
    render();if(typeof renderRadar==='function')renderRadar();
+   await window.SagsUnitInputV211?.refresh();
  }
  function setUnit(role){
    init();
@@ -417,6 +419,7 @@
    $('v20Pvsd').closest('section').classList.toggle('v20-locked',!allowed('KTS'));
    $('v20Pvhk').closest('section').classList.toggle('v20-locked',!allowed('PVHK'));
    $('v20Warehouse').closest('section').classList.toggle('v20-locked',!allowed('KHO'));
+   window.SagsUnitInputV211?.updateRights();
    const dhPanel=$('v22DhShuttle');if(dhPanel)dhPanel.style.display=allowed('DH')?'':'none';
    const note=$('v19NoteEditor');if(note)note.style.display=['DH','ADMIN'].includes(role)?'':'none';
    document.querySelectorAll('[data-v19-export],[data-v21-export]').forEach(button=>{button.hidden=!['DH','ADMIN'].includes(role);button.style.display=['DH','ADMIN'].includes(role)?'':'none';});
