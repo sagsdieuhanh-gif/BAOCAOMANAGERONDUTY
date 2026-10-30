@@ -15,7 +15,7 @@
   const serviceMinutes=f=>{
     const a=carrier(f);
     if(['VJ','9G','VU','AK','FD'].includes(a))return 30;
-    if(['KE','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(a))return 60;
+    if(['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP'].includes(a))return 60;
     return Number.isFinite(f.sta_min)&&Number.isFinite(f.std_min)?Math.max(0,(f.std_min<f.sta_min?f.std_min+1440:f.std_min)-f.sta_min):0;
   };
   function interval(f){
