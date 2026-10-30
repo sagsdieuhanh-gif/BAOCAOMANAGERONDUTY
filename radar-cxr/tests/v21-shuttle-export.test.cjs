@@ -24,7 +24,7 @@ const assert=require('node:assert/strict');
  assert.equal(add.length,12);
  const extra=add.find(x=>x.direction==='NHA_CXR'&&x.departure_min===390&&x.line_no===1);
  assert.equal(extra.confirmed,0);
- assert.equal(extra.note,'Xe bổ sung 1');
+ assert.equal(extra.note,''); // reason must not be invented when not supplied
  const custom=rows.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1380);
  assert.equal(custom.total,7);
  assert.equal(custom.is_custom,true);
