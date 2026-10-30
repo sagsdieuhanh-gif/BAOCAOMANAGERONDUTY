@@ -136,7 +136,7 @@
        const end=Math.min(p.sta_min+n,p.std_min??Infinity);
        return start<end&&start+30>p.sta_min;
      });
-     if(!active.length)continue;
+     // Counter/check-in and boarding may be active before any aircraft turn begins.
      const outer=active.filter(p=>p.bay!=null&&!bridge.has(Number(p.bay)));
      const incompleteBay=active.filter(p=>p.bay==null);
      const needs={STAIRS:outer.length*2,COBUS_LARGE:outer.length*2,
