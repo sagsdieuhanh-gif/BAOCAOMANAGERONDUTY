@@ -30,6 +30,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate Radar Excel importer
+        run: |
+          node --check radar-cxr/excel-import.js
+          node --check radar-cxr/excel-ui.js
+          node radar-cxr/tests/excel-import.test.cjs
+          node -e "const fs=require('fs');const s=fs.readFileSync('radar-cxr/index.html','utf8');fs.writeFileSync('/tmp/radar-inline.js',s.split('<script>')[1].split('</script>')[0]);"
+          node --check /tmp/radar-inline.js
       - name: Check source
         run: |
           npm test
