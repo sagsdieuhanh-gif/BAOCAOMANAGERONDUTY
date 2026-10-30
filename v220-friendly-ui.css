@@ -97,3 +97,14 @@ main.layout{padding:9px!important}
 .v24-coach .v220-coach-both .v220-coach-img{width:46px;height:37px}
 .v24-coach .v220-coach-both+span,.v24-coach>span{display:block;font-size:12px;font-weight:800}
 @media(max-width:720px){.v24-coach .v220-coach-img{width:65px;height:43px}}
+
+/* One destination per task: specialized screens live in this single optional drawer. */
+.v220-advanced{margin:0 19px 15px;padding:0;border:1px solid #dbe9ef;border-radius:12px;background:#f7fafc}
+.v220-advanced summary{cursor:pointer;padding:11px 15px;font-size:12px;font-weight:800;color:#30627c;list-style:none;user-select:none}
+.v220-advanced summary::before{content:'＋';font-size:16px;display:inline-block;margin-right:9px}
+.v220-advanced[open] summary::before{content:'−'}
+.v220-advanced summary::-webkit-details-marker{display:none}
+.v220-advanced .v220-advanced-grid{grid-template-columns:repeat(4,minmax(0,1fr));padding:0 12px 12px}
+.v220-advanced .v220-task{background:#fff!important}
+@media(max-width:920px){.v220-advanced .v220-advanced-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){.v220-advanced{margin:0 10px 11px}.v220-advanced .v220-advanced-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
