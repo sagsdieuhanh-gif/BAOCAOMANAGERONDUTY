@@ -24,6 +24,14 @@ assert.deepEqual([chart.slots[9].ia,chart.slots[9].id,chart.slots[9].da,chart.sl
 assert.deepEqual([chart.slots[10].ia,chart.slots[10].id,chart.slots[10].da,chart.slots[10].dd],[1,1,0,0]);
 assert.equal(chart.verified,6);
 assert.equal(chart.plusOne,1);
+const l1={source_detail:{arrivals:[{flight:'VJ101',row:12}],departures:[{flight:'VJ102',row:13}]},
+  flights:[{arrival:'VJ101',departure:'VJ102',sta_min:540,std_min:605,international:false,
+    arrival_route:'SGN-CXR',departure_route:'CXR-SGN'}]};
+const l1hours=a.movements(l1);
+assert.equal(l1hours.verified,2,'L1 metadata-only source_detail must use flights paired STA/STD');
+assert.equal(l1hours.slots[9].da,1);
+assert.equal(l1hours.slots[10].dd,1);
+
 assert.ok(a.svg(chart).includes('Quốc tế đến')&&a.svg(chart).includes('Quốc nội đi'));
 assert.equal(a.zone(53),'K1');assert.equal(a.zone(39),'K2');assert.equal(a.zone(60),'K3');
 const verified=a.boardings([
@@ -31,6 +39,9 @@ const verified=a.boardings([
  {no:'VJ203',t:615,gate:'G1',boarding_start:580,boarding_finish:603,carrier:'VJ'}
 ],[]);
 assert.equal(verified.warnings.length,1);assert.equal(verified.warnings[0].verified,true);
+const etaRisk=a.boardings([{no:'VJ501',t:680,gate:'G8',carrier:'VJ'}],
+ [{departure:'VJ501',sta_min:640,eta_min:670,std_min:680,airline:'VJ'}]);
+assert.equal(etaRisk.risky.length,1,'Delayed ETA requires boarding-risk warning');
 const reference=a.boardings([
  {no:'KE401',t:610,gate:'G1',carrier:'KE'},
  {no:'VJ401',t:615,gate:'G1',carrier:'VJ'}
@@ -59,6 +70,9 @@ assert.equal(w.gse.find(x=>x.key==='STAIRS').required,4);
 assert.equal(w.gse.find(x=>x.key==='STAIRS').shortage,1);
 assert.equal(w.baggage.need,6);assert.equal(w.baggage.shortage,0);
 assert.equal(w.driver.need,2);assert.equal(w.driver.shortage,0);
+assert.equal(w.cobusDrivers.need,4);
+assert.equal(w.cobusDrivers.shortage,null,'No Cobus driver capacity confirmed');
+assert.equal(w.gateStaff.shortage,null,'No signed gate staffing rule, no staffing verdict');
 const check=windows.find(x=>x.start===570);
 assert.equal(check.checkin.required,3);
 assert.equal(check.checkin.available,2);
