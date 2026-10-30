@@ -29,7 +29,7 @@ const confirmed=[
 ];
 const staff=P.summarize(confirmed);
 assert.ok(staff.complete);
-assert.deepEqual(staff.incomplete,[]);
+assert.equal(staff.incomplete.length,0);
 assert.equal(staff.lines[0],'- Phòng ĐH: Đảm bảo nhân sự PVB. Sáng (20 NS); Đêm (18 NS).');
 assert.equal(staff.lines[1],'- Phòng PVHK: Đảm bảo nhân sự phục vụ bay. Sáng (59 NS); Đêm (52 NS).');
 assert.equal(staff.lines[2],'- Phòng KTSĐ: Chưa đảm bảo nhân sự PVB. Sáng (74 NS); Đêm (73 NS).');
