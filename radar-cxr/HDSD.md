@@ -50,3 +50,17 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 7. Radar chỉ đưa ra nhu cầu nhân lực, SKYONE, PVHK và GSE theo dữ liệu đã có; không tự coi nhân sự hoặc thiết bị là đã xác nhận khi đơn vị chưa cập nhật.
 
 **Lưu ý dữ liệu mẫu:** File 29/10/2026 có 34 chuyến đến và 36 chuyến đi, sheet LB; Sheet2 có nội dung khác cấu trúc nên không được tự cộng vào lịch LB.
+
+
+## V1.9 – TRANG CHỦ THEO ĐƠN VỊ & XUẤT WORD DỰ BÁO LẦN 1 TỰ ĐỘNG
+
+- **ĐH/ADMIN**: Trang Tổng quan 4 bước (Excel lịch bay, Radar tự tính, Báo cáo Lần 1, cập nhật bãi Lần 2). Nút **XUẤT DỰ BÁO LẦN 1 (.DOCX)** tải ngay file Word, không cần gõ lại 9 nhận định mỗi ngày.
+- **KTSĐ**: Chỉ hiển thị 2 ca SÁNG/ĐÊM với bốc xếp, lái xe GSE, khung SKYONE bổ sung, và đường dẫn đến GSE khả dụng. Có thể để trống khi chưa xác nhận.
+- **PVHK**: Chỉ hiển thị 2 ca đội ĐẾN/đội ĐI; khung giờ riêng thêm khi phát sinh. Không phải mở các bảng vận hành đơn vị khác.
+- **VIEWER**: Xem Radar/bản tin, không ghi dữ liệu. Sử dụng chung tài khoản RNS và phân quyền Radar hiện có.
+- **Ngày mặc định**: D+1 theo giờ Việt Nam; vẫn chỉnh được ngày.
+- **Mẫu Word**: Giữ 5 mục theo tài liệu người dùng ngày 30/10: I. Tóm tắt khai thác; II. Bảng kiểm soát 9 mục; III. Cảnh báo cao điểm 30 phút; IV. Phối hợp thực hiện; V. Kiến nghị Ban TGĐ. File chỉ kèm liên kết trực tuyến cho phân tích Radar sâu, không nhét toàn bộ biểu đồ vào Word.
+- **Nguồn dữ liệu**: Ưu tiên ảnh chụp dự báo Lần 1 đã lưu riêng, không sử dụng lẫn lịch Lần 2 có bãi. So sánh ngày D khi có số liệu. Chỉ kết luận về cargo, thời tiết, GSE khi có nguồn; chưa có thì ghi CHƯA XÁC NHẬN.
+- **Ghi chú ngoại lệ**: Bên ĐH có 5 ô tùy chọn về AOC, thời tiết, tồn tại ca trước, kiến nghị và ghi chú điều hành; chỉ nhập khi có phát sinh. Lưu trong bảng Supabase ops_report_notes theo ngày.
+- **HDSD**: Đăng nhập RNS được cấp quyền → tải Excel nếu chưa có lịch → chọn ngày → bấm XUẤT DỰ BÁO LẦN 1 ở Tổng quan; tài khoản KTSĐ/PVHK chỉ cập nhật phần mình.
+- **Kiểm thử**: Kiểm tra cú pháp JS qua GitHub Actions; cần kiểm thử tải DOCX và ghi dữ liệu bằng tài khoản thực tế trước khi nghiệm thu vận hành chính thức.
