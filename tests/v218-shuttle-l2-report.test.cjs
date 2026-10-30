@@ -6,9 +6,12 @@ require('../v24-shuttle-grid.js');
 require('../v21-shuttle-export.js');
 const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=globalThis.SagsShuttleExport._test;
 assert.deepEqual(m.defaults.map(x=>[x.direction,x.departure_min]),[
- ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1935]
-],'All six confirmed fixed times');
+ ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
+],'All seven confirmed fixed times');
 assert.equal(m.clock(1935),'08:15 (+1)');
+assert.equal(m.clock(1560),'02:00 (+1)');
+assert.equal(m.isDefault('CXR_NHA',1560),true);
+assert.equal(m.isDefault('CXR_NHA',1260),false,'Other bus time can be added');
 assert.equal(m.isDefault('NHA_CXR',390),false);
 assert.equal(m.isDefault('CXR_NHA',495),false);
 assert.equal(m.isDefault('CXR_NHA',1125),false);
@@ -34,13 +37,14 @@ const head=exp.find(x=>x.direction==='NHA_CXR'&&x.departure_min===420);
 assert.equal(head.total,45);assert.equal(head.confirmed,4);assert.equal(head.units.length,4);
 assert.deepEqual([...head.missing],[]);
 assert.ok(exp.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1935));
+assert.ok(exp.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1560&&!x.is_custom));
 assert.equal(exp.find(x=>x.departure_min===1125).is_custom,true);
 const src=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(src.includes("['DH','PVHK','KTS','QA_IT']"));
 assert.ok(!src.includes("['DH','KTS','PVHK','KHO','QA_IT']"));
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes('v218ReportStatus')&&index.includes('V2.25'));
-assert.ok(index.includes('v21-shuttle-model.js?v=2.23'));
+assert.ok(index.includes('v21-shuttle-model.js?v=2.27'));
 const output=fs.readFileSync('v21-shuttle-export.js','utf8');
 assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complete?C.navy'));
 const report=fs.readFileSync('v19-report.js','utf8');
