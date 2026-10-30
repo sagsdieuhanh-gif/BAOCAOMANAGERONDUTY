@@ -165,7 +165,7 @@
    ];
    const actions=[
      'Phòng ĐH theo dõi giờ đến, giờ đi và các chuyến tập trung; phối hợp PVSĐ chuẩn bị trang thiết bị, PVHK bố trí người đón, tiễn khách. Khi lịch thay đổi, điều chỉnh thứ tự phục vụ phù hợp.',
-     'Phòng ĐH ưu tiên các chuyến quay đầu ngắn và các chuyến sát giờ khởi hành. PVSĐ tập trung nhân sự, thiết bị làm dứt điểm từng chuyến; hoàn thành chuyến trước mới chuyển lực lượng sang chuyến tiếp theo. PVHK phối hợp để bảo đảm tiến độ đón, tiễn khách.'+nightGuidance,
+     'Phòng ĐH ưu tiên các chuyến quay đầu ngắn và các chuyến sát giờ khởi hành. PVSĐ tập trung nhân sự, thiết bị làm dứt điểm từng chuyến; làm xong chuyến trước rồi điều chuyển quân số, thiết bị cuốn chiếu sang chuyến tiếp theo. PVHK phối hợp để bảo đảm tiến độ đón, tiễn khách.'+nightGuidance,
      'Phòng ĐH cập nhật vị trí đỗ sau thông tin AOC, lưu ý các bãi xa khu vực trung tâm nếu có. PVSĐ chủ động tuyến di chuyển xe, thiết bị; PVHK bố trí lực lượng tại khu vực phục vụ phù hợp.',
      'Phòng ĐH tổng hợp quân số từng phòng theo ca sáng và ca đêm; các đơn vị chủ động sắp xếp lực lượng theo giờ cao điểm và tăng cường cho những chuyến quay đầu ngắn.',
      activeIssues.length?
