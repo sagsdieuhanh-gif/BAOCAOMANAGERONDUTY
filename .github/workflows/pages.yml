@@ -37,6 +37,8 @@ jobs:
           node --check radar-cxr/excel-ui.js
           node --check radar-cxr/sags-schedule.js
           node --check radar-cxr/sags-auto.js
+          node --check radar-cxr/v211-report-insights.js
+          node --check radar-cxr/v211-unit-input.js
           node --check radar-cxr/v19-report.js
           node --check radar-cxr/v19-ui.js
           node --check radar-cxr/v20-departments.js
@@ -57,6 +59,8 @@ jobs:
           node radar-cxr/tests/v23-shuttle-render.test.cjs
           node radar-cxr/tests/v21-shuttle.test.cjs
           node radar-cxr/tests/v21-shuttle-export.test.cjs
+          node radar-cxr/tests/v211-report-insights.test.cjs
+          node radar-cxr/tests/v210-service-plans.test.cjs
           node radar-cxr/tests/v19-report.test.cjs
           node radar-cxr/tests/sags-schedule.test.cjs
           node radar-cxr/tests/excel-import.test.cjs
