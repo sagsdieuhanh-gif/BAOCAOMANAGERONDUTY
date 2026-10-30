@@ -116,7 +116,7 @@
   }
   function reportHtml(d){
     const r=d.radar,c=d.c,events=r.episodes;
-    let out='<div class="r28-sheet"><header class="r28-header"><strong>SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8</h2><p>Ngày '+esc(dateVN(c.date))+' · DỰ BÁO LẦN '+c.revision+' · Nguồn: '+esc(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+esc(c.author)+'</p></header>';
+    let out='<div class="r28-sheet"><header class="r28-header"><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8</h2><p>Ngày '+esc(dateVN(c.date))+' · DỰ BÁO LẦN '+c.revision+' · Nguồn: '+esc(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+esc(c.author)+'</p></header>';
     out+='<section class="r28-section"><h3>I. TÓM TẮT KHAI THÁC</h3><div class="r28-kpis"><div><b>'+c.arrivals+'</b><span>Chuyến đến</span></div><div><b>'+c.departures+'</b><span>Chuyến đi</span></div><div><b>'+r.peak.n+'</b><span>Đỉnh cặp / 30 phút</span></div><div><b>'+events.length+'</b><span>Đợt cao điểm ≥4 cặp</span></div></div><p>'+esc(d.summary)+'</p><p>'+esc(d.comparison).replace(/\n/g,'<br>')+'</p><div class="r28-chart">'+dailySvg(d)+'</div><p class="r28-note">Biểu đồ thể hiện số cặp chuyến cần phục vụ trong từng khung 30 phút; cột cam là những khung có từ 4 cặp trở lên.</p></section>';
     if(d.alerts?.length)out+='<section class="r28-section"><h3>THÔNG TIN CHỜ CÁC ĐƠN VỊ XÁC NHẬN</h3>'+table(['Đơn vị','Nhóm dữ liệu','Nội dung còn thiếu'],d.alerts.map(a=>[a.unit,a.type,a.detail]))+'</section>';
     out+='<section class="r28-section"><h3>II. BẢNG KIỂM SOÁT NGHIỆP VỤ</h3>'+table(['Nội dung','Nhận định','Phương án phục vụ'],d.topics.map(x=>[x.title,x.observation,x.action]))+'</section>';
@@ -203,7 +203,7 @@
     };
     const r=d.radar,c=d.c;
     const children=[
-      para('SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH',{center:true,bold:true,color:'167398',size:19}),
+      para('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH',{center:true,bold:true,color:'167398',size:19}),
       para('BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8',{center:true,bold:true,color:'17435E',size:28}),
       para('Ngày '+dateVN(c.date)+' · Lần '+c.revision+' · Nguồn: '+(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+c.author),
       hd('I. TÓM TẮT KHAI THÁC'),
