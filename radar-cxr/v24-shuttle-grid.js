@@ -4,6 +4,7 @@
  const $=id=>document.getElementById(id);
  const V=['DH','KTS','PVHK','KHO','QA_IT'];
  const headings=['ĐH','PVSĐ','PVHK','KHO HÀNG','QA / IT'];
+ const missingUnits=x=>V.filter((_,i)=>!x.cells[i]).map((v)=>({'DH':'ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[v]));
  const short=(s)=>String(s??'');
  const escape=s=>short(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const fixed=[...model().defaults];
@@ -19,7 +20,7 @@
    const slots=new Map();
    for(const r of fixed)slots.set(partKey({...r,line_no:0}),{direction:r.direction,departure_min:r.departure_min,line_no:0});
    for(const r of values)slots.set(partKey(r),{direction:r.direction,departure_min:r.departure_min,line_no:Number(r.line_no||0)});
-   for(const r of additional)slots.set(partKey(r),{direction:r.direction,departure_min:r.departure_min,line_no:Number(r.line_no||0)});
+   for(const r of additional)slots.set(partKey(r),{direction:r.direction,departure_min:r.departure_min,line_no:Number(r.line_no||0),reason:r.reason||'',created_by:r.created_by||null});
    // If a custom time has extra rows but no base row, include a main slot.
    for(const x of [...slots.values()])if(x.line_no>0){
      const k=partKey({...x,line_no:0});
@@ -32,6 +33,7 @@
      const cells=V.map(u=>values.find(v=>v.unit===u&&partKey(v)===partKey(x))||null);
      const confirmed=cells.filter(Boolean).length;
      return {...x,cells,confirmed,total:cells.reduce((sum,v)=>sum+(v?.quantity||0),0),
+       missing:V.filter((_,i)=>!cells[i]),
        defaultTime:fixed.some(z=>z.direction===x.direction&&z.departure_min===x.departure_min)};
    });
  }
@@ -55,7 +57,8 @@
    const what=direction==='NHA_CXR'?'CHIỀU ĐI LÀM':'CHIỀU XE VỀ';
    const directionRows=all.filter(x=>x.direction===direction);
    const body=directionRows.map(x=>{
-     const key=partKey(x),cls=classify(x),child=x.line_no>0;
+     const key=partKey(x),cls=classify(x),child=x.line_no>0,custom=!x.defaultTime||child;
+     const canReason=custom&&(who==='ADMIN'||who==='DH'||(typeof me!=='undefined'&&me?.id&&x.created_by===me.id));
      const group=directionRows.filter(z=>z.departure_min===x.departure_min);
      const groupTotal=group.reduce((sum,z)=>sum+z.total,0);
      const groupVerified=group.every(z=>z.confirmed===V.length);
@@ -69,7 +72,7 @@
        }
        return '<td class="v24-cell v24-read"><strong>'+(v?.quantity??'—')+'</strong><small>'+(v?timeVN(v.confirmed_at):'Chưa xác nhận')+'</small></td>';
      }).join('');
-     return '<tr class="v24-time-row'+(child?' v24-child':'')+'" data-v24-key="'+key+'">'+
+     return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small></td>'+
        '<td class="v24-plus">'+(!child&&active?'<button type="button" data-v24-add="'+key+'" aria-label="Thêm xe vào khung '+clock(x.departure_min)+'" title="Thêm dòng ngay dưới giờ này">+</button>':'')+
        ((child||!x.defaultTime)&&active?'<button type="button" class="v27-delete" data-v27-delete="'+key+'" title="Xóa giờ / dòng bổ sung thừa nếu chưa có số liệu xác nhận" aria-label="Xóa '+(child?'dòng bổ sung':'giờ xe tự thêm')+' '+clock(x.departure_min)+'">×</button>':'')+'</td>'+
@@ -78,7 +81,7 @@
        '<td class="v24-coach v24-'+cls.kind+'">'+
          (cls.kind==='small'?icon(29):cls.kind==='big'||cls.kind==='excess'?icon(45):'')+
          '<span>'+cls.label+'</span></td>'+
-       '<td class="v24-save">'+(active?'<button data-v24-save="'+key+'" type="button">LƯU</button>':'')+'</td></tr>';
+       '<td class="v24-save">'+(active?'<button data-v24-save="'+key+'" type="button">LƯU</button>':'')+'</td></tr>'+ (x.missing.length?'<tr class="v28-missing-row"><td colspan="10"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+ (custom?'<tr class="v28-reason-row"><td colspan="10"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason? '<input maxlength="220" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'">'+ '<button type="button" data-v28-save-reason="'+key+'">LƯU LÝ DO</button>': '<span>'+escape(x.reason||'Chưa ghi lý do thêm xe')+'</span>')+'</div></td></tr>':'');
    }).join('');
    return '<section class="v24-direction" data-v24-direction="'+direction+'"><div class="v24-route-title"><div><b>'+route+'</b><small>'+what+'</small></div>'+
      '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' mốc giờ</div></div>'+
@@ -86,7 +89,7 @@
        headings.map(t=>'<th>'+t+'</th>').join('')+'<th>TỔNG</th><th>GỢI Ý XE</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
      (active?'<details class="v24-custom"><summary>+ THÊM GIỜ XE KHÁC CHO CHIỀU NÀY</summary>'+
        '<div><label>Giờ chạy <input type="time" data-v24-time="'+direction+'" value="12:00"></label>'+
-       '<label><input type="checkbox" data-v24-next="'+direction+'"> Ngày hôm sau (+1)</label>'+
+       '<label><input type="checkbox" data-v24-next="'+direction+'"> Ngày hôm sau (+1)</label>'+ '<label class="v28-custom-reason">Lý do thêm xe <input maxlength="220" data-v28-custom-reason="'+direction+'" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" required></label>'+
        '<button type="button" data-v24-custom="'+direction+'">THÊM MỐC GIỜ</button></div></details>':'')+
      '</section>';
  }
@@ -136,7 +139,7 @@
    const req=++sequence;
    const [a,b]=await Promise.all([
      sb.from('ops_shift_transport_v2').select('unit,direction,departure_min,line_no,quantity,confirmed_at,is_custom,note').eq('service_date',date),
-     sb.from('ops_shift_transport_rows').select('direction,departure_min,line_no').eq('service_date',date)
+     sb.from('ops_shift_transport_rows').select('direction,departure_min,line_no,reason,created_by').eq('service_date',date)
    ]);
    if(req!==sequence)return;
    if(a.error||b.error){const status=document.querySelector('.v24-status');if(status)status.textContent='Không đọc được xe giao ca: '+(a.error||b.error).message;return}
@@ -156,7 +159,15 @@
    if(!allowedRoles.has(own))return;
    try{
      busy=true;b.disabled=true;
-     if(b.dataset.v27Delete){
+     if(b.dataset.v28SaveReason){
+       const [direction,minute,line]=b.dataset.v28SaveReason.split('|');
+       const field=e.currentTarget.querySelector('[data-v28-reason="'+b.dataset.v28SaveReason+'"]');
+       const reason=(field?.value||'').trim();
+       if(reason.length>220)throw Error('Lý do tối đa 220 ký tự.');
+       const {error}=await sb.rpc('ops_set_shuttle_reason',{p_date:$('day').value,p_direction:direction,p_minute:Number(minute),p_line:Number(line),p_reason:reason});
+       if(error)throw Error(error.message);
+       await refresh();message(wrap,'Đã lưu lý do xe bổ sung '+clock(Number(minute))+'.');
+     }else if(b.dataset.v27Delete){
        const [dir,min,line]=b.dataset.v27Delete.split('|');
        const isMain=Number(line)===0;
        const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
@@ -206,12 +217,17 @@
        const next=!!e.currentTarget.querySelector('[data-v24-next="'+direction+'"]')?.checked;
        const minute=readMinute(time,next);
        if(minute===null)throw Error('Vui lòng chọn giờ hợp lệ.');
+       const reason=(e.currentTarget.querySelector('[data-v28-custom-reason="'+direction+'"]')?.value||'').trim();
+       if(!reason)throw Error('Vui lòng nhập lý do thêm giờ xe (ví dụ: xe hỗ trợ họp chuyên môn).');
+       if(reason.length>220)throw Error('Lý do tối đa 220 ký tự.');
        const already=assemble(rows,lines).some(x=>x.direction===direction&&x.departure_min===minute&&x.line_no===0);
        if(already)throw Error('Khung giờ này đã có; bấm dấu + ngay cạnh khung giờ để thêm xe.');
        const {error}=await sb.rpc('ops_add_shuttle_slot',{p_date:$('day').value,p_direction:direction,p_minute:minute});
        if(error)throw Error(error.message);
+       const reasonResult=await sb.rpc('ops_set_shuttle_reason',{p_date:$('day').value,p_direction:direction,p_minute:minute,p_line:0,p_reason:reason});
+       if(reasonResult.error)throw Error('Đã tạo mốc xe nhưng chưa lưu được lý do: '+reasonResult.error.message);
        await refresh();
-       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm mốc '+clock(minute)+' cho chiều '+model().directionLabel[direction]+'.');
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm mốc '+clock(minute)+' cho chiều '+model().directionLabel[direction]+' – '+reason+'.');
      }
    }catch(error){message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Không lưu được: '+error.message,true)}
    finally{busy=false;b.disabled=false}
