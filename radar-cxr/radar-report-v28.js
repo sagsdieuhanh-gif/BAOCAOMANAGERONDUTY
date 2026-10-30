@@ -117,6 +117,7 @@
   function reportHtml(d){
     const r=d.radar,c=d.c,events=r.episodes;
     let out='<div class="r28-sheet"><header class="r28-header"><strong>SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8</h2><p>Ngày '+esc(dateVN(c.date))+' · DỰ BÁO LẦN '+c.revision+' · Nguồn: '+esc(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+esc(c.author)+'</p></header>';
+    if(d.alerts?.length)out+='<section class="r28-section"><h3>THÔNG TIN CHỜ CÁC ĐƠN VỊ XÁC NHẬN</h3>'+table(['Đơn vị','Nhóm dữ liệu','Nội dung còn thiếu'],d.alerts.map(a=>[a.unit,a.type,a.detail]))+'</section>';
     out+='<section class="r28-section"><h3>I. TÓM TẮT KHAI THÁC</h3><div class="r28-kpis"><div><b>'+c.arrivals+'</b><span>Chuyến đến</span></div><div><b>'+c.departures+'</b><span>Chuyến đi</span></div><div><b>'+r.peak.n+'</b><span>Đỉnh cặp / 30 phút</span></div><div><b>'+events.length+'</b><span>Đợt cao điểm ≥4 cặp</span></div></div><p>'+esc(d.summary)+'</p><p>'+esc(d.comparison).replace(/\n/g,'<br>')+'</p></section>';
     out+='<section class="r28-section"><h3>II. BẢNG KIỂM SOÁT NGHIỆP VỤ</h3>'+table(['Nội dung','Nhận định','Phương án phục vụ'],d.topics.map(x=>[x.title,x.observation,x.action]))+'</section>';
     out+='<section class="r28-section"><h3>III. RADAR CAO ĐIỂM – TỔNG HỢP CẢ NGÀY</h3><div class="r28-chart">'+dailySvg(d)+'</div><p class="r28-note">Phân tích cửa sổ 30 phút trượt từng 5 phút; mỗi cặp đến–đi chỉ tính một lần trong cùng cửa sổ. Khoảng phục vụ quy ước: VJ/9G/VU/AK/FD 30 phút; hãng Hàn Quốc 60 phút; hãng khác theo lịch. Không suy ra GSE được giải phóng tại STD.</p><p><b>Đỉnh:</b> '+esc(clock(r.peak.s))+'–'+esc(clock(r.peak.s+30))+' ('+r.peak.n+' cặp) · <b>Số đợt ≥4 cặp:</b> '+events.length+' · <b>Hồ sơ thiếu cơ sở tính thời lượng:</b> '+r.unusable+'.</p></section>';
@@ -205,6 +206,7 @@
       para('SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH',{center:true,bold:true,color:'167398',size:19}),
       para('BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8',{center:true,bold:true,color:'17435E',size:28}),
       para('Ngày '+dateVN(c.date)+' · Lần '+c.revision+' · Nguồn: '+(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+c.author),
+      ...(d.alerts?.length?[hd('THÔNG TIN CHỜ CÁC ĐƠN VỊ XÁC NHẬN'),tab(['Đơn vị','Nhóm dữ liệu','Nội dung còn thiếu'],d.alerts.map(a=>[a.unit,a.type,a.detail]),[3100,3900,7700])]:[]),
       hd('I. TÓM TẮT KHAI THÁC'),
       tab(['Đến','Đi','Đỉnh cặp / 30 phút','Số đợt ≥4 cặp'],[[String(c.arrivals),String(c.departures),String(r.peak.n),String(r.episodes.length)]],[3675,3675,3675,3675]),
       para(d.summary),para(d.comparison),
@@ -251,18 +253,19 @@
   async function exportPdf(){
     if(!['ADMIN','DH'].includes(unit)){alert('Chỉ ĐH/ADMIN được xuất báo cáo.');return;}
     const b=$('r28Pdf');if(b){b.disabled=true;b.textContent='ĐANG TẠO PDF…';}
-    let node;
+    let node,holder;
     try{
       const d=await loadOnce(),html2pdf=await pdfLib();ensureStyles();
       node=document.createElement('div');node.innerHTML=reportHtml(d);
-      node.style.cssText='position:fixed;left:-20000px;top:0;width:1120px;background:white;';
-      document.body.appendChild(node);
+      node.style.cssText='width:1120px;background:white;';
+      holder=document.createElement('div');holder.style.cssText='position:absolute;left:-20000px;top:0;width:1120px';
+      holder.appendChild(node);document.body.appendChild(holder);
       await html2pdf().set({margin:[8,9,8,9],filename:'SAGS_CXR_RADAR_'+d.c.date.replace(/-/g,'')+'_L'+d.c.revision+'.pdf',
         image:{type:'jpeg',quality:0.96},html2canvas:{scale:1.6,backgroundColor:'#ffffff',useCORS:true},
         jsPDF:{unit:'mm',format:'a4',orientation:'landscape',compress:true},
         pagebreak:{mode:['css','legacy'],avoid:['.r28-episode','.r28-table tr']}}).from(node).save();
     }catch(e){alert('Không thể xuất PDF: '+e.message);}
-    finally{node?.remove();if(b){b.disabled=false;b.textContent='XUẤT BÁO CÁO PDF · RADAR (.PDF)';}}
+    finally{holder?.remove();if(b){b.disabled=false;b.textContent='XUẤT BÁO CÁO PDF · RADAR (.PDF)';}}
   }
   base.exportOne=exportWord;
   base.preview=preview;
