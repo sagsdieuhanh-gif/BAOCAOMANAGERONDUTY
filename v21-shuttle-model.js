@@ -39,7 +39,7 @@
     ...(best.n29?[{seats:29,quantity:best.n29}]:[])];
   const combo=units.map(x=>(x.quantity>1?x.quantity+'×':'')+x.seats+'C').join(' + ');
   return {...best,units,short:combo,
-    label:(best.count===1?'':best.count+' XE: ')+combo,
+    label:best.count===1?(best.n29?'29 CHỖ':'45 CHỖ'):best.count+' XE: '+combo,
     details:best.seats+' ghế · dư '+best.spare+' ghế'};
  }
  function isDefault(direction,minute){return defaults.some(x=>x.direction===direction&&x.departure_min===minute)}
