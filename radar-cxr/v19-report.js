@@ -194,11 +194,13 @@
    }));
    if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Thiếu giờ lịch bay.',action:'Kiểm tra lại Excel nguồn.'});
    const coord=[
-    ['Xác nhận năng lực cao điểm, quay đầu ngắn','Rà soát nhân sự, định mức, GSE, SKYONE, phương án bổ sung.','PVHK; KTSĐ; ĐH','Trước 16:00 ngày '+dateVN(prevDate(c.date))+'; cập nhật 08:30 ngày '+dateVN(c.date)+'.'],
-    ['Cập nhật quầy, kệ, bãi đỗ; hạn chế','Sau AOC kiểm tra bãi đỗ, tuyến GSE và phát hành Lần 2.','TBĐH; các đơn vị','Sau AOC; xác nhận trước 08:30 ngày '+dateVN(c.date)+'.']
+    ['Cao điểm và các chuyến quay đầu sát','PVHK/PVSĐ xác nhận nhân sự, GSE và phương án cuốn chiếu theo từng khung.','ĐH · PVHK · PVSĐ','Trước khung cao điểm / chờ phản hồi'],
+    ['Tàu rộng A330/B777','Xác nhận GSE tương thích, người có năng định và phương án dự phòng theo từng chuyến.','PVSĐ · PVHK · ĐH','Trước chuyến thân rộng / chờ phản hồi'],
+    ['Bãi đỗ, cầu ống và đường công vụ','Sau khi có AOC, xác nhận vị trí và các chuyến có thể chịu ảnh hưởng di chuyển.','ĐH · AOC/Cảng · PVSĐ','Trước chuyến liên quan / chờ phản hồi'],
+    ['Hành lý, cargo và tồn tại từ ca trước','Kho xác nhận hàng sẵn sàng; PVHK/PVSĐ điều phối theo chuyến; QA/IT cập nhật tồn tại.','Kho · PVHK · PVSĐ · QA/IT','Trước ca / chờ phản hồi']
    ];
    const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị bổ sung được nhập.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có cơ sở xác định vấn đề vượt thẩm quyền từ lịch bay đơn thuần. Các phòng cần xác nhận khả năng đáp ứng theo khung; ĐH tổng hợp và chỉ trình Ban TGĐ khi có nguy cơ hoặc thiếu hụt đã xác minh, kèm phương án xử lý.'};
  }
  function html(data){
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
