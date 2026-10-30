@@ -57,13 +57,25 @@
    }).catch(e=>{logoPromise=null;throw e});
    return logoPromise;
  }
- function draw(input,logo){
+ let vehiclePromise=null;
+ function loadVehicleIcons(){
+   if(vehiclePromise)return vehiclePromise;
+   const get=src=>new Promise(resolve=>{
+     const image=new Image();
+     image.onload=()=>resolve(image.naturalWidth?image:null);
+     image.onerror=()=>resolve(null);
+     image.src=src;
+   });
+   vehiclePromise=Promise.all([get('./assets/shuttle-29.webp'),get('./assets/shuttle-45.webp')]).then(([small,big])=>({small,big}));
+   return vehiclePromise;
+ }
+ function draw(input,logo,vehicles={}){
    if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
    const rows=input.rows||[],a=rows.filter(x=>x.direction==='NHA_CXR'),b=rows.filter(x=>x.direction==='CXR_NHA');
    const max=Math.max(a.length,b.length);
    if(max>65)throw Error('Quá nhiều mốc xe cho một ảnh, vui lòng kiểm tra các giờ bổ sung.');
    const W=1420,outer=34,col=660,gap=30,cardH=158,step=169,startY=241;
-   const footY=startY+step*max+12,H=footY+156;
+   const footY=startY+step*max+12,H=footY+245;
    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
    const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
    const C={navy:'#173C56',blue:'#136D90',ink:'#203D53',muted:'#637D8D',line:'#D9E5EB',
@@ -86,7 +98,7 @@
    shape(18,18,W-36,7,4,C.blue);
    const ratio=Math.min(90/logo.naturalWidth,87/logo.naturalHeight);
    c.drawImage(logo,54+(90-logo.naturalWidth*ratio)/2,41+(87-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
-   t('SAGS · PHÒNG ĐIỀU HÀNH KHAI THÁC CXR',166,52,17,C.blue,true);
+   t('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH',166,52,17,C.blue,true);
    t('BẢNG TỔNG HỢP XE GIAO CA',166,89,32,C.navy,true);
    t('04 đơn vị: ĐH · PVHK · PVSĐ · QA & IT',166,125,16,C.muted);
    shape(1139,44,232,95,11,C.soft);
@@ -108,6 +120,8 @@
      shape(x,y,5,cardH,2,special?C.orange:complete?C.green:C.blue);
      t(model().clock(v.departure_min),x+18,y+30,29,C.navy,true);
      if(special){shape(x+151,y+14,96,28,10,'#FCE4C0');t(v.line_no>0?'BỔ SUNG':'GIỜ THÊM',x+199,y+29,12,C.orange,true,'center');}
+     const busIcon=complete&&total>0&&total<=29?vehicles.small:complete&&total<=45&&total>29?vehicles.big:null;
+     if(busIcon?.naturalWidth)c.drawImage(busIcon,x+col-324,y+4,140,72);
      t(String(total),x+col-26,y+35,53,complete?C.navy:C.orange,true,'right');
      t(complete?'TỔNG SỐ NGƯỜI':'NGƯỜI · TẠM TÍNH',x+col-26,y+67,12,complete?C.green:C.orange,true,'right');
      line(x+18,y+74,x+col-18,'#E0E9EE');
@@ -142,6 +156,11 @@
    });
    t('Số 0 được tính là đã xác nhận. Số người trước khi đủ 4 phòng là tổng tạm tính.',outer+10,footY+107,15,C.ink);
    t('Mốc xe bổ sung được tô vàng nhạt, lý do ghi ngay trong cùng dòng. ĐH quyết định phương án xe.',outer+10,footY+133,14,C.muted);
+   t('GỢI Ý LOẠI XE KHI ĐÃ ĐỦ 4 ĐƠN VỊ XÁC NHẬN',outer+10,footY+169,14,C.navy,true);
+   if(vehicles.small?.naturalWidth)c.drawImage(vehicles.small,outer+450,footY+149,126,74);
+   t('29 CHỖ',outer+580,footY+189,19,C.blue,true);
+   if(vehicles.big?.naturalWidth)c.drawImage(vehicles.big,outer+760,footY+149,126,74);
+   t('45 CHỖ',outer+890,footY+189,19,C.blue,true);
    return canvas;
  }
  function download(url,filename){
@@ -167,8 +186,8 @@
    buttons.forEach(b=>b.disabled=true);
    if(status)status.textContent='Đang tạo '+type.toUpperCase()+'…';
    try{
-     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
-     const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
+     const [data,logo,vehicles]=await Promise.all([fetchData(),loadLogo(),loadVehicleIcons()]);
+     const img=draw(data,logo,vehicles),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){
        const blob=await new Promise((resolve,reject)=>{if(typeof img.toBlob!=='function')return reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.'));img.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png');});
        const url=URL.createObjectURL(blob);try{download(url,base+'.png');}finally{setTimeout(()=>URL.revokeObjectURL(url),15000);}
@@ -210,8 +229,8 @@
    const el=$('v21ShuttlePreview');if(!el)return;
    el.innerHTML='<p class="v21-report-loading">Đang tạo ảnh xem trước từ dữ liệu đã xác nhận…</p>';
    try{
-     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
-     const canvas=draw(data,logo);
+     const [data,logo,vehicles]=await Promise.all([fetchData(),loadLogo(),loadVehicleIcons()]);
+     const canvas=draw(data,logo,vehicles);
      const image=document.createElement('img');
      image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVHK, PVSĐ, QA & IT.';
      const blob=await new Promise((resolve,reject)=>{if(typeof canvas.toBlob!=='function')return reject(Error('Thiết bị không hỗ trợ ảnh PNG.'));canvas.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh xem trước.')),'image/png');});
