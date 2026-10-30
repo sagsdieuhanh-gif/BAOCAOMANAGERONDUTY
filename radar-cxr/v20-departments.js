@@ -303,7 +303,8 @@
    if(n!==generation)return;
    if(p.error||q.error||b.error){console.warn('Cannot retrieve departmental source',p.error||q.error||b.error);return}
    cargo=p.data||[];issues=q.data||[];transport=b.data||[];
-   render();
+   window.SagsCargoPlanCache=cargo;
+   render();if(typeof renderRadar==='function')renderRadar();
  }
  function setUnit(role){
    init();
