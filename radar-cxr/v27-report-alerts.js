@@ -87,7 +87,7 @@
    el.innerHTML='<p class="v27-pending">Đang kiểm tra số liệu các đơn vị…</p>';
    try{
      const warnings=await fetch(date);if(current!==request)return;
-     el.innerHTML=markup(warnings);
+     el.innerHTML=markup(warnings.filter(w=>w.type!=='XE GIAO CA'));
    }catch(e){
      if(current===request)el.innerHTML='<p class="v27-error"><strong>CHƯA KIỂM TRA ĐƯỢC DỮ LIỆU CÁC ĐƠN VỊ:</strong> '+escape(e.message)+'</p>';
    }
