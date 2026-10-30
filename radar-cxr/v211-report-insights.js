@@ -8,7 +8,7 @@
  const is777=f=>/B\s?777/i.test(f.aircraft_type||'');
  const is330=f=>/A\s?330/i.test(f.aircraft_type||'');
  const zone=bay=>[31,32,33,34,35,36,37,51,52,53,54,55].includes(Number(bay))?'K1':[38,39,40,41,42].includes(Number(bay))?'K2':Number(bay)>=56&&Number(bay)<=71?'K3':'?';
- const shorten=(s,n=340)=>String(s||'').trim().slice(0,n);
+ const shorten=(s,n=340)=>{const t=String(s||'').trim();if(t.length<=n)return t;const head=t.slice(0,n-1);return head.replace(/\s+\S*$/,'').trimEnd()+'…';};
  const plans=c=>new Map((c.unitPlans||[]).filter(r=>r.status==='CONFIRMED').map(r=>[r.unit,r.details||{}]));
  const values=(c,unit)=>plans(c).get(unit)||null;
  const flag=(data,key)=>data?.[key]==='READY'?'ĐÃ XÁC NHẬN SẴN SÀNG':data?.[key]==='LIMITED'?'CÓ HẠN CHẾ ĐÃ KHAI BÁO':'CHỜ XÁC NHẬN';
