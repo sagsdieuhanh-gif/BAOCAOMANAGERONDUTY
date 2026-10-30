@@ -111,3 +111,11 @@ body.v19-unit-KTS #tab-quick >.panel:first-of-type,body.v19-unit-PVHK #tab-quick
 .v215-quick-actions button{min-height:40px}
 @media(max-width:780px){.v216-staff-row{grid-template-columns:minmax(78px,.85fr) minmax(0,1fr);gap:10px}.v216-shift-label{grid-column:1/-1;border-bottom:1px solid #d9e8ee;padding-bottom:5px}.v216-staff-row label:last-child{grid-column:1/-1}}
 @media(max-width:375px){.v216-staff-row{grid-template-columns:1fr}.v216-staff-row label:last-child{grid-column:auto}}
+
+/* V2.16 report letterhead with SAGS logo */
+.v216-report-brand{display:flex;align-items:center;justify-content:center;gap:17px;border-bottom:2px solid #226688;padding:5px 0 13px;margin-bottom:8px;color:#173d58;text-align:left}
+.v216-report-brand img.v216-report-logo{width:76px!important;height:auto!important;max-height:78px!important;object-fit:contain;flex:none}
+.v216-report-brand strong{font:700 12px/1.35 'Times New Roman',serif;letter-spacing:.1px}
+.v216-report-brand h2{margin:5px 0 0!important;font:700 17px/1.25 'Times New Roman',serif}
+@media(max-width:600px){.v216-report-brand{gap:8px}.v216-report-brand img.v216-report-logo{width:48px!important}.v216-report-brand h2{font-size:14px!important}}
+@media print{.v216-report-brand{break-inside:avoid}}
