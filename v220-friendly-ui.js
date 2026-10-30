@@ -31,7 +31,9 @@
  const doc=document;
  let current='overview',selected='home',mounted=false;
  const isAdmin=()=>typeof unit!=='undefined'&&unit==='ADMIN';
- const allowedGroup=g=>true;
+ const access=()=>root.SagsRoleAccessV225;
+ const role=()=>typeof unit==='undefined'?null:unit;
+ const allowedGroup=g=>g.items.some(x=>access()?.canOpen(role(),x[0])??true);
  function makeButton(label,cls,meta){
    const b=doc.createElement('button');b.type='button';b.className=cls;b.textContent=label;
    Object.entries(meta||{}).forEach(([k,v])=>b.dataset[k]=v);
@@ -76,7 +78,9 @@
  }
  function paint(){
    if(!mounted)return;
-   const g=GROUPS.find(x=>x.id===current)||GROUPS[0];
+   const g=GROUPS.find(x=>x.id===current&&allowedGroup(x))
+     ||GROUPS.find(allowedGroup)||GROUPS[0];
+   current=g.id;
    doc.body.dataset.v220Group=g.id;
    $('v220GroupTitle').textContent=g.title;
    $('v220GroupSubtitle').textContent=g.subtitle;
@@ -98,7 +102,7 @@
      b.querySelector('strong').textContent=label;
      b.querySelector('small').textContent=description;
      b.classList.toggle('is-selected',selected===tab);
-     if(old.classList.contains('hidden')||(tab==='admin'&&!isAdmin()))continue;
+     if(!(access()?.canOpen(role(),tab)??true))continue;
      if(isAdvanced){$('v220AdvancedMenu').appendChild(b);advancedCount++;}else $('v220Menu').appendChild(b);
    }
    $('v220Advanced').hidden=advancedCount===0;
@@ -119,11 +123,12 @@
    if(!g||!allowedGroup(g))return;
    current=g.id;
    if($('v220Advanced'))$('v220Advanced').open=false;
-   if(openFirst)navigate(g.items[0][0]);else paint();
+   const target=g.items.find(x=>access()?.canOpen(role(),x[0])??true)?.[0];
+   if(openFirst&&target)navigate(target);else paint();
  }
  function navigate(tab){
    const old=$('tabs')?.querySelector('[data-tab="'+tab+'"]');
-   if(!old||old.classList.contains('hidden'))return;
+   if(!old||!(access()?.canOpen(role(),tab)??true))return;
    old.click();
    sync(tab);
    const app=$('app');
@@ -133,6 +138,7 @@
    if(!mounted)mount();
    if(!mounted)return;
    const g=currentGroupForTab(tab);
+   if(!(access()?.canOpen(role(),tab)??true))return;
    current=g.id;selected=tab;paint();
  }
  root.SagsFriendlyUIV220={mount,navigate,sync,changeGroup,refresh:paint,groups:GROUPS.map(x=>x.id),routes:GROUPS.map(x=>({id:x.id,tabs:x.items.map(y=>y[0])}))};
