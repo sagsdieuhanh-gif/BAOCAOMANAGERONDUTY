@@ -43,7 +43,7 @@
   ]}
  };
  const selected=(unit)=>unit==='QA'||unit==='IT'?'QA_IT':unit;
- let rows=[],bound=false,token=0,loading=false,loadedDate='',lastError='';
+ let rows=[],quickRows=[],bound=false,token=0,loading=false,loadedDate='',lastError='';
  const labelFor=(row)=>row?.status==='CONFIRMED'?'ĐÃ XÁC NHẬN':row?.status==='DRAFT'?'ĐÃ LƯU NHÁP':'CHƯA CÓ DỮ LIỆU';
  const mayEdit=(key)=>typeof unit!=='undefined'&&(unit==='ADMIN'||unit===key||(key==='QA_IT'&&['QA','IT'].includes(unit)));
  const statusOpts=[['PENDING','CHƯA XÁC NHẬN'],['READY','ĐÃ SẴN SÀNG'],['LIMITED','CÓ HẠN CHẾ']]; 
@@ -78,6 +78,10 @@
  function html(k,g){
    return '<section class="v20-panel v211-input" data-unit-forecast="'+k+'"><div class="row space"><h3>BỔ SUNG XÁC NHẬN PHỤC VỤ BÁO CÁO · '+g.label+'</h3><span class="status gray" data-v211-state="'+k+'">CHƯA CÓ DỮ LIỆU</span></div>'+
     '<p class="note">Chỉ nhập điểm cần bổ sung cho dự báo; quân số, PAX, KG/PCS, GSE và xe giao ca giữ nguyên ở các biểu mẫu hiện có. Ô chưa biết để trống hoặc CHƯA XÁC NHẬN. LƯU NHÁP không được coi là xác nhận chuyên môn.</p>'+
+    '<div class="v215-fast-report"><h4>DÁN NHANH NỘI DUNG BÁO CÁO</h4>'+
+    '<p class="note">Dán nhiều dòng cùng lúc, ví dụ xe 1 hỏng từ hôm qua, xe 2 bảo trì. Nội dung được gửi cho ĐH nguyên ý để đối chiếu trước khi phát hành.</p>'+
+    '<textarea data-v215-quick="'+k+'" rows="5" maxlength="5000" placeholder="Dán các ý cần báo cáo của phòng...&#10;Xe 1 hư từ hôm qua.&#10;Xe 2 đang bảo trì.&#10;Đề nghị bố trí xe dự phòng."></textarea>'+
+    '<div class="v215-quick-actions"><button type="button" class="primary" data-v215-send="'+k+'">LƯU & GỬI ĐH</button><span data-v215-state="'+k+'">Chưa gửi nội dung bổ sung.</span></div></div>'+
     personnelFields(k)+'<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div>'+
     '<div class="btnbar"><button type="button" data-v211-save="'+k+'">LƯU NHÁP</button><button type="button" class="primary" data-v211-confirm="'+k+'">XÁC NHẬN DỮ LIỆU CỦA PHÒNG</button></div>'+
     '<p class="note" data-v211-message="'+k+'"></p></section>';
@@ -92,6 +96,7 @@
      else target.appendChild(node);
      node.querySelector('[data-v211-save]').onclick=()=>save(key,false);
      node.querySelector('[data-v211-confirm]').onclick=()=>save(key,true);
+     node.querySelector('[data-v215-send]').onclick=()=>saveQuick(key);
      node.querySelectorAll('[data-unit-field]').forEach(el=>el.addEventListener('input',()=>refreshStaffPreview(key)));
      node.querySelectorAll('select[data-unit-field]').forEach(el=>el.addEventListener('change',()=>refreshStaffPreview(key)));
      refreshStaffPreview(key);
@@ -107,9 +112,12 @@
  function applyRows(){
    for(const [key,g] of Object.entries(groups)){
      const node=document.querySelector('[data-unit-forecast="'+key+'"]');if(!node)continue;
-     const row=rows.find(r=>r.unit===key),data=row?.details||{};
+     const row=rows.find(r=>r.unit===key),data=row?.details||{},quick=quickRows.find(r=>r.unit===key);
      if(node.contains(document.activeElement))continue;
      for(const el of node.querySelectorAll('[data-unit-field]'))el.value=String(data[el.dataset.unitField]??(el.tagName==='SELECT'?'PENDING':''));
+     const box=node.querySelector('[data-v215-quick]');if(box)box.value=quick?.report_text||'';
+     const note=node.querySelector('[data-v215-state]');
+     if(note)note.textContent=quick?.updated_at?'ĐH đã nhận · '+new Date(quick.updated_at).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'Chưa gửi nội dung bổ sung.';
      refreshStaffPreview(key);
      const el=node.querySelector('[data-v211-state]');
      if(el){el.textContent=labelFor(row)+(row?.confirmed_at?' · '+new Date(row.confirmed_at).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'}):'');el.className='status '+(row?.status==='CONFIRMED'?'ok':'warn');}
@@ -120,11 +128,38 @@
    if(!bound||typeof me==='undefined'||!me)return;
    const date=$('day')?.value;if(!date)return;
    const n=++token;loading=true;
-   const {data,error}=await sb.from('ops_unit_forecasts').select('*').eq('service_date',date);
+   const [normal,quick]=await Promise.all([
+     sb.from('ops_unit_forecasts').select('*').eq('service_date',date),
+     sb.from('ops_unit_quick_reports').select('service_date,unit,report_text,updated_at,updated_by').eq('service_date',date)
+   ]);
+   const {data,error}=normal;
    if(n!==token)return;
    loading=false;loadedDate=date;lastError=error?.message||'';
-   if(error){for(const key of Object.keys(groups)){const el=document.querySelector('[data-v211-message="'+key+'"]');if(el)el.textContent='Chưa đọc được phản hồi chuyên môn: '+error.message;}return;}
-   rows=data||[];applyRows();
+   if(error||quick.error){for(const key of Object.keys(groups)){const el=document.querySelector('[data-v211-message="'+key+'"]');if(el)el.textContent='Không tải được nội dung các phòng: '+(error||quick.error).message;}return;}
+   rows=data||[];quickRows=quick.data||[];applyRows();
+ }
+ async function saveQuick(key){
+   if(!mayEdit(key)||loading||!me)return;
+   const date=$('day')?.value;if(!date||date!==loadedDate)return alert('Vui lòng tải lại dữ liệu của ngày cần báo cáo.');
+   const node=document.querySelector('[data-unit-forecast="'+key+'"]'),box=node?.querySelector('[data-v215-quick]');
+   if(!node||!box)return;
+   const note=String(box.value||'').trim();
+   if(!note)return alert('Vui lòng dán hoặc nhập nội dung cần báo cáo trước khi gửi.');
+   if(note.length>5000)return alert('Nội dung dài quá 5.000 ký tự.');
+   const button=node.querySelector('[data-v215-send]'),label=node.querySelector('[data-v215-state]');
+   button.disabled=true;button.textContent='ĐANG LƯU…';
+   try{
+     const {error}=await sb.from('ops_unit_quick_reports').upsert({
+       service_date:date,unit:key,report_text:note,updated_by:me.id,updated_at:new Date().toISOString()
+     },{onConflict:'service_date,unit'});
+     if(error)throw Error(error.message);
+     const saved=await sb.from('ops_unit_quick_reports').select('service_date,unit,report_text,updated_at,updated_by')
+       .eq('service_date',date).eq('unit',key).maybeSingle();
+     if(saved.error||saved.data?.report_text!==note)throw Error('Chưa thể xác nhận nội dung đã lưu. Vui lòng tải lại trước khi gửi lần nữa.');
+     quickRows=quickRows.filter(r=>r.unit!==key).concat(saved.data);
+     if(label)label.textContent='ĐÃ GỬI ĐH · '+new Date(saved.data.updated_at).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit'});
+   }catch(e){if(label)label.textContent='CHƯA GỬI ĐƯỢC: '+e.message;}
+   finally{button.disabled=false;button.textContent='LƯU & GỬI ĐH';}
  }
  async function save(key,confirm){
    if(!mayEdit(key)||loading)return;
