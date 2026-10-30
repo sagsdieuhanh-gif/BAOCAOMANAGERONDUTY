@@ -232,7 +232,7 @@
    const windows=capacity(pairs,staff,gse,contracts,detail);
    const attention=windows.filter(w=>w.unknownBay||w.unknownCargo||
      w.gse.some(x=>x.shortage>0)||w.baggage.shortage>0||w.driver.shortage>0||w.cobusDrivers.shortage>0||w.gateStaff.shortage>0||w.checkin.shortage>0);
-   const top=windows.slice().sort((a,b)=>b.total-a.total||a.start-b.start).slice(0,6);
+   const top=windows.filter(x=>x.total>0).sort((a,b)=>b.total-a.total||a.start-b.start).slice(0,6);
    return {hours,gate,stand,windows,attention,top,handoffs:handoffs(pairs),contracts:(contracts||[]).length,
      unknown:hours.unverified};
  }
