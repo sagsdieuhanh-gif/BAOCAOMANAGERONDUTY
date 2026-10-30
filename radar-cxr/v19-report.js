@@ -9,6 +9,7 @@
  const clock=n=>n==null?'—':String(Math.floor(n/60)%24).padStart(2,'0')+':'+String(n%60).padStart(2,'0')+(n>=1440?' (+1)':'');
  const has=(x,k)=>Number.isInteger(x?.[k]);
  const known=x=>String(x||'').trim();
+ const crop=(x,max)=>{const t=String(x??'').trim();if(t.length<=max)return t;return t.slice(0,max-1).replace(/\s+\S*$/,'').trimEnd()+'…';};
  const byRole=(u,role,shift)=>staff.find(x=>x.unit===u&&x.role_code===role&&x.shift===shift)?.quantity;
  const shown=x=>x==null?'chưa xác nhận':x+' người';
  const uStaff=(u,role)=>'Sáng '+shown(byRole(u,role,'SÁNG'))+', Đêm '+shown(byRole(u,role,'ĐÊM'));
@@ -179,8 +180,8 @@
    const topics=(enhanced||core).map((x,i)=>{
      const override=(c.controls||[]).find(row=>row.topic===i+1)||{};
      return {title:String(i+1).padStart(2,'0')+'. '+x.title.replace(/^\d+\.\s*/,''),owner:x.owner||'ĐH phối hợp các phòng',
-       observation:(known(override.observation)||x.observation||'CHỜ XÁC NHẬN').slice(0,490),
-       action:(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.').slice(0,620)};
+       observation:crop(known(override.observation)||x.observation||'CHỜ XÁC NHẬN',490),
+       action:crop(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.',620)};
    });
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
