@@ -39,7 +39,7 @@ const assert=require('node:assert/strict');
  assert.ok(outputs.filter(x=>x.text.includes('LÝ DO THÊM XE')).every(x=>/^(#AC671D|#AC671D)$/i.test(x.color)),'reason must use orange-highlight color');
  const gcode=require('node:fs').readFileSync('v24-shuttle-grid.js','utf8');
  assert.ok(gcode.includes('data-v28-custom-reason'));
- assert.ok(gcode.includes('data-v28-save-reason'));
+ assert.ok(gcode.includes('data-v24-save-all'));
  assert.ok(gcode.includes('ops_set_shuttle_reason'));
  assert.ok(gcode.includes('v28-extra-slot'));
  const index=require('node:fs').readFileSync('index.html','utf8');
