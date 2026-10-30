@@ -27,7 +27,7 @@
    const suffix=(label,value,s)=>label+' ('+(value==null?'CHỜ XÁC NHẬN':value+' NS')+
       (s==='PENDING'&&value!=null?', chưa xác nhận đáp ứng':'')+')';
    const shiftVariation=ms!==ns&&ms!=='PENDING'&&ns!=='PENDING';
-   const headline=shiftVariation?'Sáng '+human[ms].toLowerCase()+', đêm '+human[ns].toLowerCase()+' '+def.service:
+   const headline=shiftVariation?'Khả năng đáp ứng '+def.service+': ca sáng '+human[ms].toLowerCase()+', ca đêm '+human[ns].toLowerCase():
      status==='CHỜ XÁC NHẬN'?'CHỜ XÁC NHẬN '+def.service:
      status==='Chưa xác nhận đầy đủ'?'Chưa xác nhận đầy đủ khả năng đáp ứng '+def.service:
      status+' '+def.service;
