@@ -109,7 +109,7 @@
     return s+'</svg>';
   }
   function table(headers,rows){
-    return '<table class="r28-table"><thead><tr>'+headers.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+esc(x).replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+    return '<table class="r28-table"><thead><tr>'+headers.map(x=>'<th>'+esc(x)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+esc(x).replace(/(CHỜ XÁC NHẬN|Chờ xác nhận|chưa xác nhận)/gi,'<strong class="r28-pending">$1</strong>').replace(/\n/g,'<br>')+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
   }
   function alertRows(e){
     return e.alerts.map(a=>[a.level,a.kind,a.detail,a.action]);
@@ -137,7 +137,7 @@
   function ensureStyles(){
     if($('r28-style'))return;
     const el=document.createElement('style');el.id='r28-style';el.textContent=
-      '.r28-sheet{font:13px/1.45 Arial,sans-serif;color:#18384e;background:#fff;max-width:1180px;margin:12px auto;padding:16px}.r28-header{text-align:center;border-bottom:3px solid #1b779f;padding:12px}.r28-header strong{color:#176786}.r28-header h2{font-size:21px;margin:8px 0}.r28-section{margin:20px 0;break-inside:auto}.r28-section h3{font-size:15px;background:#eaf3f8;color:#174563;border-left:5px solid #1781ae;padding:8px;margin:0 0 9px}.r28-section h4{margin:10px 0 6px;color:#a26415}.r28-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.r28-kpis>div{border:1px solid #ccdfeb;text-align:center;padding:12px;background:#f3f8fb}.r28-kpis b{font-size:28px;display:block;color:#19547a}.r28-kpis span{font-size:12px}.r28-table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;margin:8px 0}.r28-table th{background:#1a506e;color:white;border:1px solid #7697aa;padding:7px;text-align:left}.r28-table td{border:1px solid #bfccd6;padding:6px;vertical-align:top;overflow-wrap:anywhere}.r28-table tr{break-inside:avoid}.r28-chart{max-width:100%;overflow:hidden;border:1px solid #d8e3eb;background:#f8fbfe;margin:8px 0}.r28-chart svg{width:100%;height:auto;display:block}.r28-note{font-size:11px;color:#5a6e7f}.r28-state{color:#a2681b;font-size:12px}.r28-episode{break-inside:avoid-page;border-top:2px solid #b9d6e5;padding-top:9px}@media print{.r28-sheet{max-width:none;margin:0;padding:0}.r28-episode{break-inside:avoid-page}}';
+      '.r28-sheet{font:13px/1.45 Arial,sans-serif;color:#18384e;background:#fff;max-width:1180px;margin:12px auto;padding:16px}.r28-header{text-align:center;border-bottom:3px solid #1b779f;padding:12px}.r28-header strong{color:#176786}.r28-header h2{font-size:21px;margin:8px 0}.r28-section{margin:20px 0;break-inside:auto}.r28-section h3{font-size:15px;background:#eaf3f8;color:#174563;border-left:5px solid #1781ae;padding:8px;margin:0 0 9px}.r28-section h4{margin:10px 0 6px;color:#a26415}.r28-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.r28-kpis>div{border:1px solid #ccdfeb;text-align:center;padding:12px;background:#f3f8fb}.r28-kpis b{font-size:28px;display:block;color:#19547a}.r28-kpis span{font-size:12px}.r28-table{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed;margin:8px 0}.r28-table th{background:#1a506e;color:white;border:1px solid #7697aa;padding:7px;text-align:left}.r28-table td{border:1px solid #bfccd6;padding:6px;vertical-align:top;overflow-wrap:anywhere}.r28-table tr{break-inside:avoid}.r28-chart{max-width:100%;overflow:hidden;border:1px solid #d8e3eb;background:#f8fbfe;margin:8px 0}.r28-chart svg{width:100%;height:auto;display:block}.r28-note{font-size:11px;color:#5a6e7f}.r28-state{color:#a2681b;font-size:12px}.r28-pending{color:#b91c1c;font-weight:700}.r28-episode{break-inside:avoid-page;border-top:2px solid #b9d6e5;padding-top:9px}@media print{.r28-sheet{max-width:none;margin:0;padding:0}.r28-episode{break-inside:avoid-page}}';
     document.head.appendChild(el);
   }
   let loading=null;
@@ -193,7 +193,7 @@
     const hd=t=>para(t,{size:23,bold:true,color:'175477',before:200,after:100,keep:true});
     function tab(head,rows,widths){
       const cell=(v,isHead)=>new D.TableCell({borders:edges,shading:isHead?{fill:'185576'}:undefined,
-        margins:{top:70,bottom:70,left:80,right:80},children:[para(v,{size:17,bold:isHead,color:isHead?'FFFFFF':'233F51',after:0})]});
+        margins:{top:70,bottom:70,left:80,right:80},children:[para(v,{size:17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(String(v))?'B91C1C':'233F51',after:0})]});
       return new D.Table({width:{size:14700,type:D.WidthType.DXA},columnWidths:widths,
         rows:[new D.TableRow({children:head.map(v=>cell(v,true)),tableHeader:true,cantSplit:true})].concat(rows.map(r=>new D.TableRow({children:r.map(v=>cell(v,false)),cantSplit:true})))});
     }
