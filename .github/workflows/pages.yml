@@ -31,6 +31,7 @@ jobs:
           node tests/v219-peak-capacity.test.cjs
           node tests/v220-friendly-ui.test.cjs
           node tests/v221-shuttle-planner.test.cjs
+          node tests/v222-shuttle-layout.test.cjs
       - name: Stage Manager On Duty
         run: |
           mkdir -p _site/assets
