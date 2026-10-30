@@ -15,7 +15,7 @@
 
 ## 3. Phân tích nghiệp vụ
 - **Bến bãi:** lấy ParkingBay thực tế của từng chuyến; phân khu 1 (31–37 và 51–55), khu 2 (38–42), khu 3 (56–71). Khu 2–3 lưu ý thời gian di chuyển xe, thiết bị khi tàu lăn. Nếu cặp chuyến đến/đi không khớp bãi, nêu rõ để ĐH đối chiếu AOC.
-- **Gate/boarding:** lấy Gate từ bảng DEPARTURE. Các chuyến cùng gate có STD gần nhau trong 45 phút chỉ là diện **cần kiểm tra**, không kết luận trùng boarding khi chưa có BDG Start/Finish.
+- **Gate/boarding:** lấy Gate và BDG Start/BDG Finish từ bảng DEPARTURE. Nếu có đủ hai khung boarding, nhận diện các khung dự kiến chồng lấn cùng gate; nếu thiếu giờ boarding, chỉ cảnh báo các chuyến cùng gate có STD gần nhau trong 45 phút và yêu cầu kiểm tra, không tự kết luận trùng.
 - **Booking:** giữ đúng chuỗi gốc như `0/10/365`. Có thể cộng ba thành phần để nhận biết mức đặt chỗ cần chú ý, nhưng **không coi đó là số khách thực đi**, không tự điền PAX.
 - **FERRY:** kiểm tra `SSR`, `NatureOfFlight` và `FlightType` đồng thời. Nếu `SSR=FERRY` nhưng `FlightType=PAX`, đưa vào **CẦN XÁC NHẬN**, không tự giả định không có khách hoặc không cần GSE.
 - **Tàu thân rộng:** nhận diện A330/B777, nêu đúng chuyến, bến bãi, gate, booking, và phương án PVSĐ/PVHK theo giờ.
