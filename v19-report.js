@@ -269,11 +269,8 @@
    const fmtBay=b=>b==null?'CHỜ XÁC NHẬN':'Bãi '+b;
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
-    '<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
+    '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, check-in, boarding, booking và ferry được phân tích theo lịch mới, đối chiếu Lần 1.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action,x.owner])).join('')+'</table>'+
-    '<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>'+
-    (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':'<p>Chưa có nội dung bổ sung từ các phòng.</p>')+
     (data.l2Details?'<h3>PHÂN TÍCH CHI TIẾT LẦN 2 · BẾN BÃI / GATE / BOOKING / FERRY</h3>'+
        '<p>Đối chiếu '+esc(data.l2Details.source)+': '+data.l2Details.bookingCount+' chuyến có booking dạng ba thành phần; '+
        data.l2Details.wideCount+' chuyến đi tàu thân rộng; '+data.l2Details.ferryCount+' chuyến có ký hiệu FERRY.</p>'+
@@ -285,6 +282,9 @@
          '. Các chuyến thiếu giờ bắt đầu/kết thúc boarding chỉ được đưa vào diện cần kiểm tra.</p>':'')+
        (data.l2Changes.length?'<p><b>THAY ĐỔI SO LẦN 1:</b> '+esc(data.l2Changes.slice(0,25).map(x=>x.flight+' '+x.type+
         (x.from!=null?' '+x.from+' → '+x.to:'')).join('; '))+'</p>':''):'')+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action,x.owner])).join('')+'</table>'+
+    '<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>'+
+    (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':'<p>Chưa có nội dung bổ sung từ các phòng.</p>')+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
     '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(data.recommendation)+'</p>'+
@@ -363,7 +363,7 @@
  async function preview(){
    const el=document.getElementById('v19ReportPreview');if(!el)return;
    el.innerHTML='<p class="v19-small">Đang tổng hợp dữ liệu…</p>';
-   try{el.innerHTML=html(build(await source()));}catch(e){el.innerHTML='<div class="v19-callout">'+esc(e.message)+'</div>'}
+   try{const result=build(await source());el.innerHTML=html(result);const banner=document.getElementById('v218ReportStatus');if(banner)banner.textContent=result.c.revision===2?'LẦN 2 ĐÃ DUYỆT · BẢN PHÂN TÍCH BÃI ĐỖ / GATE / BOOKING / FERRY / SO SÁNH LẦN 1':'CHƯA CÓ LẦN 2 ĐÃ DUYỆT · Vào LỊCH BAY để nhập, phân tích và duyệt file ARRIVAL/DEPARTURE.';}catch(e){el.innerHTML='<div class="v19-callout">'+esc(e.message)+'</div>'}
  }
  async function loadNotes(){
    const {data,error}=await sb.from('ops_report_notes').select('*').eq('service_date',E('day').value).maybeSingle();
@@ -384,5 +384,5 @@
    if(error)throw error;
    await preview();
  }
- window.SagsReportV19={source,build,preview,exportOne,loadNotes,saveNotes,_testCreateWord:word};
+ window.SagsReportV19={source,build,renderHtml:html,preview,exportOne,loadNotes,saveNotes,_testCreateWord:word};
 })();
