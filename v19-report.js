@@ -299,6 +299,7 @@
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
     (data.dailyBrief?'<h3>PHƯƠNG ÁN PHỤC VỤ LẦN 2 · NHẬN ĐỊNH THEO TÌNH HÌNH NGÀY</h3>'+
       '<p>'+esc(data.dailyBrief.lead)+'</p>'+
+      (data.dailyBrief.staffing?'<p><b>Quân số các đơn vị đã xác nhận:</b> '+esc(data.dailyBrief.staffing)+'.</p>':'')+
       '<table>'+tr(['Nội dung cần tập trung','Đánh giá từ lịch và dữ liệu các phòng','Phương án phục vụ / Đơn vị thực hiện'],true)+
       data.dailyBrief.entries.map(x=>tr([x.title,x.observation,x.action+'\n'+x.owner])).join('')+'</table>'+
       '<p><b>Thông tin cần xác nhận thêm:</b> '+esc(data.dailyBrief.closing)+'</p>':'')+
