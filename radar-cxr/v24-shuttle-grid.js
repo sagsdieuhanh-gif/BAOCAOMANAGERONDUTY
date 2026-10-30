@@ -73,20 +73,23 @@
        return '<td class="v24-cell v24-read"><strong>'+(v?.quantity??'—')+'</strong><small>'+(v?timeVN(v.confirmed_at):'Chưa xác nhận')+'</small></td>';
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
-       '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small></td>'+
-       '<td class="v24-plus">'+(!child&&active?'<button type="button" data-v24-add="'+key+'" aria-label="Thêm xe vào khung '+clock(x.departure_min)+'" title="Thêm dòng ngay dưới giờ này">+</button>':'')+
-       ((child||!x.defaultTime)&&active?'<button type="button" class="v27-delete" data-v27-delete="'+key+'" title="Xóa giờ / dòng bổ sung thừa nếu chưa có số liệu xác nhận" aria-label="Xóa '+(child?'dòng bổ sung':'giờ xe tự thêm')+' '+clock(x.departure_min)+'">×</button>':'')+'</td>'+
+       '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small>'+
+       ((child||!x.defaultTime)&&active?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Xóa dòng xe bổ sung nếu chưa có phòng khác xác nhận" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
          (cls.kind==='small'?icon(29):cls.kind==='big'||cls.kind==='excess'?icon(45):'')+
          '<span>'+cls.label+'</span></td>'+
-       '<td class="v24-save">'+(active?'<button data-v24-save="'+key+'" type="button">LƯU</button>':'')+'</td></tr>'+ (x.missing.length?'<tr class="v28-missing-row"><td colspan="10"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+ (custom?'<tr class="v28-reason-row"><td colspan="10"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason? '<input maxlength="220" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'">'+ '<button type="button" data-v28-save-reason="'+key+'">LƯU LÝ DO</button>': '<span>'+escape(x.reason||'Chưa ghi lý do thêm xe')+'</span>')+'</div></td></tr>':'');
+       '</tr>'+
+       (x.missing.length?'<tr class="v28-missing-row"><td colspan="8"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
+       (custom?'<tr class="v28-reason-row"><td colspan="8"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason?
+         '<input maxlength="220" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'">':
+         '<span>'+escape(x.reason||'Chưa ghi lý do thêm xe')+'</span>')+'</div></td></tr>':'');
    }).join('');
    return '<section class="v24-direction" data-v24-direction="'+direction+'"><div class="v24-route-title"><div><b>'+route+'</b><small>'+what+'</small></div>'+
      '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' mốc giờ</div></div>'+
-     '<div class="v24-table-scroll"><table class="v24-table"><thead><tr><th>GIỜ XE</th><th>+</th>'+
-       headings.map(t=>'<th>'+t+'</th>').join('')+'<th>TỔNG</th><th>GỢI Ý XE</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+     '<div class="v24-table-scroll"><table class="v24-table"><thead><tr><th>GIỜ XE</th>'+
+       headings.map(t=>'<th>'+t+'</th>').join('')+'<th>TỔNG</th><th>GỢI Ý XE</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
      (active?'<details class="v24-custom"><summary>+ THÊM GIỜ XE KHÁC CHO CHIỀU NÀY</summary>'+
        '<div><label>Giờ chạy <input type="time" data-v24-time="'+direction+'" value="12:00"></label>'+
        '<label><input type="checkbox" data-v24-next="'+direction+'"> Ngày hôm sau (+1)</label>'+ '<label class="v28-custom-reason">Lý do thêm xe <input maxlength="220" data-v28-custom-reason="'+direction+'" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" required></label>'+
@@ -100,8 +103,9 @@
      '<div><div class="v24-eyebrow">SAGS  ·  XE GIAO CA</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
      '<p>Hai chiều xe · 05 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
      '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
-     '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Dấu <b>+</b> cạnh giờ tạo dòng bổ sung ngay bên dưới.</div>'+
+     '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Muốn thêm giờ xe khác, mở mục <b>THÊM GIỜ XE KHÁC</b> phía dưới. Nhập xong cả hai chiều, bấm <b>LƯU TẤT CẢ THAY ĐỔI</b> một lần.</div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
+     (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
      '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 5 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
      '<div class="v24-status" role="status"></div></div>';
  }
@@ -151,6 +155,84 @@
    const el=box?.closest('.v24-mount')?.querySelector('.v24-status')||box?.querySelector('.v24-status');if(!el)return;
    el.textContent=s;el.style.color=isError?'#A64036':'#17735D';
  };
+
+ function collectChanges(valueEdits,reasonEdits,who,date,userId){
+   const upserts=[],deletes=[],reasons=[];
+   for(const e of valueEdits){
+     const [direction,minuteText,lineText]=String(e.key||'').split('|');
+     const minute=Number(minuteText),line=Number(lineText),which=e.unit;
+     if(!editable(who,which))continue;
+     if(!['NHA_CXR','CXR_NHA'].includes(direction)||!Number.isInteger(minute)||minute<0||minute>2879||!Number.isInteger(line)||line<0||line>12)
+       throw Error('Mốc xe không hợp lệ; vui lòng tải lại bảng.');
+     const value=String(e.value??'').trim();
+     const saved=rows.find(x=>x.unit===which&&partKey(x)===e.key);
+     if(value===''){
+       if(saved)deletes.push({unit:which,direction,departure_min:minute,line_no:line});
+       continue;
+     }
+     if(!/^\d+$/.test(value)||Number(value)>500)throw Error('Số người tại '+clock(minute)+' ('+which+') phải là số nguyên từ 0 đến 500.');
+     if(saved&&saved.quantity===Number(value))continue;
+     upserts.push({service_date:date,unit:which,direction,departure_min:minute,line_no:line,
+       quantity:Number(value),is_custom:line>0||!model().isDefault(direction,minute),confirmed_by:userId});
+   }
+   for(const e of reasonEdits){
+     const stored=lines.find(x=>partKey(x)===e.key);
+     if(!stored)throw Error('Dòng xe bổ sung không còn tồn tại; vui lòng tải lại.');
+     if(!(who==='DH'||who==='ADMIN'||stored.created_by===userId))continue;
+     const next=String(e.value??'').trim();
+     if(next===String(stored.reason||'').trim())continue;
+     if(!next)throw Error('Vui lòng ghi lý do của xe bổ sung '+clock(stored.departure_min)+'.');
+     if(next.length>220)throw Error('Lý do thêm xe tối đa 220 ký tự.');
+     reasons.push({direction:stored.direction,minute:stored.departure_min,line:stored.line_no,reason:next});
+   }
+   return {upserts,deletes,reasons};
+ }
+ function pendingDraft(wrap,who){
+   const fields=[...wrap.querySelectorAll('input[data-v24-value]')].filter(x=>editable(who,x.dataset.v24Value));
+   for(const el of fields){
+     const key=el.closest('[data-v24-key]')?.dataset.v24Key;
+     const saved=rows.find(x=>x.unit===el.dataset.v24Value&&partKey(x)===key);
+     if(String(el.value||'').trim()!==String(saved?.quantity??''))return true;
+   }
+   return [...wrap.querySelectorAll('input[data-v28-reason]')].some(el=>{
+     const old=lines.find(x=>partKey(x)===el.dataset.v28Reason)?.reason||'';
+     return el.value.trim()!==old.trim();
+   });
+ }
+ async function saveAll(wrap,who){
+   const date=$('day')?.value;
+   if(date!==activeDate)throw Error('Ngày xe đã thay đổi. Vui lòng tải lại trước khi lưu.');
+   const values=[...wrap.querySelectorAll('input[data-v24-value]')].map(el=>({
+     key:el.closest('[data-v24-key]')?.dataset.v24Key,unit:el.dataset.v24Value,value:el.value
+   }));
+   const edits=[...wrap.querySelectorAll('input[data-v28-reason]')].map(el=>({
+     key:el.dataset.v28Reason,value:el.value
+   }));
+   const work=collectChanges(values,edits,who,date,me.id);
+   const count=work.upserts.length+work.deletes.length+work.reasons.length;
+   if(!count){message(wrap,'Không có thay đổi. Số liệu đã xác nhận trước đó được giữ nguyên.');return;}
+   // Validate all inputs before performing any write.
+   for(const rec of work.deletes){
+     const {error}=await sb.from('ops_shift_transport_v2').delete()
+       .eq('service_date',date).eq('unit',rec.unit).eq('direction',rec.direction)
+       .eq('departure_min',rec.departure_min).eq('line_no',rec.line_no);
+     if(error)throw Error('Không thể bỏ xác nhận lúc '+clock(rec.departure_min)+': '+error.message);
+   }
+   if(work.upserts.length){
+     const {error}=await sb.from('ops_shift_transport_v2').upsert(work.upserts,{
+       onConflict:'service_date,unit,direction,departure_min,line_no'
+     });
+     if(error)throw Error('Không lưu được số người: '+error.message);
+   }
+   for(const item of work.reasons){
+     const {error}=await sb.rpc('ops_set_shuttle_reason',{
+       p_date:date,p_direction:item.direction,p_minute:item.minute,p_line:item.line,p_reason:item.reason
+     });
+     if(error)throw Error('Đã lưu một phần số liệu, nhưng chưa lưu hết lý do xe bổ sung: '+error.message);
+   }
+   await refresh();
+   message(wrap,'ĐÃ LƯU: '+work.upserts.length+' ô số người, '+work.deletes.length+' ô bỏ xác nhận, '+work.reasons.length+' lý do xe bổ sung (cả hai chiều xe).');
+ }
  let busy=false;
  async function onClick(e){
    const b=e.target.closest('button');if(!b||busy)return;
@@ -159,15 +241,10 @@
    if(!allowedRoles.has(own))return;
    try{
      busy=true;b.disabled=true;
-     if(b.dataset.v28SaveReason){
-       const [direction,minute,line]=b.dataset.v28SaveReason.split('|');
-       const field=e.currentTarget.querySelector('[data-v28-reason="'+b.dataset.v28SaveReason+'"]');
-       const reason=(field?.value||'').trim();
-       if(reason.length>220)throw Error('Lý do tối đa 220 ký tự.');
-       const {error}=await sb.rpc('ops_set_shuttle_reason',{p_date:$('day').value,p_direction:direction,p_minute:Number(minute),p_line:Number(line),p_reason:reason});
-       if(error)throw Error(error.message);
-       await refresh();message(wrap,'Đã lưu lý do xe bổ sung '+clock(Number(minute))+'.');
+     if(b.hasAttribute('data-v24-save-all')){
+       await saveAll(wrap,own);
      }else if(b.dataset.v27Delete){
+       if(pendingDraft(wrap,own))throw Error('Bạn còn số liệu chưa lưu. Hãy bấm LƯU TẤT CẢ THAY ĐỔI trước khi xóa giờ xe.');
        const [dir,min,line]=b.dataset.v27Delete.split('|');
        const isMain=Number(line)===0;
        const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
@@ -182,36 +259,8 @@
        }
        await refresh();
        message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã xóa '+label+'.');
-     }else if(b.dataset.v24Save){
-       const row=b.closest('.v24-time-row'),key=b.dataset.v24Save;
-       if(!row||row.dataset.v24Key!==key)return;
-       const [direction,minute,ln]=key.split('|');
-       const inputs=[...row.querySelectorAll('input[data-v24-value]')];
-       const data=[];
-       for(const x of inputs){
-         const value=x.value.trim(),which=x.dataset.v24Value;
-         if(value==='')continue;
-         if(!/^\d+$/.test(value)||Number(value)>500)throw Error('Số người phải là số nguyên từ 0 đến 500.');
-         if(!editable(own,which))continue;
-         const saved=rows.find(r=>r.unit===which&&partKey(r)===key);
-         if(saved&&saved.quantity===Number(value))continue;
-         data.push({service_date:$('day').value,unit:which,direction,
-           departure_min:Number(minute),line_no:Number(ln),quantity:Number(value),
-           is_custom:!model().isDefault(direction,Number(minute)),confirmed_by:me.id});
-       }
-       if(!data.length){message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Không có dữ liệu thay đổi. Giờ xác nhận cũ được giữ nguyên.');return}
-       const {error}=await sb.from('ops_shift_transport_v2').upsert(data,{onConflict:'service_date,unit,direction,departure_min,line_no'});
-       if(error)throw Error(error.message);
-       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã lưu '+data.length+' ô và ghi thời gian xác nhận trên máy chủ.');
-       await refresh();
-     }else if(b.dataset.v24Add){
-       const [dir,min,ln]=b.dataset.v24Add.split('|');
-       if(+ln!==0)throw Error('Chỉ thêm dòng từ mốc giờ chính.');
-       const {error}=await sb.rpc('ops_add_shuttle_row',{p_date:$('day').value,p_direction:dir,p_minute:+min});
-       if(error)throw Error(error.message);
-       await refresh();
-       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm một dòng xe bổ sung ngay dưới '+clock(+min)+'.');
      }else if(b.dataset.v24Custom){
+       if(pendingDraft(wrap,own))throw Error('Bạn còn số liệu chưa lưu. Hãy bấm LƯU TẤT CẢ THAY ĐỔI trước khi thêm giờ xe.');
        const direction=b.dataset.v24Custom;
        const time=e.currentTarget.querySelector('[data-v24-time="'+direction+'"]')?.value;
        const next=!!e.currentTarget.querySelector('[data-v24-next="'+direction+'"]')?.checked;
@@ -221,7 +270,7 @@
        if(!reason)throw Error('Vui lòng nhập lý do thêm giờ xe (ví dụ: xe hỗ trợ họp chuyên môn).');
        if(reason.length>220)throw Error('Lý do tối đa 220 ký tự.');
        const already=assemble(rows,lines).some(x=>x.direction===direction&&x.departure_min===minute&&x.line_no===0);
-       if(already)throw Error('Khung giờ này đã có; bấm dấu + ngay cạnh khung giờ để thêm xe.');
+       if(already)throw Error('Giờ xe này đã có trong bảng; vui lòng nhập tại dòng tương ứng.');
        const {error}=await sb.rpc('ops_add_shuttle_slot',{p_date:$('day').value,p_direction:direction,p_minute:minute});
        if(error)throw Error(error.message);
        const reasonResult=await sb.rpc('ops_set_shuttle_reason',{p_date:$('day').value,p_direction:direction,p_minute:minute,p_line:0,p_reason:reason});
@@ -233,12 +282,15 @@
    finally{busy=false;b.disabled=false}
  }
  function onKeydown(e){
-   if(e.key==='Enter'&&e.target.matches('input[data-v24-value]')){
-     e.preventDefault();e.target.closest('.v24-time-row')?.querySelector('[data-v24-save]')?.click();
+   if(e.key==='Enter'&&e.target.matches('input[data-v24-value], input[data-v28-reason]')){
+     e.preventDefault();
+     const inputs=[...e.currentTarget.querySelectorAll('input[data-v24-value], input[data-v28-reason]')];
+     const next=inputs[inputs.indexOf(e.target)+1];
+     if(next)next.focus();else e.currentTarget.querySelector('[data-v24-save-all]')?.focus();
    }
  }
  function setUnit(role){
    viewRole=role;mount();show();refresh();
  }
- root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify}};
+ root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,collectChanges,pendingDraft}};
 })(typeof window!=='undefined'?window:globalThis);
