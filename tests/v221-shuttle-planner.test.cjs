@@ -66,5 +66,5 @@ const gridCode=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(exportCode.includes('model().suggestVehicles(total)'));
 assert.ok(gridCode.includes('model().suggestVehicles(row.total)'));
 assert.ok(gridCode.includes('cls.details'),'UI must include available seats and spare seats');
-assert.ok(gridCode.includes('shuttle-'+ "'+x.seats+'" +'.webp'),'UI must show each vehicle type in plan');
+assert.ok(gridCode.includes("shuttle-'+x.seats+'.webp"),'UI must show each vehicle type in plan');
 console.log('PASS V2.21: optimize 29C/45C combinations, preserve four-unit confirmation, consistent PNG/PDF and UI plans');
