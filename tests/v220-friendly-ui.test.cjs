@@ -34,7 +34,7 @@ for(const file of ['assets/shuttle-29.webp','assets/shuttle-45.webp']){
 }
 assert.ok(shuttle.includes("loadVehicleIcons()"),'Real vehicle photo needs to load for every export');
 assert.ok(shuttle.includes('draw(data,logo,vehicles)'),'PNG/PDF and preview must share the same image with vehicles');
-assert.ok(grid.includes('shuttle-29.webp')&&grid.includes('shuttle-45.webp'),'Input suggestions must show both buses');
+assert.ok(grid.includes("shuttle-'+x.seats+'.webp")&&grid.includes('cls.units'),'Input suggestions must show every 29/45 coach dynamically');
 assert.ok(shuttle.includes('GỢI Ý LOẠI XE'),'Full shuttle export must retain suggestion');
 for(const p of ['report-export-v29.js','office-export-v29.js'])assert.ok(fs.existsSync(p),'Keep full Word/PDF export mechanism '+p);
 assert.ok(html.includes('v21ShuttleExportStatus')&&html.includes('v19ReportPreview'),'Keep original export buttons');
