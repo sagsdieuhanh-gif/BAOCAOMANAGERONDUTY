@@ -71,7 +71,8 @@
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small></td>'+
-       '<td class="v24-plus">'+(!child&&active?'<button type="button" data-v24-add="'+key+'" aria-label="Thêm xe vào khung '+clock(x.departure_min)+'" title="Thêm dòng ngay dưới giờ này">+</button>':'')+'</td>'+
+       '<td class="v24-plus">'+(!child&&active?'<button type="button" data-v24-add="'+key+'" aria-label="Thêm xe vào khung '+clock(x.departure_min)+'" title="Thêm dòng ngay dưới giờ này">+</button>':'')+
+       ((child||!x.defaultTime)&&active?'<button type="button" class="v27-delete" data-v27-delete="'+key+'" title="Xóa giờ / dòng bổ sung thừa nếu chưa có số liệu xác nhận" aria-label="Xóa '+(child?'dòng bổ sung':'giờ xe tự thêm')+' '+clock(x.departure_min)+'">×</button>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
@@ -155,7 +156,22 @@
    if(!allowedRoles.has(own))return;
    try{
      busy=true;b.disabled=true;
-     if(b.dataset.v24Save){
+     if(b.dataset.v27Delete){
+       const [dir,min,line]=b.dataset.v27Delete.split('|');
+       const isMain=Number(line)===0;
+       const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
+       if(!confirm('XÓA '+label+'? Nếu chỉ phòng bạn đã nhập thì số liệu của phòng bạn cũng sẽ được xóa. Nếu phòng khác đã xác nhận thì không xóa được. Giờ gốc không thể xóa.'))return;
+       const {error}=await sb.rpc('ops_remove_shuttle_addition',{
+         p_date:$('day').value,p_direction:dir,p_minute:Number(min),p_line:Number(line)
+       });
+       if(error){
+         if(/OTHER_DEPARTMENTS_HAVE_CONFIRMED_PEOPLE/.test(error.message||''))
+           throw Error('Không xóa được: đã có phòng khác xác nhận số người. Chỉ phòng đó được sửa/xóa số liệu của họ; bạn không được xóa dữ liệu phòng khác.');
+         throw Error(error.message);
+       }
+       await refresh();
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã xóa '+label+'.');
+     }else if(b.dataset.v24Save){
        const row=b.closest('.v24-time-row'),key=b.dataset.v24Save;
        if(!row||row.dataset.v24Key!==key)return;
        const [direction,minute,ln]=key.split('|');

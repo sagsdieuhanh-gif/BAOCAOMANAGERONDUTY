@@ -1,0 +1,34 @@
+const assert=require('node:assert/strict');
+(async()=>{
+ await import('../v21-shuttle-model.js');
+ await import('../v27-report-alerts.js');
+ const mod=globalThis.SagsMissingV27;
+ const baseline=mod.analyze();
+ assert.ok(baseline.some(x=>x.unit==='ĐH'&&x.type==='XE GIAO CA'));
+ assert.ok(baseline.some(x=>x.unit==='QA / IT'&&x.type==='XE GIAO CA'));
+ assert.ok(baseline.some(x=>x.unit==='PVSĐ'&&x.type==='TRANG THIẾT BỊ'));
+ assert.ok(baseline.some(x=>x.unit==='KHO HÀNG'&&x.type==='CARGO'));
+ assert.ok(mod._test.markup(baseline).includes('CHƯA ĐỦ THÔNG TIN'));
+ const units=['DH','KTS','PVHK','KHO','QA_IT'];
+ const slots=globalThis.SagsShuttleModel.defaults;
+ const shuttle=slots.flatMap(s=>units.map(unit=>({...s,unit,quantity:0,line_no:0})));
+ const staffing=['KTS','PVHK'].flatMap(unit=>(unit==='KTS'?['BAGGAGE','GSE_DRIVER']:['PVHK_ARRIVAL_TEAM','PVHK_DEPARTURE_TEAM'])
+  .flatMap(role_code=>['SÁNG','ĐÊM'].map(shift=>({unit,role_code,shift,quantity:0,confirmed_at:'2026-10-30T02:00:00Z'}))));
+ const equipment=[{code:'PUSHBACK',ready_count:0,confirmed_at:'2026-10-30T02:00:00Z'}];
+ const cargo=[{flight_no:'VJ123',cargo_kg:0,cargo_pcs:0,ready_by_min:540}];
+ const ok=mod.analyze({transport:shuttle,staff:staffing,gse:equipment,cargoPlans:cargo});
+ assert.equal(ok.length,0);
+ const extra=[{direction:'NHA_CXR',departure_min:390,line_no:1}];
+ const pending=mod.analyze({transport:shuttle,additionalRows:extra,staff:staffing,gse:equipment,cargoPlans:cargo});
+ assert.equal(pending.length,5);
+ assert.ok(pending.every(x=>x.detail.includes('bổ sung 1')));
+ assert.ok(pending.every(x=>x.type==='XE GIAO CA'));
+ const noOne=shuttle.filter(x=>x.unit!=='QA_IT'&&!(x.direction==='CXR_NHA'&&x.departure_min===1500));
+ const remaining=mod.analyze({transport:noOne,staff:staffing,gse:equipment,cargoPlans:cargo});
+ assert.ok(remaining.some(x=>x.unit==='QA / IT'&&x.detail.includes('01:00 (+1)')));
+ const sql=await import('node:fs').then(fs=>fs.readFileSync('radar-cxr/server/v27-remove-addition.sql','utf8'));
+ assert.ok(sql.includes('DEFAULT_SLOT_CANNOT_BE_REMOVED'));
+ assert.ok(sql.includes('OTHER_DEPARTMENTS_HAVE_CONFIRMED_PEOPLE'));
+ assert.ok(sql.includes('ops_internal.my_unit()'));
+ console.log('V2.7 red missing-unit reporting, 5 columns, extra rows, zero vs unconfirmed, safe removal: OK');
+})().catch(e=>{console.error(e);process.exitCode=1});

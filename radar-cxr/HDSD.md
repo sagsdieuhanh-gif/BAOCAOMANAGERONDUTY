@@ -151,3 +151,14 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - **ĐIỀU HÀNH:** Khi tài khoản ĐH đăng nhập, khởi tạo dashboard với các ô chuyến đến, chuyến đi, đỉnh Radar, quy trình Dự báo Lần 1/Lần 2, tình trạng nguồn lực theo phòng và nút xem báo cáo. Khi chọn ngày hoặc tải lại dữ liệu, dashboard tự làm mới.
 - **Xe giao ca:** Bảng nhập 5 cột ĐH, PVSĐ, PVHK, KHO HÀNG, QA/IT được khởi tạo ở tab ĐIỀU HÀNH ngay sau khi đăng nhập; tài khoản ĐH chỉ nhập cột ĐH. Mỗi khung giờ có nút + dòng bổ sung, lưu và xác nhận ngay trên đúng hàng. Khi tải ngày mới bảng tự nạp dữ liệu đúng ngày.
 - **Ổn định:** Nếu riêng phần tổng quan lỗi hiển thị, hệ thống không chặn khởi tạo bảng xe. Đã thêm kiểm thử vòng đời cho role ĐH, QA, IT và đường đi dự phòng. Không thay đổi schema, dữ liệu, quyền RNS hoặc quyền ghi Supabase.
+
+
+## V2.7 – Xóa giờ xe thừa an toàn, cảnh báo thiếu thông tin màu đỏ, đồng nhất file xuất
+
+**Bảng xe giao ca:** Trong cột '+' cạnh giờ xe có thêm nút **× màu đỏ** dành cho mốc giờ **người dùng tự thêm** và các dòng **Bổ sung 1, 2...**. Giờ gốc 10 mốc theo ảnh không thể xóa. Khi bấm ×, ứng dụng yêu cầu xác nhận; máy chủ kiểm tra đúng ngày, chiều, giờ, dòng, vai trò người dùng. Nếu chưa có dữ liệu hoặc **chỉ có số liệu do phòng mình đã xác nhận**, có thể xóa; nếu phòng khác đã nhập, hệ thống từ chối để không xóa dữ liệu của phòng đó. ADMIN không xóa hàng đã có số liệu. Tài khoản VIEWER không có quyền xóa. RPC `ops_remove_shuttle_addition` thực thi kiểm tra bằng Supabase server-side, không thực hiện xóa trực tiếp từ trình duyệt.
+
+**BÁO CÁO – CẢNH BÁO MÀU ĐỎ:** Có khối riêng phía trên BÁO CÁO tự tải dữ liệu theo ngày. Kiểm tra **từng đơn vị trong 5 cột** của hai chiều xe, kể cả dòng bổ sung, hiển thị thiếu theo phòng/chiều/giờ; ngoài xe, kiểm tra **PVSĐ bốc xếp/lái GSE theo ca**, **PVHK đội đến/đi theo ca**, **GSE khả dụng đã xác nhận**, và **Kho Hàng có kế hoạch KG/PCS/giờ hàng sẵn sàng**. Nếu chưa có kế hoạch cargo thì báo **chưa nhận kế hoạch hoặc chưa xác nhận không phát sinh**, không tự kết luận có hàng. Ghi rõ ô trống ≠ 0. Các dòng chưa đủ dữ liệu có **màu đỏ** trong xem trước và Word Dự báo Lần 1. Khi ngày đổi hoặc bấm XEM TRƯỚC, cảnh báo được tải lại.
+
+**Ảnh/PDF XE GIAO CA:** Cùng một Canvas dựng giao diện xem trước và tải ảnh PNG, không dùng hai mẫu. PDF cho ngày bình thường được tạo theo **đúng tỷ lệ trang ảnh gốc** nhằm hạn chế co kéo/khác bố cục, số hàng nhiều thì chia trang. Dòng nào chưa đủ 5 đơn vị xác nhận có chữ màu đỏ; chỉ có xe 29/45 chỗ, không tạo xe cỡ khác. Logo SAGS giữ nguyên file gốc EREPORT. Mọi nút xuất tập trung tại BÁO CÁO, chỉ ĐH/ADMIN được phát hành.
+
+**Nghiệm thu:** Đã thêm kiểm thử tự động về phân quyền và xóa mốc tự chọn, chuẩn hóa các tình huống missing QA/IT, hàng bổ sung và số 0 đã xác nhận. Cần thử trực tiếp trên tài khoản thực tế để xác nhận hiển thị/thiết bị.

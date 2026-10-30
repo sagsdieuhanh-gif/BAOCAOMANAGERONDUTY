@@ -163,6 +163,7 @@
  }
  async function afterTab(tab){
    if(tab==='report'&&me){
+     await window.SagsMissingV27?.refresh();
      try{await window.SagsReportV19?.loadNotes();}catch(e){const hint=$('v19NotesHint');if(hint)hint.textContent=e.message;}
      await window.SagsReportV19?.preview();
      await window.SagsShuttleExport?.renderPreview();
@@ -170,7 +171,7 @@
  }
  function attach(){
    const btn=$('v19ReportExport');if(btn)btn.onclick=()=>window.SagsReportV19?.exportOne();
-   const prev=$('v19ReportRefresh');if(prev)prev.onclick=()=>window.SagsReportV19?.preview();
+   const prev=$('v19ReportRefresh');if(prev)prev.onclick=()=>{window.SagsMissingV27?.refresh();window.SagsReportV19?.preview();window.SagsShuttleExport?.renderPreview();};
    const save=$('v19SaveNotes');if(save)save.onclick=async()=>{
      try{await window.SagsReportV19?.saveNotes();}catch(e){alert(e.message)}
    };

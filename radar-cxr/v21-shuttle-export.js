@@ -132,7 +132,7 @@
      if(r.is_custom||r.line_no>0)t(r.line_no>0?'BỔ SUNG '+r.line_no:'MỐC MỚI',x+180,y+27,11,colors.teal,true,'center');
      const totalX=x+280;
      t(done?String(r.total):'~'+r.total,totalX,y+30,29,done?colors.navy:colors.warning,true,'center');
-     t(done?'ĐÃ CHỐT 4/4':'TẠM TÍNH '+r.confirmed+'/5',totalX,y+53,12,done?colors.green:colors.steel,true,'center');
+     t(done?'ĐÃ CHỐT 5/5':'CHƯA ĐỦ '+r.confirmed+'/5',totalX,y+53,12,done?colors.green:colors.steel,true,'center');
      const iconX=x+465,wordX=x+555;
      if(done){
        if(r.total===0){
@@ -151,8 +151,8 @@
          t('BỔ SUNG XE',wordX,y+50,12,colors.warning,true);
        }
      }else{
-       shape(x+450,y+18,cardW-470,39,9,colors.warnbg);
-       t('CHỜ ĐỦ 5 ĐƠN VỊ',x+465,y+37,13,colors.warning,true);
+       shape(x+450,y+18,cardW-470,39,9,'#FFF0F0');
+       t('CHƯA ĐỦ 5 ĐƠN VỊ',x+465,y+37,13,'#B12B31',true);
      }
      line(x+22,y+69,x+cardW-22,y+69);
      const colW=(cardW-44)/5;
@@ -161,7 +161,7 @@
        if(i)line(ux-8,y+82,ux-8,y+125,'#E4ECF1');
        t(roleNames[i],ux,y+83,11,colors.steel,true);
        t(u?String(u.quantity):'—',ux,y+107,23,u?colors.ink:'#A3B2BC',!!u);
-       t(u?confirmedTime(u.confirmed_at):'CHƯA NHẬP',ux+32,y+109,10,u?colors.green:colors.steel,false,'left',colW-35);
+       t(u?confirmedTime(u.confirmed_at):'CHƯA NHẬP',ux+32,y+109,10,u?colors.green:'#B12B31',false,'left',colW-35);
      }
      if(r.note){
        const note=String(r.note);
@@ -252,13 +252,14 @@
      if(type==='png'){download(img.toDataURL('image/png'),base+'.png');return;}
      if(type!=='pdf')throw Error('Định dạng không hợp lệ.');
      const jsPDF=await pdfLib();
-     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a3',compress:true});
+     const single=img.height<=2000;
+     // For an ordinary day, preserve exactly the preview image's dimensions and aspect.
+     const pageH=420*img.height/img.width;
+     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:single?[420,pageH]:'a3',compress:true});
      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8;
      const availW=pw-m*2,availH=ph-m*2;
-     if(img.height<=2000){
-       const scale=Math.min(availW/img.width,availH/img.height);
-       const sw=img.width*scale,sh=img.height*scale;
-       pdf.addImage(img.toDataURL('image/png'),'PNG',(pw-sw)/2,(ph-sh)/2,sw,sh);
+     if(single){
+       pdf.addImage(img.toDataURL('image/png'),'PNG',0,0,pw,ph);
      }else{
        // Exceptional long custom schedule: preserve image layout on successive A3 pages.
        const capacity=Math.floor(availH*img.width/availW);

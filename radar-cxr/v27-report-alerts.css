@@ -1,0 +1,23 @@
+
+/* V2.7: critical missing departmental input warnings in report */
+#v27MissingData{margin:14px 0 18px;border:1px solid #e4b9b9;background:#fffafb;border-radius:12px;padding:15px 18px}
+.v27-alert-title{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;color:#ac2329;font-size:14px}
+.v27-alert-title b{letter-spacing:.2px;font-size:15px}
+.v27-alert-title span{color:#bc4343;font-size:12px}
+.v27-alert-caption{color:#b12c32;font-size:12px;line-height:1.5;margin:7px 0 10px}
+.v27-alert-list{margin:0!important;padding:0 0 0 20px;color:#b01e2b;font-size:12px;line-height:1.65}
+.v27-alert-list li{padding:4px 0 5px;border-bottom:1px solid #f5e2e5}
+.v27-alert-list li:last-child{border:0}
+.v27-alert-list strong{color:#a51825}
+.v27-error{color:#af222b;font-size:13px}
+.v27-pending{color:#6d8290;font-size:12px}
+.v27-ok{color:#26715b;font-size:12px}
+.v27-inline-report-warning{color:#a91926;background:#fff6f7;border-left:3px solid #cf333b;padding:7px 10px;margin:10px 0 14px}
+.v27-inline-report-warning:empty{display:none}
+.v27-inline-report-warning h3{color:#a91926!important;font-size:14px!important;background:transparent!important;margin:3px 0 7px!important}
+.v27-inline-report-warning li{color:#b12331;line-height:1.5;font-size:11px;margin:3px 0}
+.v24-plus button.v27-delete{background:#fff2f2!important;color:#ba2633!important;border:1px solid #ecc6c9!important;font-size:18px!important;margin:4px auto 0}
+.v24-plus button.v27-delete:hover{background:#fcdedf!important}
+.v24-table thead th:nth-child(2){width:57px!important}
+.v24-plus{min-width:57px}
+@media(max-width:680px){#v27MissingData{padding:11px}.v27-alert-title{align-items:flex-start}}
