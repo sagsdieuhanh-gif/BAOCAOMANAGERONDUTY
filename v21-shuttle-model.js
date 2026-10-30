@@ -1,16 +1,11 @@
 /* v2.1 Shuttle direction, schedule defaults, and cross-midnight normalization */
 (function(root){
  const defaults=[
-  {direction:'NHA_CXR',departure_min:390,label:'06:30'},
   {direction:'NHA_CXR',departure_min:420,label:'07:00'},
-  {direction:'NHA_CXR',departure_min:540,label:'09:00'},
   {direction:'NHA_CXR',departure_min:1050,label:'17:30'},
-  {direction:'NHA_CXR',departure_min:1170,label:'19:30'},
-  {direction:'CXR_NHA',departure_min:495,label:'08:15'},
-  {direction:'CXR_NHA',departure_min:540,label:'09:00',note:'Mẫu gốc ghi “ĐH họp chuyên môn” (không tự coi là số người đi xe).'},
   {direction:'CXR_NHA',departure_min:990,label:'16:30'},
-  {direction:'CXR_NHA',departure_min:1125,label:'18:45'},
-  {direction:'CXR_NHA',departure_min:1500,label:'01:00 (+1)'}
+  {direction:'CXR_NHA',departure_min:1110,label:'18:30'},
+  {direction:'CXR_NHA',departure_min:1935,label:'08:15 (+1)'}
  ];
  const directionLabel={NHA_CXR:'NHA → CXR · XE ĐI LÀM',CXR_NHA:'CXR → NHA · XE VỀ'};
  function clock(min){
