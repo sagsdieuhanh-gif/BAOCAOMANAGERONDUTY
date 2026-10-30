@@ -17,5 +17,5 @@ assert.ok(shuttle.includes('img.toBlob')&&shuttle.includes('exportCanvasPdf'));
 const grid=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(grid.includes('data-v24-save-all')&&!grid.includes('data-v24-add='));
 const inputs=fs.readFileSync('v211-unit-input.js','utf8');
-assert.ok(inputs.includes('v216-staff-row')&&inputs.includes('_required')&&inputs.includes('data-v215-quick'));
+assert.ok(inputs.includes('v224-shift-card')&&inputs.includes('_required')&&inputs.includes('data-v215-quick'),'Staff input simplified but retains requirements and paste');
 console.log('PASS: root Manager On Duty app, logo, report, transport exports and staff layout');
