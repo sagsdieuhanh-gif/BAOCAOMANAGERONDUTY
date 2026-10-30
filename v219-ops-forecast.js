@@ -156,8 +156,10 @@
      const bag=staffAt(staff,start,'BAGGAGE'),sky=staffAt(staff,start,'SKYONE_BAGGAGE'),drv=staffAt(staff,start,'GSE_DRIVER');
      const observedBag=bag==null&&sky==null?null:(bag||0)+(sky||0);
      const baggage={need:cargoUnknown.length?null:neededBag,available:observedBag,
+       scenarioMin:neededBag+cargoUnknown.length*3,scenarioMax:neededBag+cargoUnknown.length*6,
        shortage:cargoUnknown.length||observedBag==null?null:Math.max(0,neededBag-observedBag)};
      const driver={need:cargoUnknown.length?null:neededDrv,available:drv,
+       scenarioMin:neededDrv+cargoUnknown.length,scenarioMax:neededDrv+cargoUnknown.length*2,
        shortage:cargoUnknown.length||drv==null?null:Math.max(0,neededDrv-drv)};
      const cbDriver=staffAt(staff,start,'COBUS_DRIVER');
      const cobusDrivers={need:outer.length*2,available:cbDriver,
