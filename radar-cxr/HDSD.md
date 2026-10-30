@@ -37,3 +37,16 @@ Trong **LỊCH BAY / EXCEL**, chọn ngày khai thác cùng Dự báo Lần 1 (f
 Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** (có xác nhận nếu đụng dữ liệu đã lưu), tiếp theo bấm **XEM RADAR TỰ TẠO**. Radar tự tính 48 khung 30 phút theo STA/STD và thời lượng quy ước từng hãng; nhóm GSE và nhân sự dùng chung với những nguồn đã nhập. Không kết luận khả dụng nếu KTSĐ chưa xác nhận xe/nhân sự. Không gộp tự đoán các dòng chuyến rời và không tự lấy bãi từ lịch khác.
 
 **Lưu ý:** Chưa có file Excel lịch bay CXR thực tế đính kèm ở lượt hiện tại, nên phải kiểm tra ghép cột và bảng chờ trước khi cập nhật dữ liệu nghiệp vụ.
+
+
+## V1.8 – TỰ NHẬP EXCEL SAGS VÀ LẬP RADAR
+**Chỉ dành cho tài khoản ĐH hoặc ADMIN.**
+1. Vào **LỊCH BAY / EXCEL** và chọn đúng file lịch bay SAGS có sheet **LB** (ví dụ `LICH BAY SAGS 29OCT26 (1).xlsx`). Không cần chọn cột hoặc bấm lưu thủ công.
+2. Hệ thống đọc ngày tại ô **A2** (29/10/2026 trong file mẫu), nhận diện **ARRIVAL FLIGHT** và **DEPARTURE FLIGHT** thành hai danh sách riêng. Không ghép theo cùng dòng; ưu tiên ghép đăng bạ + thứ tự thời gian, sau đó ghép theo hãng, chặng đảo chiều, giờ nếu cả hai bên có một ứng viên duy nhất. Những ghép không có đăng bạ được đánh dấu **chờ đối chiếu**.
+3. Tự động gọi giao dịch Supabase `ops_import_sags_schedule`. Nếu file có lỗi hoặc giao dịch thất bại, dữ liệu cũ không bị ghi dở dang. Bảng `ops_schedule_uploads` lưu lịch sử nguồn; `ops_forecast_snapshots` giữ ảnh chụp Lần 1/Lần 2 bất biến; nhập lại đúng file (SHA-256) không nhân đôi bản ghi.
+4. Tự ghi số chuyến đến/đi, giờ STA/STD, đăng bạ, loại tàu, chặng và số khách có nguồn; giá trị TBA giữ là chưa có dữ liệu. Bãi đỗ chưa có trong sheet LB nên **bản tự động luôn là Dự báo Lần 1**, không suy đoán bãi.
+5. Sau khi nhập thành công, hệ thống chuyển sang **RADAR 30 PHÚT** và tự tính khung cao điểm, gồm các chuyến qua 00:00 có ký hiệu `+`. Chuyến đi không có chuyến đến vẫn giữ là **chưa ghép**, không cộng như một cặp đến–đi tự tạo.
+6. Lịch **Lần 2 sau 21h** nếu có mẫu Excel cấu trúc khác hoặc có bãi đỗ sẽ vào luồng so sánh hiện có; cần kiểm tra cấu trúc mẫu Lần 2 trước khi tự động hóa tương tự. Mọi sự khác biệt được lưu kèm lịch sử, không xóa snapshot Lần 1.
+7. Radar chỉ đưa ra nhu cầu nhân lực, SKYONE, PVHK và GSE theo dữ liệu đã có; không tự coi nhân sự hoặc thiết bị là đã xác nhận khi đơn vị chưa cập nhật.
+
+**Lưu ý dữ liệu mẫu:** File 29/10/2026 có 34 chuyến đến và 36 chuyến đi, sheet LB; Sheet2 có nội dung khác cấu trúc nên không được tự cộng vào lịch LB.
