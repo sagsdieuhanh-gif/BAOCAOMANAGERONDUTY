@@ -102,7 +102,7 @@
      '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
      '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Dấu <b>+</b> cạnh giờ tạo dòng bổ sung ngay bên dưới.</div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
-     '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 5 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>BÁO CÁO</b>.</p>'+
+     '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 5 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
      '<div class="v24-status" role="status"></div></div>';
  }
  function mount(){
