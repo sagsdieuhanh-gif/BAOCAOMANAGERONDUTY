@@ -11,7 +11,7 @@
  const shifts=[['SÁNG',495,1095,'08:15–18:15'],['ĐÊM',1095,1935,'18:15–08:15 (+1)']];
  const roleNames={KTS:[['BAGGAGE','Bốc xếp công ty'],['GSE_DRIVER','Lái xe GSE']],PVHK:[['PVHK_ARRIVAL_TEAM','Đội PVHK ĐẾN'],['PVHK_DEPARTURE_TEAM','Đội PVHK ĐI']]};
  let cargo=[],issues=[],transport=[],generation=0,initialized=false;
- const buses=[['IN_1630','XE VỀ 16:30'],['IN_1845','XE VỀ 18:45'],['OUT_1730','XE ĐI 17:30'],['OUT_1930','XE ĐI 19:30']];
+ const buses=window.SagsShuttleModel.defaults;
  const staffFor=(u,role,shift)=>staff.find(x=>x.unit===u&&x.role_code===role&&x.shift===shift)?.quantity;
  function fieldGroups(u){
    const names=roleNames[u];
@@ -112,55 +112,136 @@
    if(wrap&&panel&&!wrap.contains(panel))wrap.appendChild(panel);
  }
 
+
  function vehiclePanel(who){
-  return '<section class="v20-panel"><h3>XE GIAO CA · '+(who==='KTS'?'PVSĐ':who==='PVHK'?'PVHK':'KHO HÀNG')+'</h3>'+
-    '<p>Nhập số nhân sự của phòng đi/về theo xe. Có thể bỏ trống khi chưa xác nhận. Thông tin lưu kèm thời gian xác nhận.</p>'+
-    '<div class="v20-transport-grid">'+buses.map(x=>'<label>'+x[1]+
-    '<input type="number" min="0" inputmode="numeric" data-v20-bus="'+who+'|'+x[0]+'" placeholder="Chưa xác nhận">'+
-    '<small data-v20-confirm="'+who+'|'+x[0]+'"></small></label>').join('')+'</div>'+
-    '<button class="primary" data-v20-bus-save="'+who+'">LƯU & XÁC NHẬN XE GIAO CA</button>'+
-    '<div class="v20-help" data-v20-bus-message="'+who+'"></div></section>';
+   const model=window.SagsShuttleModel;
+   const name=who==='KTS'?'PVSĐ':who==='PVHK'?'PVHK':'KHO HÀNG';
+   const dirGroup=direction=>{
+      const selection=model.defaults.filter(x=>x.direction===direction);
+      return '<div class="v21-route-group"><div class="v21-route-heading"><b>'+model.directionLabel[direction]+'</b><span>'+selection.length+' mốc từ mẫu</span></div>'+
+       '<div class="v21-route-slots">'+selection.map(x=>
+        '<label class="v21-slot"><b>'+x.label+'</b><span>Số người</span>'+
+        '<input type="number" min="0" max="500" inputmode="numeric" placeholder="Chưa nhập" data-v21-bus="'+who+'|'+direction+'|'+x.departure_min+'">'+
+        '<small data-v21-confirm="'+who+'|'+direction+'|'+x.departure_min+'">Chưa xác nhận</small>'+
+        (x.note?'<em>'+escape(x.note)+'</em>':'')+
+        '</label>').join('')+'</div></div>';
+   };
+   return '<section class="v20-panel v21-transport" data-v21-panel="'+who+'"><h3>XE GIAO CA · '+name+'</h3>'+
+    '<p><b>CHIỀU NHA → CXR</b> là xe đi làm; <b>CXR → NHA</b> là xe về. Các mốc dưới đây đúng theo ảnh mẫu. Ô trống là chưa xác nhận, 0 là xác nhận không có người. Thời điểm lưu do hệ thống ghi nhận.</p>'+
+    dirGroup('NHA_CXR')+dirGroup('CXR_NHA')+
+    '<div class="v21-transport-actions"><button class="primary" data-v20-bus-save="'+who+'">LƯU & XÁC NHẬN SỐ NGƯỜI</button>'+
+    '<span class="v20-help" data-v20-bus-message="'+who+'"></span></div>'+
+    '<details class="v21-add"><summary>+ THÊM KHUNG GIỜ / CHIỀU XE TÙY CHỌN</summary>'+
+    '<div class="v21-add-fields">'+
+    '<label>Chiều xe chạy<select data-v21-add-direction="'+who+'"><option value="NHA_CXR">NHA → CXR · Xe đi làm</option><option value="CXR_NHA">CXR → NHA · Xe về</option></select></label>'+
+    '<label>Giờ xe chạy<input type="time" data-v21-add-time="'+who+'" value="12:00"></label>'+
+    '<label>Ngày chạy<select data-v21-add-next="'+who+'"><option value="0">Cùng ngày khai thác</option><option value="1">Ngày hôm sau (+1)</option></select></label>'+
+    '<label>Số người<input type="number" min="0" max="500" data-v21-add-count="'+who+'" placeholder="Nhập số người"></label>'+
+    '<label class="v21-wide">Ghi chú (không bắt buộc)<input maxlength="300" data-v21-add-note="'+who+'" placeholder="Xe tăng cường, xe bổ sung..."></label></div>'+
+    '<button class="primary" data-v21-add-save="'+who+'">+ LƯU CHUYẾN XE BỔ SUNG</button>'+
+    '</details>'+
+    '<div class="v21-extra-list"><h4>KHUNG GIỜ TÙY CHỌN ĐÃ LƯU</h4><div data-v21-custom-list="'+who+'"></div></div>'+
+    '</section>';
  }
  async function saveTransport(target){
    if(!allowed(target))return;
    const data=[];
-   for(const [slot] of buses){
-     const input=document.querySelector('[data-v20-bus="'+target+'|'+slot+'"]');
-     const n=input?.value?.trim();
-     if(n==null||n==='')continue;
-     if(!/^\d+$/.test(n)||+n>500)return alert('Số người phải từ 0 đến 500.');
-     data.push({service_date:day(),unit:target,vehicle_slot:slot,quantity:Number(n),
-       confirmed_by:me.id,confirmed_at:new Date().toISOString()});
-   }
-   if(!data.length)return alert('Chưa nhập số người xe giao ca.');
-   const {error}=await sb.from('ops_shift_transport').upsert(data,{onConflict:'service_date,unit,vehicle_slot'});
+   document.querySelectorAll('[data-v21-bus]').forEach(input=>{
+     const [u,d,m]=input.dataset.v21Bus.split('|');
+     if(u!==target)return;
+     const val=String(input.value||'').trim();
+     if(!val)return;
+     if(!/^\d+$/.test(val)||Number(val)>500)throw new Error('Số người phải từ 0 đến 500.');
+     const minute=Number(m);
+     const prior=transport.find(x=>x.unit===u&&x.direction===d&&x.departure_min===minute);
+     if(prior&&prior.quantity===Number(val))return;
+     data.push({service_date:day(),unit:u,direction:d,departure_min:minute,
+      quantity:Number(val),is_custom:!window.SagsShuttleModel.isDefault(d,minute),
+      note:prior?.note||'',confirmed_by:me.id});
+   });
+   if(!data.length)return toast('Không có số người thay đổi; giữ nguyên thời điểm xác nhận trước đó.');
+   const {error}=await sb.from('ops_shift_transport_v2').upsert(data,{onConflict:'service_date,unit,direction,departure_min'});
    if(error)return alert('Không lưu được xe giao ca: '+error.message);
    await refresh();
    const msg=document.querySelector('[data-v20-bus-message="'+target+'"]');
-   if(msg)msg.textContent='Đã xác nhận '+data.length+' mốc xe vào '+new Date().toLocaleString('vi-VN')+'.';
+   if(msg)msg.textContent='Đã xác nhận '+data.length+' chuyến xe. Giờ xác nhận được lấy từ máy chủ.';
    toast('Đã lưu xe giao ca '+target);
  }
+ async function saveNewTransport(target){
+   if(!allowed(target))return;
+   const dir=document.querySelector('[data-v21-add-direction="'+target+'"]')?.value;
+   const time=document.querySelector('[data-v21-add-time="'+target+'"]')?.value;
+   const next=document.querySelector('[data-v21-add-next="'+target+'"]')?.value==='1';
+   const num=document.querySelector('[data-v21-add-count="'+target+'"]')?.value.trim();
+   const note=document.querySelector('[data-v21-add-note="'+target+'"]')?.value.trim()||'';
+   const minute=window.SagsShuttleModel.parseClock(time,next);
+   if(!['NHA_CXR','CXR_NHA'].includes(dir)||minute==null)
+     return alert('Chọn chiều xe chạy và giờ hợp lệ.');
+   if(!/^\d+$/.test(num)||+num>500)return alert('Số người phải từ 0 đến 500.');
+   if(window.SagsShuttleModel.isDefault(dir,minute))
+     return alert('Khung giờ này có sẵn trong bảng mẫu phía trên. Nhập số người tại đúng chiều và giờ đó.');
+   const exists=transport.some(x=>x.unit===target&&x.direction===dir&&x.departure_min===minute);
+   if(exists&&!confirm('Chuyến xe tự chọn này đã có. Cập nhật lại số người và xác nhận?'))return;
+   const {error}=await sb.from('ops_shift_transport_v2').upsert({
+    service_date:day(),unit:target,direction:dir,departure_min:minute,
+    quantity:Number(num),is_custom:true,note,confirmed_by:me.id
+   },{onConflict:'service_date,unit,direction,departure_min'});
+   if(error)return alert('Không lưu được khung xe mới: '+error.message);
+   await refresh();
+   const el=document.querySelector('[data-v21-add-count="'+target+'"]');if(el)el.value='';
+   toast('Đã thêm xe '+window.SagsShuttleModel.directionLabel[dir]+' '+window.SagsShuttleModel.clock(minute));
+ }
+ async function removeTransport(unitName,direction,minute){
+   if(!allowed(unitName))return;
+   const record=transport.find(x=>x.unit===unitName&&x.direction===direction&&x.departure_min===minute);
+   if(!record||!record.is_custom)return;
+   if(!confirm('Xóa xe tự chọn '+window.SagsShuttleModel.directionLabel[direction]+' lúc '+window.SagsShuttleModel.clock(minute)+'?'))return;
+   const {error}=await sb.from('ops_shift_transport_v2').delete().eq('service_date',day()).eq('unit',unitName).eq('direction',direction).eq('departure_min',minute);
+   if(error)return alert('Không xóa được: '+error.message);
+   await refresh();
+ }
+ function vnTime(iso){
+   if(!iso)return 'Chưa xác nhận';
+   return new Date(iso).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+ }
  function renderTransport(){
+   const model=window.SagsShuttleModel;
    for(const u of ['KTS','PVHK','KHO']){
-     for(const [code] of buses){
-       const inp=document.querySelector('[data-v20-bus="'+u+'|'+code+'"]');
-       const note=document.querySelector('[data-v20-confirm="'+u+'|'+code+'"]');
-       const found=transport.find(x=>x.unit===u&&x.vehicle_slot===code);
+     for(const slot of model.defaults){
+       const key=u+'|'+slot.direction+'|'+slot.departure_min;
+       const inp=document.querySelector('[data-v21-bus="'+key+'"]');
+       const note=document.querySelector('[data-v21-confirm="'+key+'"]');
+       const found=transport.find(x=>x.unit===u&&x.direction===slot.direction&&x.departure_min===slot.departure_min);
        if(inp&&document.activeElement!==inp)inp.value=found?.quantity??'';
-       if(note)note.textContent=found?.confirmed_at?'Đã xác nhận: '+new Date(found.confirmed_at).toLocaleString('vi-VN'):'Chưa xác nhận';
+       if(note)note.textContent=found?.confirmed_at?'Đã xác nhận '+vnTime(found.confirmed_at):'Chưa xác nhận';
+     }
+     const box=document.querySelector('[data-v21-custom-list="'+u+'"]');
+     if(box){
+       const extra=model.order(transport.filter(x=>x.unit===u&&x.is_custom));
+       box.innerHTML=extra.length?extra.map(x=>{
+         const key=u+'|'+x.direction+'|'+x.departure_min;
+         return '<div class="v21-custom-row"><div><b>'+escape(model.directionLabel[x.direction])+'</b> · '+model.clock(x.departure_min)+
+           (x.note?' · '+escape(x.note):'')+'<small>Đã xác nhận: '+vnTime(x.confirmed_at)+'</small></div>'+
+           '<label>Số người<input type="number" min="0" max="500" inputmode="numeric" data-v21-bus="'+key+'" value="'+x.quantity+'"></label>'+
+           '<button type="button" data-v21-delete="'+key+'">XÓA</button></div>';
+       }).join(''):'<div class="v20-muted">Chưa có chuyến xe bổ sung.</div>';
      }
      const values=staff.filter(x=>x.unit===u&&['SÁNG','ĐÊM'].includes(x.shift)&&x.confirmed_at);
      const last=values.map(x=>x.confirmed_at).sort().at(-1);
      const label=document.querySelector('[data-v20-staff-confirm="'+u+'"]');
-     if(label)label.textContent=last?'Quân số đã xác nhận lần cuối: '+new Date(last).toLocaleString('vi-VN'):'Quân số chưa được xác nhận';
+     if(label)label.textContent=last?'Quân số đã xác nhận: '+vnTime(last):'Quân số chưa được xác nhận';
    }
  }
-
  function init(){
    if(initialized)return;initialized=true;
    $('v20Pvsd').innerHTML=tableRows()+vehiclePanel('KTS');$('v20Pvhk').innerHTML=pvhk()+vehiclePanel('PVHK');$('v20Warehouse').innerHTML=warehouse()+vehiclePanel('KHO');
    mountGse();
-   document.querySelectorAll('[data-v20-bus-save]').forEach(b=>b.onclick=()=>saveTransport(b.dataset.v20BusSave));
+   document.querySelectorAll('[data-v20-bus-save]').forEach(b=>b.onclick=()=>saveTransport(b.dataset.v20BusSave).catch(e=>alert(e.message)));
+   document.querySelectorAll('[data-v21-add-save]').forEach(b=>b.onclick=()=>saveNewTransport(b.dataset.v21AddSave));
+   for(const u of ['KTS','PVHK','KHO']){
+     const box=document.querySelector('[data-v21-custom-list="'+u+'"]');
+     box.onclick=e=>{const btn=e.target.closest('[data-v21-delete]');if(btn){const [target,dir,min]=btn.dataset.v21Delete.split('|');removeTransport(target,dir,Number(min));}};
+   }
    $('v20SaveKTS').onclick=()=>saveStaff('KTS');
    $('v20SavePVHK').onclick=()=>saveStaff('PVHK');
    $('v20SaveSky').onclick=()=>saveExtra('KTS');
@@ -168,6 +249,7 @@
    $('v20SaveIssue').onclick=saveIssue;
    $('v20SaveCargo').onclick=saveCargo;
    $('v20SaveCargoBulk').onclick=saveBulkCargo;
+   window.SagsShuttleExport?.bind();
    $('v20Issues').onclick=e=>{const b=e.target.closest('[data-v20-fix]');if(b)fixIssue(b.dataset.v20Fix)};
    $('v20CargoRows').onclick=e=>{const b=e.target.closest('[data-v20-remove]');if(b)removeCargo(b.dataset.v20Remove)};
  }
@@ -285,7 +367,7 @@
      const active=issues.filter(x=>x.issue_status!=='RETURNED');
      const planned=cargo.filter(x=>x.cargo_kg!=null);
      const total=planned.reduce((n,x)=>n+Number(x.cargo_kg),0);
-     const busDetails=buses.map(x=>x[1]+': '+['KTS','PVHK','KHO'].map(u=>{const t=transport.find(z=>z.unit===u&&z.vehicle_slot===x[0]);return (u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO')+' '+(t?.quantity??'chưa có');}).join(' / ')).join('; ');
+     const busDetails=['NHA_CXR','CXR_NHA'].map(dir=>window.SagsShuttleModel.directionLabel[dir]+': '+['KTS','PVHK','KHO'].map(u=>{const parts=transport.filter(z=>z.unit===u&&z.direction===dir);const label=u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO';return label+' '+(parts.length?parts.length+' mốc đã xác nhận ('+parts.reduce((n,r)=>n+r.quantity,0)+' lượt xe theo các mốc)':'chưa xác nhận');}).join(' · ')).join('; ');
      radar.innerHTML='<div class="v20-context-grid"><div><b>KHO HÀNG</b><p>'+cargo.length+' chuyến có kế hoạch · '+
        (planned.length?total.toLocaleString('vi-VN')+' KG đã khai báo':'KG chưa có dữ liệu')+
        '</p></div><div><b>GSE HẠN CHẾ</b><p>'+active.length+' thiết bị đang tạm dừng/sửa chữa/hạn chế</p></div>'+
@@ -298,7 +380,7 @@
    const [p,q,b]=await Promise.all([
      sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',date).order('flight_no'),
      sb.from('ops_gse_issues').select('*').eq('service_date',date).order('equipment_id'),
-     sb.from('ops_shift_transport').select('*').eq('service_date',date)
+     sb.from('ops_shift_transport_v2').select('*').eq('service_date',date)
    ]);
    if(n!==generation)return;
    if(p.error||q.error||b.error){console.warn('Cannot retrieve departmental source',p.error||q.error||b.error);return}
@@ -326,6 +408,7 @@
    $('v20Pvhk').closest('section').classList.toggle('v20-locked',!allowed('PVHK'));
    $('v20Warehouse').closest('section').classList.toggle('v20-locked',!allowed('KHO'));
    const note=$('v19NoteEditor');if(note)note.style.display=['DH','ADMIN'].includes(role)?'':'none';
+   document.querySelectorAll('[data-v19-export],[data-v21-export]').forEach(button=>{button.hidden=!['DH','ADMIN'].includes(role);button.style.display=['DH','ADMIN'].includes(role)?'':'none';});
    switchTab(allowedTabs[0]);refresh();
  }
  window.SagsUIV20={setUnit,refresh,render};

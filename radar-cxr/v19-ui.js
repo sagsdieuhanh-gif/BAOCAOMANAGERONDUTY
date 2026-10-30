@@ -165,6 +165,7 @@
    if(tab==='report'&&me){
      try{await window.SagsReportV19?.loadNotes();}catch(e){const hint=$('v19NotesHint');if(hint)hint.textContent=e.message;}
      await window.SagsReportV19?.preview();
+     await window.SagsShuttleExport?.renderPreview();
    }
  }
  function attach(){

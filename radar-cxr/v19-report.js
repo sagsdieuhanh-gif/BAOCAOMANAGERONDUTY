@@ -37,7 +37,7 @@
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
     sb.from('ops_gse_issues').select('*').eq('service_date',day),
-    sb.from('ops_shift_transport').select('*').eq('service_date',day)
+    sb.from('ops_shift_transport_v2').select('*').eq('service_date',day)
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
@@ -98,8 +98,20 @@
      (x.issue_status==='OUT_OF_SERVICE'?'tạm dừng':x.issue_status==='REPAIR'?'đang sửa':'hạn chế')+'): '+
      x.fault+(x.impact?' – '+x.impact:'')+(x.expected_return?' – dự kiến '+x.expected_return:'')).join('; ');
    const issueAlternatives=activeIssues.filter(x=>x.workaround).slice(0,3).map(x=>x.equipment_id+': '+x.workaround).join('; ');
-   const transportSummary=['KTS','PVHK','KHO'].map(u=>{const part=(c.transport||[]).filter(x=>x.unit===u);const last=part.map(x=>x.confirmed_at).sort().at(-1);return (u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG')+': '+(part.length?part.map(x=>({IN_1630:'về 16:30',IN_1845:'về 18:45',OUT_1730:'đi 17:30',OUT_1930:'đi 19:30'}[x.vehicle_slot]||x.vehicle_slot)+' '+x.quantity).join(', '):'chưa xác nhận')+(last?' (xác nhận '+new Date(last).toLocaleString('vi-VN')+')':'');}).join('; ');
-   const sourcePeak=p.length?clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+
+   const transportSummary=['KTS','PVHK','KHO'].map(u=>{
+     const label=u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG';
+     const part=(c.transport||[]).filter(x=>x.unit===u);
+     if(!part.length)return label+': chưa xác nhận xe giao ca';
+     const segments=['NHA_CXR','CXR_NHA'].map(dir=>{
+       const selection=part.filter(x=>x.direction===dir).sort((a,b)=>a.departure_min-b.departure_min);
+       if(!selection.length)return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+': chưa có';
+       const names=selection.map(x=>clock(x.departure_min)+' '+x.quantity+' người').join(', ');
+       return (dir==='NHA_CXR'?'NHA→CXR':'CXR→NHA')+' ('+names+')';
+     });
+     const last=part.map(x=>x.confirmed_at).sort().at(-1);
+     return label+': '+segments.join('; ')+(last?' (xác nhận '+new Date(last).toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh'})+')':'');
+   }).join('. ');
+      const sourcePeak=p.length?clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+
       p[0].items.map(z=>z.arrival||z.departure||'—').slice(0,7).join(', ')+')':'chưa xác định';
    const shortF=short.slice(0,5).map(x=>x.arrival+'/'+x.departure).join(', ');
 
@@ -219,6 +231,7 @@
    });
  }
  async function exportOne(){
+   if(!['ADMIN','DH'].includes(unit)){alert('Chỉ tài khoản ĐH/ADMIN được phát hành bản tin.');return;}
    const buttons=[...document.querySelectorAll('[data-v19-export]')];
    buttons.forEach(b=>{b.disabled=true;b.textContent='ĐANG TẠO WORD…'});
    try{

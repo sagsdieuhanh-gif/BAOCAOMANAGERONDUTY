@@ -1,0 +1,29 @@
+
+/* V2.1 — accurate shuttle directions, full schedule, PNG/PDF actions */
+.v21-route-group{border:1px solid #DCE9EF;border-radius:12px;overflow:hidden;margin:15px 0;background:#fff}
+.v21-route-heading{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:12px 15px;background:#E7F4F9;color:#175478}
+.v21-route-heading span{font-size:12px;color:#5E8195}
+.v21-route-group:nth-of-type(2) .v21-route-heading{background:#E9F6EC;color:#186346}
+.v21-route-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:13px}
+.v21-slot{border:1px solid #DDE9EF;border-radius:11px;padding:11px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:#31536B;background:#FAFCFD}
+.v21-slot b{font-size:20px;color:#16425E}
+.v21-slot span{font-weight:700;font-size:12px}
+.v21-slot input{width:100%;min-width:0;min-height:41px;font-size:18px}
+.v21-slot small{font-size:11px;color:#527B8E;line-height:1.45}
+.v21-slot em{font-size:11px;color:#947228;font-style:normal;line-height:1.35}
+.v21-transport-actions{display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+.v21-add{border:1px dashed #9CBCCF;border-radius:12px;padding:14px;margin-top:17px;background:#F7FAFC}
+.v21-add summary{cursor:pointer;font-size:13px;font-weight:750;color:#175A7E}
+.v21-add-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:13px}
+.v21-add-fields label{font-size:12px;font-weight:700;color:#45677A}
+.v21-add-fields label>*{width:100%;margin-top:5px;min-height:40px}
+.v21-add-fields .v21-wide{grid-column:span 2}
+.v21-extra-list{margin-top:18px}.v21-extra-list h4{font-size:14px;color:#315D78}
+.v21-custom-row{display:flex;gap:11px;align-items:center;justify-content:space-between;border:1px solid #DCE9EF;background:white;border-radius:10px;padding:12px;margin-top:7px;font-size:12px}
+.v21-custom-row>div{flex:1}.v21-custom-row small{display:block;color:#70879A;font-size:11px;margin-top:5px}
+.v21-custom-row label{width:115px;font-size:11px}.v21-custom-row input{width:100%;min-height:36px;margin-top:5px}
+.v21-export-actions{display:flex;align-items:center;flex-wrap:wrap;gap:9px;background:#EEF7FB;border-radius:11px;padding:12px;margin-top:15px}
+.v21-export-actions button{border:1px solid #B5D8E7;background:white;color:#145679;border-radius:8px;font-size:12px;min-height:41px;font-weight:750}
+.v21-export-actions .v21-export-note{font-size:11px;color:#577789;flex:1;min-width:160px}
+@media(max-width:1000px){.v21-route-slots{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:650px){.v21-route-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.v21-add-fields{grid-template-columns:1fr}.v21-add-fields .v21-wide{grid-column:auto}.v21-custom-row{flex-wrap:wrap}}

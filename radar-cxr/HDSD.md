@@ -78,3 +78,19 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - **Nhận định TBĐH**: 9 mục ngắn, tập trung dữ liệu thật: nhóm chuyến/khoảng 30 phút chồng lấn, cặp ground-time ngắn, cargo theo STD/giờ sẵn sàng, số KG kế hoạch xác nhận, thiết bị hư hỏng ảnh hưởng nào, phương án xe thay thế/điều phối, quân số và xe giao ca. Không tự kết luận khối lượng, số xe sẵn sàng, mức độ đủ người khi thiếu dữ liệu. Cảnh báo thiếu thông tin phải ghi "CHƯA XÁC NHẬN".
 - **Bản Word Lần 1** vẫn xuất một chạm, đủ 5 phần của mẫu, bảng rõ ràng, tông xanh hàng không, tiêu đề chuyên nghiệp. Link Radar trực tuyến ở cuối Word; biểu đồ chi tiết không nhét vào văn bản.
 - Các tab dài kiểu NHÂN SỰ, GSE, CÔNG CỤ CHI TIẾT vẫn có cấu trúc kỹ thuật để không làm hỏng chương trình cũ nhưng không còn trong menu nghiệp vụ; bảng GSE khả dụng được chuyển vào mục nâng cao của tab PVSĐ.
+
+
+## V2.1 – XE GIAO CA THEO ẢNH MẪU & XUẤT FILE TẬP TRUNG TẠI BÁO CÁO
+
+**Hai chiều xe rõ ràng:**
+- **NHA → CXR (đi làm):** 06:30, 07:00, 09:00, 17:30, 19:30.
+- **CXR → NHA (xe về):** 08:15, 09:00, 16:30, 18:45, 01:00 ngày hôm sau (+1).
+- Mốc 09:00 CXR → NHA của ảnh gốc có chú thích "ĐH họp chuyên môn", ghi chú này được giữ. **Không lấy con số nhân sự trong ảnh mẫu làm mặc định cho các ngày khác.**
+
+**Nhập liệu:** Xe giao ca KHÔNG có tab riêng; phần nhập số người nằm **ngay trong ba tab PVSĐ, PVHK, KHO HÀNG**, mỗi phòng chỉ ghi được số người phòng mình. Có lựa chọn **+ THÊM KHUNG GIỜ / CHIỀU XE TÙY CHỌN**: tự chọn hai chiều NHA→CXR / CXR→NHA, giờ chạy, cùng ngày hoặc ngày hôm sau (+1), số người và ghi chú. Có thể cập nhật và xóa chuyến bổ sung. Nhập 0 có nghĩa đã xác nhận không có người, ô trống là chưa xác nhận. Mốc nhân sự không đổi không cập nhật lại thời gian xác nhận; thời gian xác nhận mới do máy chủ Supabase ghi.
+
+**Xem và phát hành:** Người dùng mọi đơn vị được cấp quyền đều **xem tab RADAR và BÁO CÁO**, bao gồm bảng xe giao ca tổng hợp. Không còn nút xuất PNG/PDF ở tab nghiệp vụ hoặc RADAR. Chỉ trong **tab BÁO CÁO**, tài khoản **ĐH hoặc ADMIN** được bấm **XUẤT ẢNH PNG XE GIAO CA / XUẤT PDF XE GIAO CA** và **XUẤT DỰ BÁO LẦN 1 (DOCX)**. Các phòng khác chỉ cập nhật nguồn và xem; không có nút xuất. Điều này là phân tách luồng nghiệp vụ tại giao diện; tệp hiển thị và dữ liệu đã được xem vẫn có thể được người có quyền xem lưu thủ công bằng công cụ trình duyệt.
+
+**File xe giao ca:** Xuất tổng hợp đủ PVSĐ, PVHK, KHO HÀNG theo hai chiều; đủ các mốc gốc và giờ bổ sung, số người từng phòng, giờ xác nhận và tổng mỗi chuyến. Dấu `~` trước tổng có nghĩa chỉ là số tạm tính do chưa đủ ba phòng xác nhận; không tự coi dữ liệu trống là 0. Có biểu mẫu PNG màu sắc và PDF nhiều trang khi cần.
+
+**Cơ sở dữ liệu:** Dùng bảng `ops_shift_transport_v2`, ghi nguồn theo (ngày, phòng, chiều, số phút khởi hành) và phân quyền Supabase RLS. Dữ liệu từ bảng xe bốn mốc cũ được chuyển sang bảng v2 nếu có. HDSD phải được đồng bộ với mỗi cập nhật.
