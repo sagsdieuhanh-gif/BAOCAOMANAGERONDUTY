@@ -47,6 +47,12 @@
     '<div class="v220-current"><div><b id="v220GroupTitle"></b><span id="v220GroupSubtitle"></span></div><span id="v220PageLabel"></span></div>'+
     '<div class="v220-menu" id="v220Menu"></div><details id="v220Advanced" class="v220-advanced" hidden><summary>Nâng cao · Các chức năng ít dùng</summary><div class="v220-menu v220-advanced-grid" id="v220AdvancedMenu"></div></details>';
    rootNode.appendChild(bar);
+   const comparison=$('movementComparison');
+   if(comparison){
+     const d=doc.createElement('details');d.id='v220Comparison';d.className='v220-comparison';
+     const title=doc.createElement('summary');title.textContent='XEM THÊM · SO SÁNH SẢN LƯỢNG';
+     d.appendChild(title);comparison.parentNode.insertBefore(d,comparison);d.appendChild(comparison);
+   }
    const groups=$('v220Groups');
    for(const g of GROUPS){
      const b=makeButton(g.icon+'  '+g.title,'v220-group-btn',{group:g.id});
@@ -102,9 +108,11 @@
    updateKpis();
  }
  function updateKpis(){
-   const kpis=$('kpis'),summary=$('movementComparison');
-   if(kpis)kpis.classList.toggle('v220-compact-hide',current!=='overview');
-   if(summary)summary.classList.toggle('v220-compact-hide',current!=='overview');
+   const kpis=$('kpis'),summary=$('movementComparison'),detail=$('v220Comparison');
+   // The legacy KPI row repeats the same arrival/departure/peak numbers in v19Home.
+   if(kpis)kpis.classList.add('v220-compact-hide');
+   if(summary)summary.classList.remove('v220-compact-hide');
+   if(detail)detail.hidden=current!=='overview';
  }
  function changeGroup(group,openFirst){
    const g=GROUPS.find(x=>x.id===group);
