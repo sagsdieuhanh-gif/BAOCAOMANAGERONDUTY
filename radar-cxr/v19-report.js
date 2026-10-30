@@ -80,9 +80,12 @@
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
-   const difference=priorTotal==null?'Chưa đủ dữ liệu xác nhận để tính chênh lệch.':
-    'Đến ('+nsign(c.arrivals-prev.arrival_count)+') | Đi ('+nsign(c.departures-prev.departure_count)+
-    '). Tổng ('+nsign(total-priorTotal)+') lượt ('+(priorTotal?((total-priorTotal)/priorTotal*100).toFixed(1).replace('.',',')+'%':'chưa tính tỷ lệ')+').';
+   const trend=(n,label)=>n>0?label+' tăng '+n+' lượt':n<0?label+' giảm '+Math.abs(n)+' lượt':label+' không đổi';
+   const difference=priorTotal==null?'Chưa có số liệu xác nhận của ngày trước để so sánh.':
+     'So với ngày trước: '+trend(c.arrivals-prev.arrival_count,'chuyến đến')+'; '+
+     trend(c.departures-prev.departure_count,'chuyến đi')+'. Tổng '+
+     (total>priorTotal?'tăng '+(total-priorTotal):total<priorTotal?'giảm '+(priorTotal-total):'không đổi')+
+     ' lượt'+(priorTotal?' ('+Math.abs((total-priorTotal)/priorTotal*100).toFixed(1).replace('.',',')+'%)':'')+'.';
    const summary='Đến: '+c.arrivals+' | Đi: '+c.departures+' | Quốc nội: '+(c.domestic??'CHỜ XÁC NHẬN')+
     ' lượt | Quốc tế: '+(c.international??'CHỜ XÁC NHẬN')+' lượt.';
    const comparison='Ngày '+dateVN(prevDate(c.date))+': '+(priorTotal==null?'Chưa có số liệu đã xác nhận.':
