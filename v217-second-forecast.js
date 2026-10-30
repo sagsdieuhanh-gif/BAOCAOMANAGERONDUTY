@@ -75,7 +75,8 @@
      if(!rawNo)continue;
      const provisional=rawNo.replace(/^##/,'');
      if(!/^[A-Z0-9]{2,20}$/.test(provisional)){fatal.push(kind+' dòng '+(i+1)+': số hiệu '+rawNo+' không hợp lệ.');continue;}
-     if(rawNo!==provisional)fatal.push(kind+' dòng '+(i+1)+': số hiệu '+rawNo+' có tiền tố ##; cần xác nhận cách ghi trước khi lưu.');
+     // ## is the schedule convention for a CHARTER (non-scheduled) flight, not a parse error.
+     if(rawNo!==provisional)issues.push(kind+' '+provisional+': chuyến thuê chuyến không thường lệ (CHARTER), ký hiệu ## theo lịch nguồn.');
      if(seen.has(provisional)){fatal.push(kind+' dòng '+(i+1)+': trùng số hiệu '+provisional+'.');continue}
      seen.add(provisional);
      const scheduled=time(cell(r,kind==='ARRIVAL'?'STA':'STD'));
@@ -86,7 +87,7 @@
      const route=no(cell(r,'Route')).replace(/[–—]/g,'-');
      const ssr=cell(r,'SSR').toUpperCase(),nature=cell(r,'NatureOfFlight').toUpperCase(),flightType=cell(r,'FlightType').toUpperCase();
      const carrier=(provisional.match(/^([A-Z0-9]{2})(?=\d)/)||[])[1]||null;
-     flights.push({no:provisional,raw_no:rawNo,reg:reg(cell(r,'Registration')),raw_reg:cell(r,'Registration'),type:aircraft(cell(r,'Aircraft')),
+     flights.push({no:provisional,raw_no:rawNo,charter:rawNo!==provisional,reg:reg(cell(r,'Registration')),raw_reg:cell(r,'Registration'),type:aircraft(cell(r,'Aircraft')),
        route,t:scheduled,bay,gate:cell(r,'Gate'),booking,booking_parts:parts,booking_sum:parts?parts.reduce((a,b)=>a+b,0):null,
        ssr,nature,flight_type:flightType,ferry:/\bFERRY\b/i.test(ssr+' '+nature+' '+flightType),
        checkin_row:cell(r,'CkiRow'),checkin_open:time(cell(r,'CKIN OPEN')),checkin_close:time(cell(r,'CKIN CLS')),
@@ -119,7 +120,8 @@
        departure_boarding_start:d?.boarding_start??null,departure_boarding_finish:d?.boarding_finish??null,
        booking_raw:d?.booking||null,booking_parts:d?.booking_parts||null,booking_sum:d?.booking_sum??null,
        eta_min:a?.eta??null,etd_min:d?.etd??null,
-       ferry:!!(a?.ferry||d?.ferry),arrival_nature:a?.nature||null,departure_nature:d?.nature||null,
+       ferry:!!(a?.ferry||d?.ferry),charter:!!(a?.charter||d?.charter),arrival_raw_no:a?.raw_no||null,departure_raw_no:d?.raw_no||null,
+       arrival_nature:a?.nature||null,departure_nature:d?.nature||null,
        arrival_ssr:a?.ssr||null,departure_ssr:d?.ssr||null,arrival_flight_type:a?.flight_type||null,
        departure_flight_type:d?.flight_type||null,stand_mismatch:!!m,
        international:dd==null?null:!dd,match_method:method});
