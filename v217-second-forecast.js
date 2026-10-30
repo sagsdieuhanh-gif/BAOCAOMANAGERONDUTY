@@ -188,8 +188,13 @@
    const night=deps.filter(x=>x.t>=1080);
    const gateCheck=[];
    for(let i=0;i<deps.length;i++)for(let j=i+1;j<deps.length;j++){
-     const a=deps[i],b=deps[j];if(a.gate&&a.gate===b.gate&&Math.abs(a.t-b.t)<=45)
-       gateCheck.push({gate:a.gate,a:a.no,b:b.no,minutes:Math.abs(a.t-b.t)});
+     const a=deps[i],b=deps[j];
+     if(!a.gate||a.gate!==b.gate)continue;
+     const full=[a.boarding_start,a.boarding_finish,b.boarding_start,b.boarding_finish].every(Number.isFinite);
+     const overlap=full&&a.boarding_start<b.boarding_finish&&b.boarding_start<a.boarding_finish;
+     const gap=Math.abs(a.t-b.t);
+     if(overlap||gap<=45)gateCheck.push({gate:a.gate,a:a.no,b:b.no,minutes:gap,
+       kind:overlap?'CÙNG GATE, DỰ KIẾN TRÙNG THỜI GIAN BOARDING':'CÙNG GATE, STD GẦN NHAU – CẦN ĐỐI CHIẾU'});
    }
    const zones={};for(const f of pairs)for(const [key,bay] of [['ARR',f.arrival_bay],['DEP',f.departure_bay]]){
      if(bay==null)continue;const z=zone(bay);zones[z]=(zones[z]||0)+1;
