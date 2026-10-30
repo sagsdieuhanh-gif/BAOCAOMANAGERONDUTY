@@ -57,3 +57,14 @@
 .v24-status{font-size:12px;font-weight:700;margin:8px 0;min-height:17px}
 @media(max-width:780px){.v24-wrap{padding:12px}.v24-heading{align-items:flex-start;flex-direction:column}.v24-route-title{padding:12px}.v24-table{min-width:1030px}}
 @media print{.v24-wrap{display:none!important}}
+
+/* V2.13: clear unresolved departments and distinguish supplementary bus runs. */
+.v24-table tr.v28-extra-slot td{background:#fff4e0!important;border-top:2px solid #d8943d!important}
+.v24-table tr.v28-extra-slot .v24-time b{color:#95550d}
+.v24-table tr.v28-missing-row td{background:#fff2f1!important;text-align:left!important;color:#a32e39!important;font-size:11px;font-weight:600;padding:6px 13px!important;white-space:normal}
+.v24-table tr.v28-reason-row td{background:#fff6e8!important;text-align:left!important;color:#9b5a11!important;border-bottom:2px solid #d8a355!important;padding:8px 14px!important}
+.v28-reason-wrap{display:flex;align-items:center;flex-wrap:wrap;gap:9px;font-size:12px}
+.v28-reason-wrap input{flex:1;min-width:190px;max-width:490px;min-height:35px;padding:6px 9px;background:#fff!important;border:1px solid #d6a357;border-radius:7px;color:#73450f}
+.v28-reason-wrap button{border-radius:7px;padding:7px 12px;background:#bd7830!important;color:white!important;font-weight:700}
+.v28-custom-reason{min-width:270px;flex:1}
+.v28-custom-reason input{width:100%;min-height:37px;border:1px solid #d7a152!important;border-radius:8px;padding:7px}
