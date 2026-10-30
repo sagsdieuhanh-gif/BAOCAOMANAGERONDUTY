@@ -60,7 +60,7 @@
         seen.add(no);
         const t=time(row[start+5]);if(t===null)throw Error('Thiếu hoặc sai giờ '+which+' của '+no+' ở dòng '+(i+1));
         const rt=route(row[start+4]);if(!rt.includes('CXR'))issues.push(no+': chặng bay không có CXR ('+rt+').');
-        out.push({no,reg:reg(row[start+2]),type:norm(row[start+3]),route:rt,
+        out.push({no,reg:reg(row[start+2]),rawReg:norm(row[start+2]),type:norm(row[start+3]),route:rt,
           t,pax:pax(row[start+6]),paxRaw:row[start+6]==null?'':String(row[start+6]).trim(),
           airline:airline(no),sheetRow:i+1,stand:null});
       }
@@ -73,7 +73,7 @@
       const intr=(intA===null||intD===null)?null:!(intA&&intD);
       pairs.push({arrival:a.no,departure:d.no,sta_min:a.t,std_min:d.t,bay:null,
         airline:a.airline||d.airline,aircraft_type:a.type||d.type||null,
-        aircraft_reg:a.reg?a.reg.replace(/^VN(?=A\d)/,'VN-'):d.reg?d.reg.replace(/^VN(?=A\d)/,'VN-'):null,
+        aircraft_reg:a.rawReg||d.rawReg||null,
         arrival_route:a.route,departure_route:d.route,arrival_pax:a.pax,departure_pax:d.pax,
         international:intr,match_method:method});
     }
@@ -108,7 +108,7 @@
     for(let i=0;i<arrs.length;i++)if(!usedA.has(i)){
       const a=arrs[i],int=isDomestic(a.route);
       pairs.push({arrival:a.no,departure:null,sta_min:a.t,std_min:null,bay:null,
-        airline:a.airline,aircraft_type:a.type||null,aircraft_reg:a.reg||null,
+        airline:a.airline,aircraft_type:a.type||null,aircraft_reg:a.rawReg||null,
         arrival_route:a.route,departure_route:null,arrival_pax:a.pax,departure_pax:null,
         international:int===null?null:!int,match_method:'ARRIVAL_ONLY'});
       issues.push(a.no+': chưa tìm được chuyến đi tương ứng từ nguồn.');
@@ -116,7 +116,7 @@
     for(let j=0;j<deps.length;j++)if(!usedD.has(j)){
       const d=deps[j],int=isDomestic(d.route);
       pairs.push({arrival:null,departure:d.no,sta_min:null,std_min:d.t,bay:null,
-        airline:d.airline,aircraft_type:d.type||null,aircraft_reg:d.reg||null,
+        airline:d.airline,aircraft_type:d.type||null,aircraft_reg:d.rawReg||null,
         arrival_route:null,departure_route:d.route,arrival_pax:null,departure_pax:d.pax,
         international:int===null?null:!int,match_method:'DEPARTURE_ONLY'});
       issues.push(d.no+': chuyến đi không có chuyến đến tương ứng trong lịch ngày này.');

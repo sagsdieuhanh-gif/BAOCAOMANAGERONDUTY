@@ -20,6 +20,7 @@ const assert=require('node:assert/strict');
  assert.equal(r.payload.flights.find(x=>x.departure==='VJ5208').match_method,'DEPARTURE_ONLY');
  assert.equal(r.payload.flights.find(x=>x.arrival==='AK204').arrival_pax,null);
  assert.equal(r.payload.flights.find(x=>x.arrival==='VJ602').arrival_pax,136);
+ assert.equal(r.payload.flights.find(x=>x.arrival==='VJ602').aircraft_reg,'VNA543');
  assert.throws(()=>core.parse([['Wrong Header']]));
  console.log('SAGS LB template parser: OK');
 })().catch(e=>{console.error(e);process.exitCode=1});
