@@ -128,7 +128,7 @@
    const g=currentGroupForTab(tab);
    current=g.id;selected=tab;paint();
  }
- root.SagsFriendlyUIV220={mount,navigate,sync,changeGroup,groups:GROUPS.map(x=>x.id)};
+ root.SagsFriendlyUIV220={mount,navigate,sync,changeGroup,refresh:paint,groups:GROUPS.map(x=>x.id)};
  if(doc.readyState==='loading')doc.addEventListener('DOMContentLoaded',mount,{once:true});
  else mount();
 })(window);
