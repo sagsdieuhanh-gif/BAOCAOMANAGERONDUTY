@@ -136,7 +136,8 @@
    const mapping=[['tab-home','DH'],['tab-pvsd','KTS'],['tab-pvhk','PVHK'],['tab-qa-it',role==='IT'?'IT':'QA']];
    for(const [tab,who] of mapping){
      const div=$('v24-'+tab);if(!div)continue;
-     const adjusted=role==='ADMIN'?'ADMIN':who;
+     const adjusted=['ADMIN','DH'].includes(role)?role:who;
+     div.hidden=!(root.SagsRoleAccessV225?.canOpen(role,tab.replace('tab-','').replace('qa-it','qa_it'))??true);
      // Preserve input being edited if a refresh occurs in another tab.
      if(div.contains(document.activeElement)&&document.activeElement?.matches('input[data-v24-value]'))continue;
      div.innerHTML=template(adjusted);
