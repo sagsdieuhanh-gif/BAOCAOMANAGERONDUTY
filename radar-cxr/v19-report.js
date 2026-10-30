@@ -47,13 +47,14 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n,cp,gi,bus,shuttleRows]=await Promise.all([
+   const [s,n,cp,gi,bus,shuttleRows,unitInputs]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
     sb.from('ops_gse_issues').select('*').eq('service_date',day),
     sb.from('ops_shift_transport_v2').select('*').eq('service_date',day),
-    sb.from('ops_shift_transport_rows').select('direction,departure_min,line_no').eq('service_date',day)
+    sb.from('ops_shift_transport_rows').select('direction,departure_min,line_no').eq('service_date',day),
+    sb.from('ops_unit_forecasts').select('*').eq('service_date',day)
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
@@ -61,6 +62,7 @@
    if(gi.error)throw Error('Không tải được danh sách xe hỏng: '+gi.error.message);
    if(bus.error)throw Error('Không tải được xe giao ca: '+bus.error.message);
    if(shuttleRows.error)throw Error('Không tải được các dòng xe bổ sung: '+shuttleRows.error.message);
+   if(unitInputs.error)throw Error('Không tải được xác nhận các phòng: '+unitInputs.error.message);
    const payload=s.data?.payload||null,arr=payload?.flights?.length?payload.flights:flights;
    if(!arr.length)throw Error('Chưa có lịch bay cho ngày '+dateVN(day)+'. Cần tải Excel trước khi xuất báo cáo.');
    if(!payload&&arr.some(x=>x.bay!=null))throw Error('Không có ảnh chụp lịch Lần 1; không dùng lịch có bãi để tái tạo Lần 1.');
@@ -73,7 +75,7 @@
    }
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
-    note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:s.data?.source_filename||'',prior:prevTotals,controls};
+    note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:s.data?.source_filename||'',prior:prevTotals,controls,unitPlans:unitInputs.data||[],staff,gse};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -166,10 +168,13 @@
      'ĐH nhận thông tin thời tiết/an toàn chính thức, xác định các khung có thể ảnh hưởng và thông báo điều chỉnh; PVSĐ kiểm soát GSE, tuyến di chuyển an toàn; PVHK chủ động phương án đón/boarding khi điều kiện khai thác thay đổi.',
      'ĐH rà soát tồn tại đã xác nhận từ ca trước, ưu tiên việc ảnh hưởng trực tiếp đến chuyến cao điểm; PVSĐ/PVHK/Kho Hàng xác nhận phần việc liên quan và phương án thay thế trước khi tiếp nhận chuyến.'
    ];
-   const topics=LABELS.map((label,i)=>{
-     const override=c.controls.find(x=>x.topic===i+1)||{};
-     return {title:String(i+1).padStart(2,'0')+'. '+label,
-       observation:(known(override.observation)||observations[i]).slice(0,420),action:(known(override.action)||actions[i]).slice(0,620)};
+   const core=LABELS.map((label,i)=>({title:label,observation:observations[i],action:actions[i]}));
+   const enhanced=window.SagsReportInsightsV211?.enrich(c,core);
+   const topics=(enhanced||core).map((x,i)=>{
+     const override=(c.controls||[]).find(row=>row.topic===i+1)||{};
+     return {title:String(i+1).padStart(2,'0')+'. '+x.title.replace(/^\d+\.\s*/,''),owner:x.owner||'ĐH phối hợp các phòng',
+       observation:(known(override.observation)||x.observation||'CHỜ XÁC NHẬN').slice(0,490),
+       action:(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.').slice(0,620)};
    });
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
@@ -191,10 +196,10 @@
  }
  function html(data){
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
-   return '<div class="v19-report-sheet"><h2>DỰ BÁO KHAI THÁC HẰNG NGÀY – LẦN 1</h2>'+
+   return '<div class="v19-report-sheet v211-compact"><h2>SAGS-CXR | BÁO CÁO DỰ BÁO KHAI THÁC HẰNG NGÀY</h2>'+
     '<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+'</table>'+
-    '<h3>II. BẢNG KIỂM SOÁT</h3><table>'+tr(['Nội dung','Nhận định','Phương án phục vụ'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action])).join('')+'</table>'+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action,x.owner])).join('')+'</table>'+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
     '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(data.recommendation)+'</p>'+
@@ -242,7 +247,7 @@
        hd('I. TÓM TẮT KHAI THÁC'),
        t(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],[['Sản lượng',data.summary],['Biến động so với ngày hôm trước',data.comparison]],[2350,8150]),
        hd('II. BẢNG KIỂM SOÁT'),
-       t(['Nội dung','Nhận định','Phương án phục vụ'],data.topics.map(x=>[x.title,x.observation,x.action]),[2120,4150,4230]),
+       t(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ','Đơn vị'],data.topics.map(x=>[x.title,x.observation,x.action,x.owner]),[1900,3800,3600,1200]),
        hd('III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)'),
        t(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],data.peakRows.map(x=>[x.slot,x.flight,x.risk,x.action]),[1730,3150,2620,3000]),
        hd('IV. PHỐI HỢP THỰC HIỆN'),
