@@ -34,6 +34,7 @@ jobs:
           mkdir -p _site/assets
           cp index.html ./*.js ./*.css _site/
           cp assets/logo-sags.png _site/assets/
+          cp assets/shuttle-29.webp assets/shuttle-45.webp _site/assets/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
