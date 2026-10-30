@@ -14,6 +14,7 @@ assert.ok(report,'Radar V2.8 API must be registered');
 const {interval,serviceMinutes,area,reportHtml}=report._test;
 assert.equal(serviceMinutes({airline:'VJ',sta_min:300,std_min:400}),30);
 assert.equal(serviceMinutes({airline:'KE',sta_min:300,std_min:400}),60);
+assert.equal(serviceMinutes({airline:'OZ',sta_min:300,std_min:400}),60);
 assert.equal(serviceMinutes({airline:'TR',sta_min:300,std_min:345}),45);
 assert.equal(area({bay:31}),'K1');assert.equal(area({bay:55}),'K1');
 assert.equal(area({bay:40}),'K2');assert.equal(area({bay:70}),'K3');
