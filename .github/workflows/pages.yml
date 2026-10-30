@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -75,6 +76,24 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+      - name: Wait for automatic Pages branch build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The legacy branch-based Pages workflow can be running for the same commit.
+          # GitHub only permits one Pages deployment at a time.
+          for attempt in $(seq 1 30); do
+            active=$(gh run list -R "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --limit 20 --json name,status |
+              jq '[.[] | select(.name == "pages build and deployment" and .status != "completed")] | length')
+            if [ "$active" = "0" ]; then
+              echo "No competing Pages deployment is active."
+              exit 0
+            fi
+            echo "Automatic Pages workflow still active; verifying before deploying custom artifact..."
+            sleep 10
+          done
+          echo "::error::Pages branch build did not settle; refusing to race deployments."
+          exit 1
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
