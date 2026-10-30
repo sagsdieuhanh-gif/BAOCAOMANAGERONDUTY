@@ -41,6 +41,7 @@
         const values=[...el.children].map(x=>inner(x));
         if(values.length)result.push({kind:'table',rows:[values],header:false});return;
       }
+      if(tag==='IMG'){const src=el.currentSrc||el.getAttribute('src');if(src)result.push({kind:'image',src,logo:el.classList?.contains('v216-report-logo')});return;}
       if(tag==='TABLE'){
         const rows=[...el.querySelectorAll('tr')].map(r=>[...r.children].filter(x=>x.tagName==='TH'||x.tagName==='TD').map(inner)).filter(x=>x.length);
         if(rows.length)result.push({kind:'table',rows,header:!!el.querySelector('th')});return;
@@ -101,8 +102,8 @@
     parts.push(bytes(trailer));
     return new Blob(parts,{type:'application/pdf'});
   }
-  async function svgImage(svg){
-    const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  async function svgImage(svg,src){
+    const url=src||'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
     const image=new Image();
     await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Không tạo được hình Radar; kiểm tra dữ liệu biểu đồ.'));image.src=url;});
     return image;
@@ -162,8 +163,8 @@
       else if(b.kind==='paragraph')para(b.text,{font:22,color:b.pending?'#B91C1C':'#273E52'});
       else if(b.kind==='table')table(b.rows,b.header);
       else if(b.kind==='image'){
-        const im=await svgImage(b.svg);
-        const targetW=W-2*M,targetH=Math.min(575,Math.round(targetW*im.height/im.width));
+        const im=await svgImage(b.svg,b.src);
+        const targetW=b.logo?165:W-2*M,targetH=b.logo?Math.round(targetW*im.height/im.width):Math.min(575,Math.round(targetW*im.height/im.width));
         enough(targetH+20);ctx.drawImage(im,M,y,targetW,targetH);y+=targetH+16;
       }
     }
@@ -203,13 +204,13 @@
       else if(b.kind==='paragraph')body+=paragraph(b.text,{size:20,color:b.pending?'B91C1C':'233B4D'});
       else if(b.kind==='table')body+=wordTable(b.rows,b.header);
       else if(b.kind==='image'){
-        const img=await svgImage(b.svg),canvas=document.createElement('canvas');
+        const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');
         canvas.width=Math.max(100,img.width||1152);canvas.height=Math.max(80,img.height||250);
         canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
         const png=toBytes(canvas.toDataURL('image/png')),id=images.length+1,relId='rId'+id;
         images.push(['word/media/chart'+id+'.png',png]);
         rels+='<Relationship Id="'+relId+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/chart'+id+'.png"/>';
-        const width=820,height=Math.round(width*canvas.height/canvas.width),cx=width*9525,cy=height*9525;
+        const width=b.logo?118:820,height=Math.round(width*canvas.height/canvas.width),cx=width*9525,cy=height*9525;
         body+='<w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:docPr id="'+id+'" name="Radar '+id+'"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Radar '+id+'"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+relId+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
       }
     }
