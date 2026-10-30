@@ -53,19 +53,37 @@
  }
  function personnelFields(k){
    if(!['DH','PVHK','KTS'].includes(k))return '';
-   const options='<option value="PENDING">CHỜ XÁC NHẬN</option><option value="READY">ĐỦ NHÂN SỰ</option><option value="LIMITED">CHƯA ĐỦ NHÂN SỰ</option>';
-   const shift=(name,code)=>'<div class="v216-staff-row">'+
-     '<strong class="v216-shift-label">'+name+'</strong>'+
-     '<label>Tổng quân số<input data-unit-field="pvb_'+code+'" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Số NS thực có"></label>'+
-     '<label>Nhu cầu (nếu biết)<input data-unit-field="pvb_'+code+'_required" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="NS cần bố trí"></label>'+
-     '<label>Đánh giá của phòng<select data-unit-field="pvb_'+code+'_status">'+options+'</select></label>'+
+   const opts='<option value="PENDING">Chưa đánh giá</option><option value="READY">ĐỦ nhân sự</option><option value="LIMITED">THIẾU nhân sự</option>';
+   const shift=(name,code)=>'<article class="v224-shift-card" data-v224-shift="'+code+'">'+
+     '<h4>'+name+'</h4><div class="v224-shift-fields">'+
+     '<label>Quân số hiện có<input data-unit-field="pvb_'+code+'" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Nhập số người"></label>'+
+     '<label>Quân số cần (nếu có định mức)<input data-unit-field="pvb_'+code+'_required" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Chưa có định mức"></label>'+
+     '<label>Đánh giá của phòng<select data-unit-field="pvb_'+code+'_status">'+opts+'</select></label>'+
+     '</div><p class="v224-shift-feedback" data-v224-shift-feedback="'+code+'">Chưa nhập hoặc chưa đánh giá.</p></article>';
+   return '<div class="v212-personnel v224-personnel">'+
+     '<div class="v224-section-title"><span class="v224-step">01</span><div><h4>TỔNG QUÂN SỐ PHỤC VỤ BAY</h4>'+
+     '<p>Nhập số người thực có và xác nhận tình trạng từng ca. Không cộng lại số người ở phần phân bổ theo đội.</p></div></div>'+
+     '<div class="v224-shift-grid">'+shift('CA SÁNG','morning')+shift('CA ĐÊM','night')+'</div>'+
+     '<div class="v212-staff-preview v224-staff-preview"><b>NỘI DUNG SẼ ĐƯA VÀO BÁO CÁO</b>'+
+     '<p data-v212-preview="'+k+'">Chưa có quân số được xác nhận.</p>'+
+     '<small>Đây là bản xem trước; chỉ số liệu đã bấm XÁC NHẬN & LƯU mới được dùng trong báo cáo chính thức.</small></div>'+
      '</div>';
-   return '<div class="v212-personnel">'+
-     '<h4>TỔNG QUÂN SỐ PHỤC VỤ BAY · THEO CA</h4>'+
-     '<p class="note">Nhập tổng quân số từng ca và đánh giá đủ/chưa đủ. Nếu có số nhân sự cần bố trí, nhập thêm để báo cáo ghi rõ thiếu bao nhiêu người; không tự kết luận khi thiếu định mức.</p>'+
-     '<div class="v216-staff-rows">'+shift('CA SÁNG','morning')+shift('CA ĐÊM','night')+'</div>'+
-     '<div class="v212-staff-preview"><b>CÂU TỔNG HỢP TẠI MỤC NHÂN SỰ</b><p data-v212-preview="'+k+'">CHỜ XÁC NHẬN quân số.</p><small>Các phòng xác nhận xong, nội dung sẽ được đưa vào báo cáo Điều hành.</small></div>'+
-     '</div>';
+ }
+ function shiftFeedback(details,code){
+   const p=root.SagsPersonnelV212;
+   if(!p)return 'Chưa có đánh giá.';
+   const count=p.parseCount(details['pvb_'+code]),required=p.parseCount(details['pvb_'+code+'_required']);
+   const state=details['pvb_'+code+'_status'];
+   if(count==null)return 'CHƯA NHẬP quân số.';
+   if(state==='PENDING'||!state)return 'Đã nhập '+count+' người · chưa đánh giá đủ/thiếu.';
+   if(required==null)return (state==='READY'?'Phòng xác nhận đủ':'Phòng xác nhận thiếu')+
+      ' · chưa có định mức số người để tính chênh lệch.';
+   const diff=count-required;
+   const contradiction=state==='READY'&&diff<0||state==='LIMITED'&&diff>=0;
+   if(contradiction)return 'CẦN KIỂM TRA: '+count+' người / nhu cầu '+required+
+      ' người, khác với đánh giá đã chọn.';
+   return diff<0?'THIẾU '+(-diff)+' NGƯỜI ('+count+'/'+required+').':
+     'ĐỦ THEO SỐ LIỆU ('+count+'/'+required+', dư '+diff+').';
  }
  function readFields(node){
    const values={};
@@ -73,19 +91,39 @@
    return values;
  }
  function refreshStaffPreview(k){
-   const node=document.querySelector('[data-unit-forecast="'+k+'"]'),out=node?.querySelector('[data-v212-preview]');
-   if(out&&root.SagsPersonnelV212)out.textContent=root.SagsPersonnelV212.formatUnit(k,readFields(node),true).line;
+   const node=document.querySelector('[data-unit-forecast="'+k+'"]'),
+         out=node?.querySelector('[data-v212-preview]');
+   if(!node||!root.SagsPersonnelV212)return;
+   const data=readFields(node);
+   if(out)out.textContent=root.SagsPersonnelV212.formatUnit(k,data,true).line;
+   for(const code of ['morning','night']){
+     const indicator=node.querySelector('[data-v224-shift-feedback="'+code+'"]');
+     if(indicator){
+       const copy=shiftFeedback(data,code);
+       indicator.textContent=copy;
+       indicator.dataset.level=/CẦN KIỂM TRA|THIẾU/.test(copy)?'warn':
+         /CHƯA|chưa đánh giá/.test(copy)?'pending':'ok';
+     }
+   }
  }
  function html(k,g){
-   return '<section class="v20-panel v211-input" data-unit-forecast="'+k+'"><div class="row space"><h3>BỔ SUNG XÁC NHẬN PHỤC VỤ BÁO CÁO · '+g.label+'</h3><span class="status gray" data-v211-state="'+k+'">CHƯA CÓ DỮ LIỆU</span></div>'+
-    '<p class="note">Chỉ nhập điểm cần bổ sung cho dự báo; quân số, PAX, KG/PCS, GSE và xe giao ca giữ nguyên ở các biểu mẫu hiện có. Ô chưa biết để trống hoặc CHƯA XÁC NHẬN. LƯU NHÁP không được coi là xác nhận chuyên môn.</p>'+
-    '<div class="v215-fast-report"><h4>DÁN NHANH NỘI DUNG BÁO CÁO</h4>'+
-    '<p class="note">Dán nhiều dòng cùng lúc, ví dụ xe 1 hỏng từ hôm qua, xe 2 bảo trì. Nội dung được gửi cho ĐH nguyên ý để đối chiếu trước khi phát hành.</p>'+
-    '<textarea data-v215-quick="'+k+'" rows="5" maxlength="5000" placeholder="Dán các ý cần báo cáo của phòng...&#10;Xe 1 hư từ hôm qua.&#10;Xe 2 đang bảo trì.&#10;Đề nghị bố trí xe dự phòng."></textarea>'+
-    '<div class="v215-quick-actions"><button type="button" class="primary" data-v215-send="'+k+'">LƯU & GỬI ĐH</button><span data-v215-state="'+k+'">Chưa gửi nội dung bổ sung.</span></div></div>'+
-    personnelFields(k)+'<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div>'+
-    '<div class="btnbar"><button type="button" data-v211-save="'+k+'">LƯU NHÁP</button><button type="button" class="primary" data-v211-confirm="'+k+'">XÁC NHẬN DỮ LIỆU CỦA PHÒNG</button></div>'+
-    '<p class="note" data-v211-message="'+k+'"></p></section>';
+   return '<section class="v20-panel v211-input v224-unit-panel" data-unit-forecast="'+k+'">'+
+    '<div class="v224-head"><div><span class="v224-kicker">CẬP NHẬT THEO NGÀY</span><h3>'+g.label+'</h3>'+
+    '<p>Chỉ cần xác nhận quân số của hai ca và bổ sung nội dung cần lưu ý nếu có.</p></div>'+
+    '<span class="status gray" data-v211-state="'+k+'">CHƯA CÓ DỮ LIỆU</span></div>'+
+    personnelFields(k)+
+    '<details class="v224-details v224-specialty"><summary><b>02 · THÔNG TIN NGHIỆP VỤ BỔ SUNG</b><small>Chỉ mở khi có hạn chế hoặc nội dung cần báo ĐH</small></summary>'+
+    '<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div></details>'+
+    '<details class="v224-details v224-paste"><summary><b>DÁN NHANH BẢN TIN CỦA PHÒNG</b><small>Dán nhiều dòng khi có tình trạng xe, nhân sự hoặc nhiệm vụ khác cần báo</small></summary>'+
+    '<textarea data-v215-quick="'+k+'" rows="4" maxlength="5000" placeholder="Dán những nội dung cần báo ĐH. Giữ nguyên ý từ phòng..."></textarea>'+
+    '<div class="v215-quick-actions"><button type="button" data-v215-send="'+k+'">LƯU NỘI DUNG DÁN NHANH</button>'+
+    '<span data-v215-state="'+k+'">Chưa gửi nội dung bổ sung.</span></div></details>'+
+    '<div class="v224-primary-actions"><button type="button" class="primary" data-v211-confirm="'+k+'">XÁC NHẬN & LƯU THÔNG TIN PHÒNG</button>'+
+    '<span class="v224-save-note">Số liệu đã xác nhận được đưa vào báo cáo điều hành.</span></div>'+
+    '<details class="v224-draft"><summary>Chưa đủ dữ liệu? Lưu nháp</summary>'+
+    '<button type="button" data-v211-save="'+k+'">LƯU NHÁP · CHƯA PHÁT HÀNH</button>'+
+    '<p>Thông tin lưu nháp không được coi là số liệu xác nhận của phòng.</p></details>'+
+    '<p class="note" data-v211-message="'+k+'" role="status" aria-live="polite"></p></section>';
  }
  function init(){
    if(bound)return;bound=true;
@@ -94,7 +132,11 @@
      const section=document.createElement('div');section.innerHTML=html(key,g);
      const node=section.firstElementChild;
      if(key==='DH')target.insertBefore(node,$('v22DhShuttle')||null);
-     else target.appendChild(node);
+     else if(key==='PVHK'||key==='KTS'){
+       const head=target.querySelector('.v20-head');
+       if(head)head.insertAdjacentElement('afterend',node);
+       else target.prepend(node);
+     }else target.appendChild(node);
      node.querySelector('[data-v211-save]').onclick=()=>save(key,false);
      node.querySelector('[data-v211-confirm]').onclick=()=>save(key,true);
      node.querySelector('[data-v215-send]').onclick=()=>saveQuick(key);
@@ -196,5 +238,5 @@
    }catch(e){if(message)message.textContent='KHÔNG LƯU ĐƯỢC: '+e.message;}
    finally{updateRights();}
  }
- root.SagsUnitInputV211={init,refresh,updateRights,groups,_test:{selected,labelFor}};
+ root.SagsUnitInputV211={init,refresh,updateRights,groups,_test:{selected,labelFor,shiftFeedback,html,personnelFields}};
 })(window);
