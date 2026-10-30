@@ -104,3 +104,15 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - Chỉ có **29 chỗ** và **45 chỗ**, không tồn tại xe vừa. Với tổng người đã chốt: 1–29 => **gợi ý xe 29C**; 30–45 => **gợi ý xe 45C**; trên 45 => **cảnh báo CẦN THÊM XE**, không tự phát sinh loại xe lớn hơn 45C hay suy đoán số xe thực tế; 0 => không có người, không gợi ý điều xe.
 - PNG/PDF dùng bố cục báo cáo điều hành hiện đại: bảng cân đối, màu tiết chế, dấu địa điểm Nha Trang/Cam Ranh bằng biểu tượng tối giản, **chỉ hai kích thước icon xe 29C/45C**, số người từng phòng và giờ xác nhận từ dữ liệu thực. Không tạo ảnh bằng số liệu giả để phát hành.
 - Chỉ **ĐH/ADMIN** bấm xuất tại tab BÁO CÁO; những tài khoản đã cấp quyền khác được xem dữ liệu chung. Phân tích Radar và các nghiệp vụ hiện có được giữ nguyên.
+
+
+## V2.3 – ĐỒNG NHẤT ẢNH XEM TRƯỚC VỚI PNG/PDF XE GIAO CA
+
+- Phần ảnh ở **BÁO CÁO** hiện là ảnh dựng trực tiếp từ đúng cùng một renderer Canvas mà nút xuất PNG và PDF sử dụng. Không còn một bảng HTML xem trước nhưng PNG/PDF có bố cục khác.
+- Bố cục mới ngang, hai cột **NHA TRANG → CAM RANH (ĐI LÀM)** và **CAM RANH → NHA TRANG (XE VỀ)**; 10 mốc gốc và khung tự chọn xếp theo giờ, mỗi mốc gồm ĐH, PVSĐ, PVHK, KHO HÀNG, giờ xác nhận, tổng và đề xuất loại xe.
+- **29C/45C là hai loại xe duy nhất**. Với số người đã xác nhận đủ 4/4: 1–29 người gợi ý 29C, 30–45 người gợi ý 45C, trên 45 người cảnh báo **BỔ SUNG XE**. Không tự chốt số xe hoặc điều xe. Nếu chưa đủ 4/4, không gợi ý xe, ghi tổng tạm tính.
+- Biểu tượng Nha Trang sử dụng đường sóng biển đơn giản và Cam Ranh biểu tượng nhà ga/máy bay; phương tiện vẽ với đúng hai tỷ lệ hình xe 29/45. Thiết kế tiết chế, dùng nền trắng, navy, teal.
+- **Logo gốc EREPORT:** GitHub Actions copy nguyên file `assets/branding/logo.png` từ repository E-REPORT-SAGS đã checkout tại commit cố định `41ad37fc9033f160fd00c21008ff9711ddfd7294`, xác nhận SHA Git `c5674a77f84b0bd9359d8eed423c074842ecc31a`, đưa vào `_site/radar-cxr/assets/logo-ereport.png` khi phát hành. Không chỉnh sửa hình/logo; cả header web và PNG/PDF sử dụng cùng tệp.
+- **PNG:** tải một hình ảnh đúng như ảnh xem trước.
+- **PDF:** in raster từ cùng Canvas, mặc định một trang A3 ngang nếu bảng có kích thước chuẩn; nếu số chuyến bổ sung quá lớn, tự chia trang để giữ kích thước chữ. Cả hai nút xuất chỉ nằm trong BÁO CÁO và chỉ ĐH/ADMIN được bấm.
+- Nếu logo EREPORT chưa tải thành công, thông báo lỗi rõ ràng thay vì âm thầm thay bằng logo giả hoặc xuất file thiếu nhận diện.

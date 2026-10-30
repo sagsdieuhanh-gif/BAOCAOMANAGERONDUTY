@@ -27,3 +27,13 @@
 .v21-export-actions .v21-export-note{font-size:11px;color:#577789;flex:1;min-width:160px}
 @media(max-width:1000px){.v21-route-slots{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.v21-route-slots{grid-template-columns:repeat(2,minmax(0,1fr))}.v21-add-fields{grid-template-columns:1fr}.v21-add-fields .v21-wide{grid-column:auto}.v21-custom-row{flex-wrap:wrap}}
+
+/* V2.3 – one shared premium report artwork for preview/PNG/PDF */
+.v23-site-brand{display:flex;align-items:center;gap:14px}
+.v23-site-brand img{width:65px;height:65px;object-fit:contain;background:white;border:1px solid #d9e5ed;border-radius:10px;padding:5px;flex-shrink:0}
+.v23-preview-container{width:100%;max-width:100%;background:#edf2f6;padding:12px;border:1px solid #dce6ed;border-radius:12px;overflow:auto}
+.v23-preview-image{display:block;width:100%;height:auto;max-width:1600px;margin:auto;border-radius:8px;box-shadow:0 5px 24px #152c4020}
+.v21-report-loading{padding:16px;color:#627d8c;background:#f2f8fb;border-radius:8px}
+.v21-report-shuttle{margin:18px 0 25px}
+.v21-report-shuttle>p{font-size:13px;line-height:1.6;color:#587284}
+@media(max-width:560px){.v23-site-brand img{width:48px;height:48px;padding:3px}.v23-site-brand{gap:10px}.v23-preview-container{padding:5px}}

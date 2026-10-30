@@ -25,101 +25,193 @@
    if(error)throw Error(error.message);
    return {date:day,rows:normalize(data||[])};
  }
- function draw(input){
-   const rows=input.rows,H=545+rows.length*67+90;
-   if(H>14500)throw Error('Quá nhiều chuyến xe trong một ngày.');
+
+ const LOGO_PATH='./assets/logo-ereport.png';
+ let logoPromise=null;
+ function loadLogo(){
+   if(logoPromise)return logoPromise;
+   logoPromise=new Promise((resolve,reject)=>{
+     const image=new Image();
+     image.onload=()=>{if(image.naturalWidth>0)resolve(image);else reject(Error('Logo EREPORT không hợp lệ.'))};
+     image.onerror=()=>reject(Error('Chưa tải được logo gốc EREPORT; kiểm tra kết nối và thử lại.'));
+     image.src=LOGO_PATH;
+   }).catch(e=>{logoPromise=null;throw e});
+   return logoPromise;
+ }
+ function draw(input,logo){
+   if(!logo||!logo.naturalWidth)throw Error('Thiếu logo SAGS gốc của EREPORT.');
+   const rows=input.rows, left=rows.filter(x=>x.direction==='NHA_CXR'),right=rows.filter(x=>x.direction==='CXR_NHA');
+   const count=Math.max(left.length,right.length);
+   if(count>65)throw Error('Quá nhiều mốc xe, cần rút gọn dữ liệu trước khi xuất.');
+   const W=1600,cardH=142,startY=410,step=152;
+   const bottomY=startY+count*step+24,H=bottomY+194;
    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
    const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
-   const box=(x,y,w,h,fill,stroke)=>{
-     c.fillStyle=fill;c.fillRect(x,y,w,h);
-     if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.strokeRect(x+.5,y+.5,w-1,h-1);}
+   const colors={
+     background:'#F3F7FA',paper:'#FFFFFF',navy:'#113852',ink:'#203B50',
+     steel:'#6A8192',teal:'#077F9E',line:'#DCE7ED',soft:'#EAF3F7',
+     mint:'#E9F6F2',green:'#178166',warning:'#A85F29',warnbg:'#FFF2E7'
    };
-   const txt=(value,x,y,size=17,color=ink,bold=false,align='left',maxWidth)=>{
-     c.fillStyle=color;c.font=(bold?'700 ':'400 ')+size+'px Arial, sans-serif';
-     c.textAlign=align;c.textBaseline='middle';c.fillText(String(value),x,y,maxWidth);c.textAlign='left';
+   const cardW=738,leftX=49,rightX=813,pad=18;
+   const t=(s,x,y,sz=18,color=colors.ink,bold=false,align='left',max)=>{
+     c.fillStyle=color;c.font=(bold?'700 ':'400 ')+sz+'px Arial, sans-serif';
+     c.textAlign=align;c.textBaseline='middle';
+     if(max)c.fillText(String(s),x,y,max);else c.fillText(String(s),x,y);
+     c.textAlign='left';
    };
-   const coach=(x,y,size,emphasis=false)=>{
-     const length=size===45?98:72;
-     c.save();c.translate(x,y);
-     c.strokeStyle=emphasis?'#AD6325':blue;c.lineWidth=3;
-     c.fillStyle='#F1F7FB';c.beginPath();c.roundRect(-length/2,-18,length,31,6);c.fill();c.stroke();
-     c.fillStyle='#5B9BBA';
-     const windows=size===45?6:4;
-     for(let j=0;j<windows;j++)c.fillRect(-length/2+8+j*((length-16)/windows),-11,(length-22)/windows,10);
-     c.fillStyle=navy;
-     for(const wx of [-length/2+18,length/2-18]){c.beginPath();c.arc(wx,16,6,0,Math.PI*2);c.fill();}
-     c.restore();
+   const shape=(x,y,w,h,r,fill,stroke)=>{
+     r=Math.min(r,w/2,h/2);c.beginPath();c.moveTo(x+r,y);
+     c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
+     c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+     c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);
+     c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+     if(fill){c.fillStyle=fill;c.fill();}
+     if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}
    };
-   box(0,0,W,H,'#F6F9FB');
-   box(0,0,W,147,navy);
-   box(0,147,W,5,'#0B94B5');
-   txt('SAGS  /  ĐIỀU HÀNH KHAI THÁC',48,39,17,'#98D0E5',true);
-   txt('XE GIAO CA  ·  BẢNG TỔNG HỢP',48,93,31,'#FFFFFF',true);
-   txt(name(input.date),W-50,96,25,'#FFFFFF',true,'right');
-   box(47,170,W-94,73,'#FFFFFF',border);
-   // Understated Nha Trang shoreline and airport plane markers, no photos or invented identity imagery.
-   c.strokeStyle='#1684AC';c.lineWidth=3;
-   for(let j=0;j<3;j++){c.beginPath();c.arc(75+j*14,206,8,Math.PI,2*Math.PI);c.stroke();}
-   txt('NHA TRANG',127,192,18,navy,true);
-   txt('NHA → CXR  ·  ĐI LÀM',127,221,15,muted);
-   txt('CXR → NHA  ·  XE VỀ',W-80,221,15,muted,false,'right');
-   txt('CAM RANH AIRPORT',W-80,192,18,navy,true,'right');
-   txt('✈',W-65,202,27,blue,true,'right');
-   const x=[47,182,325,454,578,706,848,980,1125,1443];
-   const head=['CHIỀU','GIỜ','ĐH','PVSĐ','PVHK','KHO','TỔNG','XE DỰ KIẾN','GHI CHÚ'];
-   let y=266,prev='';
-   box(47,y,1396,53,'#E9F0F4');
-   head.forEach((v,i)=>txt(v,(x[i]+x[i+1])/2,y+27,15,navy,true,'center'));
-   y+=53;
-   for(const r of rows){
-     if(r.direction!==prev){
-       box(47,y,1396,39,r.direction==='NHA_CXR'?'#E0F0F5':'#E4F0EC');
-       txt(r.direction==='NHA_CXR'?'NHA TRANG  →  CXR    |    XE ĐI LÀM':'CXR  →  NHA TRANG    |    XE VỀ',63,y+20,17,navy,true);
-       y+=39;prev=r.direction;
-     }
-     const yRow=y;
-     box(47,y,1396,67,'#FFFFFF',border);
-     for(let j=1;j<9;j++){c.strokeStyle='#E5ECF0';c.lineWidth=1;c.beginPath();c.moveTo(x[j],y);c.lineTo(x[j],y+67);c.stroke();}
-     txt(r.direction==='NHA_CXR'?'NHA → CXR':'CXR → NHA',(x[0]+x[1])/2,y+33,14,ink,true,'center');
-     txt(model().clock(r.departure_min),(x[1]+x[2])/2,y+33,21,navy,true,'center');
-     r.units.forEach((u,j)=>{
-       const mid=(x[j+2]+x[j+3])/2;
-       txt(u?u.quantity:'—',mid,y+23,23,u?navy:muted,!!u,'center');
-       txt(u?when(u.confirmed_at):'CHỜ NHẬP',mid,y+52,9,u?green:muted,false,'center',x[j+3]-x[j+2]-5);
-     });
-     const complete=r.confirmed===4;
-     txt(complete?r.total:'~'+r.total,(x[6]+x[7])/2,y+25,24,complete?navy:'#B27133',true,'center');
-     txt(complete?'4/4 phòng':'Đã nhập '+r.confirmed+'/4',(x[6]+x[7])/2,y+51,12,complete?green:muted,false,'center');
-     const cx=(x[7]+x[8])/2;
-     if(!complete){
-       txt('CHỜ CHỐT',cx,y+26,15,muted,true,'center');
-       txt('Chưa đủ 4 phòng',cx,y+51,11,muted,false,'center');
-     }else if(r.total===0){
-       txt('KHÔNG CÓ NGƯỜI',cx,y+33,12,muted,true,'center');
-     }else if(r.total<=29){
-       coach(cx-30,y+27,29);
-       txt('29C',cx+43,y+34,18,blue,true,'center');
-     }else if(r.total<=45){
-       coach(cx-30,y+27,45);
-       txt('45C',cx+43,y+34,18,blue,true,'center');
-     }else{
-       coach(cx-34,y+27,45,true);
-       txt('>45',cx+47,y+23,18,'#AD6325',true,'center');
-       txt('CẦN THÊM XE',cx+47,y+48,10,'#AD6325',true,'center');
-     }
-     const note=r.note||(r.is_custom?'XE BỔ SUNG':'');
-     if(note){
-       txt(note.slice(0,30),x[8]+7,y+24,12,ink,false,'left',x[9]-x[8]-12);
-       if(note.length>30)txt(note.slice(30,58),x[8]+7,y+49,10,muted,false,'left',x[9]-x[8]-12);
-     }else txt('—',(x[8]+x[9])/2,y+34,14,muted,false,'center');
-     y=yRow+67;
+   const line=(x1,y1,x2,y2,color=colors.line,width=1)=>{
+     c.strokeStyle=color;c.lineWidth=width;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+   };
+   function coast(x,y){
+     c.save();c.strokeStyle=colors.teal;c.lineWidth=4;c.lineCap='round';
+     for(let i=0;i<3;i++){c.beginPath();c.moveTo(x,y+i*12);
+       c.bezierCurveTo(x+13,y-11+i*12,x+24,y+11+i*12,x+38,y+i*12);
+       c.bezierCurveTo(x+48,y-8+i*12,x+60,y+8+i*12,x+72,y+i*12);c.stroke();}
+     c.fillStyle='#EEBE72';c.beginPath();c.arc(x+62,y-26,11,0,Math.PI*2);c.fill();c.restore();
    }
-   box(47,y+16,1396,70,'#E8F2F6');
-   const num=rows.reduce((a,v)=>a+v.total,0);
-   txt('TỔNG LƯỢT ĐÃ ĐƯỢC KHAI BÁO',65,y+46,19,navy,true);
-   txt(num.toLocaleString('vi-VN')+' lượt',1426,y+46,23,blue,true,'right');
-   txt('29C · xe 29 chỗ   |   45C · xe 45 chỗ   |   >45 · ĐH phải bố trí thêm xe.',48,y+117,15,ink);
-   txt('Ký hiệu ~: tổng tạm tính khi chưa đủ 4 phòng; loại xe chỉ là gợi ý theo số người, không thay cho lệnh điều xe.',48,y+145,13,muted);
+   function airport(x,y){
+     c.save();c.strokeStyle=colors.teal;c.lineWidth=3;c.lineCap='round';
+     // terminal + control tower silhouette, rather than emoji fonts
+     c.strokeRect(x+7,y+9,72,29);line(x,y+42,x+90,y+42,colors.teal,3);
+     for(let i=0;i<4;i++)shape(x+16+i*16,y+19,9,11,2,'#C9E5EE');
+     line(x+73,y+9,x+73,y-9,colors.teal,3);
+     line(x+66,y-9,x+80,y-9,colors.teal,3);
+     // small aircraft silhouette at upper-left
+     c.beginPath();c.moveTo(x+23,y-22);c.lineTo(x+34,y-18);
+     c.lineTo(x+52,y-32);c.lineTo(x+58,y-29);c.lineTo(x+42,y-14);
+     c.lineTo(x+47,y-6);c.lineTo(x+41,y-4);c.lineTo(x+31,y-12);
+     c.lineTo(x+22,y-10);c.closePath();c.fillStyle=colors.navy;c.fill();c.restore();
+   }
+   function vehicle(x,y,seats,alert=false){
+     const w=seats===45?88:68;
+     c.save();c.translate(x,y);
+     c.lineWidth=2;c.strokeStyle=alert?colors.warning:colors.teal;
+     shape(-w/2,-18,w,31,7,alert?'#FFF0E1':'#D9EBF1',alert?colors.warning:colors.teal);
+     const n=seats===45?6:4;for(let k=0;k<n;k++){
+       shape(-w/2+7+k*(w-17)/n,-10,(w-23)/n,9,2,alert?'#E4BD97':'#7EAFC1');
+     }
+     c.fillStyle=colors.navy;for(const xx of [-w/2+17,w/2-17]){
+       c.beginPath();c.arc(xx,14,5.5,0,Math.PI*2);c.fill();
+     }
+     c.restore();
+   }
+   const roleNames=['ĐH','PVSĐ','PVHK','KHO HÀNG'];
+   const confirmedTime=s=>{
+     if(!s)return 'Chưa xác nhận';
+     const dt=new Date(s);
+     if(!Number.isFinite(dt.getTime()))return 'Chưa xác nhận';
+     return dt.toLocaleString('vi-VN',{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+   };
+   function tripCard(r,x,y){
+     const done=r.confirmed===4;
+     shape(x,y,cardW,cardH,15,colors.paper,colors.line);
+     shape(x+1,y+1,5,cardH-2,3,done?colors.green:'#D7A467');
+     t(model().clock(r.departure_min),x+22,y+30,27,colors.navy,true);
+     if(r.is_custom)shape(x+142,y+15,76,24,12,'#EAF4FA');
+     if(r.is_custom)t('BỔ SUNG',x+180,y+27,11,colors.teal,true,'center');
+     const totalX=x+280;
+     t(done?String(r.total):'~'+r.total,totalX,y+30,29,done?colors.navy:colors.warning,true,'center');
+     t(done?'ĐÃ CHỐT 4/4':'TẠM TÍNH '+r.confirmed+'/4',totalX,y+53,12,done?colors.green:colors.steel,true,'center');
+     const iconX=x+465,wordX=x+555;
+     if(done){
+       if(r.total===0){
+         t('KHÔNG CẦN XE',iconX,y+32,14,colors.steel,true);
+       }else if(r.total<=29){
+         vehicle(iconX+34,y+38,29);
+         t('29 CHỖ',wordX,y+28,17,colors.teal,true);
+         t('GỢI Ý',wordX,y+50,11,colors.steel);
+       }else if(r.total<=45){
+         vehicle(iconX+34,y+38,45);
+         t('45 CHỖ',wordX,y+28,17,colors.teal,true);
+         t('GỢI Ý',wordX,y+50,11,colors.steel);
+       }else{
+         vehicle(iconX+34,y+38,45,true);
+         t('TRÊN 45',wordX,y+27,15,colors.warning,true);
+         t('BỔ SUNG XE',wordX,y+50,12,colors.warning,true);
+       }
+     }else{
+       shape(x+450,y+18,cardW-470,39,9,colors.warnbg);
+       t('CHỜ ĐỦ 4 PHÒNG',x+465,y+37,13,colors.warning,true);
+     }
+     line(x+22,y+69,x+cardW-22,y+69);
+     const colW=(cardW-44)/4;
+     for(let i=0;i<4;i++){
+       const u=r.units[i],ux=x+22+i*colW;
+       if(i)line(ux-8,y+82,ux-8,y+125,'#E4ECF1');
+       t(roleNames[i],ux,y+83,11,colors.steel,true);
+       t(u?String(u.quantity):'—',ux,y+107,23,u?colors.ink:'#A3B2BC',!!u);
+       t(u?confirmedTime(u.confirmed_at):'CHƯA NHẬP',ux+32,y+109,10,u?colors.green:colors.steel,false,'left',colW-35);
+     }
+     if(r.note){
+       const note=String(r.note);
+       t(note.slice(0,65),x+cardW-22,y+135,10,colors.steel,false,'right',cardW-40);
+     }
+   }
+   // Print-white canvas, no gradients/large decorative icons
+   c.fillStyle=colors.background;c.fillRect(0,0,W,H);
+   shape(30,23,W-60,H-46,22,colors.paper,'#E1E9EE');
+   shape(30,23,W-60,9,4,colors.navy);
+   // Original unmodified EREPORT SAGS logo
+   const maxW=126,maxH=117,ratio=Math.min(maxW/logo.naturalWidth,maxH/logo.naturalHeight);
+   c.drawImage(logo,55+(maxW-logo.naturalWidth*ratio)/2,45+(maxH-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
+   line(205,53,205,154,colors.line,2);
+   t('PHÒNG ĐIỀU HÀNH KHAI THÁC · CXR',232,66,15,colors.teal,true);
+   t('BẢNG TỔNG HỢP XE GIAO CA',232,113,35,colors.navy,true);
+   t('Số liệu xác nhận từ 04 phòng  /  Phát hành bởi ĐH',232,151,17,colors.steel);
+   shape(1292,62,226,84,14,colors.soft);
+   t('NGÀY KHAI THÁC',1405,83,13,colors.steel,true,'center');
+   t(name(input.date),1405,118,26,colors.navy,true,'center');
+   line(50,177,1550,177);
+   // Place markers at both ends; route-direction explicitly repeated below
+   shape(49,195,1502,115,16,'#F0F7F9');
+   coast(90,254);
+   t('NHA TRANG',201,234,21,colors.navy,true);
+   t('THÀNH PHỐ',201,260,13,colors.steel);
+   c.strokeStyle='#A3C5D2';c.lineWidth=3;c.setLineDash([6,9]);
+   line(450,251,1110,251,'#7DAFC3',3);c.setLineDash([]);
+   shape(734,228,132,44,22,colors.paper,'#C9DFE8');
+   t('NHA  ↔  CXR',800,250,18,colors.teal,true,'center');
+   airport(1280,244);
+   t('SÂN BAY CAM RANH',1240,233,20,colors.navy,true,'right');
+   t('CẢNG HKQT CXR',1240,260,13,colors.steel,false,'right');
+   const hdr=(x,code,nameText,sub,qty)=>{
+     shape(x,336,cardW,58,11,code==='NHA_CXR'?'#E8F3F7':'#EAF4F0');
+     shape(x,336,6,58,3,code==='NHA_CXR'?colors.teal:colors.green);
+     t(nameText,x+20,357,19,colors.navy,true);
+     t(sub,x+20,378,13,colors.steel);
+     t(qty+' mốc xe',x+cardW-20,368,16,colors.teal,true,'right');
+   };
+   hdr(leftX,'NHA_CXR','NHA TRANG → CAM RANH','CHIỀU ĐI LÀM',left.length);
+   hdr(rightX,'CXR_NHA','CAM RANH → NHA TRANG','CHIỀU XE VỀ',right.length);
+   left.forEach((r,i)=>tripCard(r,leftX,startY+i*step));
+   right.forEach((r,i)=>tripCard(r,rightX,startY+i*step));
+   const confirmed=rows.filter(r=>r.confirmed===4).length;
+   const incomplete=rows.length-confirmed;
+   const warn=rows.filter(r=>r.confirmed===4&&r.total>45).length;
+   shape(49,bottomY,1502,98,15,'#EDF4F8');
+   const metrics=[
+     ['SỐ MỐC XE',String(rows.length)],
+     ['ĐÃ XÁC NHẬN 4/4',String(confirmed)],
+     ['CHỜ PHÒNG XÁC NHẬN',String(incomplete)],
+     ['MỐC TRÊN 45 NGƯỜI',String(warn)]
+   ];
+   const metW=1502/4;
+   metrics.forEach((m,i)=>{
+     const x=70+metW*i;if(i)line(x-17,bottomY+18,x-17,bottomY+80,'#CCDCE6');
+     t(m[0],x,bottomY+30,13,colors.steel,true);
+     t(m[1],x,bottomY+64,29,i===3&&warn?colors.warning:colors.navy,true);
+   });
+   t('29 CHỖ  ·  45 CHỖ  ·  Trên 45 người: TBĐH phải xác nhận phương án bổ sung xe.',60,bottomY+131,16,colors.navy,true);
+   t('Dấu ~: tổng tạm tính, không gợi ý xe khi chưa đủ 4 phòng. Giờ xác nhận theo dữ liệu máy chủ.',60,bottomY+162,14,colors.steel);
    return canvas;
  }
  function download(url,filename){
@@ -143,50 +235,61 @@
    const buttons=[...document.querySelectorAll('[data-v21-export]')];
    buttons.forEach(b=>b.disabled=true);
    try{
-     const data=await fetchData(),img=draw(data),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
+     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
+     const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){download(img.toDataURL('image/png'),base+'.png');return;}
      if(type!=='pdf')throw Error('Định dạng không hợp lệ.');
      const jsPDF=await pdfLib();
-     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4',compress:true});
+     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a3',compress:true});
      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8;
-     const width=pw-m*2,capacity=Math.floor((ph-m*2)*img.width/width);
-     const pages=Math.ceil(img.height/capacity);
-     for(let i=0;i<pages;i++){
-       if(i)pdf.addPage();
-       const from=i*capacity,height=Math.min(capacity,img.height-from);
-       const part=document.createElement('canvas');part.width=img.width;part.height=height;
-       part.getContext('2d').drawImage(img,0,from,img.width,height,0,0,img.width,height);
-       pdf.addImage(part.toDataURL('image/png'),'PNG',m,m,width,height*width/img.width);
-       pdf.setFontSize(9);pdf.setTextColor(70,88,105);
-       pdf.text('SAGS-CXR · '+name(data.date)+' · Trang '+(i+1)+'/'+pages,pw-m,ph-3,{align:'right'});
+     const availW=pw-m*2,availH=ph-m*2;
+     if(img.height<=2000){
+       const scale=Math.min(availW/img.width,availH/img.height);
+       const sw=img.width*scale,sh=img.height*scale;
+       pdf.addImage(img.toDataURL('image/png'),'PNG',(pw-sw)/2,(ph-sh)/2,sw,sh);
+     }else{
+       // Exceptional long custom schedule: preserve image layout on successive A3 pages.
+       const capacity=Math.floor(availH*img.width/availW);
+       const pages=Math.ceil(img.height/capacity);
+       for(let i=0;i<pages;i++){
+         if(i)pdf.addPage();
+         const from=i*capacity,height=Math.min(capacity,img.height-from);
+         const part=document.createElement('canvas');part.width=img.width;part.height=height;
+         part.getContext('2d').drawImage(img,0,from,img.width,height,0,0,img.width,height);
+         pdf.addImage(part.toDataURL('image/png'),'PNG',m,m,availW,height*availW/img.width);
+         pdf.setFontSize(9);pdf.setTextColor(70,88,105);
+         pdf.text('SAGS-CXR  ·  '+name(data.date)+'  ·  Trang '+(i+1)+'/'+pages,pw-m,ph-3,{align:'right'});
+       }
      }
-     pdf.save(base+'.pdf');
+          pdf.save(base+'.pdf');
    }catch(e){alert('Không xuất được '+type.toUpperCase()+': '+e.message);}
    finally{buttons.forEach(b=>b.disabled=false);}
  }
 
  function escapeHTML(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));}
+
  async function renderPreview(){
    const el=$('v21ShuttlePreview');if(!el)return;
-   el.textContent='Đang tải số người xe giao ca theo từng phòng…';
+   el.innerHTML='<p class="v21-report-loading">Đang tạo ảnh xem trước từ dữ liệu đã xác nhận…</p>';
    try{
-     const data=await fetchData(),rows=data.rows;
-     const view=(r)=>{
-       const td=r.units.map(x=>'<td><strong>'+(x?x.quantity:'—')+'</strong><small>'+(x?escapeHTML(when(x.confirmed_at)):'Chưa xác nhận')+'</small></td>').join('');
-       return '<tr><td>'+escapeHTML(model().directionLabel[r.direction])+'</td><td><b>'+escapeHTML(model().clock(r.departure_min))+'</b>'+(r.is_custom?' <small>Bổ sung</small>':'')+'</td>'+td+
-         '<td>'+((r.confirmed===4)?r.total:'~'+r.total)+'<small>'+r.confirmed+'/4 phòng</small></td><td>'+escapeHTML(r.confirmed<4?'Chờ chốt':r.total===0?'—':r.total<=29?'29C':r.total<=45?'45C':'45C + cần thêm xe')+'</td></tr>';
-     };
-     const heads='<tr><th>Chiều xe</th><th>Giờ</th><th>ĐH</th><th>PVSĐ</th><th>PVHK</th><th>Kho Hàng</th><th>Tổng</th><th>Gợi ý xe</th></tr>';
-     el.innerHTML='<div class="v21-report-note">Bảng xe giao ca ngày <b>'+escapeHTML(name(data.date))+'</b>. Dấu ~ là tổng tạm tính khi chưa đủ bốn phòng xác nhận. 0 là số người bằng không đã được xác nhận. Chỉ có xe 29C và 45C; trên 45 người cần bố trí thêm xe.</div>'+
-       '<div class="tablewrap"><table class="v21-report-table">'+heads+rows.map(view).join('')+'</table></div>';
-   }catch(err){el.textContent='Chưa tải được bảng xe giao ca: '+err.message;}
+     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
+     const canvas=draw(data,logo);
+     const image=document.createElement('img');
+     image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVSĐ, PVHK, Kho Hàng.';
+     image.src=canvas.toDataURL('image/png');
+     image.className='v23-preview-image';
+     const wrap=document.createElement('div');wrap.className='v23-preview-container';wrap.appendChild(image);
+     el.replaceChildren(wrap);
+   }catch(e){
+     const p=document.createElement('p');p.className='v21-report-loading';
+     p.textContent='Không tạo được bản xem trước: '+e.message;el.replaceChildren(p);
+   }
  }
-
  function bind(){
    document.querySelectorAll('[data-v21-export]').forEach(b=>{
      if(b.dataset.v21Bound)return;
      b.dataset.v21Bound='1';b.onclick=()=>exportFile(b.dataset.v21Export);
    });
  }
- root.SagsShuttleExport={exportFile,bind,renderPreview,_test:{normalize}};
+ root.SagsShuttleExport={exportFile,bind,renderPreview,_test:{normalize,draw}};
 })(typeof window!=='undefined'?window:globalThis);

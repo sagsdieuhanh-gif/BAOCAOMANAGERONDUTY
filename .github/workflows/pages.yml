@@ -41,6 +41,7 @@ jobs:
           node --check radar-cxr/v20-departments.js
           node --check radar-cxr/v21-shuttle-model.js
           node --check radar-cxr/v21-shuttle-export.js
+          node radar-cxr/tests/v23-shuttle-render.test.cjs
           node radar-cxr/tests/v21-shuttle.test.cjs
           node radar-cxr/tests/v21-shuttle-export.test.cjs
           node radar-cxr/tests/v19-report.test.cjs
@@ -62,6 +63,9 @@ jobs:
           cp index.html style.css config.js manifest.webmanifest version.json _site/
           cp -R docs _site/
           cp -R radar-cxr _site/
+          mkdir -p _site/radar-cxr/assets
+          cp upstream-old/assets/branding/logo.png _site/radar-cxr/assets/logo-ereport.png
+          test "$(git hash-object _site/radar-cxr/assets/logo-ereport.png)" = "c5674a77f84b0bd9359d8eed423c074842ecc31a"
           cp -R src forms data app _site/
           npm run build:native
           touch _site/.nojekyll
