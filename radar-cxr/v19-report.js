@@ -1,6 +1,6 @@
 'use strict';
 (function(){
- const LABELS=['Lịch bay','Khung giờ cao điểm cần lưu ý','Vị trí đỗ và hạ tầng','Nhân sự','Trang thiết bị','Hành lý - Hàng hóa','OTP và chất lượng','An ninh - An toàn','Kết quả xử lý tồn tại trước đó'];
+ const LABELS=['Lịch bay và sản lượng','Khung giờ cao điểm','Vị trí đỗ và hạ tầng','Nhân lực khai thác','GSE trọng yếu','Hành lý – hàng hóa','OTP và chất lượng','An toàn – an ninh','Kết quả xử lý tồn tại'];
  const SITE='https://sagsdieuhanh-gif.github.io/EREPORT/radar-cxr/';
  const dateVN=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4):'—';
  const txt=x=>String(x==null?'':x);
