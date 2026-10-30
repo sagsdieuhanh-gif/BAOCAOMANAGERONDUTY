@@ -54,8 +54,25 @@
        '<p>Chưa thấy các chuyến đi cách nhau tối đa 45 phút cùng gate đã xác nhận.</p>')+
      (diff.length?table(['Chuyến','Loại thay đổi','Cũ','Mới'],diff.slice(0,30).map(x=>[x.flight,x.type,x.from,x.to])):'<p>Chưa có thay đổi xác định được từ các trường đã đối chiếu.</p>')+
      '<p><b>Nguyên tắc:</b> Booking được giữ nguyên dạng nguồn (vd. 0/10/365); tổng ba thành phần không được coi là PAX thực đi. Bãi khu 2/3 cần kiểm tra đường xe, thiết bị; không tự suy ra xe sẵn sàng tại STD.</p>'+
-     '<div class="btnbar"><button class="primary" id="v217Approve" '+(isReady?'':'disabled')+'>DUYỆT VÀ LƯU LẦN 2</button>'+
-     '<span id="v217State">'+(isReady?'Dữ liệu chờ Điều hành xác nhận, chưa ghi vào Supabase.':'Phải xử lý các nội dung CẦN SỬA FILE / thiếu Lần 1 trước khi lưu.')+'</span></div></div>';
+     '<div class="btnbar"><button type="button" class="primary" id="v218PreviewL2">XEM TRƯỚC BÁO CÁO LẦN 2 (CHƯA LƯU)</button><button class="primary" id="v217Approve" '+(isReady?'':'disabled')+'>DUYỆT VÀ LƯU LẦN 2</button>'+
+     '<span id="v217State">'+(isReady?'Dữ liệu chờ Điều hành xác nhận, chưa ghi vào Supabase.':'Phải xử lý các nội dung CẦN SỬA FILE / thiếu Lần 1 trước khi lưu.')+'</span></div><div id="v218DraftPreview"></div></div>';
+   const draft=$('v218PreviewL2');if(draft)draft.onclick=async()=>{
+     if(!staged?.parsed)return;
+     const panel=$('v218DraftPreview');
+     try{
+       draft.disabled=true;draft.textContent='ĐANG LẬP BẢN XEM TRƯỚC…';
+       const base=window.SagsReportV19;
+       if(!base?.renderHtml||!base?.build)throw Error('Chưa tải module báo cáo Lần 2.');
+       const context=await base.source();
+       const src=staged.parsed.payload;
+       const input={...context,revision:2,sourcePayload:src,firstPayload:staged.baseline?.payload||null,
+         sourceFile:staged.filename,rows:src.flights,arrivals:src.arrival_count,departures:src.departure_count,
+         domestic:src.domestic_count,international:src.international_count};
+       const report=base.renderHtml(base.build(input));
+       if(panel){panel.innerHTML='<div class="v218-draft-warning">BẢN XEM TRƯỚC LẦN 2 · CHƯA ĐƯỢC DUYỆT / CHƯA LƯU · KHÔNG DÙNG PHÁT HÀNH</div>'+report;panel.scrollIntoView?.({behavior:'smooth',block:'start'});}
+     }catch(e){if(panel)panel.innerHTML='<div class="issue">Chưa lập được bản xem trước Lần 2: '+esc(e.message)+'</div>';}
+     finally{draft.disabled=false;draft.textContent='XEM TRƯỚC BÁO CÁO LẦN 2 (CHƯA LƯU)';}
+   };
    const approve=$('v217Approve');if(approve)approve.onclick=()=>saveL2();
    notice('Đã phân tích '+stats.arrival_count+' đến / '+stats.departure_count+' đi từ '+filename+'. '+
      (isReady?'Chưa ghi dữ liệu; kiểm tra và duyệt Lần 2.':'Có thông tin cần sửa hoặc xác nhận, chưa được phép lưu.'));
