@@ -172,6 +172,30 @@
    return {meta:{service_date:da,source_sheet:'ARRIVAL+DEPARTURE'},arrivals:a.flights,departures:d.flights,
      payload:x.payload,stats:x.stats,issues,fatal:fatals};
  }
+ function validateForSave(parsed,baseline){
+   const blocks=[...(parsed?.fatal||[])],p=parsed?.payload||{},pairs=p.flights||[];
+   if(!baseline?.payload?.flights?.length)
+     blocks.push('Chưa có lịch bay Lần 1 đã lưu cho ngày '+(parsed?.meta?.service_date||'này')+'. Nhập và lưu Lần 1 trước khi duyệt Lần 2.');
+   if(!pairs.length||pairs.length>350)blocks.push('Số cặp chuyến không hợp lệ (chỉ hỗ trợ 1–350 cặp).');
+   if(!pairs.some(x=>x.bay!=null))
+     blocks.push('Lần 2 chưa có vị trí đỗ hợp lệ. Cần kiểm tra cột ParkingBay trong file.');
+   const arr=new Set(),dep=new Set();
+   for(const f of pairs){
+     const id=f.departure||f.arrival||'Chuyến chưa rõ số hiệu';
+     if(f.arrival){if(arr.has(f.arrival))blocks.push('Trùng số hiệu chuyến đến '+f.arrival+'.');arr.add(f.arrival);}
+     if(f.departure){if(dep.has(f.departure))blocks.push('Trùng số hiệu chuyến đi '+f.departure+'.');dep.add(f.departure);}
+     if(f.arrival&&f.departure&&f.sta_min!=null&&f.std_min!=null&&f.std_min<=f.sta_min)
+       blocks.push(id+': STD '+clock(f.std_min)+' không sau STA '+clock(f.sta_min)+
+         '. Nếu chuyến đi qua ngày cần ghi dấu + ở nguồn Excel.');
+     if((f.sta_min!=null&&(f.sta_min<0||f.sta_min>1800))||
+        (f.std_min!=null&&(f.std_min<0||f.std_min>1800)))
+       blocks.push(id+': giờ bay ngoài phạm vi cho phép; kiểm tra dấu + và định dạng giờ.');
+     if(f.bay!=null&&(f.bay<1||f.bay>99))blocks.push(id+': số vị trí đỗ ngoài phạm vi cho phép.');
+   }
+   if(p.arrival_count!==arr.size||p.departure_count!==dep.size)
+     blocks.push('Số lượt chuyến đến/đi không khớp dữ liệu đã ghép; kiểm tra số hiệu bị trùng hoặc bỏ sót.');
+   return [...new Set(blocks)];
+ }
  function detectWorkbook(book,xlsx){
    if(!book||!xlsx?.utils)return null;
    const found={};
@@ -221,7 +245,7 @@
    }
    return changes;
  }
- const api={detectWorkbook,parseTables,analyze,compare,clock,time,date,zone,booking,_test:{readSheet,detectHeader,marker43}};
+ const api={detectWorkbook,parseTables,validateForSave,analyze,compare,clock,time,date,zone,booking,_test:{readSheet,detectHeader,marker43}};
  root.SagsSecondForecast=api;
  if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
