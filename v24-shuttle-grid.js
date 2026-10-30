@@ -10,7 +10,7 @@
  const fixed=[...model().defaults];
  const allowedRoles=new Set(['ADMIN','DH','KTS','PVHK','QA','IT']);
  const fieldOf=r=>r==='QA'||r==='IT'?'QA_IT':r;
- const editable=(who,field)=>who==='ADMIN'||fieldOf(who)===field;
+ const editable=(who,field)=>['ADMIN','DH'].includes(who)||fieldOf(who)===field;
  const partKey=(x)=>x.direction+'|'+x.departure_min+'|'+Number(x.line_no||0);
  const clock=x=>model().clock(x);
  const readMinute=(s,next)=>model().parseClock(s,next);
