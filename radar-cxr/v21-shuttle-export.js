@@ -255,7 +255,7 @@
      const single=img.height<=2000;
      // For an ordinary day, preserve exactly the preview image's dimensions and aspect.
      const pageH=420*img.height/img.width;
-     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:single?[420,pageH]:'a3',compress:true});
+     const pdf=new jsPDF({orientation:single?(pageH>420?'portrait':'landscape'):'landscape',unit:'mm',format:single?[420,pageH]:'a3',compress:true});
      const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8;
      const availW=pw-m*2,availH=ph-m*2;
      if(single){
