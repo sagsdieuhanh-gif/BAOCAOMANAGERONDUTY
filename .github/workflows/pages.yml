@@ -48,6 +48,9 @@ jobs:
           node radar-cxr/tests/v27-alerts.test.cjs
           node --check radar-cxr/radar-report-v28.js
           node radar-cxr/tests/v28-report.test.cjs
+          node --check radar-cxr/office-export-v29.js
+          node --check radar-cxr/report-export-v29.js
+          node radar-cxr/tests/v29-office-export.test.cjs
           node --check radar-cxr/rns-admin.js
           node radar-cxr/tests/rns-admin.test.cjs
           node radar-cxr/tests/v24-shuttle-grid.test.cjs
