@@ -18,6 +18,10 @@ jobs:
       - name: Check syntax
         run: |
           for f in ./*.js; do node --check "$f"; done
+          node tests/manager-root.test.cjs
+          node tests/v29-office-export.test.cjs
+          node tests/v212-personnel-human-report.test.cjs
+          node tests/v213-shuttle-reasons.test.cjs
       - name: Stage Manager On Duty
         run: |
           mkdir -p _site/assets
