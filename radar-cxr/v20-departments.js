@@ -401,17 +401,17 @@
      if(home)home.innerHTML='<div class="panel"><h2>PHÒNG ĐIỀU HÀNH</h2><p>Không tải được phần tổng quan. Bảng xe giao ca vẫn sử dụng được ở bên dưới.</p></div>';
    }
    const allowedTabs={
-     DH:['home','sources','radar','report','doorclose'],
-     KTS:['pvsd','radar','report'],
-     PVHK:['pvhk','radar','report'],
-     KHO:['warehouse','radar','report'],
-     QA:['qa_it','radar','report'],
-     IT:['qa_it','radar','report'],
-     VIEWER:['radar','report'],
-     ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','radar','report','doorclose','admin']
-   }[role]||['radar','report'];
+     DH:['home','sources','radar','report','radar-report','shuttle-report','doorclose'],
+     KTS:['pvsd','radar','report','radar-report','shuttle-report'],
+     PVHK:['pvhk','radar','report','radar-report','shuttle-report'],
+     KHO:['warehouse','radar','report','radar-report','shuttle-report'],
+     QA:['qa_it','radar','report','radar-report','shuttle-report'],
+     IT:['qa_it','radar','report','radar-report','shuttle-report'],
+     VIEWER:['radar','report','radar-report','shuttle-report'],
+     ADMIN:['home','sources','pvsd','pvhk','warehouse','qa_it','radar','report','radar-report','shuttle-report','doorclose','admin']
+   }[role]||['radar','report','radar-report'];
    const labels={home:'ĐIỀU HÀNH',sources:'LỊCH BAY',pvsd:'PVSĐ',pvhk:'PVHK',warehouse:'KHO HÀNG',qa_it:'QA / IT',
-     radar:'RADAR',report:'BÁO CÁO',doorclose:'DOOR CLOSE',admin:'PHÂN QUYỀN'};
+     radar:'RADAR',report:'BÁO CÁO', 'radar-report':'BÁO CÁO RADAR', 'shuttle-report':'XE GIAO CA',doorclose:'DOOR CLOSE',admin:'PHÂN QUYỀN'};
    document.querySelectorAll('#tabs [data-tab]').forEach(b=>{
      b.classList.toggle('v19-tab-off',!allowedTabs.includes(b.dataset.tab));
      if(labels[b.dataset.tab])b.textContent=labels[b.dataset.tab];
