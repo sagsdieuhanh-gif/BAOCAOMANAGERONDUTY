@@ -125,7 +125,7 @@
      const div=$('v24-'+tab);if(!div)continue;
      const adjusted=role==='ADMIN'?'ADMIN':who;
      // Preserve input being edited if a refresh occurs in another tab.
-     if(div.contains(document.activeElement))continue;
+     if(div.contains(document.activeElement)&&document.activeElement?.matches('input[data-v24-value]'))continue;
      div.innerHTML=template(adjusted);
    }
  }
@@ -172,10 +172,10 @@
            departure_min:Number(minute),line_no:Number(ln),quantity:Number(value),
            is_custom:!model().isDefault(direction,Number(minute)),confirmed_by:me.id});
        }
-       if(!data.length){message(wrap,'Không có dữ liệu thay đổi. Giờ xác nhận cũ được giữ nguyên.');return}
+       if(!data.length){message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Không có dữ liệu thay đổi. Giờ xác nhận cũ được giữ nguyên.');return}
        const {error}=await sb.from('ops_shift_transport_v2').upsert(data,{onConflict:'service_date,unit,direction,departure_min,line_no'});
        if(error)throw Error(error.message);
-       message(wrap,'Đã lưu '+data.length+' ô và ghi thời gian xác nhận trên máy chủ.');
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã lưu '+data.length+' ô và ghi thời gian xác nhận trên máy chủ.');
        await refresh();
      }else if(b.dataset.v24Add){
        const [dir,min,ln]=b.dataset.v24Add.split('|');
@@ -183,7 +183,7 @@
        const {error}=await sb.rpc('ops_add_shuttle_row',{p_date:$('day').value,p_direction:dir,p_minute:+min});
        if(error)throw Error(error.message);
        await refresh();
-       message(wrap,'Đã thêm một dòng xe bổ sung ngay dưới '+clock(+min)+'.');
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm một dòng xe bổ sung ngay dưới '+clock(+min)+'.');
      }else if(b.dataset.v24Custom){
        const direction=b.dataset.v24Custom;
        const time=e.currentTarget.querySelector('[data-v24-time="'+direction+'"]')?.value;
@@ -195,9 +195,9 @@
        const {error}=await sb.rpc('ops_add_shuttle_slot',{p_date:$('day').value,p_direction:direction,p_minute:minute});
        if(error)throw Error(error.message);
        await refresh();
-       message(wrap,'Đã thêm mốc '+clock(minute)+' cho chiều '+model().directionLabel[direction]+'.');
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm mốc '+clock(minute)+' cho chiều '+model().directionLabel[direction]+'.');
      }
-   }catch(error){message(wrap,'Không lưu được: '+error.message,true)}
+   }catch(error){message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Không lưu được: '+error.message,true)}
    finally{busy=false;b.disabled=false}
  }
  function onKeydown(e){
