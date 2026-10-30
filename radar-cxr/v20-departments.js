@@ -115,7 +115,7 @@
 
  function vehiclePanel(who){
    const model=window.SagsShuttleModel;
-   const name=who==='KTS'?'PVSĐ':who==='PVHK'?'PVHK':'KHO HÀNG';
+   const name=who==='KTS'?'PVSĐ':who==='PVHK'?'PVHK':who==='DH'?'ĐIỀU HÀNH':'KHO HÀNG';
    const dirGroup=direction=>{
       const selection=model.defaults.filter(x=>x.direction===direction);
       return '<div class="v21-route-group"><div class="v21-route-heading"><b>'+model.directionLabel[direction]+'</b><span>'+selection.length+' mốc từ mẫu</span></div>'+
@@ -206,7 +206,7 @@
  }
  function renderTransport(){
    const model=window.SagsShuttleModel;
-   for(const u of ['KTS','PVHK','KHO']){
+   for(const u of ['DH','KTS','PVHK','KHO']){
      for(const slot of model.defaults){
        const key=u+'|'+slot.direction+'|'+slot.departure_min;
        const inp=document.querySelector('[data-v21-bus="'+key+'"]');
@@ -235,10 +235,11 @@
  function init(){
    if(initialized)return;initialized=true;
    $('v20Pvsd').innerHTML=tableRows()+vehiclePanel('KTS');$('v20Pvhk').innerHTML=pvhk()+vehiclePanel('PVHK');$('v20Warehouse').innerHTML=warehouse()+vehiclePanel('KHO');
+   $('tab-home').insertAdjacentHTML('beforeend', '<div id="v22DhShuttle">'+vehiclePanel('DH')+'</div>');
    mountGse();
    document.querySelectorAll('[data-v20-bus-save]').forEach(b=>b.onclick=()=>saveTransport(b.dataset.v20BusSave).catch(e=>alert(e.message)));
    document.querySelectorAll('[data-v21-add-save]').forEach(b=>b.onclick=()=>saveNewTransport(b.dataset.v21AddSave));
-   for(const u of ['KTS','PVHK','KHO']){
+   for(const u of ['DH','KTS','PVHK','KHO']){
      const box=document.querySelector('[data-v21-custom-list="'+u+'"]');
      box.onclick=e=>{const btn=e.target.closest('[data-v21-delete]');if(btn){const [target,dir,min]=btn.dataset.v21Delete.split('|');removeTransport(target,dir,Number(min));}};
    }
@@ -367,7 +368,7 @@
      const active=issues.filter(x=>x.issue_status!=='RETURNED');
      const planned=cargo.filter(x=>x.cargo_kg!=null);
      const total=planned.reduce((n,x)=>n+Number(x.cargo_kg),0);
-     const busDetails=['NHA_CXR','CXR_NHA'].map(dir=>window.SagsShuttleModel.directionLabel[dir]+': '+['KTS','PVHK','KHO'].map(u=>{const parts=transport.filter(z=>z.unit===u&&z.direction===dir);const label=u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO';return label+' '+(parts.length?parts.length+' mốc đã xác nhận ('+parts.reduce((n,r)=>n+r.quantity,0)+' lượt xe theo các mốc)':'chưa xác nhận');}).join(' · ')).join('; ');
+     const busDetails=['NHA_CXR','CXR_NHA'].map(dir=>window.SagsShuttleModel.directionLabel[dir]+': '+['DH','KTS','PVHK','KHO'].map(u=>{const parts=transport.filter(z=>z.unit===u&&z.direction===dir);const label=u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':u==='DH'?'ĐH':'KHO';return label+' '+(parts.length?parts.length+' mốc đã xác nhận ('+parts.reduce((n,r)=>n+r.quantity,0)+' lượt xe theo các mốc)':'chưa xác nhận');}).join(' · ')).join('; ');
      radar.innerHTML='<div class="v20-context-grid"><div><b>KHO HÀNG</b><p>'+cargo.length+' chuyến có kế hoạch · '+
        (planned.length?total.toLocaleString('vi-VN')+' KG đã khai báo':'KG chưa có dữ liệu')+
        '</p></div><div><b>GSE HẠN CHẾ</b><p>'+active.length+' thiết bị đang tạm dừng/sửa chữa/hạn chế</p></div>'+
@@ -407,6 +408,7 @@
    $('v20Pvsd').closest('section').classList.toggle('v20-locked',!allowed('KTS'));
    $('v20Pvhk').closest('section').classList.toggle('v20-locked',!allowed('PVHK'));
    $('v20Warehouse').closest('section').classList.toggle('v20-locked',!allowed('KHO'));
+   const dhPanel=$('v22DhShuttle');if(dhPanel)dhPanel.style.display=allowed('DH')?'':'none';
    const note=$('v19NoteEditor');if(note)note.style.display=['DH','ADMIN'].includes(role)?'':'none';
    document.querySelectorAll('[data-v19-export],[data-v21-export]').forEach(button=>{button.hidden=!['DH','ADMIN'].includes(role);button.style.display=['DH','ADMIN'].includes(role)?'':'none';});
    switchTab(allowedTabs[0]);refresh();

@@ -98,8 +98,8 @@
      (x.issue_status==='OUT_OF_SERVICE'?'tạm dừng':x.issue_status==='REPAIR'?'đang sửa':'hạn chế')+'): '+
      x.fault+(x.impact?' – '+x.impact:'')+(x.expected_return?' – dự kiến '+x.expected_return:'')).join('; ');
    const issueAlternatives=activeIssues.filter(x=>x.workaround).slice(0,3).map(x=>x.equipment_id+': '+x.workaround).join('; ');
-   const transportSummary=['KTS','PVHK','KHO'].map(u=>{
-     const label=u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG';
+   const transportSummary=['DH','KTS','PVHK','KHO'].map(u=>{
+     const label=u==='DH'?'ĐH':u==='KTS'?'PVSĐ':u==='PVHK'?'PVHK':'KHO HÀNG';
      const part=(c.transport||[]).filter(x=>x.unit===u);
      if(!part.length)return label+': chưa xác nhận xe giao ca';
      const segments=['NHA_CXR','CXR_NHA'].map(dir=>{

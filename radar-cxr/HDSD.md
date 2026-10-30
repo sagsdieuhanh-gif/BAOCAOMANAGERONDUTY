@@ -94,3 +94,13 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 **File xe giao ca:** Xuất tổng hợp đủ PVSĐ, PVHK, KHO HÀNG theo hai chiều; đủ các mốc gốc và giờ bổ sung, số người từng phòng, giờ xác nhận và tổng mỗi chuyến. Dấu `~` trước tổng có nghĩa chỉ là số tạm tính do chưa đủ ba phòng xác nhận; không tự coi dữ liệu trống là 0. Có biểu mẫu PNG màu sắc và PDF nhiều trang khi cần.
 
 **Cơ sở dữ liệu:** Dùng bảng `ops_shift_transport_v2`, ghi nguồn theo (ngày, phòng, chiều, số phút khởi hành) và phân quyền Supabase RLS. Dữ liệu từ bảng xe bốn mốc cũ được chuyển sang bảng v2 nếu có. HDSD phải được đồng bộ với mỗi cập nhật.
+
+
+## V2.2 – CHỈ CÓ XE 29C VÀ 45C; ĐH NHẬP XE GIAO CA
+- Xe giao ca do bốn đơn vị **ĐH, PVSĐ (mã KTS), PVHK, KHO HÀNG** nhập theo tài khoản của mình. ĐH nhập số người đi/về ngay tại trang **ĐIỀU HÀNH**, không tạo tab XE riêng.
+- Supabase `ops_shift_transport_v2` cho phép vai trò ĐH tự ghi số người thuộc đơn vị DH, vẫn không được sửa PVSĐ/PVHK/KHO. ADMIN quản trị toàn bộ. Không tự điền số người từ hình minh họa hoặc ngày trước.
+- Mỗi tuyến NHA→CXR hoặc CXR→NHA giữ 5 mốc chuẩn và các giờ tự thêm; thời điểm xác nhận do Supabase ghi; ô trống là chưa xác nhận, nhập 0 là đã xác nhận không có người.
+- Bảng trên tab **BÁO CÁO** có ĐH, PVSĐ, PVHK, KHO HÀNG, tổng và loại xe dự kiến. Nếu chưa đủ **4/4** đơn vị thì ghi **~ tổng tạm tính** và **CHỜ CHỐT**, không gợi ý loại xe.
+- Chỉ có **29 chỗ** và **45 chỗ**, không tồn tại xe vừa. Với tổng người đã chốt: 1–29 => **gợi ý xe 29C**; 30–45 => **gợi ý xe 45C**; trên 45 => **cảnh báo CẦN THÊM XE**, không tự phát sinh loại xe lớn hơn 45C hay suy đoán số xe thực tế; 0 => không có người, không gợi ý điều xe.
+- PNG/PDF dùng bố cục báo cáo điều hành hiện đại: bảng cân đối, màu tiết chế, dấu địa điểm Nha Trang/Cam Ranh bằng biểu tượng tối giản, **chỉ hai kích thước icon xe 29C/45C**, số người từng phòng và giờ xác nhận từ dữ liệu thực. Không tạo ảnh bằng số liệu giả để phát hành.
+- Chỉ **ĐH/ADMIN** bấm xuất tại tab BÁO CÁO; những tài khoản đã cấp quyền khác được xem dữ liệu chung. Phân tích Radar và các nghiệp vụ hiện có được giữ nguyên.

@@ -10,7 +10,7 @@
    for(const x of data)if(!keys.has(x.direction+'|'+x.departure_min))
      keys.set(x.direction+'|'+x.departure_min,{direction:x.direction,departure_min:x.departure_min,is_custom:true});
    return model().order([...keys.values()]).map(x=>{
-     const units=['KTS','PVHK','KHO'].map(u=>data.find(v=>v.unit===u&&v.direction===x.direction&&v.departure_min===x.departure_min)||null);
+     const units=['DH','KTS','PVHK','KHO'].map(u=>data.find(v=>v.unit===u&&v.direction===x.direction&&v.departure_min===x.departure_min)||null);
      return {...x,units,confirmed:units.filter(Boolean).length,total:units.reduce((n,v)=>n+(v?v.quantity:0),0),
        note:x.note||units.map(v=>v?.note||'').filter(Boolean).join('; ')};
    });
@@ -26,60 +26,100 @@
    return {date:day,rows:normalize(data||[])};
  }
  function draw(input){
-   const rows=input.rows,H=600+rows.length*70;
-   if(H>14000)throw Error('Có quá nhiều chuyến xe tự chọn trong một ngày.');
+   const rows=input.rows,H=545+rows.length*67+90;
+   if(H>14500)throw Error('Quá nhiều chuyến xe trong một ngày.');
    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-   const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ ảnh Canvas.');
+   const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
    const box=(x,y,w,h,fill,stroke)=>{
      c.fillStyle=fill;c.fillRect(x,y,w,h);
-     if(stroke){c.lineWidth=1;c.strokeStyle=stroke;c.strokeRect(x+.5,y+.5,w-1,h-1);}
+     if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.strokeRect(x+.5,y+.5,w-1,h-1);}
    };
-   const txt=(s,x,y,size=18,color=ink,bold=false,align='left',maxWidth)=>{
+   const txt=(value,x,y,size=17,color=ink,bold=false,align='left',maxWidth)=>{
      c.fillStyle=color;c.font=(bold?'700 ':'400 ')+size+'px Arial, sans-serif';
-     c.textAlign=align;c.textBaseline='middle';c.fillText(String(s),x,y,maxWidth);c.textAlign='left';
+     c.textAlign=align;c.textBaseline='middle';c.fillText(String(value),x,y,maxWidth);c.textAlign='left';
    };
-   box(0,0,W,H,'#F2F7FA');
-   box(0,0,W,152,navy);box(0,152,W,7,blue);
-   txt('SAGS  /  CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH',46,47,19,'#B6E1F0',true);
-   txt('TỔNG HỢP XE GIAO CA',46,99,35,'#FFFFFF',true);
-   txt('NGÀY '+name(input.date),W-46,101,26,'#FFFFFF',true,'right');
-   box(46,178,W-92,72,'#FFFFFF',border);
-   txt('CHIỀU XE  ·  GIỜ KHỞI HÀNH  ·  QUÂN SỐ TỪNG PHÒNG',64,200,19,blue,true);
-   txt('NHA → CXR: ĐI LÀM     |     CXR → NHA: XE VỀ',64,230,18,ink);
-   txt('DỮ LIỆU ĐÃ XÁC NHẬN',W-64,217,17,green,true,'right');
-   const x=[46,216,387,608,829,1050,1192,1444];
-   let y=271,prev='';
-   box(x[0],y,x.at(-1)-x[0],55,blue);
-   const header=['CHIỀU XE','GIỜ','PVSĐ','PVHK','KHO HÀNG','TỔNG','GHI CHÚ'];
-   header.forEach((h,i)=>txt(h,(x[i]+x[i+1])/2,y+28,18,'#FFFFFF',true,'center'));
-   y+=55;
-   for(let i=0;i<rows.length;i++){
-     const r=rows[i];
-     if(prev!==r.direction){
-       box(46,y,W-92,38,r.direction==='NHA_CXR'?'#D8EBF5':'#DDF2E9');
-       txt(model().directionLabel[r.direction],62,y+19,20,navy,true);y+=38;prev=r.direction;
+   const coach=(x,y,size,emphasis=false)=>{
+     const length=size===45?98:72;
+     c.save();c.translate(x,y);
+     c.strokeStyle=emphasis?'#AD6325':blue;c.lineWidth=3;
+     c.fillStyle='#F1F7FB';c.beginPath();c.roundRect(-length/2,-18,length,31,6);c.fill();c.stroke();
+     c.fillStyle='#5B9BBA';
+     const windows=size===45?6:4;
+     for(let j=0;j<windows;j++)c.fillRect(-length/2+8+j*((length-16)/windows),-11,(length-22)/windows,10);
+     c.fillStyle=navy;
+     for(const wx of [-length/2+18,length/2-18]){c.beginPath();c.arc(wx,16,6,0,Math.PI*2);c.fill();}
+     c.restore();
+   };
+   box(0,0,W,H,'#F6F9FB');
+   box(0,0,W,147,navy);
+   box(0,147,W,5,'#0B94B5');
+   txt('SAGS  /  ĐIỀU HÀNH KHAI THÁC',48,39,17,'#98D0E5',true);
+   txt('XE GIAO CA  ·  BẢNG TỔNG HỢP',48,93,31,'#FFFFFF',true);
+   txt(name(input.date),W-50,96,25,'#FFFFFF',true,'right');
+   box(47,170,W-94,73,'#FFFFFF',border);
+   // Understated Nha Trang shoreline and airport plane markers, no photos or invented identity imagery.
+   c.strokeStyle='#1684AC';c.lineWidth=3;
+   for(let j=0;j<3;j++){c.beginPath();c.arc(75+j*14,206,8,Math.PI,2*Math.PI);c.stroke();}
+   txt('NHA TRANG',127,192,18,navy,true);
+   txt('NHA → CXR  ·  ĐI LÀM',127,221,15,muted);
+   txt('CXR → NHA  ·  XE VỀ',W-80,221,15,muted,false,'right');
+   txt('CAM RANH AIRPORT',W-80,192,18,navy,true,'right');
+   txt('✈',W-65,202,27,blue,true,'right');
+   const x=[47,182,325,454,578,706,848,980,1125,1443];
+   const head=['CHIỀU','GIỜ','ĐH','PVSĐ','PVHK','KHO','TỔNG','XE DỰ KIẾN','GHI CHÚ'];
+   let y=266,prev='';
+   box(47,y,1396,53,'#E9F0F4');
+   head.forEach((v,i)=>txt(v,(x[i]+x[i+1])/2,y+27,15,navy,true,'center'));
+   y+=53;
+   for(const r of rows){
+     if(r.direction!==prev){
+       box(47,y,1396,39,r.direction==='NHA_CXR'?'#E0F0F5':'#E4F0EC');
+       txt(r.direction==='NHA_CXR'?'NHA TRANG  →  CXR    |    XE ĐI LÀM':'CXR  →  NHA TRANG    |    XE VỀ',63,y+20,17,navy,true);
+       y+=39;prev=r.direction;
      }
-     box(46,y,W-92,70,i%2?'#F7FAFC':'#FFFFFF',border);
-     for(let j=1;j<7;j++){c.strokeStyle=border;c.beginPath();c.moveTo(x[j],y);c.lineTo(x[j],y+70);c.stroke();}
-     txt(r.direction==='NHA_CXR'?'NHA → CXR':'CXR → NHA',(x[0]+x[1])/2,y+32,17,navy,true,'center');
-     txt(model().clock(r.departure_min),(x[1]+x[2])/2,y+32,22,blue,true,'center');
-     r.units.forEach((v,j)=>{
-       const cx=(x[j+2]+x[j+3])/2;
-       txt(v?String(v.quantity):'—',cx,y+22,25,v?ink:muted,!!v,'center');
-       txt(v?when(v.confirmed_at):'CHƯA XÁC NHẬN',cx,y+52,12,v?green:muted,false,'center');
+     const yRow=y;
+     box(47,y,1396,67,'#FFFFFF',border);
+     for(let j=1;j<9;j++){c.strokeStyle='#E5ECF0';c.lineWidth=1;c.beginPath();c.moveTo(x[j],y);c.lineTo(x[j],y+67);c.stroke();}
+     txt(r.direction==='NHA_CXR'?'NHA → CXR':'CXR → NHA',(x[0]+x[1])/2,y+33,14,ink,true,'center');
+     txt(model().clock(r.departure_min),(x[1]+x[2])/2,y+33,21,navy,true,'center');
+     r.units.forEach((u,j)=>{
+       const mid=(x[j+2]+x[j+3])/2;
+       txt(u?u.quantity:'—',mid,y+23,23,u?navy:muted,!!u,'center');
+       txt(u?when(u.confirmed_at):'CHỜ NHẬP',mid,y+52,9,u?green:muted,false,'center',x[j+3]-x[j+2]-5);
      });
-     if(r.confirmed!==3)box(x[5]+1,y+1,x[6]-x[5]-2,68,'#FFF4CE');
-     txt(r.confirmed===3?String(r.total):'~'+r.total,(x[5]+x[6])/2,y+22,24,r.confirmed===3?navy:'#9C6500',true,'center');
-     txt(r.confirmed+'/3 phòng',(x[5]+x[6])/2,y+52,13,muted,false,'center');
-     const note=r.note||(r.is_custom?'Xe bổ sung':'—');
-     txt(note.slice(0,34),x[6]+8,y+23,14,ink,false,'left',x[7]-x[6]-12);
-     if(note.length>34)txt(note.slice(34,70),x[6]+8,y+51,12,muted,false,'left',x[7]-x[6]-12);
-     y+=70;
+     const complete=r.confirmed===4;
+     txt(complete?r.total:'~'+r.total,(x[6]+x[7])/2,y+25,24,complete?navy:'#B27133',true,'center');
+     txt(complete?'4/4 phòng':'Đã nhập '+r.confirmed+'/4',(x[6]+x[7])/2,y+51,12,complete?green:muted,false,'center');
+     const cx=(x[7]+x[8])/2;
+     if(!complete){
+       txt('CHỜ CHỐT',cx,y+26,15,muted,true,'center');
+       txt('Chưa đủ 4 phòng',cx,y+51,11,muted,false,'center');
+     }else if(r.total===0){
+       txt('KHÔNG CÓ NGƯỜI',cx,y+33,12,muted,true,'center');
+     }else if(r.total<=29){
+       coach(cx-30,y+27,29);
+       txt('29C',cx+43,y+34,18,blue,true,'center');
+     }else if(r.total<=45){
+       coach(cx-30,y+27,45);
+       txt('45C',cx+43,y+34,18,blue,true,'center');
+     }else{
+       coach(cx-34,y+27,45,true);
+       txt('>45',cx+47,y+23,18,'#AD6325',true,'center');
+       txt('CẦN THÊM XE',cx+47,y+48,10,'#AD6325',true,'center');
+     }
+     const note=r.note||(r.is_custom?'XE BỔ SUNG':'');
+     if(note){
+       txt(note.slice(0,30),x[8]+7,y+24,12,ink,false,'left',x[9]-x[8]-12);
+       if(note.length>30)txt(note.slice(30,58),x[8]+7,y+49,10,muted,false,'left',x[9]-x[8]-12);
+     }else txt('—',(x[8]+x[9])/2,y+34,14,muted,false,'center');
+     y=yRow+67;
    }
-   box(46,y+15,W-92,67,'#DCEEF6');
-   txt('TỔNG LƯỢT ĐÃ NHẬP THEO CÁC MỐC XE',63,y+49,20,navy,true);
-   txt(rows.reduce((n,v)=>n+v.total,0).toLocaleString('vi-VN')+' lượt',W-65,y+49,26,blue,true,'right');
-   txt('— = chưa xác nhận; 0 = xác nhận không có người; ~ = tổng tạm tính khi chưa đủ 3 phòng.',46,y+108,17,ink);
+   box(47,y+16,1396,70,'#E8F2F6');
+   const num=rows.reduce((a,v)=>a+v.total,0);
+   txt('TỔNG LƯỢT ĐÃ ĐƯỢC KHAI BÁO',65,y+46,19,navy,true);
+   txt(num.toLocaleString('vi-VN')+' lượt',1426,y+46,23,blue,true,'right');
+   txt('29C · xe 29 chỗ   |   45C · xe 45 chỗ   |   >45 · ĐH phải bố trí thêm xe.',48,y+117,15,ink);
+   txt('Ký hiệu ~: tổng tạm tính khi chưa đủ 4 phòng; loại xe chỉ là gợi ý theo số người, không thay cho lệnh điều xe.',48,y+145,13,muted);
    return canvas;
  }
  function download(url,filename){
@@ -134,10 +174,10 @@
      const view=(r)=>{
        const td=r.units.map(x=>'<td><strong>'+(x?x.quantity:'—')+'</strong><small>'+(x?escapeHTML(when(x.confirmed_at)):'Chưa xác nhận')+'</small></td>').join('');
        return '<tr><td>'+escapeHTML(model().directionLabel[r.direction])+'</td><td><b>'+escapeHTML(model().clock(r.departure_min))+'</b>'+(r.is_custom?' <small>Bổ sung</small>':'')+'</td>'+td+
-         '<td>'+((r.confirmed===3)?r.total:'~'+r.total)+'<small>'+r.confirmed+'/3 phòng</small></td></tr>';
+         '<td>'+((r.confirmed===4)?r.total:'~'+r.total)+'<small>'+r.confirmed+'/4 phòng</small></td><td>'+escapeHTML(r.confirmed<4?'Chờ chốt':r.total===0?'—':r.total<=29?'29C':r.total<=45?'45C':'45C + cần thêm xe')+'</td></tr>';
      };
-     const heads='<tr><th>Chiều xe</th><th>Giờ</th><th>PVSĐ</th><th>PVHK</th><th>Kho Hàng</th><th>Tổng</th></tr>';
-     el.innerHTML='<div class="v21-report-note">Bảng xe giao ca ngày <b>'+escapeHTML(name(data.date))+'</b>. Dấu ~ là tổng tạm tính khi chưa đủ ba phòng xác nhận. 0 là số người bằng không đã được xác nhận.</div>'+
+     const heads='<tr><th>Chiều xe</th><th>Giờ</th><th>ĐH</th><th>PVSĐ</th><th>PVHK</th><th>Kho Hàng</th><th>Tổng</th><th>Gợi ý xe</th></tr>';
+     el.innerHTML='<div class="v21-report-note">Bảng xe giao ca ngày <b>'+escapeHTML(name(data.date))+'</b>. Dấu ~ là tổng tạm tính khi chưa đủ bốn phòng xác nhận. 0 là số người bằng không đã được xác nhận. Chỉ có xe 29C và 45C; trên 45 người cần bố trí thêm xe.</div>'+
        '<div class="tablewrap"><table class="v21-report-table">'+heads+rows.map(view).join('')+'</table></div>';
    }catch(err){el.textContent='Chưa tải được bảng xe giao ca: '+err.message;}
  }
