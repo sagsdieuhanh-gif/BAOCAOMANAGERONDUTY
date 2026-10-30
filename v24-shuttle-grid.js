@@ -299,5 +299,5 @@
  function setUnit(role){
    viewRole=role;mount();show();refresh();
  }
- root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,collectChanges,pendingDraft}};
+ root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,collectChanges,pendingDraft,makeGrid}};
 })(typeof window!=='undefined'?window:globalThis);
