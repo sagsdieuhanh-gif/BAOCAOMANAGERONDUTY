@@ -12,11 +12,12 @@
    buttons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent='ĐANG XUẤT '+format.toUpperCase()+'…'});
    try{
      if(!root.SagsOfficeExportV29)throw Error('Chưa nạp thư viện xuất file nội bộ.');
+     const active=await base.source();
      await base.preview();
      const node=$('v19ReportPreview')?.querySelector('.v19-report-sheet');
-     if(!node)throw Error('Không tạo được bản xem trước V2.7. Vui lòng kiểm tra lịch bay Lần 1 và dữ liệu nguồn.');
+     if(!node)throw Error('Không tạo được bản xem trước V2.18. Vui lòng kiểm tra đã duyệt lịch bay Lần 2 và nguồn dữ liệu.');
      const date=$('day')?.value||'UNKNOWN';
-     const filename='SAGS_CXR_DU_BAO_LAN_1_'+date.replaceAll('-','')+'.'+format;
+     const filename='SAGS_CXR_DU_BAO_LAN_'+(active.revision===2?'2':'1')+'_'+date.replaceAll('-','')+'.'+format;
      const result=await root.SagsOfficeExportV29.exportElement(node,format,filename);
      if(status)status.textContent='Đã tạo '+filename+' ('+Math.round(result.bytes/1024)+' KB).';
    }catch(err){
