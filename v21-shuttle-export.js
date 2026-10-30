@@ -119,8 +119,12 @@
        t(unit?String(unit.quantity):'—',ux,y+110,24,unit?C.ink:'#AAB8C1',!!unit);
      }
      if(v.missing?.length){
-       t('CHƯA XÁC NHẬN: '+v.missing.join(', '),x+19,y+131,12,C.red,true,'left',col-40);
+       t('CHƯA XÁC NHẬN: '+v.missing.join(', '),x+19,y+131,12,C.red,true,'left',col-220);
      }else t('Đã đủ 4 đơn vị xác nhận',x+19,y+131,12,C.green,true);
+     if(complete){
+       const recommend=total===0?'KHÔNG CẦN XE':total<=29?'XE 29 CHỖ':total<=45?'XE 45 CHỖ':'CẦN BỔ SUNG XE';
+       t('GỢI Ý: '+recommend,x+col-16,y+131,14,total>45?C.orange:C.blue,true,'right',200);
+     }
      if(special){
        t('LÝ DO THÊM XE: '+(v.note||'Chưa ghi lý do'),x+19,y+148,12,C.orange,true,'left',col-40);
      }
