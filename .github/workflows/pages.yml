@@ -40,6 +40,7 @@ jobs:
           node --check radar-cxr/v211-report-insights.js
           node --check radar-cxr/v211-unit-input.js
           node --check radar-cxr/v212-personnel.js
+          node --check radar-cxr/v212-personnel.js
           node --check radar-cxr/v19-report.js
           node --check radar-cxr/v19-ui.js
           node --check radar-cxr/v20-departments.js
@@ -61,6 +62,7 @@ jobs:
           node radar-cxr/tests/v21-shuttle.test.cjs
           node radar-cxr/tests/v21-shuttle-export.test.cjs
           node radar-cxr/tests/v211-report-insights.test.cjs
+          node radar-cxr/tests/v212-personnel-human-report.test.cjs
           node radar-cxr/tests/v212-personnel-human-report.test.cjs
           node radar-cxr/tests/v210-service-plans.test.cjs
           node radar-cxr/tests/v19-report.test.cjs
