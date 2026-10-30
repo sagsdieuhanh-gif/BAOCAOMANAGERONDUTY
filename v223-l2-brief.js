@@ -5,7 +5,7 @@
 (function(root){
  const clock=n=>n==null?'—':String(Math.floor((n%1440)/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')+(n>=1440?' (+1)':'');
  const short=(x,n=5)=>[...new Set(x.filter(Boolean))].slice(0,n).join(', ');
- const quantity=x=>Number.isFinite(Number(x))?Number(x):null;
+ const quantity=x=>x==null||String(x).trim()===''?null:Number.isFinite(Number(x))?Number(x):null;
  const cap=(a,n=580)=>a.length>n?a.slice(0,n-1).replace(/\s+\S*$/,'')+'…':a;
  const isWide=x=>/A\s?330|B\s?777/i.test(x.aircraft_type||x.type||'');
  const carrier=x=>String(x.airline||x.carrier||x.departure||x.no||'').match(/^[A-Z0-9]{2}(?=\d)/)?.[0]||String(x.airline||x.carrier||'').toUpperCase();
@@ -35,7 +35,7 @@
    })).sort((a,b)=>b.total-a.total||a.start-b.start)[0];
    if(topW){
      const flights=short(topW.active,5);
-     lead.push('Áp lực phục vụ tập trung tại '+clock(topW.start)+'–'+clock(topW.start+30)+' với '+topW.total+' cặp chuyến, trong đó có '+flights+'.');
+     lead.push((topW.total>=4?'Khung cao điểm':'Khung phục vụ có nhiều cặp nhất')+' vào '+clock(topW.start)+'–'+clock(topW.start+30)+' với '+topW.total+' cặp chuyến, gồm '+flights+'.');
      const priority=pNight&&pNight.start!==topW.start?' Đến '+clock(pNight.start)+'–'+clock(pNight.start+30)+
        ' cần chú ý thêm nhóm '+short(pNight.active,4)+' (có AK/FD hoặc hãng Hàn Quốc).':'';
      const overlaps=(op.handoffs||[]).filter(x=>x.gap<0&&topW.active.includes(x.from)).slice(0,3);
