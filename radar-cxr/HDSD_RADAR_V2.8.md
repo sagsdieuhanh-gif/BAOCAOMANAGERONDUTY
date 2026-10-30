@@ -1,14 +1,14 @@
 # Hướng dẫn xuất báo cáo Radar CXR V2.8 (bản thử)
 
 ## Phạm vi
-- Áp dụng trong **BÁO CÁO TGĐ** tại `/EREPORT/radar-cxr/`. Báo cáo gồm 5 phần nghiệp vụ đang sử dụng, mở rộng mục III bằng Radar tổng hợp cả ngày và tất cả **đợt** đạt ngưỡng ít nhất 4 cặp đến–đi trong cửa sổ 30 phút.
+- Áp dụng trong **BÁO CÁO TGĐ** tại `/EREPORT/radar-cxr/`. Báo cáo gồm 5 phần nghiệp vụ đang sử dụng, đặt Radar tổng hợp cả ngày ngay ở mục I và mở rộng mục III bằng tất cả **đợt** đạt ngưỡng ít nhất 4 cặp đến–đi trong cửa sổ 30 phút.
 - Mỗi cặp khai thác trong một hồ sơ chỉ tính một lần. Phân tích cửa sổ 30 phút dịch mỗi 5 phút. Những cửa sổ từ 4 cặp trở lên kề nhau được gom thành một đợt, tránh nhiều trang lặp.
 - Dự báo thời lượng quy ước: VJ/9G/VU/AK/FD: 30 phút; các hãng Hàn Quốc: 60 phút; hãng khác theo lịch. Không đồng nhất thời lượng với ground-time thực tế và không coi STD là mốc GSE đã giải phóng.
 
 ## Cách sử dụng
 1. Chọn **ngày khai thác** và nhập/kiểm tra Excel lịch bay. Lưu snapshot Lần 1. Sau khi có nguồn AOC và bãi đỗ, nhập và lưu snapshot Lần 2 nếu cần.
 2. Các đơn vị PVSĐ, PVHK, Kho, QA/IT cập nhật những dữ liệu thực sự đã xác nhận.
-3. Mở tab **BÁO CÁO TGĐ**; nút **XEM TRƯỚC / TẢI LẠI SỐ LIỆU** hiện Radar cả ngày, các đợt cao điểm, danh sách cặp chuyến và cảnh báo ngay dưới mỗi Radar.
+3. Mở tab **BÁO CÁO TGĐ**; nút **XEM TRƯỚC / TẢI LẠI SỐ LIỆU** hiện Radar cả ngày ở phần tổng quan, các đợt cao điểm tại mục III, danh sách cặp chuyến và cảnh báo ngay dưới mỗi Radar.
 4. Tài khoản **ĐH/ADMIN** chọn **XUẤT BÁO CÁO WORD · RADAR (.DOCX)** hoặc **XUẤT BÁO CÁO PDF · RADAR (.PDF)**. Tài khoản chỉ xem không được phát hành.
 5. Kiểm tra trang đầu, bảng chuyến trong mỗi đợt và phần **TỔNG HỢP CẢNH BÁO TOÀN NGÀY** trước khi gửi Ban TGĐ.
 
