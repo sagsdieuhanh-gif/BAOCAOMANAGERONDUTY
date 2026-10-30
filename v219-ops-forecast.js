@@ -85,7 +85,8 @@
    const c=carrier(f),lead=c==='VJ'?50:c==='KE'?35:['AK','FD'].includes(c)?30:null;
    if(lead===null)return null;
    // Approximation / passenger arrival guidance only: NOT an airline handling timetable.
-   return {start:Math.max(0,f.t-lead),end:Math.max(0,f.t-(c==='KE'?10:15)),
+   const ref=f.etd!=null&&f.etd>=f.t?f.etd:f.t;
+   return {start:Math.max(0,ref-lead),end:Math.max(0,ref-(c==='KE'?10:15)),
      certainty:'THAM CHIẾU; CHƯA XÁC NHẬN BOARDING',lead,carrier:c};
  }
  function serviceM(p){
@@ -108,9 +109,14 @@
    const risky=[];
    for(const f of list){
      const pair=arrivals.get(f.no),lead=pair&&serviceM(pair);
-     if(pair?.sta_min!=null&&pair?.std_min!=null&&lead!=null&&pair.std_min-pair.sta_min<lead)
-       risky.push({flight:f.no,sta:pair.sta_min,std:pair.std_min,ground:pair.std_min-pair.sta_min,
-         reference:lead,gate:f.gate,kind:'QUAY ĐẦU SÁT; CHẬM ĐẾN CÓ THỂ ẢNH HƯỞNG BOARDING'});
+     if(pair?.sta_min!=null&&pair?.std_min!=null&&lead!=null){
+       const ground=pair.std_min-pair.sta_min,eta=pair.eta_min;
+       if(ground<lead||eta!=null&&eta>pair.sta_min&&eta+lead>pair.std_min)
+         risky.push({flight:f.no,sta:pair.sta_min,std:pair.std_min,ground,
+           eta:eta??null,reference:lead,gate:f.gate,
+           kind:eta!=null&&eta>pair.sta_min?'ETA MUỘN HƠN STA; CÓ THỂ ẢNH HƯỞNG BOARDING':
+             'QUAY ĐẦU SÁT; ĐẾN TRỄ CÓ THỂ ẢNH HƯỞNG BOARDING'});
+     }
    }
    return {warnings,risky,unknown:list.filter(x=>!x.w).map(x=>x.no)};
  }
@@ -151,6 +157,9 @@
        shortage:cargoUnknown.length||observedBag==null?null:Math.max(0,neededBag-observedBag)};
      const driver={need:cargoUnknown.length?null:neededDrv,available:drv,
        shortage:cargoUnknown.length||drv==null?null:Math.max(0,neededDrv-drv)};
+     const cbDriver=staffAt(staff,start,'COBUS_DRIVER');
+     const cobusDrivers={need:outer.length*2,available:cbDriver,
+       shortage:cbDriver==null?null:Math.max(0,outer.length*2-cbDriver)};
      const chosen=src.filter(d=>!d.ferry&&d.t>=start&&d.t<start+30);
      const desks=chosen.filter(x=>contract.has(carrier(x))).map(x=>({...x,rule:contract.get(carrier(x))}));
      const missingRules=chosen.filter(x=>!contract.has(carrier(x))).map(x=>x.no);
@@ -169,11 +178,20 @@
      const counterUnknown=src.filter(d=>{
        const rule=contract.get(carrier(d));return !rule&&d.t!=null&&start>=d.t-180&&start<d.t;
      });
+     const currentGates=src.filter(d=>d.gate&&!d.ferry&&(()=>{
+       const w=boardingWindow(d);return !!w&&start<w.end&&start+30>w.start;
+     })());
+     const unconfirmedGate=currentGates.filter(d=>!contract.get(carrier(d))?.gate_staff);
+     const gateRequired=currentGates.reduce((n,d)=>n+(contract.get(carrier(d))?.gate_staff||0),0);
+     const gateAvailable=staffAt(staff,start,'GATE');
+     const gateStaff={need:unconfirmedGate.length?null:gateRequired,available:gateAvailable,
+       shortage:unconfirmedGate.length||gateAvailable==null?null:Math.max(0,gateRequired-gateAvailable),
+       flights:currentGates.map(d=>d.no)};
      windows.push({start,active:active.map(x=>x.departure||x.arrival),
        total:active.length,outer:outer.length,unknownBay:incompleteBay.length,
        zone2:active.filter(x=>zone(x.bay)==='K2').map(x=>x.departure||x.arrival),
        zone3:active.filter(x=>zone(x.bay)==='K3').map(x=>x.departure||x.arrival),
-       gse:comparisons,baggage,driver,unknownCargo:cargoUnknown.length,
+       gse:comparisons,baggage,driver,cobusDrivers,gateStaff,unknownCargo:cargoUnknown.length,
        checkin:{required:!counterUnknown.length&&openDesks.length?neededCounterStaff:null,
          available:desksReady,shortage:counterUnknown.length||!openDesks.length||desksReady==null?null:Math.max(0,neededCounterStaff-desksReady),
          openFlights:openDesks.map(x=>x.no),missing:counterUnknown.map(x=>x.no)}});
@@ -213,7 +231,7 @@
    const gate=boardings(deps,pairs),stand=groupStand(pairs);
    const windows=capacity(pairs,staff,gse,contracts,detail);
    const attention=windows.filter(w=>w.unknownBay||w.unknownCargo||
-     w.gse.some(x=>x.shortage>0)||w.baggage.shortage>0||w.driver.shortage>0||w.checkin.shortage>0);
+     w.gse.some(x=>x.shortage>0)||w.baggage.shortage>0||w.driver.shortage>0||w.cobusDrivers.shortage>0||w.gateStaff.shortage>0||w.checkin.shortage>0);
    const top=windows.slice().sort((a,b)=>b.total-a.total||a.start-b.start).slice(0,6);
    return {hours,gate,stand,windows,attention,top,handoffs:handoffs(pairs),contracts:(contracts||[]).length,
      unknown:hours.unverified};
