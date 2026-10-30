@@ -112,7 +112,7 @@
     '<p>Chỉ cần xác nhận quân số của hai ca và bổ sung nội dung cần lưu ý nếu có.</p></div>'+
     '<span class="status gray" data-v211-state="'+k+'">CHƯA CÓ DỮ LIỆU</span></div>'+
     personnelFields(k)+
-    '<details class="v224-details v224-specialty"><summary><b>02 · THÔNG TIN NGHIỆP VỤ BỔ SUNG</b><small>Chỉ mở khi có hạn chế hoặc nội dung cần báo ĐH</small></summary>'+
+    '<details class="v224-details v224-specialty"'+(personnelFields(k)?'':' open')+'><summary><b>'+(personnelFields(k)?'02 · THÔNG TIN NGHIỆP VỤ BỔ SUNG':'NỘI DUNG CẦN BÁO CÁO')+'</b><small>Chỉ mở khi có hạn chế hoặc nội dung cần báo ĐH</small></summary>'+
     '<div class="v20-incident-grid">'+g.fields.map(createField).join('')+'</div></details>'+
     '<details class="v224-details v224-paste"><summary><b>DÁN NHANH BẢN TIN CỦA PHÒNG</b><small>Dán nhiều dòng khi có tình trạng xe, nhân sự hoặc nhiệm vụ khác cần báo</small></summary>'+
     '<textarea data-v215-quick="'+k+'" rows="4" maxlength="5000" placeholder="Dán những nội dung cần báo ĐH. Giữ nguyên ý từ phòng..."></textarea>'+
