@@ -172,7 +172,7 @@
        'Kho Hàng chưa cập nhật kế hoạch hàng hóa; cần bổ sung trước các chuyến có hàng.',
      short.length?'Theo lịch, các chuyến '+shortF+' có thời gian quay đầu sát. Nếu tàu về muộn, công tác phục vụ và giờ khởi hành có thể bị ảnh hưởng.':
        'Chưa có chuyến quay đầu ngắn nổi bật theo lịch; tiếp tục theo dõi thay đổi giờ đến và giờ đi.',
-     c.note.weather_note||'Chưa có thông tin thời tiết, an ninh, an toàn bất thường được các đơn vị báo về.',
+     c.note.weather_note||'Chưa nhận được báo cáo cụ thể về thời tiết, an ninh hoặc an toàn trong nguồn cập nhật cho ngày khai thác; các thông tin mới phát sinh sẽ được tổng hợp và chuyển ngay đến đơn vị liên quan.',
      c.note.previous_issue||'Chưa ghi nhận tồn tại từ ca trước cần xử lý trong ngày.'
    ];
    const actions=[
@@ -187,7 +187,7 @@
        'Kho Hàng ưu tiên chuẩn bị, bàn giao hàng cho '+(heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+'; PVSĐ bố trí xe kéo hàng và nhân sự tiếp nhận theo tiến độ từng chuyến. ĐH phối hợp khi các chuyến dồn giờ.':
        'Kho Hàng cập nhật hàng sẵn sàng trước giờ phục vụ; PVSĐ chủ động xe kéo và người nhận hàng. ĐH phối hợp điều chỉnh khi nhiều chuyến tập trung.',
      'Phòng ĐH theo dõi giờ đáp thực tế, chủ động điều phối khi tàu về muộn. PVSĐ và PVHK ưu tiên hoàn thành công việc cho chuyến quay đầu ngắn, báo sớm khi có nguy cơ ảnh hưởng giờ đi.',
-     'Phòng ĐH cập nhật các cảnh báo thời tiết, an toàn và thông báo kịp thời cho đơn vị phục vụ. PVSĐ kiểm soát an toàn xe, thiết bị; PVHK chuẩn bị phương án điều chỉnh khi cần.',
+     'Phòng Điều hành làm đầu mối tiếp nhận và kiểm chứng thông tin an ninh, an toàn, thời tiết và các sự việc phát sinh trong khai thác; tổng hợp mức độ ảnh hưởng, phát cảnh báo kịp thời đến các phòng/đơn vị liên quan trong toàn công ty, đồng thời theo dõi việc tiếp nhận và phối hợp xử lý. Các đơn vị chuyên môn chịu trách nhiệm triển khai biện pháp phòng ngừa, phản hồi kết quả để ĐH cập nhật tình hình chung.',
      'Các phòng tiếp tục xử lý các tồn tại đã được xác nhận từ ca trước, ưu tiên những nội dung ảnh hưởng trực tiếp đến chuyến bay; báo ĐH kết quả và khó khăn phát sinh.'
    ];
    const core=LABELS.map((label,i)=>({title:label,observation:observations[i],action:actions[i]}));
