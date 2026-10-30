@@ -178,7 +178,8 @@
    const cargoKnown=cargo.filter(x=>quantity(x.cargo_kg)!=null);
    const unfinished=cargo.filter(x=>x.ready_by_min==null);
    const ferry=deps.filter(x=>x.ferry);
-   if(cargo.length||ferry.length){
+   const charter=deps.filter(x=>x.charter);
+   if(cargo.length||ferry.length||charter.length){
      const loaded=cargoKnown.length?cargoKnown.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg))
        .slice(0,3).map(x=>x.flight_no+' ('+Number(x.cargo_kg).toLocaleString('vi-VN')+' kg)'):[];
      const parts=[];
@@ -187,9 +188,11 @@
        (unfinished.length?'. Còn '+unfinished.length+' chuyến chưa chốt giờ hàng sẵn sàng.':'.'));
      if(ferry.length)parts.push('Có chuyến mang ký hiệu ferry: '+short(ferry.map(x=>x.no),5)+
        '; cần xác nhận phạm vi phục vụ thay vì áp dụng quy trình chuyến chở khách.');
+     if(charter.length)parts.push('Lịch bay có '+charter.length+' chuyến thuê chuyến không thường lệ (CHARTER, ký hiệu ##): '+
+       short(charter.map(x=>'##'+x.no),5)+'. CHARTER không đồng nghĩa FERRY; phải đối chiếu loại hình phục vụ thực tế.');
      push('cargo','Hàng hóa và chuyến có tính chất đặc biệt',parts.join(' '),
-       'Kho Hàng chốt thứ tự bàn giao theo giờ phục vụ, báo sớm lô hàng có nguy cơ đến muộn; PVSĐ dành xe kéo và tổ tiếp nhận phù hợp. Với chuyến ferry, ĐH đối chiếu lại yêu cầu hãng/AOC rồi mới thống nhất các hạng mục nhân sự, xe và phục vụ khách cần triển khai.',
-       'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length?3:2);
+       'Kho Hàng chốt tiến độ bàn giao theo giờ phục vụ; PVSĐ bố trí xe kéo, tổ tiếp nhận phù hợp khi có hàng. Với FERRY, ĐH xác nhận phạm vi dịch vụ thực tế. Với CHARTER, ĐH phối hợp hãng/AOC làm rõ yêu cầu phục vụ riêng, sau đó chuyển thông tin cho PVHK, PVSĐ và Kho Hàng để chuẩn bị theo đúng tính chất chuyến.',
+       'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length||charter.length?3:2);
    }
    const distinct=changes.filter(x=>/BÃI ĐỖ|STA|STD|GATE/i.test(x.type||'')).slice(0,4);
    if(distinct.length){
