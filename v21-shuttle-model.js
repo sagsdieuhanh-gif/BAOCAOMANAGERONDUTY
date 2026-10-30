@@ -19,9 +19,32 @@
   if(hour>23||minute>59)return null;
   return hour*60+minute+(dayAfter?1440:0);
  }
+ function suggestVehicles(rawCount){
+  const people=Number(rawCount);
+  if(!Number.isSafeInteger(people)||people<0||people>5000) return null;
+  if(people===0)return {people,seats:0,spare:0,count:0,n29:0,n45:0,
+    units:[],short:'KHÔNG CẦN XE',label:'KHÔNG CẦN XE',details:'0 người'};
+  let best=null;
+  for(let n45=0;n45<=Math.ceil(people/45);n45++){
+   for(let n29=0;n29<=Math.ceil(people/29);n29++){
+    const count=n45+n29,seats=45*n45+29*n29,spare=seats-people;
+    if(!count||spare<0)continue;
+    if(!best||count<best.count||count===best.count&&spare<best.spare||
+       count===best.count&&spare===best.spare&&n45>best.n45){
+      best={people,count,seats,spare,n29,n45};
+    }
+   }
+  }
+  const units=[...(best.n45?[{seats:45,quantity:best.n45}]:[]),
+    ...(best.n29?[{seats:29,quantity:best.n29}]:[])];
+  const combo=units.map(x=>(x.quantity>1?x.quantity+'×':'')+x.seats+'C').join(' + ');
+  return {...best,units,short:combo,
+    label:(best.count===1?'':best.count+' XE: ')+combo,
+    details:best.seats+' ghế · dư '+best.spare+' ghế'};
+ }
  function isDefault(direction,minute){return defaults.some(x=>x.direction===direction&&x.departure_min===minute)}
  function order(records){return [...records].sort((a,b)=>
   (a.direction===b.direction?0:a.direction==='NHA_CXR'?-1:1)
   ||a.departure_min-b.departure_min);}
- root.SagsShuttleModel={defaults,directionLabel,clock,parseClock,isDefault,order};
+ root.SagsShuttleModel={defaults,directionLabel,clock,parseClock,isDefault,order,suggestVehicles};
 })(typeof window!=='undefined'?window:globalThis);
