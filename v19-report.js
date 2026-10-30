@@ -200,11 +200,11 @@
    });
    if(window.SagsPersonnelV212){
      const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
-     topics[3].observation=people.complete?
+     topics[4].observation=people.complete?
        'Các phòng đã xác nhận quân số phục vụ bay theo ca. Phương án bố trí cụ thể sẽ điều chỉnh theo lịch bay thực tế.':
        'Các phòng đã cập nhật hoặc đang rà soát quân số phục vụ bay cho từng ca; số liệu chưa xác nhận được ghi rõ bên cạnh.';
-     topics[3].action=people.lines.join('\n');
-     topics[3].owner='ĐH · PVHK · PVSĐ';
+     topics[4].action=people.lines.join('\n');
+     topics[4].owner='ĐH · PVHK · KTSĐ';
    }
    let l2Details=null,l2Changes=[];
    if(c.revision===2&&window.SagsSecondForecast&&c.sourcePayload?.source_detail){
@@ -274,13 +274,15 @@
    const operational=window.SagsOpsForecastV219?.summarize(operationalSource,enhancedPairs,c.staff,c.gse,confirmedContracts)||null;
    const dailyBrief=window.SagsL2BriefV223?.make({c,operational,changes:l2Changes})||null;
    if(c.revision===2&&dailyBrief){
-     const topicIndex={peak:1,stands:2,gate:6,checkin:3,resource:4,wide:0,cargo:5,change:8};
+     const topicIndex={peak:1,stands:3,gate:7,checkin:4,resource:5,wide:2,cargo:6,change:9};
      for(const item of dailyBrief.entries){
        const idx=topicIndex[item.key];if(idx==null)continue;
        const ctrl=(c.controls||[]).find(x=>x.topic===idx+1)||{};
        if(!known(ctrl.observation))topics[idx].observation=crop(item.observation,490);
-       if(!known(ctrl.action))topics[idx].action=crop(item.action,620);
-       if(!ctrl.owner)topics[idx].owner=item.owner;
+       // The staffing row must always keep the exact signed-off headcounts from Personnel,
+       // while the situation-specific check-in advice is printed in the L2 table above.
+       if(item.key!=='checkin'&&!known(ctrl.action))topics[idx].action=crop(item.action,620);
+       if(item.key!=='checkin'&&!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
