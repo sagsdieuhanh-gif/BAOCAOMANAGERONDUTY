@@ -117,21 +117,21 @@
   function reportHtml(d){
     const r=d.radar,c=d.c,events=r.episodes;
     let out='<div class="r28-sheet"><header class="r28-header"><strong>SAGS · CẢNG HÀNG KHÔNG QUỐC TẾ CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH – RADAR V2.8</h2><p>Ngày '+esc(dateVN(c.date))+' · DỰ BÁO LẦN '+c.revision+' · Nguồn: '+esc(c.sourceFile||'chưa ghi tên file')+' · Người lập: '+esc(c.author)+'</p></header>';
-    out+='<section class="r28-section"><h3>I. TÓM TẮT KHAI THÁC</h3><div class="r28-kpis"><div><b>'+c.arrivals+'</b><span>Chuyến đến</span></div><div><b>'+c.departures+'</b><span>Chuyến đi</span></div><div><b>'+r.peak.n+'</b><span>Đỉnh cặp / 30 phút</span></div><div><b>'+events.length+'</b><span>Đợt cao điểm ≥4 cặp</span></div></div><p>'+esc(d.summary)+'</p><p>'+esc(d.comparison).replace(/\n/g,'<br>')+'</p><div class="r28-chart">'+dailySvg(d)+'</div><p class="r28-note">Radar toàn ngày: cửa sổ 30 phút trượt từng 5 phút; mỗi cặp đến–đi tính một lần. Cam = từ 4 cặp. Không suy ra thời điểm GSE được giải phóng từ STD.</p></section>';
+    out+='<section class="r28-section"><h3>I. TÓM TẮT KHAI THÁC</h3><div class="r28-kpis"><div><b>'+c.arrivals+'</b><span>Chuyến đến</span></div><div><b>'+c.departures+'</b><span>Chuyến đi</span></div><div><b>'+r.peak.n+'</b><span>Đỉnh cặp / 30 phút</span></div><div><b>'+events.length+'</b><span>Đợt cao điểm ≥4 cặp</span></div></div><p>'+esc(d.summary)+'</p><p>'+esc(d.comparison).replace(/\n/g,'<br>')+'</p><div class="r28-chart">'+dailySvg(d)+'</div><p class="r28-note">Biểu đồ thể hiện số cặp chuyến cần phục vụ trong từng khung 30 phút; cột cam là những khung có từ 4 cặp trở lên.</p></section>';
     if(d.alerts?.length)out+='<section class="r28-section"><h3>THÔNG TIN CHỜ CÁC ĐƠN VỊ XÁC NHẬN</h3>'+table(['Đơn vị','Nhóm dữ liệu','Nội dung còn thiếu'],d.alerts.map(a=>[a.unit,a.type,a.detail]))+'</section>';
     out+='<section class="r28-section"><h3>II. BẢNG KIỂM SOÁT NGHIỆP VỤ</h3>'+table(['Nội dung','Nhận định','Phương án phục vụ'],d.topics.map(x=>[x.title,x.observation,x.action]))+'</section>';
-    out+='<section class="r28-section"><h3>III. RADAR CHI TIẾT CÁC ĐỢT CAO ĐIỂM ≥4 CẶP</h3><p class="r28-note">Phân tích cửa sổ 30 phút trượt từng 5 phút; mỗi cặp đến–đi chỉ tính một lần trong cùng cửa sổ. Khoảng phục vụ quy ước: VJ/9G/VU/AK/FD 30 phút; hãng Hàn Quốc 60 phút; hãng khác theo lịch. Không suy ra GSE được giải phóng tại STD.</p><p><b>Đỉnh:</b> '+esc(clock(r.peak.s))+'–'+esc(clock(r.peak.s+30))+' ('+r.peak.n+' cặp) · <b>Số đợt ≥4 cặp:</b> '+events.length+' · <b>Chuyến thiếu thông tin giờ phục vụ:</b> '+r.unusable+'.</p></section>';
+    out+='<section class="r28-section"><h3>III. RADAR CHI TIẾT CÁC ĐỢT CAO ĐIỂM ≥4 CẶP</h3><p class="r28-note">Các khung cao điểm được xác định theo lịch bay và thời gian phục vụ dự kiến; các phòng tiếp tục cập nhật khi giờ bay thay đổi.</p><p><b>Đỉnh:</b> '+esc(clock(r.peak.s))+'–'+esc(clock(r.peak.s+30))+' ('+r.peak.n+' cặp) · <b>Số đợt ≥4 cặp:</b> '+events.length+' · <b>Chuyến thiếu thông tin giờ phục vụ:</b> '+r.unusable+'.</p></section>';
     if(!events.length)out+='<section class="r28-section"><p>Không phát hiện khung từ 4 cặp phục vụ trở lên theo lịch nguồn và quy tắc đã chọn.</p></section>';
     events.forEach((e,i)=>{
       out+='<section class="r28-section r28-episode"><h3>III.'+(i+1)+' CAO ĐIỂM '+esc(clock(e.from))+'–'+esc(clock(e.to))+' · ĐỈNH '+e.peak.n+' CẶP <span class="r28-state">'+esc(e.level)+'</span></h3>';
-      out+='<p>Khung đỉnh: '+esc(clock(e.peak.s))+'–'+esc(clock(e.peak.s+30))+'. Có '+e.items.length+' hồ sơ từng xuất hiện trong đợt, '+e.peak.items.length+' hồ sơ trong khung đỉnh.</p><div class="r28-chart">'+episodeSvg(e)+'</div>';
+      out+='<p>Khung đỉnh: '+esc(clock(e.peak.s))+'–'+esc(clock(e.peak.s+30))+'. Trong đợt có '+e.items.length+' cặp chuyến liên quan, '+e.peak.items.length+' cặp tập trung ở khung cao điểm nhất.</p><div class="r28-chart">'+episodeSvg(e)+'</div>';
       out+='<h4>CẢNH BÁO VÀ HÀNH ĐỘNG – NGAY DƯỚI RADAR</h4>'+table(['Mức','Nội dung','Cơ sở / nguy cơ cần rà soát','Hành động điều phối'],alertRows(e));
       out+='<h4>DANH SÁCH CẶP CHUYẾN TRONG KHUNG ĐỈNH</h4>'+table(['Cặp chuyến (đến / đi)','STA / STD','Bãi / khu','Loại tàu','Thời gian phục vụ dự kiến'],e.peak.items.map(x=>[flightId(x.f),clock(x.f.sta_min)+' / '+clock(x.f.std_min),x.f.bay==null?'CHỜ XÁC NHẬN':x.f.bay+' / '+area(x.f),x.f.aircraft_type||'Chưa xác nhận',serviceMinutes(x.f)+' phút']))+'</section>';
     });
     out+='<section class="r28-section"><h3>III. TỔNG HỢP CẢNH BÁO TOÀN NGÀY</h3>'+(
-      events.length?table(['Đợt cao điểm','Mức','Nhóm cảnh báo','Yêu cầu'],events.flatMap(e=>e.alerts.map(a=>[clock(e.from)+'–'+clock(e.to),a.level,a.kind,a.action]))):'<p>Không có đợt cao điểm thuộc ngưỡng báo cáo.</p>')+'</section>';
+      events.length?table(['Đợt cao điểm','Mức','Nhóm cảnh báo','Yêu cầu'],events.flatMap(e=>e.alerts.map(a=>[clock(e.from)+'–'+clock(e.to),a.level,a.kind,a.action]))):'<p>Theo lịch hiện có chưa có đợt cao điểm cần lưu ý.</p>')+'</section>';
     out+='<section class="r28-section"><h3>IV. PHỐI HỢP THỰC HIỆN</h3>'+table(['Nội dung phối hợp','Yêu cầu / phương án','Đơn vị','Thời hạn'],d.coord)+'</section>';
-    out+='<section class="r28-section"><h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(d.recommendation)+'</p><p class="r28-note">Phân loại “Theo dõi/Cần rà soát/Chờ xác nhận” dựa trên dữ liệu hiện có; không tự kết luận thiếu người, thiếu GSE hay gián đoạn đường công vụ. Dữ liệu chưa xác nhận cần bổ sung trước khi chốt phương án.</p></section></div>';
+    out+='<section class="r28-section"><h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(d.recommendation)+'</p><p class="r28-note">Các phòng tiếp tục xác nhận nhân sự, thiết bị, hàng hóa và vị trí đỗ; Phòng ĐH điều chỉnh kế hoạch phục vụ nếu lịch bay có thay đổi.</p></section></div>';
     return out;
   }
   function ensureStyles(){
@@ -221,7 +221,7 @@
     for(let i=0;i<r.episodes.length;i++){
       const e=r.episodes[i];
       children.push(hd('III.'+(i+1)+' ĐỢT '+clock(e.from)+'–'+clock(e.to)+' | ĐỈNH '+e.peak.n+' CẶP – '+e.level));
-      children.push(para('Khung đỉnh '+clock(e.peak.s)+'–'+clock(e.peak.s+30)+'; '+e.items.length+' hồ sơ trong toàn đợt, '+e.peak.items.length+' hồ sơ ở khung đỉnh.'));
+      children.push(para('Khung đỉnh '+clock(e.peak.s)+'–'+clock(e.peak.s+30)+'; '+e.items.length+' cặp chuyến trong toàn đợt, '+e.peak.items.length+' cặp chuyến ở khung cao điểm nhất.'));
       children.push(await pic(episodeSvg(e)));
       children.push(para('CẢNH BÁO NGAY DƯỚI RADAR',{bold:true,color:'A36518'}));
       children.push(tab(['Mức','Nội dung','Cơ sở / nguy cơ','Hành động'],alertRows(e),[2150,2800,5100,4650]));
