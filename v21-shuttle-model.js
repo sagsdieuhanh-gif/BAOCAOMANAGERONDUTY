@@ -3,6 +3,7 @@
  const defaults=[
   {direction:'NHA_CXR',departure_min:420,label:'07:00'},
   {direction:'NHA_CXR',departure_min:1050,label:'17:30'},
+  {direction:'NHA_CXR',departure_min:1170,label:'19:30'},
   {direction:'CXR_NHA',departure_min:990,label:'16:30'},
   {direction:'CXR_NHA',departure_min:1110,label:'18:30'},
   {direction:'CXR_NHA',departure_min:1935,label:'08:15 (+1)'}
