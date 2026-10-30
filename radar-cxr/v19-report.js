@@ -132,6 +132,12 @@
      ...(['AK','FD'].filter(airline=>items.some(f=>flightCarrier(f)===airline))),
      ...(items.some(f=>KOREAN_CARRIERS.includes(flightCarrier(f)))?['hãng Hàn Quốc']:[])
    ].join(', ');
+   const hasAfterMidnight=c.rows.some(f=>(f.sta_min!=null&&f.sta_min>=1440)||(f.std_min!=null&&f.std_min>=1440));
+   const keyPoints=(p.length?'Khung phục vụ tập trung '+clock(p[0].minute)+'–'+clock(p[0].minute+30)+' ('+p[0].items.length+' cặp)':'Chưa xác định cao điểm')+
+      (w.length?'; tàu A330/B777 '+w.slice(0,4).map(f=>f.arrival||f.departure).join(', '):'')+
+      (short.length?'; '+short.length+' cặp quay đầu sát':'')+
+      (priorityNight?'; ưu tiên '+nightGroups(priorityNight.items)+' tại '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30):'')+
+      (hasAfterMidnight?'; chuyến qua ngày (+1)':'')+'.';
    const nightGuidance=priorityNight?
      ' Khung tối '+clock(priorityNight.minute)+'–'+clock(priorityNight.minute+30)+' ưu tiên '+priorityNightList+' ('+nightGroups(priorityNight.items)+'); ĐH theo dõi chặt tiến độ bàn giao.':
      '';
@@ -192,13 +198,13 @@
     ['Cập nhật quầy, kệ, bãi đỗ; hạn chế','Sau AOC kiểm tra bãi đỗ, tuyến GSE và phát hành Lần 2.','TBĐH; các đơn vị','Sau AOC; xác nhận trước 08:30 ngày '+dateVN(c.date)+'.']
    ];
    const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
-   return {c,alerts,summary,comparison,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị bổ sung được nhập.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị bổ sung được nhập.'};
  }
  function html(data){
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><h2>SAGS-CXR | BÁO CÁO DỰ BÁO KHAI THÁC HẰNG NGÀY</h2>'+
     '<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
-    '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+'</table>'+
+    '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
     '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action,x.owner])).join('')+'</table>'+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
     '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
@@ -245,7 +251,7 @@
        p('Người lập báo cáo: '+data.c.author,{size:22}),
        ...(data.alerts?.length?[hd('THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU BỔ SUNG'),...data.alerts.map(a=>p(a.unit+' / '+a.type+': '+a.detail,{color:'B91C1C',size:18}))]:[]),
        hd('I. TÓM TẮT KHAI THÁC'),
-       t(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],[['Sản lượng',data.summary],['Biến động so với ngày hôm trước',data.comparison]],[2350,8150]),
+       t(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],[['Sản lượng',data.summary],['Biến động so với ngày hôm trước',data.comparison],['Trọng điểm',data.keyPoints]],[2350,8150]),
        hd('II. BẢNG KIỂM SOÁT'),
        t(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ','Đơn vị'],data.topics.map(x=>[x.title,x.observation,x.action,x.owner]),[1900,3800,3600,1200]),
        hd('III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)'),
