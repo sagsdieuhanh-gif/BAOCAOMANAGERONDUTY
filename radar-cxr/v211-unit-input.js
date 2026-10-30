@@ -53,17 +53,18 @@
  }
  function personnelFields(k){
    if(!['DH','PVHK','KTS'].includes(k))return '';
-   const options='<option value="PENDING">CHỜ XÁC NHẬN</option><option value="READY">ĐẢM BẢO PHỤC VỤ BAY</option><option value="LIMITED">CHƯA ĐẢM BẢO PHỤC VỤ BAY</option>';
+   const options='<option value="PENDING">CHỜ XÁC NHẬN</option><option value="READY">ĐỦ NHÂN SỰ</option><option value="LIMITED">CHƯA ĐỦ NHÂN SỰ</option>';
+   const shift=(name,code)=>'<div class="v216-staff-row">'+
+     '<strong class="v216-shift-label">'+name+'</strong>'+
+     '<label>Tổng quân số<input data-unit-field="pvb_'+code+'" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Số NS thực có"></label>'+
+     '<label>Nhu cầu (nếu biết)<input data-unit-field="pvb_'+code+'_required" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="NS cần bố trí"></label>'+
+     '<label>Đánh giá của phòng<select data-unit-field="pvb_'+code+'_status">'+options+'</select></label>'+
+     '</div>';
    return '<div class="v212-personnel">'+
      '<h4>TỔNG QUÂN SỐ PHỤC VỤ BAY · THEO CA</h4>'+
-     '<p class="note">Nhập tổng nhân sự phục vụ bay của phòng, không nhập riêng đội đến/đi hoặc từng vị trí. Tình trạng đảm bảo do phòng tự xác nhận; không tự kết luận từ số lượng.</p>'+
-     '<div class="v212-staff-grid">'+
-       '<label>Ca sáng – tổng quân số<input data-unit-field="pvb_morning" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Chưa có số liệu"></label>'+
-       '<label>Ca sáng – tình trạng<select data-unit-field="pvb_morning_status">'+options+'</select></label>'+
-       '<label>Ca đêm – tổng quân số<input data-unit-field="pvb_night" type="number" min="0" max="9999" step="1" inputmode="numeric" placeholder="Chưa có số liệu"></label>'+
-       '<label>Ca đêm – tình trạng<select data-unit-field="pvb_night_status">'+options+'</select></label>'+
-     '</div>'+
-     '<div class="v212-staff-preview"><b>CÂU TỔNG HỢP TẠI MỤC NHÂN SỰ</b><p data-v212-preview="'+k+'">CHỜ XÁC NHẬN quân số.</p><small>Bản xem trước khi nhập; báo cáo chính chỉ nhận số liệu sau khi phòng bấm XÁC NHẬN.</small></div>'+
+     '<p class="note">Nhập tổng quân số từng ca và đánh giá đủ/chưa đủ. Nếu có số nhân sự cần bố trí, nhập thêm để báo cáo ghi rõ thiếu bao nhiêu người; không tự kết luận khi thiếu định mức.</p>'+
+     '<div class="v216-staff-rows">'+shift('CA SÁNG','morning')+shift('CA ĐÊM','night')+'</div>'+
+     '<div class="v212-staff-preview"><b>CÂU TỔNG HỢP TẠI MỤC NHÂN SỰ</b><p data-v212-preview="'+k+'">CHỜ XÁC NHẬN quân số.</p><small>Các phòng xác nhận xong, nội dung sẽ được đưa vào báo cáo Điều hành.</small></div>'+
      '</div>';
  }
  function readFields(node){
