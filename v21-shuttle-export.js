@@ -22,9 +22,9 @@
        if(!keys.has(primary))keys.set(primary,{direction:x.direction,departure_min:x.departure_min,line_no:0,is_custom:true});
      }
    }
-   const sorted=[...keys.values()].sort((a,b)=>
-      (a.direction===b.direction?0:a.direction==='NHA_CXR'?-1:1)||
-      a.departure_min-b.departure_min||a.line_no-b.line_no);
+   // Match the live input table: fixed + newly added departure times are
+   // chronologically interleaved on both PNG and PDF outputs.
+   const sorted=model().order([...keys.values()]);
    return sorted.map(x=>{
      const units=UNITS.map(u=>data.find(v=>v.unit===u&&getkey(v)===getkey(x))||null);
      return {...x,units,confirmed:units.filter(Boolean).length,
