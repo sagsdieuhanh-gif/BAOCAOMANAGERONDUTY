@@ -63,7 +63,8 @@
    mark('rnsInviteStatus','Đang yêu cầu Supabase gửi thư mời…');
    try{
      const result=await invoke('invite',{email,display_name:name,unit:target});
-     mark('rnsInviteStatus','Đã tiếp nhận lời mời cho '+result.email+'. Nhân viên cần kiểm tra email, kích hoạt và đặt mật khẩu dùng chung RNS/Radar. Quyền RNS: VIEWER; Radar: '+(roles[target]||target)+'.');
+     mark('rnsInviteStatus','Supabase ĐÃ TIẾP NHẬN lời mời cho '+result.email+
+       '. Đây KHÔNG phải xác nhận email đã đến hộp thư. Nếu chưa nhận được, mở Quản lý tài khoản RNS → CHỜ XÁC MINH → LẤY LINK MỜI để chuyển riêng cho nhân viên. Quyền RNS: VIEWER; Radar: '+(roles[target]||target)+'.');
      $('rnsInviteEmail').value='';$('rnsInviteName').value='';
      if(typeof loadAssignedMembers==='function')await loadAssignedMembers();
      await loadShared();
