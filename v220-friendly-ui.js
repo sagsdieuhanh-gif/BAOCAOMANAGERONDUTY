@@ -8,6 +8,7 @@
   ]},
   {id:'input',title:'CẬP NHẬT',icon:'✎',subtitle:'Chọn đúng đơn vị hoặc dữ liệu cần nhập',items:[
     ['sources','Lịch bay / Excel','▦','Lần 1, Lần 2',false],
+    ['norms','ĐỊNH MỨC NHÂN SỰ','▤','Nhập một lần theo loại tàu · cập nhật quân số theo ca',false],
     ['pvhk','Phòng PVHK','♙','Khách và check-in',false],
     ['pvsd','Phòng PVSĐ','⚙','Phục vụ sân đỗ',false],
     ['gse','Trang thiết bị','▣','Xe thang, Cobus, GSE',true],
