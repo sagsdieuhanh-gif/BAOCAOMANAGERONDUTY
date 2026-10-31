@@ -118,7 +118,9 @@
    if(ready)return;ready=true;
    const placements=[
      ['DH','tab-home'],['KTS','tab-pvsd'],['PVHK','tab-pvhk'],
-     ['QA','tab-qa-it'],['IT','tab-qa-it']
+     ['QA','tab-qa-it'],['IT','tab-qa-it'],
+     // V3.04: The consolidated shuttle screen must also have a LIVE entry grid.
+     ['SHUTTLE','tab-shuttle-report']
    ];
    const done=new Set();
    placements.forEach(([role,id])=>{
@@ -133,7 +135,8 @@
  function show(){
    if(!ready)return;
    const role=typeof unit==='undefined'?viewRole:unit;
-   const mapping=[['tab-home','DH'],['tab-pvsd','KTS'],['tab-pvhk','PVHK'],['tab-qa-it',role==='IT'?'IT':'QA']];
+   const mapping=[['tab-home','DH'],['tab-pvsd','KTS'],['tab-pvhk','PVHK'],
+      ['tab-qa-it',role==='IT'?'IT':'QA'],['tab-shuttle-report',role]];
    for(const [tab,who] of mapping){
      const div=$('v24-'+tab);if(!div)continue;
      const adjusted=['ADMIN','DH'].includes(role)?role:who;
