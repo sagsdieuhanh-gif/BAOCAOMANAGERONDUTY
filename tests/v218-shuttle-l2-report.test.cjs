@@ -6,8 +6,8 @@ require('../v24-shuttle-grid.js');
 require('../v21-shuttle-export.js');
 const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=globalThis.SagsShuttleExport._test;
 assert.deepEqual(m.defaults.map(x=>[x.direction,x.departure_min]),[
- ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
-],'All seven confirmed fixed times');
+ ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',510],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
+],'All eight confirmed fixed times');
 assert.equal(m.clock(1935),'08:15');
 assert.equal(m.clock(1560),'02:00');
 assert.equal(m.isDefault('CXR_NHA',1560),true);
