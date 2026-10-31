@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.03
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.04
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -58,3 +58,18 @@
 - Mật khẩu tạm 20 ký tự được tạo ngẫu nhiên ở máy chủ, chỉ trả về sau khi hoàn tất hai bảng quyền và chỉ hiển thị trên phiên thao tác hiện tại. Không lưu bản rõ trong Firestore/Database/browser storage, không gửi email tự động. ADMIN phải chuyển riêng cho nhân viên.
 - Tài khoản mới phải **đăng nhập RNS trước** và đổi mật khẩu tạm theo luồng bắt buộc. Manager không cho truy cập nghiệp vụ khi `rns_must_change_password` còn hiệu lực. Sau khi đổi thành công, một email/mật khẩu dùng được trên cả hai hệ thống.
 - GỬI EMAIL MỜI vẫn giữ như phương án phụ, không bắt buộc để đăng ký. Danh sách đã có vẫn có chức năng cấp/chỉnh quyền Manager riêng mà không thay đổi quyền RNS.
+
+## V3.04 – Khôi phục NHẬP NHÂN SỰ XE GIAO CA
+
+**Lỗi:** V3.00–V3.03 chỉ mở bản xem trước/xuất của mục `Xe giao ca`. Bảng nhập số người theo từng giờ xe vẫn ở các tab phòng cũ đã ẩn, làm mất đường thao tác trong giao diện mới.
+
+**Đã khắc phục:**
+1. Sau đăng nhập, chọn **XE GIAO CA** trực tiếp từ thanh chức năng **bên trái** trên cả PC và điện thoại (không còn nằm trong nhóm CÔNG CỤ PHỤ).
+2. Ngay trên cùng màn hình hiển thị **BẢNG NHẬP TRỰC TIẾP THEO GIỜ XE** theo cả hai chiều **Nha Trang → CXR** và **CXR → Nha Trang**, tiếp theo là khối **XEM TRƯỚC / XUẤT ẢNH PNG, PDF**.
+3. Nhập **số người** trong cột được phân quyền, sau đó chọn **LƯU TẤT CẢ THAY ĐỔI**. Các cột phòng khác chỉ xem; ĐH/ADMIN được cập nhật theo phân quyền đã có.
+4. Ô trống = chưa xác nhận, 0 = đã xác nhận không có người; giờ lưu lấy từ máy chủ. Mốc xe mặc định, các giờ tự thêm và lý do bổ sung theo cơ chế hiện hành, không tự thay đổi định mức xe.
+5. Ngày khai thác lấy từ ngày được chọn chung ở đầu website; khi mở mục XE GIAO CA sẽ tự tải bảng xác nhận hiện hành. Không nhập lại vào bảng nhân sự phục vụ tàu bay.
+6. Sau khi lưu, bản xem trước và xuất PNG/PDF tiếp tục dùng đúng dữ liệu xe giao ca đã lưu. Quyền xuất bản vẫn thuộc Điều hành/ADMIN.
+7. Dữ liệu `ops_shift_transport_v2`, `ops_shift_transport_rows`, các RPC, quy tắc bảo mật hiện có được giữ nguyên; chỉ khôi phục đường dẫn tới giao diện nhập.
+
+**Phạm vi:** Đây là sửa lỗi hiển thị của V3.03. Các module nghiệp vụ và báo cáo D+1 khác giữ nguyên.
