@@ -38,8 +38,8 @@ const timeline=m.order([
  {direction:dir,departure_min:1935},
  {direction:dir,departure_min:990}
 ]).map(x=>x.departure_min);
-assert.deepEqual(timeline,[1560,1935,660,990],
-  'Visible clock sorting must show 02:00, 08:15, 11:00 then 16:30, while preserving persisted minute values');
+assert.deepEqual(timeline,[660,990,1560,1935],
+  'Operational order must place next-day 02:00 and 08:15 after the current-day 11:00 and 16:30');
 assert.deepEqual(values[0].departure_min,660,'Sort must not mutate persisted booking source records');
 assert.ok(grid.assemble(values,added).find(x=>x.direction==='NHA_CXR'&&x.departure_min===630),
  'Other direction must retain independent added time');
