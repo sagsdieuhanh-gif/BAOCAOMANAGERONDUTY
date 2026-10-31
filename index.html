@@ -96,17 +96,16 @@
   <div class="panel"><h2>DANH SÁCH DOOR CLOSE ĐÃ NHẬP</h2><div class="tablewrap" id="doorInputTable"></div></div>
 </section>
 <section id="tab-shuttle-report" class="hidden">
- <div class="panel"><h2>XE GIAO CA – BÁO CÁO RIÊNG</h2><p>Tổng hợp xe giao ca 5 đơn vị. Xuất PNG/PDF độc lập; không đưa vào bản tin dự báo chính.</p> <section class="v21-report-shuttle">
- <h3>XE GIAO CA – TỔNG HỢP 5 ĐƠN VỊ</h3>
- <p>Các phòng cập nhật dữ liệu tại tab nghiệp vụ của mình. <b>ĐH là đơn vị duy nhất quyết định phát hành.</b> Tất cả tài khoản có quyền Radar đều được xem bảng phía dưới.</p>
- <div class="v21-export-actions noprint" id="v21ReportExport">
-   <button type="button" data-v21-export="png">XUẤT ẢNH PNG XE GIAO CA</button>
-   <button type="button" data-v21-export="pdf">XUẤT PDF XE GIAO CA</button>
-   <span class="v21-export-note">Bảng 5 đơn vị (ĐH, PVSĐ, PVHK, Kho, QA/IT), hai chiều Nha Trang ↔ Cam Ranh, đủ giờ gốc và dòng tự thêm. Ảnh xem trước chính là bố cục file PNG/PDF xuất ra.</span>
- </div>
- <p class="note" id="v21ShuttleExportStatus" role="status" aria-live="polite"></p><div id="v21ShuttlePreview"></div>
- </section>
-
+ <div class="panel v307-export-panel">
+  <h2>XEM TRƯỚC · XUẤT BẢNG XE GIAO CA</h2>
+  <section class="v21-report-shuttle">
+   <div class="v21-export-actions noprint" id="v21ReportExport">
+    <button type="button" data-v21-export="png">XUẤT PNG</button>
+    <button type="button" data-v21-export="pdf">XUẤT PDF</button>
+   </div>
+   <p class="note" id="v21ShuttleExportStatus" role="status" aria-live="polite"></p>
+   <div id="v21ShuttlePreview"></div>
+  </section>
  </div>
 </section>
 <section id="tab-radar-report" class="hidden">
