@@ -22,6 +22,7 @@ jobs:
         run: |
           for f in ./*.js; do node --check "$f"; done
           node tests/manager-root.test.cjs
+          node tests/v301-unified-sidebar.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
