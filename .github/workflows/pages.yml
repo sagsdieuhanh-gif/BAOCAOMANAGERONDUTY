@@ -34,6 +34,7 @@ jobs:
           node tests/v311-report-shuttle-simple.test.cjs
           node tests/v312-pvhk-report-language.test.cjs
           node tests/v313-report-pdf-portrait.test.cjs
+          node tests/v314-report-staff-visibility.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
