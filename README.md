@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.05
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.06
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -82,3 +82,16 @@
 - Sau khi thêm, giao diện tự tải lại và đưa người dùng đến dòng vừa chèn để nhập số người; không cần tải lại trang thủ công. Các ô chưa xác nhận không tự coi là 0.
 - Bản xem trước và xuất **PNG/PDF** dùng đúng bộ sắp xếp chung với màn hình nhập, bảo đảm cùng thứ tự giờ. Phân quyền theo phòng, quy tắc xe 29/45 chỗ, mốc xe và dữ liệu Supabase không thay đổi.
 - Kiểm thử hồi quy mới: `tests/v305-shuttle-chronology.test.cjs` cho trường hợp 10:00, 11:00, 16:30, xe bổ sung cùng giờ và qua ngày.
+
+## V3.06 – Khôi phục phần gợi ý loại xe 29/45 chỗ trực quan
+
+**Lý do:** Bảng nhập xe giao ca trong V3.04/V3.05 có gợi ý xe tại **cột cuối**, nhưng trên màn hình mobile phải cuộn ngang mới thấy; nếu bốn đơn vị chưa xác nhận đủ, cột đó chưa có hình xe, khiến người dùng tưởng mất chức năng.
+
+**Cách sử dụng:**
+1. Vào mục **XE GIAO CA** ở menu bên trái. Ngay trước bảng nhập từng chiều, hệ thống hiển thị **🚌 GỢI Ý XE THEO GIỜ** và hình minh họa hai loại xe **29 chỗ/45 chỗ**.
+2. Đối với các mốc đã có đủ 4 đơn vị ĐH, PVHK, PVSĐ và QA/IT xác nhận số người, bảng gợi ý hiển thị ngay **giờ xe → hình xe → số lượng ×N → loại xe/ghế dư**. Ví dụ tổng 60 người, gợi ý theo bộ tối ưu hiện có là **01 xe 45 chỗ + 01 xe 29 chỗ**. Các mốc không đủ xác nhận ghi rõ còn chờ; hình 29/45 ở phần đầu chỉ là danh mục minh họa, không phải lệnh điều xe.
+3. Người dùng có thể cuộn ngang bảng để xem cột **GỢI Ý XE** như trước. Phần gợi ý bên trên được thiết kế để xem được trên PC và mobile **không cần vuốt ngang**.
+4. Khi thêm giờ xe mới, mốc đó được tự chèn đúng thứ tự. Sau khi lưu đủ số liệu của cả 4 phòng, gợi ý tự xuất hiện trong bản xem trước/xuất PNG/PDF theo đúng thứ tự.
+5. Các gợi ý chỉ mang tính dự kiến, quyết định loại và số xe triển khai thuộc Phòng Điều hành. Không thay đổi dữ liệu lịch xe, quy tắc gợi ý 29/45 chỗ, quyền sửa, cơ chế xác nhận, xuất PNG/PDF hay cấu hình Supabase.
+
+**Kiểm thử:** `tests/v305-shuttle-chronology.test.cjs` và `tests/v306-shuttle-vehicle-recommendations.test.cjs` bảo vệ thứ tự giờ, hình xe, số xe và không suy đoán khi thiếu xác nhận.
