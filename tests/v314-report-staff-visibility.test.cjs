@@ -47,7 +47,7 @@ for(const revision of [1,2]){
  const kts=data.staffDetails.find(x=>x.unit==='KTS'&&x.role.includes('SKYONE'));
  assert.deepEqual([kts.morning,kts.night],[9,11]);
  assert.ok(!data.staffDetails.some(x=>x.role==='UNCONFIRMED'));
- assert.ok(data.topics[4].observation.includes('đã xác nhận quân số'));
+ assert.ok(data.topics[4].observation.includes('đã cập nhật quân số'));
  assert.ok(!/thiếu|đảm bảo|đáp ứng|định mức/i.test(data.topics[4].action),'No staff sufficiency text');
  assert.ok(!data.topics[4].action.includes('50 NS'),'Do not claim sum of PVSD roles is unique staff');
  const html=report.renderHtml(data);
