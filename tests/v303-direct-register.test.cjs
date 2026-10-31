@@ -12,5 +12,5 @@ assert.ok(admin.includes('temporary_password'),'Temporary password must only com
 assert.ok(admin.includes("rnsCreateSecretPanel')?.classList.add('hidden')"),'One-time password must be erasable');
 assert.ok(!html.includes('<option value="ADMIN">'),'Shared account quick create must never grant manager ADMIN');
 assert.ok(html.includes('rns_must_change_password===true'),'New accounts must reset password via RNS before Manager');
-assert.match(html,/const APP_VERSION='V3\.15'/);
+assert.match(html,/const APP_VERSION='V3\.16'/);
 console.log('PASS: V3.10 admin-only shared RNS/Manager creation UI, immediate roles and first-login reset');
