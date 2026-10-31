@@ -373,8 +373,25 @@
      '<p class="v19-footnote">Nguồn Lần 2: '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lịch Lần 1 được giữ làm mốc so sánh. Chi tiết Peak Hours và Radar xem tại tab chuyên biệt.</p></div>';
  }
  function html(data){
-   if(data.c.revision===2&&data.dailyBrief)return l2Html(data);
+   // Lần 2 giữ nguyên biểu mẫu Lần 1 và bổ sung ngay dưới mục liên quan.
    const fmtBay=b=>b==null?'CHỜ XÁC NHẬN':'Bãi '+b;
+   const isL2=data.c.revision===2;
+   const brief=isL2?data.dailyBrief?.entries||[]:[];
+   const related={
+     0:['change'],1:[],2:['stands','wide'],3:['checkin'],
+     4:['resource'],5:['cargo'],6:['gate'],7:[],8:[]
+   };
+   const appendL2=(base,index,field)=>{
+     if(!isL2)return base;
+     const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
+     const values=sources.map(x=>field==='observation'?x.observation:x.action)
+       .filter(Boolean).map(v=>crop(v,200));
+     if(!values.length)return base;
+     const extra=values.join('; ');
+     return String(base).includes(extra)?base:String(base)+'\n(Cập nhật Lần 2: '+extra+')';
+   };
+   const updateTopic=(x,i)=>({...x,observation:appendL2(x.observation,i,'observation'),
+     action:appendL2(x.action,i,'action')});
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
     '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, check-in, boarding, booking và ferry được phân tích theo lịch mới, đối chiếu Lần 1.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
@@ -385,13 +402,7 @@
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
-    (data.dailyBrief?'<h3>PHƯƠNG ÁN PHỤC VỤ LẦN 2 · NHẬN ĐỊNH THEO TÌNH HÌNH NGÀY</h3>'+
-      '<p>'+esc(data.dailyBrief.lead)+'</p>'+
-      (data.dailyBrief.staffing?'<p><b>Quân số các đơn vị đã xác nhận:</b> '+esc(data.dailyBrief.staffing)+'.</p>':'')+
-      '<table>'+tr(['Nội dung cần tập trung','Đánh giá từ lịch và dữ liệu các phòng','Phương án phục vụ / Đơn vị thực hiện'],true)+
-      data.dailyBrief.entries.map(x=>tr([x.title,x.observation,x.action+'\n'+x.owner])).join('')+'</table>'+
-      '<p><b>Thông tin cần xác nhận thêm:</b> '+esc(data.dailyBrief.closing)+'</p>':'')+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map(x=>tr([x.title,x.observation,x.action,x.owner])).join('')+'</table>'+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,y.observation,y.action,y.owner])}).join('')+'</table>'+
     '<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>'+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':'<p>Chưa có nội dung bổ sung từ các phòng.</p>')+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
