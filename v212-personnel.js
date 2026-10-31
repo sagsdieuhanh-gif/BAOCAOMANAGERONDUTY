@@ -20,24 +20,13 @@
    const rm=parseCount(details.pvb_morning_required),rn=parseCount(details.pvb_night_required);
    const ms=confirmed&&m!=null?state(details.pvb_morning_status):'PENDING';
    const ns=confirmed&&n!=null?state(details.pvb_night_status):'PENDING';
-   const human={READY:'Đảm bảo',LIMITED:'Chưa đảm bảo',PENDING:'CHỜ XÁC NHẬN'}; 
-   const status=ms==='READY'&&ns==='READY'?'Đảm bảo':
-     (ms==='LIMITED'||ns==='LIMITED')?'Chưa đảm bảo':
-     ms==='PENDING'&&ns==='PENDING'?'CHỜ XÁC NHẬN':
-     'Chưa xác nhận đầy đủ';
-   const shortage=(count,required,st)=>st!=='LIMITED'?'':required!=null&&count!=null&&required>count?', thiếu '+(required-count)+' NS so với nhu cầu':', cần bổ sung lực lượng';
-   const suffix=(label,value,st,required)=>label+' ('+(value==null?'CHỜ XÁC NHẬN':value+' NS')+
-      (st==='PENDING'&&value!=null?', chưa xác nhận đáp ứng':'')+
-      (required!=null&&value!=null?', nhu cầu '+required+' NS':'')+')'+shortage(value,required,st);
-   const shiftVariation=ms!==ns&&ms!=='PENDING'&&ns!=='PENDING';
+   // Reporting only: do not rate staffing sufficiency here. Such assessments
+   // require an applicable, verified service norm, not just a headcount.
    const headcountConfirmed=confirmed&&m!=null&&n!=null;
-   const headline=shiftVariation?'Khả năng đáp ứng '+def.service+': ca sáng '+human[ms].toLowerCase()+', ca đêm '+human[ns].toLowerCase():
-     headcountConfirmed&&ms==='PENDING'&&ns==='PENDING'?'Đã xác nhận quân số '+def.service+'; chưa đánh giá đủ/thiếu so với nhu cầu':
-     status==='CHỜ XÁC NHẬN'?'CHỜ XÁC NHẬN '+def.service:
-     status==='Chưa xác nhận đầy đủ'?'Chưa xác nhận đầy đủ khả năng đáp ứng '+def.service:
-     status+' '+def.service;
-   const countMorning=confirmed?m:null,countNight=confirmed?n:null;
-   const line='- '+def.label+': '+headline+'. '+suffix('Sáng',countMorning,ms,rm)+'; '+suffix('Đêm',countNight,ns,rn)+'.';
+   const status=headcountConfirmed?'CONFIRMED':confirmed?'PARTIAL':'PENDING';
+   const show=(label,value)=>label+' ('+(value==null?'CHỜ XÁC NHẬN':value+' NS')+')';
+   const line='- '+def.label+': '+(headcountConfirmed?'Quân số đã xác nhận':'Quân số theo ca')+
+     '. '+show('Sáng',confirmed?m:null)+'; '+show('Đêm',confirmed?n:null)+'.';
    return {unit,line,status,headcountConfirmed,complete:ms!=='PENDING'&&ns!=='PENDING'&&m!=null&&n!=null,detail:{morning:m,night:n,required_morning:rm,required_night:rn,morning_status:ms,night_status:ns}};
  }
  function summarize(rows=[]){

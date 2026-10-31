@@ -139,3 +139,10 @@
 
 - ĐH/PVHK/PVSĐ đã xác nhận số người: báo cáo Lần 1 và Lần 2 tải trực tiếp từ `ops_staff_capacity` theo ngày, có bảng quân số từng vị trí và ca sáng/đêm. Trạng thái chưa đánh giá đủ/thiếu không làm mất số người đã nhập; không cộng trùng các nhóm PVSĐ.
 - Chi tiết: [HDSD_MANAGER_V3.14.md](HDSD_MANAGER_V3.14.md).
+
+
+### V3.15 – Báo cáo quân số và PDF có tùy chọn ẩn cảnh báo
+
+- Quân số chỉ nêu số người thực tế theo ca/vị trí; không phán đoán đủ/thiếu theo định mức.
+- Tích **“Ẩn thông tin chưa xác nhận khi xuất PDF”** để không đưa khối cảnh báo GSE/Kho hàng chờ xác nhận vào PDF. Bản xem trước và Word giữ nguyên nội dung; bỏ tích để đưa cảnh báo trở lại PDF.
+- Xem [HDSD_MANAGER_V3.15.md](HDSD_MANAGER_V3.15.md).

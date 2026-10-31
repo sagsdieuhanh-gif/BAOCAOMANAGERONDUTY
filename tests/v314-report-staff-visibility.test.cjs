@@ -16,7 +16,7 @@ const plans=['DH','PVHK','KTS'].map((unit,i)=>({
 const p=personnel.summarize(plans);
 assert.equal(p.headcountsConfirmed,true,'Count confirmations must be independent from staffing adequacy');
 assert.equal(p.complete,false,'Pending sufficiency cannot be declared READY');
-assert.ok(p.lines[0].includes('Đã xác nhận quân số'));
+assert.ok(p.lines[0].includes('Quân số đã xác nhận'));
 assert.ok(p.lines[0].includes('Sáng (8 NS'));
 const staffRows=[
  ['DH','COORD',8,8],
@@ -47,7 +47,8 @@ for(const revision of [1,2]){
  const kts=data.staffDetails.find(x=>x.unit==='KTS'&&x.role.includes('SKYONE'));
  assert.deepEqual([kts.morning,kts.night],[9,11]);
  assert.ok(!data.staffDetails.some(x=>x.role==='UNCONFIRMED'));
- assert.ok(data.topics[4].observation.includes('đã xác nhận quân số'));
+ assert.ok(data.topics[4].observation.includes('đã cập nhật quân số'));
+ assert.ok(!/thiếu|đảm bảo|đáp ứng|định mức/i.test(data.topics[4].action),'No staff sufficiency text');
  assert.ok(!data.topics[4].action.includes('50 NS'),'Do not claim sum of PVSD roles is unique staff');
  const html=report.renderHtml(data);
  for(const field of ['CHI TIẾT QUÂN SỐ','Điều phối','Đội khách đi','Bốc xếp','SKYONE','59 người','43 người','0 người','18 người','15 người','8 người','7 người'])
@@ -60,7 +61,7 @@ assert.ok(fs.readFileSync('v19-report.js','utf8').includes("sb.from('ops_staff_c
 assert.ok(fs.readFileSync('v19-report.js','utf8').includes("staff:staffToday.data||[]"),
  'Confirmed staff must use current date query data');
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes("APP_VERSION='V3.14'"));
-assert.ok(index.includes('v19-report.js?v=3.14'));
-assert.ok(index.includes('v212-personnel.js?v=3.14'));
+assert.ok(index.includes("APP_VERSION='V3.15'"));
+assert.ok(index.includes('v19-report.js?v=3.15'));
+assert.ok(index.includes('v212-personnel.js?v=3.15'));
 console.log('PASS V3.14: confirmed staffing is visible in L1/L2 by department and shift, readiness distinct, no duplicates');

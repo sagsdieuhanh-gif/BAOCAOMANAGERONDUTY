@@ -74,7 +74,7 @@
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.14</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.15</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -422,7 +422,8 @@
    $('v300Page').innerHTML=wrapPanel('Báo cáo điều hành D+1',
     'Giữ mẫu Lần 1; Lần 2 chỉ cập nhật dữ liệu và nhận định có căn cứ.',
     '<div class="v300-report-controls"><button data-v300-command="preview" class="v300-primary">TẠO / CẬP NHẬT BẢN XEM TRƯỚC</button>'+
-    (['DH','ADMIN'].includes(role())?'<button data-v300-command="word">XUẤT WORD</button><button data-v300-command="pdf">XUẤT PDF</button>':'')+
+    (['DH','ADMIN'].includes(role())?'<button data-v300-command="word">XUẤT WORD</button><button data-v300-command="pdf">XUẤT PDF</button>'+
+    '<label class="v315-pdf-toggle"><input id="v315WorkspaceHidePending" type="checkbox" checked> Ẩn thông tin chưa xác nhận khi xuất PDF</label>':'')+
     '</div><div class="v300-report-preview" id="v300ReportPreview"><p class="v300-hint">Chọn tạo bản xem trước để tổng hợp số liệu hiện có.</p></div>');
    await previewReport();
  }
@@ -446,7 +447,8 @@
    try{
      if(!root.SagsOfficeExportV29)throw Error('Công cụ xuất Word/PDF chưa sẵn sàng.');
      const target='SAGS_CXR_DU_BAO_'+(state?.snap2?'LAN_2':'LAN_1')+'_'+date().replaceAll('-','')+'.'+ext;
-     await root.SagsOfficeExportV29.exportElement(src,ext,target);
+     const hidePendingWarnings=ext==='pdf'&&$('v315WorkspaceHidePending')?.checked===true;
+     await root.SagsOfficeExportV29.exportElement(src,ext,target,{hidePendingWarnings});
      status('Đã xuất '+target+'.');
    }catch(e){status('Chưa xuất được '+ext.toUpperCase()+': '+e.message,true)}
  }

@@ -29,18 +29,12 @@
    const staffNames={DH:'Phòng ĐH',PVHK:'PVHK',KTS:'PVSĐ'};
    const confirmedStaff=(c.unitPlans||[]).filter(x=>staffNames[x.unit]&&x.status==='CONFIRMED'&&x.details);
    const staffing=confirmedStaff.length?confirmedStaff.map(x=>{
-      const d=x.details,parts=['morning','night'].map((shift,i)=>{
-        const n=quantity(d['pvb_'+shift]),need=quantity(d['pvb_'+shift+'_required']),
-          status=d['pvb_'+shift+'_status'];
-        if(n==null)return null;
-        const delta=need!=null?' (nhu cầu '+need+', '+(n<need?'thiếu '+(need-n):'đáp ứng theo số đã đăng ký')+' người)':
-          status==='LIMITED'?' (phòng báo chưa đủ)':
-          status==='READY'?' (phòng báo đủ)':' (chưa có nhu cầu đối chiếu)';
-        return (i?'đêm ':'sáng ')+n+' người'+delta;
-      }).filter(Boolean);
-      return parts.length?staffNames[x.unit]+': '+parts.join(', '):null;
+     const d=x.details,parts=['morning','night'].map((shift,i)=>{
+       const n=quantity(d['pvb_'+shift]);
+       return n==null?null:(i?'đêm ':'sáng ')+n+' người';
+     }).filter(Boolean);
+     return parts.length?staffNames[x.unit]+': '+parts.join(', '):null;
    }).filter(Boolean).join('; '):'';
-
    const push=(key,title,observation,action,owner,weight=0)=>
      entries.push({key,title,observation:cap(observation),action:cap(action,720),owner,weight});
    const top=(op.top||[]).filter(w=>w.total>=2).slice().sort((a,b)=>b.total-a.total||a.start-b.start);
@@ -100,68 +94,39 @@
    const byBooking=deps.filter(x=>!x.ferry&&Number.isFinite(x.booking_sum)&&x.booking_sum>0)
      .sort((a,b)=>b.booking_sum-a.booking_sum||a.t-b.t);
    const busyBooking=byBooking.slice(0,3);
-   const cWindows=windows.filter(x=>x.checkin?.openFlights?.length).sort((a,b)=>{
-     const d=(b.checkin?.shortage||0)-(a.checkin?.shortage||0);
-     return d||b.checkin.openFlights.length-a.checkin.openFlights.length||a.start-b.start;
-   });
-   const knownCount=deps.filter(x=>!x.ferry&&agreed.has(carrier(x))).length;
-   const checkIssue=cWindows.find(x=>x.checkin.shortage>0)||cWindows[0];
+   // Booking, check-in/gate duties are reported as an operational plan.
+   // Do not infer 'thiếu/đủ nhân sự' from calculated staffing demand.
+   const cWindows=windows.filter(x=>x.checkin?.openFlights?.length)
+     .sort((a,b)=>b.checkin.openFlights.length-a.checkin.openFlights.length||a.start-b.start);
+   const checkIssue=cWindows[0];
    if(busyBooking.length||checkIssue){
      const bookings=busyBooking.length?'Các chuyến có booking cao nhất trong lịch là '+
        busyBooking.map(x=>x.no+' ('+x.booking_sum+' khách đặt chỗ'+(x.gate?', gate '+x.gate:'')+')').join(', ')+
        '. Đây là lượng đặt chỗ, chưa phải PAX thực đi. ':'';
-     let counter='';
-     if(checkIssue){
-       const check=checkIssue.checkin;
-       counter=' Tại '+clock(checkIssue.start)+'–'+clock(checkIssue.start+30)+', các quầy dự kiến phục vụ '+
-         short(check.openFlights,5)+'.';
-       if(check.required!=null&&check.available!=null)counter+=' Nhu cầu theo định mức đã nhập '+check.required+
-         ' người, trong khi lực lượng đội đi khai báo cho khung này là '+check.available+' người'+
-         (check.shortage>0?', chênh thiếu '+check.shortage+' người.':'; chưa ghi nhận thiếu theo phép đối chiếu này.');
-       else counter+=' Chưa đủ định mức hoặc phân bổ quân số theo thời điểm để kết luận thiếu/đủ ở quầy.';
-     }
-     const unconfirmed=deps.filter(x=>!x.ferry&&!agreed.has(carrier(x)));
-     if(unconfirmed.length)counter+=' Các hãng chưa đủ định mức đã duyệt: '+short(unconfirmed.map(x=>carrier(x)),5)+'.';
+     const counter=checkIssue?' Tại '+clock(checkIssue.start)+'–'+clock(checkIssue.start+30)+
+       ', các quầy dự kiến phục vụ '+short(checkIssue.checkin.openFlights,5)+'.':'';
      push('checkin','Booking, quầy check-in và nhân sự PVHK',
        bookings+counter,
-       checkIssue?.checkin?.shortage>0?
-        'PVHK bố trí người trực quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo từng chuyến. Khi thiếu người ở quầy, rà lại thời gian mở/đóng quầy để điều tiết từ công đoạn ít áp lực nếu thực tế cho phép; hoặc báo ĐH phối hợp tăng cường. Không rút người ở công đoạn đang phục vụ chỉ dựa vào tổng quân số ca.':
-        'PVHK phân người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo giờ từng chuyến. Theo dõi số quầy đang mở và lượng khách thực tế để điều tiết, nhưng không rút người khỏi công đoạn đang phục vụ. ĐH yêu cầu xác nhận định mức và phân bổ từng vị trí trước khi nhận định đủ nhân lực.',
-       'PVHK · ĐH',checkIssue?.checkin?.shortage>0?5:2);
+       'PVHK phân công nhân sự làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo lịch từng chuyến. Theo dõi số quầy mở cùng lúc và khách thực tế để điều tiết giữa các công đoạn, chỉ điều chuyển người khi vị trí trước đã hoàn tất nhiệm vụ.',
+       'PVHK · ĐH',checkIssue?3:2);
    }
-   const shortages=windows.filter(w=>w.total>0&&(
-     w.gse?.some(x=>x.shortage>0)||w.baggage?.shortage>0||
-     w.driver?.shortage>0||w.cobusDrivers?.shortage>0||w.gateStaff?.shortage>0
-   )).sort((a,b)=>{
-     const aCount=a.gse.filter(x=>x.shortage>0).length+
-       [a.baggage,a.driver,a.cobusDrivers,a.gateStaff].filter(x=>x.shortage>0).length;
-     const bCount=b.gse.filter(x=>x.shortage>0).length+
-       [b.baggage,b.driver,b.cobusDrivers,b.gateStaff].filter(x=>x.shortage>0).length;
-     return bCount-aCount||b.total-a.total||a.start-b.start;
-   });
-   const resource=shortages[0]||windows.filter(x=>x.total>=2).sort((a,b)=>b.total-a.total||a.start-b.start)[0];
+   const resource=windows.filter(x=>x.total>=2)
+     .sort((a,b)=>b.total-a.total||a.start-b.start)[0];
    const equipment=(c.equipmentIssues||[]).filter(x=>x.issue_status!=='RETURNED');
    if(resource||equipment.length){
      const items=[];
      if(resource){
-       const needed=resource.gse.filter(x=>x.shortage>0).map(x=>x.key+' thiếu '+x.shortage);
-       for(const [obj,label] of [[resource.baggage,'bốc xếp'],[resource.driver,'lái GSE'],
-         [resource.cobusDrivers,'lái Cobus'],[resource.gateStaff,'nhân sự gate']])
-         if(obj?.shortage>0)needed.push(label+' thiếu '+obj.shortage+' người');
-       items.push('Khung '+clock(resource.start)+'–'+clock(resource.start+30)+' có '+resource.total+
-         ' cặp cần phục vụ'+(needed.length?'; đối chiếu theo số liệu đã khai báo ghi nhận '+needed.join(', ')+'.':
-         ', chưa ghi nhận thiếu theo các chỉ tiêu đã có số liệu; vẫn phải xác nhận thời gian quay vòng xe.'));
-       if(resource.unknownCargo)items.push(resource.unknownCargo+' chuyến chưa rõ yêu cầu cargo; nhu cầu bốc xếp theo kịch bản '+resource.baggage.scenarioMin+
-         '–'+resource.baggage.scenarioMax+' người, chưa đủ căn cứ kết luận.');
+       items.push('Khung '+clock(resource.start)+'–'+clock(resource.start+30)+
+         ' có '+resource.total+' cặp cần phục vụ; PVSĐ kiểm tra khả năng luân chuyển người và trang thiết bị theo từng công đoạn.');
+       if(resource.unknownCargo)items.push(resource.unknownCargo+
+         ' chuyến chưa rõ tình trạng hàng, cần Kho Hàng xác nhận để tổ chức phục vụ.');
      }
      if(equipment.length)items.push('PVSĐ đang báo '+equipment.length+' thiết bị hạn chế, trong đó có '+
        short(equipment.map(x=>x.equipment_id),4)+'.');
      push('resource','Xe thang, Cobus và lực lượng phục vụ sân đỗ',
        items.join(' '),
-       shortages.length?
-         'PVSĐ kiểm tra lại xe thực sự có thể huy động, ưu tiên cấp cho các chuyến đang chồng lấn và giữ thiết bị phù hợp với bãi đỗ. Nếu thiếu theo phương án bố trí, phân lại nhóm xe/nhân sự theo từng đợt và báo ĐH phương án tăng cường; không lấy STD làm mốc xe chắc chắn được giải phóng.':
-         'PVSĐ rà soát thời gian hoàn tất từng công đoạn, vị trí để xe và đường di chuyển giữa các bãi; đưa thiết bị dự phòng tới nơi có thể tiếp cận nhanh. Số xe khai báo đang sẵn sàng chưa đồng nghĩa có thể dùng ngay ở bãi khác.',
-       'PVSĐ · ĐH',shortages.length?5:2);
+       'PVSĐ rà soát thời gian hoàn tất từng công đoạn, vị trí tập kết và đường di chuyển giữa các bãi; chuẩn bị thiết bị phù hợp và chỉ điều chuyển nhân sự, thiết bị sau khi công đoạn trước hoàn tất. ĐH phối hợp xử lý các thay đổi ảnh hưởng khai thác.',
+       'PVSĐ · ĐH',equipment.length?3:2);
    }
    const wide=all.filter(isWide);
    if(wide.length){
@@ -222,11 +187,9 @@
    if(!lead.length){
      if(standBusy.length)lead.push('Trong ngày, lưu ý luồng xe tại khu bãi '+short(standBusy.map(x=>x.zone),2)+' theo các cụm giờ có chuyến dự kiến.');
      else if(busyBooking.length)lead.push('Kế hoạch hôm nay cần bám sát giờ mở quầy và tiến độ boarding của các chuyến có booking cao.');
-     else lead.push('Phương án được xây dựng từ lịch Lần 2 và các số liệu đơn vị đã nhập, chưa có cơ sở xác nhận thiếu nguồn lực trên toàn ca.');
+     else lead.push('Phương án được xây dựng theo lịch Lần 2 và số người, thiết bị đã được các đơn vị cập nhật; cần rà soát phân công theo từng công đoạn.');
    }
    const outstanding=[];
-   if(!contract.length&&deps.some(x=>!x.ferry))outstanding.push('chưa có định mức quầy hãng đã xác nhận');
-   if(windows.some(x=>x.checkin?.openFlights?.length&&x.checkin?.available==null))outstanding.push('chưa có phân bổ đội check-in theo thời gian');
    if(windows.some(x=>x.total&&x.gse?.some(t=>t.available==null)))outstanding.push('còn thiếu số lượng một số thiết bị khả dụng');
    if(arrs.length&&all.some(x=>x.bay==null))outstanding.push('còn chuyến chưa có bãi đỗ');
    const closing=outstanding.length?'Các nội dung cần chốt thêm trước ca: '+outstanding.slice(0,4).join('; ')+'.':
