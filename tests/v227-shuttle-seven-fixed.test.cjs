@@ -40,9 +40,9 @@ assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1185&&x.is
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js']){
- assert.ok(index.includes(file+'?v=2.27'),'Unchanged shuttle model/export assets must stay available: '+file);
+ assert.ok(index.includes(file+'?v=3.05'),'Chronological model/export assets must bypass cache: '+file);
 }
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.04'),
+assert.ok(index.includes('v24-shuttle-grid.js?v=3.05'),
  'Restored shuttle personnel grid must bypass legacy asset cache');
 const migration=fs.readFileSync('server/v227-shuttle-fixed-seven.sql','utf8');
 assert.ok(migration.includes('(990,1110,1560,1935)'),'DB protects 02:00 along with previous fixed departures');
