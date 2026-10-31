@@ -40,7 +40,8 @@ assert.deepEqual(sorted,['08:30','10:00','11:00','16:30','18:30','02:00','08:15'
 const partial=grid.makeGrid(dir,grid.assemble([{unit:'DH',direction:dir,departure_min:660,line_no:0,quantity:2}],extra),'PVHK');
 assert.ok(partial.includes('data-v306-slot="CXR_NHA|660|0"')&&partial.includes('TẠM TÍNH'),
  'Partially entered headcount must receive a visibly provisional recommendation');
-assert.ok(partial.includes('shuttle-29.webp')&&partial.includes('shuttle-45.webp'),'Vehicle example imagery must be retained');
+assert.ok(grid.vehicleGuide().includes('shuttle-29.webp')&&grid.vehicleGuide().includes('shuttle-45.webp'),
+ 'The always-visible guide must retain illustrations of 29- and 45-seat coaches');
 const ui=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(ui.includes('show();\n   const req=++sequence;'),'Show timetable before any Supabase query');
 const index=fs.readFileSync('index.html','utf8');
