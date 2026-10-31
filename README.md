@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.06
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.07
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -78,7 +78,7 @@
 
 - Trong **XE GIAO CA → THÊM GIỜ XE KHÁC**, sau khi nhập giờ chạy và lý do rồi bấm THÊM MỐC GIỜ, hệ thống **tự chèn dòng theo thứ tự tăng dần của giờ xe**, không đưa giờ tự thêm xuống cuối bảng.
 - Ví dụ chiều xe có **10:00** và **16:30**, thêm giờ **11:00** thì bảng nhập hiển thị **10:00 → 11:00 → 16:30**. Mỗi chiều xe sắp xếp riêng. Nhiều xe cùng giờ có dòng bổ sung nằm ngay dưới mốc chính.
-- Giờ xe ngày hôm sau (+1) được đối chiếu theo thời điểm có tính ngày, không đặt nhầm trước các giờ của ngày hiện tại. Không đổi mốc thời gian gốc trong dữ liệu đã lưu.
+- Giờ xe hiển thị theo thứ tự đồng hồ HH:MM của từng chiều xe, từ sớm đến muộn; mã phút lưu gốc vẫn giữ nguyên bao gồm các mốc qua ngày.
 - Sau khi thêm, giao diện tự tải lại và đưa người dùng đến dòng vừa chèn để nhập số người; không cần tải lại trang thủ công. Các ô chưa xác nhận không tự coi là 0.
 - Bản xem trước và xuất **PNG/PDF** dùng đúng bộ sắp xếp chung với màn hình nhập, bảo đảm cùng thứ tự giờ. Phân quyền theo phòng, quy tắc xe 29/45 chỗ, mốc xe và dữ liệu Supabase không thay đổi.
 - Kiểm thử hồi quy mới: `tests/v305-shuttle-chronology.test.cjs` cho trường hợp 10:00, 11:00, 16:30, xe bổ sung cùng giờ và qua ngày.
@@ -95,3 +95,13 @@
 5. Các gợi ý chỉ mang tính dự kiến, quyết định loại và số xe triển khai thuộc Phòng Điều hành. Không thay đổi dữ liệu lịch xe, quy tắc gợi ý 29/45 chỗ, quyền sửa, cơ chế xác nhận, xuất PNG/PDF hay cấu hình Supabase.
 
 **Kiểm thử:** `tests/v305-shuttle-chronology.test.cjs` và `tests/v306-shuttle-vehicle-recommendations.test.cjs` bảo vệ thứ tự giờ, hình xe, số xe và không suy đoán khi thiếu xác nhận.
+
+## V3.07 – Sửa tận gốc thứ tự giờ xe và tối giản bảng
+
+- Bảng XE GIAO CA sắp tăng dần theo **giờ chạy nhìn thấy** (giờ/phút, không phải khóa phút +1440 lưu trong database). Chiều **CXR → NHA** mặc định **02:00 → 08:15 → 16:30 → 18:30**; thêm 11:00 thành **02:00 → 08:15 → 11:00 → 16:30 → 18:30**. Chiều **NHA → CXR** mặc định **07:00 → 17:30 → 19:30**; giờ mới chèn đúng vị trí.
+- Với các mốc chuẩn, hiển thị **08:15** và **02:00**, không gắn dấu (+1); **không thay đổi giá trị `departure_min`** hay dữ liệu đã lưu.
+- Bảng chỉ còn **GIỜ CHẠY | ĐH | PVHK | PVSĐ | QA/IT | TỔNG | GỢI Ý XE**; chữ giờ chạy, tổng người và hình 29/45 chỗ được làm nổi bật. Bỏ các dòng xác nhận, ngày giờ và lý do lặp xen giữa các mốc.
+- Mục **Quản lý giờ bổ sung** được thu gọn để sửa lý do và xóa xe đã thêm khi cần; giữ phân quyền và chức năng lưu.
+- Gợi ý 29/45 chỗ theo từng giờ hiện phía trên bảng, kể cả giờ đang chờ 4 phòng xác nhận; giờ chưa đủ số liệu phải ghi **CHỜ XÁC NHẬN**, không tự suy đoán loại xe.
+- Hiển thị bảng giờ chuẩn ngay cả trước khi Supabase trả dữ liệu; nếu lỗi truy vấn sẽ thông báo cụ thể. Trên màn hình mới, chọn **+ THÊM GIỜ XE** theo chiều → nhập giờ/lý do → bấm THÊM MỐC GIỜ → nhập quân số ở dòng được chèn → LƯU TẤT CẢ THAY ĐỔI. PNG/PDF dùng cùng thứ tự.
+- Kiểm thử `tests/v307-shuttle-compact-order.test.cjs` kiểm tra chuỗi **02:00 → 08:15 → 10:00 → 11:00 → 16:30 → 18:30**, bố cục một dòng/giờ, hình xe, phân quyền và khả năng xuất.
