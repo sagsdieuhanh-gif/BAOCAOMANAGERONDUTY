@@ -39,8 +39,8 @@ assert.ok(m.suggestVehicles(60).n29===1&&m.suggestVehicles(60).n45===1,
 const partial=g.makeGrid(dir,g.assemble(four(660,[4,3,2,1]).slice(0,2),[]),'PVHK');
 assert.ok(g.vehicleGuide().includes('shuttle-29.webp')&&g.vehicleGuide().includes('shuttle-45.webp'),
  'Permanent guide shows both 29/45C bus illustrations even with incomplete staffing');
-assert.ok(partial.includes('TẠM TÍNH')&&!partial.includes('ĐỦ 4/4'),
- 'Incomplete staffing must show a clearly labeled provisional suggestion, never an official one');
+assert.ok(partial.includes('TẠM TÍNH')&&partial.includes('phòng (tạm tính)'),
+ 'Incomplete staffing must show the explicit provisional label and department count');
 assert.ok(partial.includes('data-v306-slot="CXR_NHA|660|0"'),
  'Each scheduled time remains visible in the summary even while awaiting data');
 assert.ok(partial.includes('TẠM TÍNH'),
