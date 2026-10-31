@@ -125,8 +125,8 @@
      push('checkin','Booking, quầy check-in và nhân sự PVHK',
        bookings+counter,
        checkIssue?.checkin?.shortage>0?
-        'PVHK rà lại số người trực quầy theo giờ mở và đóng quầy của từng chuyến; điều tiết từ công đoạn ít áp lực nếu thực tế cho phép, hoặc báo ĐH phối hợp tăng cường trước giờ mở quầy. Đồng thời giữ lực lượng làm boarding tại gate và đón khách đến tại tàu bay đang phục vụ; không điều người sang quầy chỉ dựa trên tổng quân số cả ca.':
-        'PVHK phân người làm thủ tục tại các quầy check-in mở đồng thời theo giờ từng chuyến, đồng thời bố trí đội gate/boarding và người đón, tiễn khách tại tàu bay. Theo dõi lượng khách thực tế để điều tiết, nhưng không rút người khỏi công đoạn đang phục vụ. ĐH yêu cầu xác nhận định mức và phân bổ từng vị trí trước khi nhận định đủ nhân lực.',
+        'PVHK bố trí người trực quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo từng chuyến. Khi thiếu người ở quầy, rà lại thời gian mở/đóng quầy để điều tiết từ công đoạn ít áp lực nếu thực tế cho phép; hoặc báo ĐH phối hợp tăng cường. Không rút người ở công đoạn đang phục vụ chỉ dựa vào tổng quân số ca.':
+        'PVHK phân người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo giờ từng chuyến. Theo dõi số quầy đang mở và lượng khách thực tế để điều tiết, nhưng không rút người khỏi công đoạn đang phục vụ. ĐH yêu cầu xác nhận định mức và phân bổ từng vị trí trước khi nhận định đủ nhân lực.',
        'PVHK · ĐH',checkIssue?.checkin?.shortage>0?5:2);
    }
    const shortages=windows.filter(w=>w.total>0&&(
