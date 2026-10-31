@@ -48,7 +48,7 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo,minimumNorms]=await Promise.all([
+   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo,minimumNorms,staffToday]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
@@ -60,7 +60,8 @@
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',2).maybeSingle(),
     sb.from('ops_service_contracts').select('*').eq('service_date',day),
     sb.from('ops_flights').select('arrival,departure,cargo_status').eq('service_date',day),
-     sb.from('ops_minimum_service_norms').select('*')
+     sb.from('ops_minimum_service_norms').select('*'),
+     sb.from('ops_staff_capacity').select('service_date,unit,role_code,shift,start_min,end_min,quantity,confirmed_at').eq('service_date',day)
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(s2.error)throw Error('Không tải được lịch bay Lần 2: '+s2.error.message);
@@ -73,6 +74,7 @@
    if(bus.error)throw Error('Không tải được xe giao ca: '+bus.error.message);
    if(shuttleRows.error)throw Error('Không tải được các dòng xe bổ sung: '+shuttleRows.error.message);
    if(unitInputs.error)throw Error('Không tải được xác nhận các phòng: '+unitInputs.error.message);
+   if(staffToday.error)throw Error('Không tải được quân số đã nhập: '+staffToday.error.message);
    if(quickReports.error)throw Error('Không tải được nội dung các phòng gửi nhanh: '+quickReports.error.message);
    const payload=s2.data?.payload||s.data?.payload||null,arr=payload?.flights?.length?payload.flights:flights;
    if(!arr.length)throw Error('Chưa có lịch bay cho ngày '+dateVN(day)+'. Cần tải Excel trước khi xuất báo cáo.');
@@ -87,7 +89,7 @@
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
     note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:(s2.data||s.data)?.source_filename||'',revision:s2.data?2:1,sourcePayload:payload,firstPayload:s.data?.payload||null,
-    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],minimumNorms:minimumNorms.data||[],staff,gse};
+    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],minimumNorms:minimumNorms.data||[],staff:staffToday.data||[],gse};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -103,6 +105,33 @@
     prev.departure_count+' đi, '+prev.arrival_count+' đến ('+priorTotal+' lượt).')+
     '\nNgày '+dateVN(c.date)+': '+c.departures+' đi, '+c.arrivals+' đến ('+total+' lượt).\n'+difference;
    const w=wide(c.rows),p=peaks(c.rows),short=lowGround(c.rows);
+   const staffDetails=(()=> {
+     const units=[['DH','ĐH'],['PVHK','PVHK'],['KTS','PVSĐ']];
+     const roles={
+       COORD:'Điều phối',PVHK_DEPARTURE_TEAM:'Đội khách đi / làm thủ tục',
+       PVHK_ARRIVAL_TEAM:'Đội khách đến',
+       BAGGAGE:'Bốc xếp',GSE_DRIVER:'Lái xe GSE',COBUS_DRIVER:'Lái xe Cobus',
+       SKYONE_BAGGAGE:'SKYONE (thuê ngoài)',TERMINAL_BAGGAGE:'Hành lý nhà ga',
+       GATE:'Cửa boarding',BUSGATE:'Busgate',AIRCRAFT_BOARDING:'Phục vụ tại tàu',ARRIVAL:'Đón khách đến'
+     };
+     const records=(c.staff||[]).filter(x=>x.confirmed_at&&
+       ['DH','PVHK','KTS'].includes(x.unit)&&['SÁNG','ĐÊM'].includes(x.shift)&&
+       Number.isInteger(Number(x.quantity))&&Number(x.quantity)>=0);
+     const output=[];
+     for(const [unit,label] of units){
+       const own=records.filter(x=>x.unit===unit),keys=[...new Set(own.map(x=>x.role_code))]
+         .sort((a,b)=>Object.keys(roles).indexOf(a)===-1?1:
+              Object.keys(roles).indexOf(b)===-1?-1:
+              Object.keys(roles).indexOf(a)-Object.keys(roles).indexOf(b));
+       for(const role_code of keys){
+         const locate=shift=>own.find(x=>x.role_code===role_code&&x.shift===shift);
+         output.push({unit,label,role:roles[role_code]||role_code,
+           morning:locate('SÁNG')?Number(locate('SÁNG').quantity):null,
+           night:locate('ĐÊM')?Number(locate('ĐÊM').quantity):null});
+       }
+     }
+     return output;
+   })();
    const staffSky=staff.filter(x=>x.unit==='KTS'&&x.role_code==='SKYONE_BAGGAGE');
    const staffInfo='Phòng KTSĐ: Bốc xếp công ty ('+uStaff('KTS','BAGGAGE')+'); Lái xe GSE ('+uStaff('KTS','GSE_DRIVER')+'). SKYONE thuê ngoài: '+
     (staffSky.length?staffSky.slice(0,6).map(x=>clock(x.start_min)+'–'+clock(x.end_min)+': '+x.quantity+' người').join('; '):'chưa có khung giờ xác nhận')+
@@ -202,10 +231,11 @@
    });
    if(window.SagsPersonnelV212){
      const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
-     topics[4].observation=people.complete?
-       'Các phòng đã xác nhận quân số phục vụ bay theo ca. Phương án bố trí cụ thể sẽ điều chỉnh theo lịch bay thực tế.':
-       'Các phòng đã cập nhật hoặc đang rà soát quân số phục vụ bay cho từng ca; số liệu chưa xác nhận được ghi rõ bên cạnh.';
-     topics[4].action=people.lines.join('\n');
+     topics[4].observation=people.headcountsConfirmed?
+       'ĐH, PVHK và PVSĐ đã xác nhận quân số theo ca. Việc đáp ứng nhu cầu theo từng công đoạn chỉ được đánh giá khi có định mức và phân bổ thực tế được xác nhận.':
+       'Quân số theo ca của một số phòng chưa được xác nhận đầy đủ; các số liệu đã nhập vẫn được trình bày tại bảng quân số bên dưới.';
+     topics[4].action=people.lines.map((line,i)=>i===2&&staffDetails.some(x=>x.unit==='KTS')?
+       '- Phòng PVSĐ: đã xác nhận số người theo từng nhóm công việc và ca trong bảng chi tiết bên dưới. Chưa cộng thành tổng nhân sự độc lập do cần loại trừ khả năng kiêm nhiệm.':line).join('\n');
      topics[4].owner='ĐH · PVHK · KTSĐ';
    }
    let l2Details=null,l2Changes=[];
@@ -291,7 +321,7 @@
        if(item.key!=='checkin'&&!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
 
  function html(data){
@@ -309,7 +339,7 @@
      // baseline during build(). Re-prepending a 185-character excerpt would
      // truncate actual PVHK duties (check-in, gate/boarding, aircraft service).
      // Explicitly edited actions retain precedence in the same way.
-     if(field==='action'&&[1,2,7].includes(index))return base;
+     if(field==='action'&&[1,2,4,7].includes(index))return base;
      const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
      const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
      // Kết quả định mức quầy đã xác nhận chỉ bổ sung ở dòng nhân lực,
@@ -336,7 +366,14 @@
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,isL2?crop(y.observation,290):y.observation,isL2?crop(y.action,[0,1,2,3,4,7].includes(i)?560:225):y.action,y.owner])}).join('')+'</table>'+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,isL2?crop(y.observation,290):y.observation,i===4?y.action:isL2?crop(y.action,[0,1,2,3,7].includes(i)?560:225):y.action,y.owner])}).join('')+'</table>'+
+    '<h4>CHI TIẾT QUÂN SỐ ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ</h4>'+
+    '<table>'+tr(['Phòng / Bộ phận','Vị trí công việc','Ca sáng','Ca đêm'],true)+
+      (data.staffDetails?.length?data.staffDetails.map(x=>tr([
+        x.label,x.role,x.morning==null?'CHỜ XÁC NHẬN':x.morning+' người',
+        x.night==null?'CHỜ XÁC NHẬN':x.night+' người'
+      ])).join(''):tr(['ĐH / PVHK / PVSĐ','CHƯA CÓ QUÂN SỐ XÁC NHẬN','—','—']))+'</table>'+
+    '<p class="v19-footnote">Nguồn: số người đã xác nhận theo từng vị trí và từng ca của ngày khai thác; số 0 là dữ liệu đã xác nhận. Không cộng các nhóm PVSĐ thành tổng nhân sự độc lập khi chưa loại trừ nhân sự kiêm nhiệm; số liệu này chưa phải kết luận đủ/thiếu so với nhu cầu.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+(isL2?data.peakRows.slice(0,2):data.peakRows).map(x=>tr([x.slot,x.flight,isL2?crop(x.risk,190):x.risk,isL2?crop(x.action,460):x.action])).join('')+'</table>'+
