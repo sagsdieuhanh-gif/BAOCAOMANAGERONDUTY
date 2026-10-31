@@ -31,9 +31,11 @@ const canvas=e.draw({date:'2026-10-31',rows},{naturalWidth:100,naturalHeight:100
 assert.equal(canvas.width,1420);
 const banner=paint.find(p=>p.kind==='text'&&p.label==='GỢI Ý XE');
 assert.ok(banner&&banner.y<228,'Compact illustrated suggestion strip must appear inside export at TOP, before route tables');
-assert.ok(paint.some(p=>p.label==='50 NGƯỜI'&&p.y<228));
+assert.ok(paint.some(p=>p.label==='08:30 · 50 NGƯỜI'&&p.y<228));
 assert.ok(paint.some(p=>p.label==='2 XE: 45C + 29C'&&p.y<228));
-assert.ok(paint.filter(p=>p.kind==='image'&&(p.image==='29'||p.image==='45')&&p.y<228).length>=5,
+assert.ok(!paint.some(p=>p.label==='40 NGƯỜI'&&p.y<228),
+ 'No misleading unrelated generic 40-person example is shown in exported heading');
+assert.ok(paint.filter(p=>p.kind==='image'&&(p.image==='29'||p.image==='45')&&p.y<228).length>=3,
  'The small upper image strip must actually draw bus illustrations, not only labels');
 assert.ok(paint.some(p=>p.kind==='text'&&p.label.includes('GỢI Ý: 2 XE: 45C + 29C')),
  'Confirmed 50-person trip must show recommended 45C+29C in its own exported card');
