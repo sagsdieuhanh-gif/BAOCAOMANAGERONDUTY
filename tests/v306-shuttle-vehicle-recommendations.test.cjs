@@ -10,7 +10,7 @@ assert.equal((html.match(/<th scope="col">/g)||[]).length,6,'Only time, four dep
 assert.ok(!html.includes('v306-vehicle-showcase')&&!html.includes('GỢI Ý XE')&&!html.includes('shuttle-29.webp'),'No vehicle advice or icons in entry');
 assert.ok(html.includes('50</b>'),'Live total still shown');
 assert.equal(model.suggestVehicles(50).n45,1);
-assert.deepEqual(rows.map(x=>x.departure_min),exp.normalize(data,[]).filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min).slice(-rows.length));
+assert.deepEqual(rows.filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min),exp.normalize(data,[]).filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min));
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes('v24-shuttle-grid.js?v=3.11')&&index.includes('v300-workspace.css?v=3.11'));
 console.log('PASS V3.11: simple headcount entry hides all bus suggestions, export remains compatible');
