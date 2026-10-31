@@ -555,3 +555,95 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  #v300Root .v307-compact .v306-vehicle-showcase{margin:8px 5px!important}
  #v300Root .v307-compact .v306-vehicle-list{grid-template-columns:1fr!important}
 }
+
+
+/* V3.08 · Permanent example guide and immediate provisional vehicle advice. */
+#v300Root .v308-guide{
+  display:block!important;visibility:visible!important;
+  margin:8px 0 17px!important;padding:15px!important;
+  border:2px solid #87c8bd!important;border-radius:14px!important;
+  background:linear-gradient(120deg,#ecfaf5,#f4fbff)!important;
+}
+#v300Root .v308-guide-head{
+  display:flex!important;align-items:baseline!important;
+  justify-content:space-between!important;gap:7px 16px!important;
+  flex-wrap:wrap!important;margin-bottom:12px!important;
+}
+#v300Root .v308-guide-head strong{font-size:17px!important;color:#075d65!important;font-weight:950!important}
+#v300Root .v308-guide-head small{font-size:11px!important;color:#37677c!important}
+#v300Root .v308-example-list{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:9px!important;
+}
+#v300Root .v308-example{
+  display:flex!important;flex-direction:column!important;align-items:center!important;
+  justify-content:space-between!important;gap:7px!important;
+  padding:12px 6px!important;border:1px solid #b8dfd8!important;
+  border-radius:11px!important;background:white!important;text-align:center!important;
+  min-width:0!important;
+}
+#v300Root .v308-example>strong{
+  color:#0a5573!important;font-size:14px!important;font-weight:950!important;
+  white-space:nowrap!important;
+}
+#v300Root .v308-example>b{
+  color:#125569!important;font-size:11px!important;font-weight:850!important;
+  overflow-wrap:anywhere!important;
+}
+#v300Root .v308-example-buses{
+  display:flex!important;flex-wrap:wrap!important;gap:4px!important;
+  align-items:center!important;justify-content:center!important;min-height:51px!important;
+}
+#v300Root .v308-example-buses .v306-vehicle-thumb{
+  display:inline-block!important;position:relative!important;
+}
+#v300Root .v308-example-buses img{
+  width:72px!important;height:51px!important;object-fit:contain!important;
+}
+#v300Root .v308-live-head{
+  display:flex!important;gap:8px!important;align-items:baseline!important;
+  justify-content:space-between!important;flex-wrap:wrap!important;
+  margin:0 0 11px!important;
+}
+#v300Root .v308-live-head strong{
+  color:#0a516c!important;font-weight:950!important;font-size:13px!important;
+}
+#v300Root .v308-live-head small{color:#597788!important;font-size:10px!important}
+#v300Root .v308-vehicle-showcase{
+  display:block!important;visibility:visible!important;
+  padding:13px!important;margin:10px!important;
+}
+#v300Root .v308-provisional{
+  border-left:4px solid #d5a342!important;background:#fffaf0!important;
+}
+#v300Root .v308-provisional .v306-suggest-text>strong,
+#v300Root .v24-table td.v24-estimate .v308-plan-label{
+  color:#98620a!important;
+}
+#v300Root .v308-official{border-left:4px solid #23a486!important}
+#v300Root .v24-table td.v24-coach.v24-estimate{
+  background:#fff7e8!important;
+}
+#v300Root .v24-table td.v24-coach small{
+  font-size:10px!important;line-height:1.35!important;color:#8a6a35!important;
+}
+#v300Root .v308-next-day{
+  display:block!important;color:#a76813!important;
+  font-size:9px!important;font-weight:950!important;line-height:1.1!important;
+  white-space:normal!important;margin-top:5px!important;
+}
+@media(max-width:1050px){
+ #v300Root .v308-example-list{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ }
+}
+@media(max-width:620px){
+ #v300Root .v308-guide{padding:9px!important;margin:6px 1px 13px!important}
+ #v300Root .v308-guide-head strong{font-size:13px!important}
+ #v300Root .v308-example-list{gap:5px!important}
+ #v300Root .v308-example{padding:8px 3px!important;gap:5px!important}
+ #v300Root .v308-example>strong{font-size:11px!important}
+ #v300Root .v308-example>b{font-size:10px!important}
+ #v300Root .v308-example-buses img{width:52px!important;height:35px!important}
+ #v300Root .v308-vehicle-showcase{margin:6px 2px!important;padding:8px!important}
+}
