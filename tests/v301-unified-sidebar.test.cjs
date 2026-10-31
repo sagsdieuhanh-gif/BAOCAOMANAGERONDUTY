@@ -21,8 +21,8 @@ assert.match(css,/#v300Root \.v300-main \.tablewrap,[\s\S]*?overflow-x:auto/,'Wi
 assert.match(index,/Báo cáo điều hành V3\.11/);
 assert.match(index,/const APP_VERSION='V3\.11'/);
 assert.match(js,/id="v300Version">V3\.11/);
-assert.ok(index.indexOf('v300-workspace.css?v=3.10')>index.indexOf('v225-role-access.css'),'Unified layout stylesheet must load last');
-assert.ok(index.includes('v300-workspace.js?v=3.10'));
+assert.ok(index.indexOf('v300-workspace.css?v=3.11')>index.indexOf('v225-role-access.css'),'Unified layout stylesheet must load last');
+assert.ok(index.includes('v300-workspace.js?v=3.11'));
 assert.ok(js.includes('v300-cta')&&js.includes('XEM BÁO CÁO TGĐ'),'Existing CTA must survive the layout change');
-assert.ok(readme.includes('V3.10')&&readme.includes('bên trái'),'HDSD must track changed navigation');
+assert.ok(readme.includes('V3.11')&&readme.includes('bên trái'),'HDSD must track changed navigation');
 console.log('PASS V3.10: sidebar left and workspace right on PC, tablet and mobile; stacked phone navigation, exports/CTA retained');
