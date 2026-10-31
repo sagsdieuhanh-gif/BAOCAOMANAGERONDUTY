@@ -6,7 +6,7 @@
  const clock=n=>n==null?'—':String(Math.floor((n%1440)/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')+(n>=1440?' (+1)':'');
  const short=(x,n=5)=>[...new Set(x.filter(Boolean))].slice(0,n).join(', ');
  const quantity=x=>x==null||String(x).trim()===''?null:Number.isFinite(Number(x))?Number(x):null;
- const cap=(a,n=580)=>a.length>n?a.slice(0,n-1).replace(/\s+\S*$/,'')+'…':a;
+ const cap=a=>String(a??'').trim(); // Never truncate an L2 sentence.
  const isWide=x=>/A\s?330|B\s?777/i.test(x.aircraft_type||x.type||'');
  const carrier=x=>String(x.airline||x.carrier||x.departure||x.no||'').match(/^[A-Z0-9]{2}(?=\d)/)?.[0]||String(x.airline||x.carrier||'').toUpperCase();
  const isKorean=x=>['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP','WE'].includes(carrier(x));
@@ -156,7 +156,7 @@
        (kgLight.length?'; nhóm 100–200 kg: '+short(kgLight,4):'')+
        (kgLow.length?'; nhóm khác dưới 2,5 tấn: '+short(kgLow,4):'')+
        (kgHigh.length?'; từ 2,5 tấn: '+short(kgHigh,4):'')+
-       (unfinished.length?'. Còn '+unfinished.length+' chuyến chưa chốt giờ hàng sẵn sàng.':'.'));
+       '.');
      if(ferry.length)parts.push('Có chuyến mang ký hiệu ferry: '+short(ferry.map(x=>x.no),5)+
        '; cần xác nhận phạm vi phục vụ thay vì áp dụng quy trình chuyến chở khách.');
      if(charter.length)parts.push('Lịch bay có '+charter.length+' chuyến thuê chuyến không thường lệ (CHARTER, ký hiệu ##): '+
@@ -176,7 +176,7 @@
    }
    if(!entries.length){
      push('quiet','Đánh giá kế hoạch Lần 2',
-       'Theo những thông tin đã được cập nhật, chưa ghi nhận cụm chuyến hoặc yêu cầu riêng nổi bật để tách phương án tăng cường.',
+       'Lịch Lần 2 đã được tiếp nhận; các đơn vị phục vụ theo giờ STA/STD, gate, bãi đỗ và booking đã lưu, theo dõi điều chỉnh khi lịch thay đổi.',
        'Các phòng thực hiện theo lịch được duyệt, kiểm tra lại mức sẵn sàng nhân lực và thiết bị trước ca; ĐH điều chỉnh khi có thay đổi giờ đến, vị trí đỗ hoặc yêu cầu hãng.',
        'ĐH · PVHK · PVSĐ',1);
    }
