@@ -148,7 +148,7 @@
  function template(who){
    const editablePart=allowedRoles.has(who);
    const activeField=who==='ADMIN'?'TẤT CẢ CỘT':headings[V.indexOf(fieldOf(who))]||'CHỈ XEM';
-   return '<div class="v24-wrap v307-compact" data-v24-active="'+who+'"><div class="v24-heading">'+
+   return '<div class="v24-wrap v307-compact" data-v24-active="'+who+'" data-v307-render="clock-sorted"><div class="v24-heading">'+
      '<div><h2>XE GIAO CA</h2><p>GIỜ CHẠY · SỐ NGƯỜI · GỢI Ý XE</p></div>'+
      '<div class="v24-access">'+(editablePart?'NHẬP: '+activeField:'CHỈ XEM')+'</div></div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
@@ -191,13 +191,22 @@
  async function refresh(){
    if(typeof me==='undefined'||!me||typeof sb==='undefined'||!sb)return;
    mount();const date=$('day')?.value;if(!date)return;
+   // Render the core table immediately. Missing network access/permissions
+   // must never make the entire timetable and illustrated bus panel vanish.
+   if(activeDate!==date){rows=[];lines=[];activeDate=date;}
+   show();
    const req=++sequence;
    const [a,b]=await Promise.all([
      sb.from('ops_shift_transport_v2').select('unit,direction,departure_min,line_no,quantity,confirmed_at,is_custom,note').eq('service_date',date),
      sb.from('ops_shift_transport_rows').select('direction,departure_min,line_no,reason,created_by').eq('service_date',date)
    ]);
    if(req!==sequence)return;
-   if(a.error||b.error){const status=document.querySelector('.v24-status');if(status)status.textContent='Không đọc được xe giao ca: '+(a.error||b.error).message;return}
+   if(a.error||b.error){
+     for(const status of document.querySelectorAll('.v24-mount .v24-status'))
+       status.textContent='CHƯA TẢI ĐƯỢC SỐ NGƯỜI: '+(a.error||b.error).message+
+         '. Bảng giờ vẫn hiển thị, nhưng không xác nhận nguồn khi chưa đồng bộ.';
+     return;
+   }
    activeDate=date;rows=a.data||[];lines=b.data||[];
    show();
    window.SagsShuttleExport?.renderPreview?.();
