@@ -152,15 +152,15 @@
   if(mounted)return;
   const target=unitRole();
   if(!meNow()||!db()||!['ADMIN','DH','KTS','PVHK','KHO'].includes(target))return;
-  const tab=target==='ADMIN'||target==='DH'?'tab-staff':target==='KTS'?'tab-pvsd':target==='PVHK'?'tab-pvhk':'tab-warehouse';
+  const tab='tab-norms';
   const parent=E(tab);if(!parent)return;
   const pane=document.createElement('div');pane.className='panel';pane.id='v229StaffNormsPanel';
   pane.innerHTML='<h2>ĐỊNH MỨC NHÂN SỰ THEO CHUYẾN – LƯU DÙNG CHUNG CÁC NGÀY</h2>'+
    '<p class="note">Nhập một lần cho từng đơn vị/vị trí và tàu thân hẹp, thân rộng. Số <b>0</b> = xác nhận không cần nhân sự cho vị trí đó; để trống = CHỜ ĐỊNH MỨC. Ghi rõ nguồn quy định/thoả thuận. Định mức không tự thay đổi theo ngày. Dự báo tính trong cửa sổ 30 phút từ lịch Lần 2, không tính trùng cặp đến–đi.</p>'+
    '<p class="note">Quân số sáng/đêm là số thực sự sẵn sàng theo đúng vị trí (08:15–18:15 và 18:15–08:15 hôm sau). Không dùng tổng quân số phòng để tự suy ra số CO, Loading, đội đến/đi hay tổ bốc xếp.</p>'+
    '<div id="v229NormTable" class="tablewrap"></div>'+
-   '<div class="btnbar"><button class="primary" type="button" id="v229SaveNorms">LƯU ĐỊNH MỨC VÀ QUÂN SỐ THEO VỊ TRÍ</button><span id="v229NormStatus" role="status"></span></div>';
-  parent.prepend(pane);
+   '<div class="btnbar"><button class="primary" type="button" id="v229SaveNorms">LƯU ĐỊNH MỨC / QUÂN SỐ</button><span id="v229NormStatus" role="status"></span></div>';
+  parent.replaceChildren(pane);
   E('v229SaveNorms').onclick=save;
   mounted=true;
  }
@@ -168,7 +168,7 @@
   mount();if(!mounted||loading)return;
   const role=unitRole(),date=E('day')?.value;
   if(!meNow()||!date)return;
-  const shown=['ADMIN','DH'].includes(role)?'staff':role==='KTS'?'pvsd':role==='PVHK'?'pvhk':'warehouse';
+  const shown='norms';
   if(tab&&tab!==shown)return;
   if(E('v229NormTable').querySelector(':focus'))return;
   loading=true;
