@@ -25,8 +25,11 @@ const extra=grid.assemble([...values.slice(0,3),{
  unit:'DH',direction:'NHA_CXR',departure_min:480,line_no:0,quantity:2
 }], [{direction:'NHA_CXR',departure_min:480,line_no:0,reason:'Xe họp chuyên môn',created_by:'user-1'}]);
 const customHtml=grid.makeGrid('NHA_CXR',extra,'DH');
-assert.ok(customHtml.includes('colspan="7"'),'unconfirmed/extra row must span exactly seven columns');
-assert.ok(customHtml.includes('XE BỔ SUNG · LÝ DO:'));
+assert.ok(!customHtml.includes('colspan="7"'),'Do not insert noisy extra status/reason rows between departure times');
+assert.ok(customHtml.includes('class="v307-extras"'),'Reason editing must move into optional compact drawer');
+assert.ok(customHtml.includes('data-v28-reason="NHA_CXR|480|0"'),'Extra-hour reason editing remains available');
+assert.equal((customHtml.match(/<tr class="v24-time-row[^>]*>/g)||[]).length,4,
+ 'Added 08:00 must be exactly one row between 07:00 and 17:30');
 const css=fs.readFileSync('v222-shuttle-layout.css','utf8');
 const expectedWidths={time:126,unit:116,total:116,bus:260};
 assert.equal(expectedWidths.time+4*expectedWidths.unit+expectedWidths.total+expectedWidths.bus,966,'fixed grid widths must total 966px');
