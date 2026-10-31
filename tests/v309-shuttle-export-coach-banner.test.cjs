@@ -13,7 +13,7 @@ for(const [p,big,small] of [[20,0,1],[40,1,0],[46,1,1],[50,1,1],[58,1,1],[60,1,1
  assert.equal(x.n29,small,'29-seat coach count for '+p+' employees');
 }
 const complete=['DH','PVHK','KTS','QA_IT'].map((unit,i)=>({
- unit,direction:'CXR_NHA',departure_min:510,line_no:0,quantity:[20,15,10,5][i]
+ unit,direction:'CXR_NHA',departure_min:990,line_no:0,quantity:[20,15,10,5][i]
 }));
 const partial=[{unit:'DH',direction:'CXR_NHA',departure_min:1935,line_no:0,quantity:20}];
 const rows=e.normalize([...complete,...partial],[]);
@@ -31,7 +31,7 @@ const canvas=e.draw({date:'2026-10-31',rows},{naturalWidth:100,naturalHeight:100
 assert.equal(canvas.width,1420);
 const banner=paint.find(p=>p.kind==='text'&&p.label==='GỢI Ý XE');
 assert.ok(banner&&banner.y<228,'Compact illustrated suggestion strip must appear inside export at TOP, before route tables');
-assert.ok(paint.some(p=>p.label==='08:30 · 50 NGƯỜI'&&p.y<228));
+assert.ok(paint.some(p=>p.label==='16:30 · 50 NGƯỜI'&&p.y<228));
 assert.ok(paint.some(p=>p.label==='2 XE: 45C + 29C'&&p.y<228));
 assert.ok(!paint.some(p=>p.label==='40 NGƯỜI'&&p.y<228),
  'No misleading unrelated generic 40-person example is shown in exported heading');
@@ -43,10 +43,11 @@ assert.ok(paint.some(p=>p.kind==='text'&&p.label.includes('TẠM TÍNH: 29 CHỖ
  'Partial 20-person trip must show provisional 29C suggestion in exported card');
 assert.ok(paint.some(p=>p.kind==='text'&&p.label==='NGÀY HÔM SAU'),
  '08:15 trip must show its next-day label in exported image');
-assert.ok(paint.some(p=>p.kind==='text'&&p.label==='08:30'));
+assert.ok(paint.some(p=>p.kind==='text'&&p.label==='16:30'));
 assert.ok(paint.some(p=>p.kind==='text'&&p.label==='08:15'));
+assert.ok(paint.filter(p=>p.kind==='image'&&(p.image==='29'||p.image==='45')).every(p=>p.w<=70&&p.h<=43),'Vehicle icons must be smaller in final export');
 const index=fs.readFileSync('index.html','utf8');
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js','v24-shuttle-grid.js'])
- assert.ok(index.includes(file+'?v=3.10'),'Cache-bust changed '+file);
-assert.ok(index.includes("APP_VERSION='V3.10'"));
-console.log('PASS V3.10: eight fixed routes, compact top image bus advice, 45C+29C preference, partial/confirmed labels and next-day timing');
+ assert.ok(index.includes(file+'?v=3.11'),'Cache-bust changed '+file);
+assert.ok(index.includes("APP_VERSION='V3.11'"));
+console.log('PASS V3.11: eight fixed routes, compact top image bus advice, 45C+29C preference, partial/confirmed labels and next-day timing');

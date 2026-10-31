@@ -114,3 +114,11 @@
 - Khi chưa có đủ 4 phòng, gợi ý hiển thị **TẠM TÍNH** dựa trên số người đã nhập, không cộng ô trống thành 0. Khi đủ 4/4 phòng và đã lưu, hiển thị **GỢI Ý**. Đây là phương án sức chứa, không xác nhận xe thật khả dụng hoặc lệnh điều xe.
 - Các mốc giờ chuẩn đã cập nhật V3.08 vẫn giữ nguyên: NHA→CXR 07:00,17:30,19:30; CXR→NHA 08:30,16:30,18:30 trong ngày, 02:00/08:15 ngày hôm sau. Giờ bổ sung tiếp tục tự chèn đúng vị trí và cùng thứ tự trên ảnh xuất.
 - Kiểm thử `tests/v310-shuttle-capacity-match.test.cjs` quét số người 0–180, đảm bảo sức chứa đủ, đồng thời kiểm tra 42 người = xe 45, 50 người = 45+29 và hình minh họa xuất lấy đúng số người của chuyến thật.
+
+
+### V3.11 · Báo cáo D+1 và xe giao ca nhập gọn
+
+- Dữ liệu lịch bay, cao điểm, bãi đỗ và charter được tự lấy từ nguồn ngày khai thác; phòng ban chỉ bổ sung quân số, thiết bị/hàng hóa có xác nhận, ngoại lệ và phương án.
+- Kho hàng nhập nhiều chuyến có booking xác nhận trên cùng một bảng, lưu cùng lúc; các thông tin không xác nhận để trống, không coi bằng 0.
+- Xe giao ca: bảng nhập chỉ có giờ, 4 phòng và tổng; không hiển thị ảnh/gợi ý xe. Hình xe trên ảnh PNG/PDF thu nhỏ. CXR→NHA có 16:30, 18:30, 02:00 và 08:15 ngày hôm sau; không có chuyến 08:30 trong ngày.
+- Hướng dẫn cập nhật: [HDSD_MANAGER_V3.11.md](HDSD_MANAGER_V3.11.md).

@@ -26,13 +26,8 @@ const gridRows=ui.assemble([
  {unit:'DH',direction:'CXR_NHA',departure_min:990,line_no:0,quantity:50}
 ],[]);
 const htmlN=ui.makeGrid('NHA_CXR',gridRows,'DH'),htmlC=ui.makeGrid('CXR_NHA',gridRows,'DH');
-const card42=htmlN.match(/data-v306-slot="NHA_CXR\|1050\|0"[^>]*>[\s\S]*?<\/div>/)?.[0]||'';
-const card50=htmlC.match(/data-v306-slot="CXR_NHA\|990\|0"[^>]*>[\s\S]*?<\/div>/)?.[0]||'';
-assert.ok(card42.includes('TẠM TÍNH'),'Partially entered 42 persons must have a provisional recommendation');
-assert.ok(card42.includes('shuttle-45.webp')&&!card42.includes('shuttle-29.webp'),
- '42 persons must not display a 29-seat bus as its proposal');
-assert.ok(card50.includes('shuttle-45.webp')&&card50.includes('shuttle-29.webp'),
- '50 persons must show exactly 45+29 seat vehicle types');
+assert.ok(!htmlN.includes('v306-vehicle-showcase')&&!htmlC.includes('v306-vehicle-showcase'),'No vehicle proposals in entry');
+assert.ok(htmlN.includes('data-v24-value="DH"')&&htmlC.includes('data-v24-value="DH"'));
 const exportRows=exporter.normalize([
  {unit:'DH',direction:'NHA_CXR',departure_min:1050,line_no:0,quantity:42},
  {unit:'DH',direction:'CXR_NHA',departure_min:990,line_no:0,quantity:50}
@@ -62,4 +57,4 @@ assert.ok(!top.some(v=>v.kind==='text'&&v.txt.includes('20 NGƯỜI')),
  'Never show unrelated hardcoded passenger examples in operational report');
 const source=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(!source.includes("vehicleGuide()+makeGrid("),'Do not show unrelated example vehicles above live input');
-console.log('PASS V3.10: capacity never under headcount, 30-45=45C, 46-74=45C+29C, image banner uses real departure totals');
+console.log('PASS V3.11: capacity never under headcount, 30-45=45C, 46-74=45C+29C, image banner uses real departure totals');

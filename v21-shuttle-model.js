@@ -4,7 +4,6 @@
   {direction:'NHA_CXR',departure_min:420,label:'07:00'},
   {direction:'NHA_CXR',departure_min:1050,label:'17:30'},
   {direction:'NHA_CXR',departure_min:1170,label:'19:30'},
-  {direction:'CXR_NHA',departure_min:510,label:'08:30'},
   {direction:'CXR_NHA',departure_min:990,label:'16:30'},
   {direction:'CXR_NHA',departure_min:1110,label:'18:30'},
   {direction:'CXR_NHA',departure_min:1560,label:'02:00'},
@@ -57,7 +56,8 @@
  }
  function isDefault(direction,minute){return defaults.some(x=>x.direction===direction&&x.departure_min===minute)}
  // Sort by actual chronological departure within the service date + following day.
- // CXR_NHA: 08:30 → 16:30 → 18:30 → 02:00 (next day) → 08:15 (next day).
+ // CXR_NHA: 16:30 → 18:30 → 02:00 (next day) → 08:15 (next day).
+ // 08:30 is NOT a scheduled departure; 08:15 belongs to the following day.
  // Store the existing 1560 / 1935 minute keys unchanged.
  function compareSlots(a,b){
   const directions={NHA_CXR:0,CXR_NHA:1};

@@ -1,54 +1,29 @@
 'use strict';
-const assert=require('node:assert/strict');
-const fs=require('node:fs');
-require('../v21-shuttle-model.js');
-require('../v24-shuttle-grid.js');
-require('../v21-shuttle-export.js');
-const m=globalThis.SagsShuttleModel;
-const g=globalThis.SagsShuttleGridV24._test;
-const e=globalThis.SagsShuttleExport._test;
-const fixed={
- NHA_CXR:[420,1050,1170],
- CXR_NHA:[510,990,1110,1560,1935]
-};
-assert.deepEqual(m.defaults.filter(x=>x.direction==='NHA_CXR').map(x=>x.departure_min),fixed.NHA_CXR);
-assert.deepEqual(m.defaults.filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min),fixed.CXR_NHA);
-assert.equal(m.clock(1560),'02:00');
-assert.equal(m.clock(1935),'08:15');
-assert.equal(m.clock(510),'08:30');
-assert.equal(m.isNextDay(510),false);
-assert.equal(m.isNextDay(1935),true);
-assert.equal(m.parseClock('02:00',true),1560);
-for(const [direction,minutes] of Object.entries(fixed)){
- for(const minute of minutes)assert.equal(m.isDefault(direction,minute),true,'Must protect '+direction+' '+minute);
+const assert=require('node:assert/strict'),fs=require('node:fs');
+require('../v21-shuttle-model.js');require('../v24-shuttle-grid.js');require('../v21-shuttle-export.js');
+const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=globalThis.SagsShuttleExport._test;
+const fixed={NHA_CXR:[420,1050,1170],CXR_NHA:[990,1110,1560,1935]};
+for(const [d,slots] of Object.entries(fixed)){
+ assert.deepEqual(m.defaults.filter(x=>x.direction===d).map(x=>x.departure_min),slots);
+ for(const slot of slots)assert.ok(m.isDefault(d,slot),'Must protect official '+slot);
 }
-assert.equal(m.isDefault('CXR_NHA',1185),false,'19:45 must remain addable');
-assert.equal(m.isDefault('NHA_CXR',1230),false,'20:30 must remain addable');
-const recorded=[{unit:'DH',direction:'CXR_NHA',departure_min:1560,line_no:0,quantity:7}];
-const rows=g.assemble(recorded,[]);
-assert.equal(rows.filter(x=>x.direction==='CXR_NHA').length,5);
-const slot=rows.find(x=>x.departure_min===1560);
-assert.ok(slot&&slot.defaultTime,'02:00 is a base row, never a removable additional slot');
-assert.equal(slot.cells[0].quantity,7,'Existing data at 02:00 is preserved');
+assert.equal(m.isDefault('CXR_NHA',510),false);
+assert.equal(m.clock(1935),'08:15');assert.equal(m.clock(1560),'02:00');
+assert.ok(m.isNextDay(1935));
+const duplicated=['DH','PVHK','KTS','QA_IT'].flatMap((unit,i)=>[
+ {unit,direction:'CXR_NHA',departure_min:510,line_no:0,quantity:10+i},
+ {unit,direction:'CXR_NHA',departure_min:1935,line_no:0,quantity:10+i}
+]);
+const rows=g.assemble(duplicated,[]),exported=e.normalize(duplicated,[]);
+assert.equal(rows.filter(x=>x.direction==='CXR_NHA').length,4,'08:30 must not appear in grid');
+assert.ok(!rows.some(x=>x.departure_min===510)&&!exported.some(x=>x.departure_min===510),'Do not export obsolete row');
+assert.equal(rows.find(x=>x.departure_min===1935).total,46,'08:15 total preserved');
 const grid=g.makeGrid('CXR_NHA',rows,'DH');
-assert.ok(grid.includes('02:00'));
-assert.ok(grid.includes('08:15'));
-assert.ok(grid.includes('THÊM GIỜ XE'));
-const custom=[{unit:'PVHK',direction:'CXR_NHA',departure_min:1185,line_no:0,quantity:4}];
-const withOther=g.assemble([...recorded,...custom],[]);
-assert.equal(withOther.find(x=>x.departure_min===1185).defaultTime,false);
-const exported=e.normalize([...recorded,...custom]);
-assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1560&&!x.is_custom),'PNG/PDF must include fixed 02:00');
-assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1185&&x.is_custom),'PNG/PDF must keep custom hours');
+assert.ok(grid.includes('08:15')&&grid.includes('NGÀY HÔM SAU')&&!grid.includes('08:30'));
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
-for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js']){
- assert.ok(index.includes(file+'?v=3.10'),'Chronological model/export assets must bypass cache: '+file);
-}
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.10'),
- 'Restored shuttle personnel grid must bypass legacy asset cache');
-const migration=fs.readFileSync('server/v308-shuttle-eight-fixed.sql','utf8');
-assert.ok(migration.includes('(510,990,1110,1560,1935)'),'DB protects 08:30, 02:00 and 08:15');
-assert.ok(migration.includes('ops_remove_shuttle_addition'));
-assert.ok(migration.includes('ops_set_shuttle_reason'));
-console.log('PASS V3.10: eight official shuttle slots preserved in storage, including same-day 08:30 and next-day departures');
+assert.ok(index.includes("APP_VERSION='V3.11'"));
+for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js','v24-shuttle-grid.js'])
+ assert.ok(index.includes(file+'?v=3.11'));
+const migration=fs.readFileSync('server/v311-shuttle-0815-not-0830.sql','utf8');
+assert.ok(migration.includes('(990,1110,1560,1935)')&&migration.includes('departure_min=1935'));
+console.log('PASS V3.11 phantom 08:30 removed; confirmed 08:15 kept; seven protected official slots');

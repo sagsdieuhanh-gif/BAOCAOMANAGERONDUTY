@@ -11,14 +11,14 @@ const values=['DH','PVHK','KTS','QA_IT'].map((unit,i)=>({
 const confirmed=grid.assemble(values,[]);
 assert.equal(confirmed.find(x=>x.direction==='NHA_CXR'&&x.departure_min===420).total,74);
 const html=grid.makeGrid('NHA_CXR',confirmed,'DH');
-assert.equal((html.match(/<col class="v222-col-/g)||[]).length,7,'exactly 7 column dimensions');
-assert.equal((html.match(/<th scope="col"/g)||[]).length,7,'exactly seven headers');
+assert.equal((html.match(/<col class="v222-col-/g)||[]).length,6,'exactly 6 column dimensions');
+assert.equal((html.match(/<th scope="col"/g)||[]).length,6,'exactly six headers');
 const rows=[...html.matchAll(/<tr class="v24-time-row[^>]*>[\s\S]*?<\/tr>/g)];
 assert.equal(rows.length,3,'three fixed departures on NHA_CXR including 19:30');
-for(const row of rows)assert.equal((row[0].match(/<td\b/g)||[]).length,7,'each run must have seven cells');
+for(const row of rows)assert.equal((row[0].match(/<td\b/g)||[]).length,6,'each run must have six cells');
 assert.ok(html.includes('<td class="v24-cell v24-edit">'),'editable cell remains in correct column');
-assert.ok(html.includes('2 XE: 45C + 29C'),'vehicle recommendation shown in a fixed column');
-assert.ok(html.includes('74 ghế · dư 0 ghế'),'seat count stays inside recommendation column');
+assert.ok(!html.includes('GỢI Ý XE'),'No coach proposals inside entry table');
+assert.ok(html.includes('74</b>'),'Actual headcount remains visible');
 assert.ok(html.includes('v222-scroll-hint'),'mobile horizontal-scroll instruction');
 assert.ok(html.includes('tabindex="0"'),'keyboard navigable scroll container');
 const extra=grid.assemble([...values.slice(0,3),{
@@ -43,7 +43,7 @@ assert.ok(css.includes('input[data-v24-value]')&&css.includes('max-width:100%!im
 assert.ok(css.includes('.v214-actions{position:relative!important'),'save toolbar should not cover rows on phone');
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.10'));
+assert.ok(index.includes('v24-shuttle-grid.js?v=3.11'));
 assert.ok(index.includes('v222-shuttle-layout.css?v=2.22'));
 assert.ok(index.indexOf('v222-shuttle-layout.css')>index.indexOf('rns-admin.css'),'alignment overrides must load last');
 console.log('PASS V2.22: seven aligned cells, explicit column widths, sticky time, safe mobile inputs and existing shuttle recommendation');
