@@ -4,7 +4,7 @@ const css=fs.readFileSync('v300-workspace.css','utf8');
 const js=fs.readFileSync('v300-workspace.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const readme=fs.readFileSync('README.md','utf8');
-const unified=css.slice(css.indexOf('V3.02 · UNIFIED SIDE-BY-SIDE WORKSPACE'));
+const unified=css.slice(css.indexOf('V3.01 · UNIFIED SIDE-BY-SIDE WORKSPACE'));
 assert.ok(unified.length>1000,'V3.02 layout overrides must exist');
 assert.match(unified,/#v300Root \.v300-sidebar\s*\{[\s\S]*?position:sticky/,'Sidebar stays fixed during content scroll');
 const tablet=unified.match(/@media\(max-width:850px\)\{([\s\S]*?)\n\}\n@media\(max-width:540px\)/);
