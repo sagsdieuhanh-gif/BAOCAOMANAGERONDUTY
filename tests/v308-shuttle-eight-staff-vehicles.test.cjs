@@ -59,7 +59,8 @@ const code=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(code.includes("div.addEventListener('input',onQuantityInput)"),
  'Updating headcount must refresh current bus advice without waiting for save');
 assert.ok(code.includes("model().suggestVehicles(people)"));
-assert.ok(code.includes('vehicleGuide()+makeGrid('),'Static vehicle examples must appear above both direction tables');
+assert.ok(code.includes("makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)"),
+ 'Real headcount proposals must appear inside each direction rather than generic examples');
 const migration=fs.readFileSync('server/v308-shuttle-eight-fixed.sql','utf8');
 assert.ok(migration.includes('(510,990,1110,1560,1935)'));
 console.log('PASS V3.08: correct eight official trips, next-day chronology, automatic 29/45-seat provisional and confirmed recommendations');
