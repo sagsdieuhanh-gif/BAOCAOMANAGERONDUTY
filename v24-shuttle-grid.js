@@ -63,6 +63,13 @@
      kind:official?(plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'):'estimate'};
  }
  function classify(row){
+   // Accept historical aggregate callers as well as the new four-cell rows.
+   if(!Array.isArray(row.cells)){
+     if(row.confirmed!==V.length)return {label:'CHỜ XÁC NHẬN',kind:'pending',units:[]};
+     const plan=model().suggestVehicles(row.total);
+     if(!plan)return {label:'CHƯA THỂ TÍNH',kind:'pending',units:[]};
+     return {...plan,kind:plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'};
+   }
    return proposal(row.cells.map(v=>v?.quantity??null),row.confirmed===V.length);
  }
  function coachImages(plan,compact=false){
