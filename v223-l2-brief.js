@@ -118,8 +118,8 @@
      if(resource){
        items.push('Khung '+clock(resource.start)+'–'+clock(resource.start+30)+
          ' có '+resource.total+' cặp cần phục vụ; PVSĐ kiểm tra khả năng luân chuyển người và trang thiết bị theo từng công đoạn.');
-       if(resource.unknownCargo)items.push(resource.unknownCargo+
-         ' chuyến chưa rõ tình trạng hàng, cần Kho Hàng xác nhận để tổ chức phục vụ.');
+       // Cargo source-completeness belongs in the cargo review, not in the GSE
+       // assessment. The ramp section should discuss equipment and access only.
      }
      if(equipment.length)items.push('PVSĐ đang báo '+equipment.length+' thiết bị hạn chế, trong đó có '+
        short(equipment.map(x=>x.equipment_id),4)+'.');
