@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.07
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.10
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -105,3 +105,12 @@
 - Gợi ý 29/45 chỗ theo từng giờ hiện phía trên bảng, kể cả giờ đang chờ 4 phòng xác nhận; giờ chưa đủ số liệu phải ghi **CHỜ XÁC NHẬN**, không tự suy đoán loại xe.
 - Hiển thị bảng giờ chuẩn ngay cả trước khi Supabase trả dữ liệu; nếu lỗi truy vấn sẽ thông báo cụ thể. Trên màn hình mới, chọn **+ THÊM GIỜ XE** theo chiều → nhập giờ/lý do → bấm THÊM MỐC GIỜ → nhập quân số ở dòng được chèn → LƯU TẤT CẢ THAY ĐỔI. PNG/PDF dùng cùng thứ tự.
 - Kiểm thử `tests/v307-shuttle-compact-order.test.cjs` kiểm tra chuỗi **02:00 → 08:15 → 10:00 → 11:00 → 16:30 → 18:30**, bố cục một dòng/giờ, hình xe, phân quyền và khả năng xuất.
+
+## V3.10 – Gợi ý xe tính theo số người THỰC TẾ, không dùng hình minh họa sai chuyến
+
+- Thuật toán tính từ tổng **số người đã nhập cho đúng giờ xe**; không gợi ý xe có tổng sức chứa nhỏ hơn số người. Quy tắc: 1–29 người → 1 xe 29; 30–45 → 1 xe 45; 46–74 → 1 xe 45 + 1 xe 29 (không ưu tiên 2 xe 29), 75–90 → 2 xe 45. Với nhiều người hơn, tiếp tục chọn số xe ít nhất, tránh dùng nhiều xe 29 nếu có phối hợp 45 phù hợp và đảm bảo đủ chỗ.
+- **Bỏ 4 thẻ ví dụ cố định 20/40/50/60** trên màn hình XE GIAO CA, vì dễ gây hiểu nhầm hình xe 29 chỗ là gợi ý cho một chuyến thực tế có 40+ người. Thay bằng gợi ý theo từng mốc giờ ngay trên bảng với số người và loại xe tương ứng.
+- **Phần trên của ảnh xuất PNG/PDF** chỉ hiển thị *tối đa 4 mốc xe thực tế có số người*, ưu tiên mốc đông người nhất. Mỗi thẻ: giờ xe, tổng số người, loại/số lượng xe với hình đúng. Mốc khác vẫn đầy đủ gợi ý trong ô giờ xe bên dưới. Nếu không có số người, không hiển thị hình xe minh họa sai; ghi rõ chưa nhập số người.
+- Khi chưa có đủ 4 phòng, gợi ý hiển thị **TẠM TÍNH** dựa trên số người đã nhập, không cộng ô trống thành 0. Khi đủ 4/4 phòng và đã lưu, hiển thị **GỢI Ý**. Đây là phương án sức chứa, không xác nhận xe thật khả dụng hoặc lệnh điều xe.
+- Các mốc giờ chuẩn đã cập nhật V3.08 vẫn giữ nguyên: NHA→CXR 07:00,17:30,19:30; CXR→NHA 08:30,16:30,18:30 trong ngày, 02:00/08:15 ngày hôm sau. Giờ bổ sung tiếp tục tự chèn đúng vị trí và cùng thứ tự trên ảnh xuất.
+- Kiểm thử `tests/v310-shuttle-capacity-match.test.cjs` quét số người 0–180, đảm bảo sức chứa đủ, đồng thời kiểm tra 42 người = xe 45, 50 người = 45+29 và hình minh họa xuất lấy đúng số người của chuyến thật.
