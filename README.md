@@ -30,3 +30,8 @@ Mã nguồn các module ở thư mục gốc. `server/` lưu mã tham khảo và
 - Định mức nhập một lần theo đơn vị, vị trí và loại tàu thân hẹp/thân rộng; lưu Supabase cùng nguồn xác nhận, không tự mặc định số người. Trống = CHỜ ĐỊNH MỨC, 0 chỉ dùng nếu đơn vị xác nhận.
 - Nhập quân số thật theo vai trò, ca sáng/đêm của từng ngày; so sánh tại khung 30 phút có cặp đến–đi cùng phục vụ. Chỉ tính chênh lệch khi đủ định mức và số xác nhận; tổng quân số chỉ cho biết thiếu tối thiểu, không chứng minh đủ từng vị trí.
 - Báo cáo Lần 2: đối chiếu Lần 1, bảng quân số/nhu cầu cao nhất theo ca, nhận định/chuyến/khung giờ và phương án cụ thể, thông tin còn chờ xác nhận. Lần 1 giữ nguyên mẫu. Định mức check-in theo hợp đồng vẫn ở PVHK.
+
+## V2.30 – Đường dẫn ĐỊNH MỨC riêng, nhận biết phiên bản
+- Sau đăng nhập, vào **CẬP NHẬT → ĐỊNH MỨC NHÂN SỰ** (nút chính, không nằm trong Nâng cao). Điều hành/ADMIN xem và chỉnh tất cả phòng; PVSĐ, PVHK và Kho hàng chỉ chỉnh phần thuộc đơn vị mình. Người không có quyền không thấy mục.
+- Trong phần ĐỊNH MỨC, nhập người/chuyến cho tàu thân hẹp và thân rộng, nguồn định mức, và quân số sáng/đêm thực tế. Bấm **LƯU ĐỊNH MỨC / QUÂN SỐ**. Định mức lưu dùng chung qua ngày; quân số theo ngày chọn. Cột trống là CHỜ XÁC NHẬN, không tự điền 0.
+- Sau đăng nhập, góc trên bên phải hiển thị **Tên tài khoản – VAI TRÒ  V2.30** cạnh nút Đăng xuất. Nhãn phiên bản tăng khi phát hành và được nạp từ hằng `APP_VERSION` của bản giao diện.
