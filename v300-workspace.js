@@ -422,7 +422,8 @@
    $('v300Page').innerHTML=wrapPanel('Báo cáo điều hành D+1',
     'Giữ mẫu Lần 1; Lần 2 chỉ cập nhật dữ liệu và nhận định có căn cứ.',
     '<div class="v300-report-controls"><button data-v300-command="preview" class="v300-primary">TẠO / CẬP NHẬT BẢN XEM TRƯỚC</button>'+
-    (['DH','ADMIN'].includes(role())?'<button data-v300-command="word">XUẤT WORD</button><button data-v300-command="pdf">XUẤT PDF</button>':'')+
+    (['DH','ADMIN'].includes(role())?'<button data-v300-command="word">XUẤT WORD</button><button data-v300-command="pdf">XUẤT PDF</button>'+
+    '<label class="v315-pdf-toggle"><input id="v315WorkspaceHidePending" type="checkbox" checked> Ẩn thông tin chưa xác nhận khi xuất PDF</label>':'')+
     '</div><div class="v300-report-preview" id="v300ReportPreview"><p class="v300-hint">Chọn tạo bản xem trước để tổng hợp số liệu hiện có.</p></div>');
    await previewReport();
  }
@@ -446,7 +447,8 @@
    try{
      if(!root.SagsOfficeExportV29)throw Error('Công cụ xuất Word/PDF chưa sẵn sàng.');
      const target='SAGS_CXR_DU_BAO_'+(state?.snap2?'LAN_2':'LAN_1')+'_'+date().replaceAll('-','')+'.'+ext;
-     await root.SagsOfficeExportV29.exportElement(src,ext,target);
+     const hidePendingWarnings=ext==='pdf'&&$('v315WorkspaceHidePending')?.checked===true;
+     await root.SagsOfficeExportV29.exportElement(src,ext,target,{hidePendingWarnings});
      status('Đã xuất '+target+'.');
    }catch(e){status('Chưa xuất được '+ext.toUpperCase()+': '+e.message,true)}
  }
