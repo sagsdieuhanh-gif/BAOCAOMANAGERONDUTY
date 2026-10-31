@@ -52,12 +52,10 @@ assert.equal(confirmed.n45,1);
 assert.ok(!confirmed.label.includes('TẠM TÍNH'));
 assert.equal(ui.proposal([null,null,null,null],false).people,null,
  'Missing is unknown, not zero, and should not propose any vehicles');
-assert.ok(html.includes('TẠM TÍNH · 29 CHỖ'),
- 'A single entered row should immediately show a provisional vehicle choice');
-assert.ok(html.includes('GỢI Ý THEO TỪNG GIỜ XE'));
+assert.ok(!html.includes('GỢI Ý'),'No proposal in input table');
 const code=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(code.includes("div.addEventListener('input',onQuantityInput)"),
- 'Updating headcount must refresh current bus advice without waiting for save');
+ 'Updating headcount must refresh total without saving');
 assert.ok(code.includes("model().suggestVehicles(people)"));
 assert.ok(code.includes("makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)"),
  'Real headcount proposals must appear inside each direction rather than generic examples');
