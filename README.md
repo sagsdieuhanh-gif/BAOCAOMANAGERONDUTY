@@ -133,3 +133,9 @@
 
 - Xuất PDF báo cáo trên **A4 dọc**, có lề in, cỡ chữ gọn và bảng tự xuống dòng; bảng dài lặp lại tiêu đề khi chuyển trang, không làm mất nội dung. Xuất Word và PDF ảnh xe giao ca giữ nguyên cơ chế riêng.
 - Hướng dẫn chi tiết: [HDSD_MANAGER_V3.13.md](HDSD_MANAGER_V3.13.md).
+
+
+### V3.14 – Quân số đã nhập được đưa vào báo cáo
+
+- ĐH/PVHK/PVSĐ đã xác nhận số người: báo cáo Lần 1 và Lần 2 tải trực tiếp từ `ops_staff_capacity` theo ngày, có bảng quân số từng vị trí và ca sáng/đêm. Trạng thái chưa đánh giá đủ/thiếu không làm mất số người đã nhập; không cộng trùng các nhóm PVSĐ.
+- Chi tiết: [HDSD_MANAGER_V3.14.md](HDSD_MANAGER_V3.14.md).
