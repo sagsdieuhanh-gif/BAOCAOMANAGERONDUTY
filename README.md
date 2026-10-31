@@ -35,3 +35,9 @@ Mã nguồn các module ở thư mục gốc. `server/` lưu mã tham khảo và
 - Sau đăng nhập, vào **CẬP NHẬT → ĐỊNH MỨC NHÂN SỰ** (nút chính, không nằm trong Nâng cao). Điều hành/ADMIN xem và chỉnh tất cả phòng; PVSĐ, PVHK và Kho hàng chỉ chỉnh phần thuộc đơn vị mình. Người không có quyền không thấy mục.
 - Trong phần ĐỊNH MỨC, nhập người/chuyến cho tàu thân hẹp và thân rộng, nguồn định mức, và quân số sáng/đêm thực tế. Bấm **LƯU ĐỊNH MỨC / QUÂN SỐ**. Định mức lưu dùng chung qua ngày; quân số theo ngày chọn. Cột trống là CHỜ XÁC NHẬN, không tự điền 0.
 - Sau đăng nhập, góc trên bên phải hiển thị **Tên tài khoản – VAI TRÒ  V2.30** cạnh nút Đăng xuất. Nhãn phiên bản tăng khi phát hành và được nạp từ hằng `APP_VERSION` của bản giao diện.
+
+## V2.31 – Định mức phục vụ tối thiểu và Báo cáo Lần 2 theo mẫu Lần 1
+- Vào **CẬP NHẬT → ĐỊNH MỨC TỐI THIỂU**. Chọn hãng, tàu thân hẹp/thân rộng và đơn vị; chỉ nhập số tối thiểu theo công đoạn. Không còn yêu cầu nhập “nguồn định mức”, “quân số sáng” và “quân số đêm” trên giao diện này. Quân số thực có tiếp tục nhập ở phần nhân sự riêng.
+- Các nhóm: CO kiêm Loading (chỉ 1 người đủ năng định); PVHK check-in, chia sẻ nhóm quầy và Skyboard, gate/boarding/thang; sân đỗ lái đầu kéo, lái băng chuyền, bốc xếp hầm và dưới sân; Kho hàng số nhân sự cho chuyến có hàng.
+- **ĐIỀN MẪU GỢI Ý VJ THÂN HẸP** chỉ điền số minh họa do người dùng đề xuất trên giao diện, KHÔNG tự lưu hoặc coi là định mức WI/SLA. Chỉ khi nhân viên rà soát và bấm LƯU mới được dùng để dự báo. Quy tắc 2 chuyến cùng nhóm quầy được dùng chung khi khả thi theo giờ thực tế, chuyến thứ 3 thêm nhóm quầy.
+- Báo cáo Lần 2 **giữ nguyên mẫu 5 mục, cấu trúc, bảng kiểm soát và thứ tự mục của Lần 1**. Không dựng bảng nhân lực ca sáng/đêm độc lập hoặc bảng nhận định Lần 2 riêng. Chỉ chèn ghi chú “Cập nhật Lần 2” ngắn dưới mục có dữ liệu mới (bãi đỗ, nhân lực, quầy/gate, hàng hóa). Không tự khẳng định đủ/thiếu nếu chưa xác nhận định mức, lịch sử dụng và quân số.
