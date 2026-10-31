@@ -16,7 +16,7 @@ const plans=['DH','PVHK','KTS'].map((unit,i)=>({
 const p=personnel.summarize(plans);
 assert.equal(p.headcountsConfirmed,true,'Count confirmations must be independent from staffing adequacy');
 assert.equal(p.complete,false,'Pending sufficiency cannot be declared READY');
-assert.ok(p.lines[0].includes('Đã xác nhận quân số'));
+assert.ok(p.lines[0].includes('Quân số đã xác nhận'));
 assert.ok(p.lines[0].includes('Sáng (8 NS'));
 const staffRows=[
  ['DH','COORD',8,8],
@@ -48,6 +48,7 @@ for(const revision of [1,2]){
  assert.deepEqual([kts.morning,kts.night],[9,11]);
  assert.ok(!data.staffDetails.some(x=>x.role==='UNCONFIRMED'));
  assert.ok(data.topics[4].observation.includes('đã xác nhận quân số'));
+ assert.ok(!/thiếu|đảm bảo|đáp ứng|định mức/i.test(data.topics[4].action),'No staff sufficiency text');
  assert.ok(!data.topics[4].action.includes('50 NS'),'Do not claim sum of PVSD roles is unique staff');
  const html=report.renderHtml(data);
  for(const field of ['CHI TIẾT QUÂN SỐ','Điều phối','Đội khách đi','Bốc xếp','SKYONE','59 người','43 người','0 người','18 người','15 người','8 người','7 người'])
