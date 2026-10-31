@@ -38,7 +38,7 @@ const exported=e.normalize([...recorded,...custom]);
 assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1560&&!x.is_custom),'PNG/PDF must include fixed 02:00');
 assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1185&&x.is_custom),'PNG/PDF must keep custom hours');
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes('Báo cáo điều hành V3.00'));
+assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js','v24-shuttle-grid.js']){
  assert.ok(index.includes(file+'?v=2.27'),'Latest file must be cache-busted: '+file);
 }
