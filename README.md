@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.01
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.02
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -45,3 +45,8 @@
 - PC: sidebar đủ tên chức năng và mô tả. Tablet: sidebar hẹp vừa. Mobile: thanh trái thu gọn còn 82 px (màn rất nhỏ: 74 px), hiển thị biểu tượng kèm tên ngắn, các phòng nằm trong nhóm CÁC PHÒNG, công cụ phụ trong nhóm CÔNG CỤ PHỤ.
 - Thanh công cụ trái cuộn riêng khi có nhiều mục, nội dung phải cuộn dọc và bảng dài được cuộn ngang **bên trong bảng**, không bắt toàn trang cuộn ngang. Khi in, thanh công cụ ẩn để giữ nội dung báo cáo.
 - CTA và toàn bộ luồng Lịch bay → Các phòng → Phân tích nguy cơ → Báo cáo TGĐ, quyền xem/nhập và xuất Word/PDF **giữ nguyên**.
+
+## V3.02 – Gửi thư mời qua Supabase Auth
+- Trong **QUẢN LÝ TÀI KHOẢN**, gửi thư mời qua `sagscxr-radar-register` chỉ được ghi là **Supabase đã tiếp nhận yêu cầu**, không thể khẳng định email đã đến Inbox. Nếu chưa nhận, vào SAGSCXR-RNS → QUẢN LÝ TÀI KHOẢN → CHỜ XÁC MINH → LẤY LINK MỜI để tạo link kích hoạt và chia sẻ riêng qua email/Zalo.
+- Edge Function `sagscxr-radar-register` đã cập nhật redirect sang `https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/secure.html`, thay URL Vercel cũ; bảo toàn cấp quyền RNS Viewer/Radar và quy trình đăng nhập Supabase.
+- Cấu hình SMTP chuyên dụng và nhật ký email provider cần được kiểm tra để xác nhận chuyển phát tự động; không được báo đã gửi thành công chỉ dựa vào HTTP 200 của Auth.
