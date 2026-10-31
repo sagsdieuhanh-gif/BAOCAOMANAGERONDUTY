@@ -9,12 +9,15 @@ const g=globalThis.SagsShuttleGridV24._test;
 const e=globalThis.SagsShuttleExport._test;
 const fixed={
  NHA_CXR:[420,1050,1170],
- CXR_NHA:[990,1110,1560,1935]
+ CXR_NHA:[510,990,1110,1560,1935]
 };
 assert.deepEqual(m.defaults.filter(x=>x.direction==='NHA_CXR').map(x=>x.departure_min),fixed.NHA_CXR);
 assert.deepEqual(m.defaults.filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min),fixed.CXR_NHA);
 assert.equal(m.clock(1560),'02:00');
 assert.equal(m.clock(1935),'08:15');
+assert.equal(m.clock(510),'08:30');
+assert.equal(m.isNextDay(510),false);
+assert.equal(m.isNextDay(1935),true);
 assert.equal(m.parseClock('02:00',true),1560);
 for(const [direction,minutes] of Object.entries(fixed)){
  for(const minute of minutes)assert.equal(m.isDefault(direction,minute),true,'Must protect '+direction+' '+minute);
@@ -23,7 +26,7 @@ assert.equal(m.isDefault('CXR_NHA',1185),false,'19:45 must remain addable');
 assert.equal(m.isDefault('NHA_CXR',1230),false,'20:30 must remain addable');
 const recorded=[{unit:'DH',direction:'CXR_NHA',departure_min:1560,line_no:0,quantity:7}];
 const rows=g.assemble(recorded,[]);
-assert.equal(rows.filter(x=>x.direction==='CXR_NHA').length,4);
+assert.equal(rows.filter(x=>x.direction==='CXR_NHA').length,5);
 const slot=rows.find(x=>x.departure_min===1560);
 assert.ok(slot&&slot.defaultTime,'02:00 is a base row, never a removable additional slot');
 assert.equal(slot.cells[0].quantity,7,'Existing data at 02:00 is preserved');
@@ -44,8 +47,8 @@ for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js']){
 }
 assert.ok(index.includes('v24-shuttle-grid.js?v=3.07'),
  'Restored shuttle personnel grid must bypass legacy asset cache');
-const migration=fs.readFileSync('server/v227-shuttle-fixed-seven.sql','utf8');
-assert.ok(migration.includes('(990,1110,1560,1935)'),'DB protects 02:00 along with previous fixed departures');
+const migration=fs.readFileSync('server/v308-shuttle-eight-fixed.sql','utf8');
+assert.ok(migration.includes('(510,990,1110,1560,1935)'),'DB protects 08:30, 02:00 and 08:15');
 assert.ok(migration.includes('ops_remove_shuttle_addition'));
 assert.ok(migration.includes('ops_set_shuttle_reason'));
 console.log('PASS V3.07: seven fixed storage keys retained, clean 02:00/08:15 labels and chronological clock ordering');
