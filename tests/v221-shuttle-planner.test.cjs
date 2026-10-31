@@ -64,7 +64,8 @@ assert.ok(draws.some(x=>x==='IMAGE:29')&&draws.some(x=>x==='IMAGE:45'));
 const exportCode=fs.readFileSync('v21-shuttle-export.js','utf8');
 const gridCode=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(exportCode.includes('model().suggestVehicles(total)'));
-assert.ok(gridCode.includes('model().suggestVehicles(row.total)'));
-assert.ok(gridCode.includes('cls.details'),'UI must include available seats and spare seats');
-assert.ok(gridCode.includes("shuttle-'+x.seats+'.webp"),'UI must show each vehicle type in plan');
+assert.ok(gridCode.includes('model().suggestVehicles(row.total)')&&gridCode.includes('model().suggestVehicles(people)'),
+ 'Keep historical confirmed plan and new provisional plan calculations');
+assert.ok(gridCode.includes('plan.note'),'UI must include available seats, spare seats, and confirmation status');
+assert.ok(gridCode.includes("shuttle-'+item.seats+'.webp"),'UI must show each vehicle type in plan');
 console.log('PASS V2.21: optimize 29C/45C combinations, preserve four-unit confirmation, consistent PNG/PDF and UI plans');
