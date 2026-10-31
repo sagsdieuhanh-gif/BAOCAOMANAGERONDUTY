@@ -232,8 +232,8 @@
    if(window.SagsPersonnelV212){
      const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
      topics[4].observation=people.headcountsConfirmed?
-       'ĐH, PVHK và PVSĐ đã xác nhận quân số theo ca. Việc đáp ứng nhu cầu theo từng công đoạn chỉ được đánh giá khi có định mức và phân bổ thực tế được xác nhận.':
-       'Quân số theo ca của một số phòng chưa được xác nhận đầy đủ; các số liệu đã nhập vẫn được trình bày tại bảng quân số bên dưới.';
+       'ĐH, PVHK và PVSĐ đã cập nhật quân số thực tế theo từng ca; chi tiết từng vị trí được trình bày tại bảng quân số bên dưới.':
+       'Bảng quân số bên dưới thể hiện số người đã xác nhận theo từng vị trí và từng ca; những ô chưa có thông tin được ghi CHỜ XÁC NHẬN.';
      topics[4].action=people.lines.map((line,i)=>i===2&&staffDetails.some(x=>x.unit==='KTS')?
        '- Phòng PVSĐ: đã xác nhận số người theo từng nhóm công việc và ca trong bảng chi tiết bên dưới. Chưa cộng thành tổng nhân sự độc lập do cần loại trừ khả năng kiêm nhiệm.':line).join('\n');
      topics[4].owner='ĐH · PVHK · KTSĐ';
@@ -373,7 +373,7 @@
         x.label,x.role,x.morning==null?'CHỜ XÁC NHẬN':x.morning+' người',
         x.night==null?'CHỜ XÁC NHẬN':x.night+' người'
       ])).join(''):tr(['ĐH / PVHK / PVSĐ','CHƯA CÓ QUÂN SỐ XÁC NHẬN','—','—']))+'</table>'+
-    '<p class="v19-footnote">Nguồn: số người đã xác nhận theo từng vị trí và từng ca của ngày khai thác; số 0 là dữ liệu đã xác nhận. Không cộng các nhóm PVSĐ thành tổng nhân sự độc lập khi chưa loại trừ nhân sự kiêm nhiệm; số liệu này chưa phải kết luận đủ/thiếu so với nhu cầu.</p>'+
+    '<p class="v19-footnote">Nguồn: số người đã xác nhận theo từng vị trí và từng ca của ngày khai thác; số 0 là dữ liệu đã xác nhận. Không cộng các nhóm PVSĐ thành tổng nhân sự độc lập khi chưa loại trừ nhân sự kiêm nhiệm.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+(isL2?data.peakRows.slice(0,2):data.peakRows).map(x=>tr([x.slot,x.flight,isL2?crop(x.risk,190):x.risk,isL2?crop(x.action,460):x.action])).join('')+'</table>'+
