@@ -29,11 +29,13 @@
     return new Blob([...locals,central,end],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
   }
   const inner=el=>text(el.innerText??el.textContent);
-  function blocksFromDOM(rootEl){
+  function blocksFromDOM(rootEl,options={}){
     const result=[];
     function visit(el){
       if(!el||el.nodeType!==1)return;
       const tag=el.tagName;
+      // PDF-only presentation filter. Never hide warnings from the on-screen report or DOCX.
+      if(options.hidePendingWarnings&&el.classList?.contains('v27-inline-report-warning'))return;
       if(el.classList?.contains('r28-chart')){
         const svg=el.querySelector('svg');if(svg)result.push({kind:'image',svg:svg.outerHTML});return;
       }
@@ -307,9 +309,9 @@
     a.href=u;a.download=filename;document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>URL.revokeObjectURL(u),10000);
   }
-  async function exportElement(el,format,filename){
+  async function exportElement(el,format,filename,options={}){
     if(!el)throw Error('Không tìm thấy nội dung xem trước. Hãy chọn ngày và tải lịch bay.');
-    const blocks=blocksFromDOM(el);
+    const blocks=blocksFromDOM(el,format==='pdf'?options:{});
     if(!blocks.length)throw Error('Báo cáo không có nội dung hợp lệ để xuất.');
     const blob=format==='docx'?await exportDocx(blocks):format==='pdf'?await exportPdf(blocks):null;
     if(!blob||blob.size<150)throw Error('Không tạo được file '+format.toUpperCase()+'.');
