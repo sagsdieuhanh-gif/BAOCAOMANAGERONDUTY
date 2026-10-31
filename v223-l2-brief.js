@@ -79,8 +79,8 @@
      push('stands','Bãi đỗ và luồng xe công vụ',
        (focus?'Các lượt qua khu bãi xa tập trung tại '+focus+'. ':'')+
        'Khu vực 2–3 có nguy cơ làm gián đoạn tuyến di chuyển thiết bị khi tàu lăn, đặc biệt nếu nhiều chuyến đến sát nhau.'+discrepancy,
-       'ĐH trao đổi trước với AOC về thứ tự tàu vào/ra bãi; PVSĐ đưa xe thang, Cobus và lực lượng về gần khu vực phục vụ từ trước. Hạn chế điều chuyển gấp giữa khu 2 và khu 3 khi đường công vụ phải dừng chờ, ưu tiên phương án gom chuyến theo cụm bãi.',
-       'ĐH · PVSĐ · AOC',3);
+       'PVSĐ chủ động trao đổi với ATC (Đài Kiểm soát không lưu) để nắm thứ tự tàu bay lăn ra/vào bãi và xin phép cho xe, phương tiện, trang thiết bị đi qua khu vực đường công vụ có kiểm soát khi cần. PVSĐ bố trí xe thang, Cobus, trang thiết bị và lực lượng đến khu vực phục vụ trước khi tàu bay lăn, hạn chế dừng chờ; ĐH theo dõi nguy cơ ảnh hưởng để phối hợp xử lý.',
+       'PVSĐ (chủ trì) · ĐH (phối hợp)',3);
    }
    const collisions=(op.gate?.warnings||[]).slice().sort((a,b)=>Number(b.verified)-Number(a.verified)||a.start-b.start);
    const arrivalRisk=(op.gate?.risky||[]).filter(x=>x.eta!=null&&x.eta>x.sta);
@@ -183,15 +183,21 @@
      const loaded=cargoKnown.length?cargoKnown.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg))
        .slice(0,3).map(x=>x.flight_no+' ('+Number(x.cargo_kg).toLocaleString('vi-VN')+' kg)'):[];
      const parts=[];
+     const kgValue=x=>quantity(x.cargo_kg);
+     const groupKg=predicate=>cargoKnown.filter(x=>predicate(kgValue(x))).map(x=>x.flight_no);
+     const kgLight=groupKg(n=>n>=100&&n<=200),kgLow=groupKg(n=>n<2500&&(n<100||n>200)),kgHigh=groupKg(n=>n>=2500);
      if(cargo.length)parts.push('Kho Hàng đã khai báo '+cargo.length+' chuyến có kế hoạch hàng'+
        (loaded.length?'; trọng lượng đáng lưu ý: '+loaded.join(', '):'')+
+       (kgLight.length?'; nhóm 100–200 kg: '+short(kgLight,4):'')+
+       (kgLow.length?'; nhóm khác dưới 2,5 tấn: '+short(kgLow,4):'')+
+       (kgHigh.length?'; từ 2,5 tấn: '+short(kgHigh,4):'')+
        (unfinished.length?'. Còn '+unfinished.length+' chuyến chưa chốt giờ hàng sẵn sàng.':'.'));
      if(ferry.length)parts.push('Có chuyến mang ký hiệu ferry: '+short(ferry.map(x=>x.no),5)+
        '; cần xác nhận phạm vi phục vụ thay vì áp dụng quy trình chuyến chở khách.');
      if(charter.length)parts.push('Lịch bay có '+charter.length+' chuyến thuê chuyến không thường lệ (CHARTER, ký hiệu ##): '+
        short(charter.map(x=>'##'+x.no),5)+'. CHARTER không đồng nghĩa FERRY; phải đối chiếu loại hình phục vụ thực tế.');
      push('cargo','Hàng hóa và chuyến có tính chất đặc biệt',parts.join(' '),
-       'Kho Hàng chốt tiến độ bàn giao theo giờ phục vụ; PVSĐ bố trí xe kéo, tổ tiếp nhận phù hợp khi có hàng. Với FERRY, ĐH xác nhận phạm vi dịch vụ thực tế. Với CHARTER, ĐH phối hợp hãng/AOC làm rõ yêu cầu phục vụ riêng, sau đó chuyển thông tin cho PVHK, PVSĐ và Kho Hàng để chuẩn bị theo đúng tính chất chuyến.',
+       'Sau khi Kho Hàng xác nhận có hàng đi và khối lượng booking, ưu tiên chuyến có hàng và thời gian quay đầu ngắn: PVSĐ chủ động đưa nhân lực, xe và trang thiết bị về khu vực phục vụ trước giờ khai thác. Với booking dưới 2,5 tấn, phương án phục vụ phải phù hợp thỏa thuận hiện hành với công ty và hãng, không tự áp dụng theo ngưỡng. Với FERRY, ĐH xác nhận phạm vi dịch vụ; với CHARTER (##), Phòng Điều hành chủ động trao đổi hãng hàng không về yêu cầu riêng rồi chuyển thông tin cho PVSĐ và Kho Hàng nếu liên quan để chuẩn bị.',
        'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length||charter.length?3:2);
    }
    const distinct=changes.filter(x=>/BÃI ĐỖ|STA|STD|GATE/i.test(x.type||'')).slice(0,4);
