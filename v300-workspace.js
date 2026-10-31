@@ -71,7 +71,7 @@
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
       '<div id="v300Busy" class="v300-loading" hidden>Đang đối chiếu nguồn dữ liệu đã xác nhận…</div>'+
-      '<div id="v300Page"></div><div class="v300-foot"><span id="v300Status" role="status" aria-live="polite"></span>'+
+      '<div id="v300Page"></div><div id="v300LegacyDock" hidden></div><div class="v300-foot"><span id="v300Status" role="status" aria-live="polite"></span>'+
       '<span>Chưa đủ căn cứ = CHỜ XÁC NHẬN · Không tự kết luận đủ</span></div></div></div>';
  }
  function mount(){
@@ -264,8 +264,13 @@
    }catch(e){status('Không đọc được dữ liệu: '+e.message,true);if(state)render();}
    finally{loading=false;showLoading(false)}
  }
+ function parkNative(){
+   const page=$('v300Page'),dock=$('v300LegacyDock');if(!page||!dock)return;
+   for(const node of [...page.querySelectorAll(':scope > [id^="tab-"]')]){node.classList.add('hidden');dock.appendChild(node)}
+ }
  function render(){
    if(!mounted)return;
+   parkNative();
    const nav=$('v300Nav');
    nav.querySelectorAll('[data-v300-route]').forEach(x=>x.classList.toggle('on',x.dataset.v300Route===view));
    const obj=NAV.find(x=>x[0]===view)||NAV[0];
@@ -284,6 +289,7 @@
    $('v300Page').replaceChildren(node);
    node.classList.remove('hidden');
    node.classList.add('v300-embedded');
+   if(k==='sources')root.SagsSecondUI?.refresh?.();
    if(k==='norms')root.SagsMinimumV231?.refresh('norms');
    if(k==='shuttle')root.SagsShuttleExport?.renderPreview?.();
    if(k==='admin')root.RnsRadarAdmin?.loadShared?.();
