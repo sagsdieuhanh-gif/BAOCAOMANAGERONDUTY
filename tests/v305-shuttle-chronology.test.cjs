@@ -38,8 +38,9 @@ const timeline=m.order([
  {direction:dir,departure_min:1935},
  {direction:dir,departure_min:990}
 ]).map(x=>x.departure_min);
-assert.deepEqual(timeline,[660,990,1560,1935],'After-midnight (+1) remains after current-day departures');
+assert.deepEqual(timeline,[1560,1935,660,990],
+  'Visible clock sorting must show 02:00, 08:15, 11:00 then 16:30, while preserving persisted minute values');
 assert.deepEqual(values[0].departure_min,660,'Sort must not mutate persisted booking source records');
 assert.ok(grid.assemble(values,added).find(x=>x.direction==='NHA_CXR'&&x.departure_min===630),
  'Other direction must retain independent added time');
-console.log('PASS V3.05: mixed default/custom 10:00 → 11:00 → 16:30, extra coach and (+1) ordered identically in live grid and PNG/PDF');
+console.log('PASS V3.07: mixed default/custom 10:00 → 11:00 → 16:30; normalized 02:00/08:15; same input and export order');
