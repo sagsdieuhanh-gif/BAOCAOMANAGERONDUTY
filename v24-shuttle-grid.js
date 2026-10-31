@@ -54,20 +54,23 @@
  // The legacy recommendation is the far-right column of a horizontally scrolling table;
  // this strip restores vehicle imagery without claiming a plan for unconfirmed staff.
  function vehicleSuggestions(directionRows){
-   const confirmed=directionRows.filter(x=>x.confirmed===V.length);
-   const pending=directionRows.length-confirmed.length;
-   const previews=confirmed.map(x=>{
-     const p=model().suggestVehicles(x.total);
-     if(!p)return null;
-     const units=p.units.map(item=>'<span class="v306-vehicle-thumb">'+
+   const pending=directionRows.filter(x=>x.confirmed<V.length).length;
+   // Every scheduled hour receives a visual entry, whether or not four units
+   // have submitted. Only fully confirmed rows receive a vehicle choice.
+   const previews=directionRows.map(x=>{
+     const complete=x.confirmed===V.length;
+     const p=complete?model().suggestVehicles(x.total):null;
+     const units=(p?.units||[]).map(item=>'<span class="v306-vehicle-thumb">'+
        '<img loading="lazy" src="./assets/shuttle-'+item.seats+'.webp" alt="Xe '+item.seats+' chỗ">'+
        '<b>×'+item.quantity+'</b></span>').join('');
      return '<div class="v306-suggestion" data-v306-slot="'+escape(partKey(x))+'">'+
        '<span class="v306-suggest-time">'+escape(clock(x.departure_min))+
        (x.line_no>0?' <small>Xe bổ sung '+x.line_no+'</small>':'')+'</span>'+
-       '<span class="v306-suggest-vehicles">'+(units||'<span class="v306-none">Không cần xe</span>')+'</span>'+
-       '<span class="v306-suggest-text"><strong>'+escape(p.label)+'</strong>'+
-       '<small>'+escape(p.details||'')+' · '+x.total+' người đã xác nhận</small></span>'+
+       '<span class="v306-suggest-vehicles">'+(complete?units||'<span class="v306-none">Không cần xe</span>':
+         '<span class="v306-none">⏳</span>')+'</span>'+
+       '<span class="v306-suggest-text"><strong>'+(p?escape(p.label):'CHỜ XÁC NHẬN')+'</strong>'+
+       '<small>'+(p?escape(p.details||'')+' · '+x.total+' người':
+         'Đã nhập '+x.confirmed+'/4 phòng')+'</small></span>'+
        '</div>';
    }).filter(Boolean);
    const legend='<div class="v306-vehicle-legend">'+
@@ -78,57 +81,65 @@
      '<div class="v306-vehicle-header"><div><strong>🚌 GỢI Ý XE THEO GIỜ</strong>'+
      '<p>Hệ thống tự tính phương án xe 29/45 chỗ từ tổng người của bốn đơn vị.</p></div>'+legend+'</div>'+
      (previews.length?'<div class="v306-vehicle-list">'+previews.join('')+'</div>':
-       '<p class="v306-await">Chưa đủ 4 đơn vị xác nhận tại một mốc giờ nào để tính gợi ý xe chính thức.</p>')+
+       '<p class="v306-await">Chưa có giờ xe để gợi ý.</p>')+
      (pending?'<p class="v306-pending">'+pending+' mốc giờ còn chờ dữ liệu đủ 4 phòng; không tự chốt loại xe khi chưa đủ số người.</p>':'')+
      '</aside>';
  }
  function makeGrid(direction,all,who){
    const active=allowedRoles.has(who);
-   const route=direction==='NHA_CXR'?'NHA TRANG → CAM RANH':'CAM RANH → NHA TRANG';
+   const route=direction==='NHA_CXR'?'NHA TRANG → CXR':'CXR → NHA TRANG';
    const what=direction==='NHA_CXR'?'CHIỀU ĐI LÀM':'CHIỀU XE VỀ';
    const directionRows=all.filter(x=>x.direction===direction);
    const body=directionRows.map(x=>{
      const key=partKey(x),cls=classify(x),child=x.line_no>0,custom=!x.defaultTime||child;
      const canReason=custom&&(who==='ADMIN'||who==='DH'||(typeof me!=='undefined'&&me?.id&&x.created_by===me.id));
-     const group=directionRows.filter(z=>z.departure_min===x.departure_min);
-     const groupTotal=group.reduce((sum,z)=>sum+z.total,0);
-     const groupVerified=group.every(z=>z.confirmed===V.length);
-     const groupNote=!child&&group.length>1?'<small>Tổng '+group.length+' xe: '+(groupVerified?'':'~')+groupTotal+'</small>':'';
      const cells=x.cells.map((v,j)=>{
        const u=V[j],edit=editable(who,u);
        if(edit){
          return '<td class="v24-cell v24-edit"><label><input aria-label="'+escape(headings[j])+' '+clock(x.departure_min)+(child?' bổ sung '+x.line_no:'')+
            '" type="number" min="0" max="500" inputmode="numeric" placeholder="—" data-v24-value="'+u+'" value="'+(v?.quantity??'')+'"></label>'+
-           '<small>'+(v?'Đã lưu '+timeVN(v.confirmed_at):'Chưa xác nhận')+'</small></td>';
+           '</td>';
        }
-       return '<td class="v24-cell v24-read"><strong>'+(v?.quantity??'—')+'</strong><small>'+(v?timeVN(v.confirmed_at):'Chưa xác nhận')+'</small></td>';
+       return '<td class="v24-cell v24-read"><strong>'+(v?.quantity??'—')+'</strong></td>';
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
-       '<td class="v24-time"><b>'+clock(x.departure_min)+'</b><small>'+(child?'↳ Xe bổ sung '+x.line_no:'Chuyến chính')+'</small>'+
-       ((child||!x.defaultTime)&&(who==='ADMIN'||who==='DH')?'<button type="button" class="v27-delete v214-delete-slot" data-v27-delete="'+key+'" title="Chỉ ĐH/ADMIN được xóa giờ bổ sung; hệ thống ghi nhật ký dữ liệu đã xóa" aria-label="Xóa giờ xe bổ sung '+clock(x.departure_min)+'">× Xóa</button>':'')+'</td>'+
+       '<td class="v24-time"><b>'+clock(x.departure_min)+'</b>'+
+       (custom?'<span class="v307-added-badge">'+(child?'XE '+(x.line_no+1):'GIỜ THÊM')+'</span>':'')+'</td>'+
        cells+
-       '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b><small>'+x.confirmed+'/'+V.length+' đơn vị</small>'+groupNote+'</td>'+
+       '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b>'+
+         (x.confirmed<V.length?'<small>Đủ '+x.confirmed+'/4</small>':'')+'</td>'+
        '<td class="v24-coach v24-'+cls.kind+'">'+
          (cls.units?.length?'<span class="v221-bus-types">'+cls.units.map(x=>
            '<span class="v221-bus-type"><img src="./assets/shuttle-'+x.seats+'.webp" alt="Xe SAGS '+x.seats+' chỗ" class="v220-coach-img"><b>×'+x.quantity+'</b></span>'
          ).join('')+'</span>':'')+
          '<span><b>'+escape(cls.label)+'</b></span>'+
          (cls.seats?'<small>'+escape(cls.details)+'</small>':'')+'</td>'+
-       '</tr>'+
-       (x.missing.length?'<tr class="v28-missing-row"><td colspan="7"><b>CHƯA XÁC NHẬN:</b> '+escape(missingUnits(x).join(', '))+'</td></tr>':'')+
-       (custom?'<tr class="v28-reason-row"><td colspan="7"><div class="v28-reason-wrap"><b>XE BỔ SUNG · LÝ DO:</b> '+(canReason?
-         '<input maxlength="220" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'">':
-         '<span>'+escape(x.reason||'Chưa ghi lý do thêm xe')+'</span>')+'</div></td></tr>':'');
+       '</tr>';
+   }).join('');
+   // Keep delete and reason editing available in an optional compact drawer;
+   // do not generate extra rows between times in the main table.
+   const editExtras=directionRows.filter(x=>!x.defaultTime||x.line_no>0).map(x=>{
+     const key=partKey(x),canReason=who==='ADMIN'||who==='DH'||
+       (typeof me!=='undefined'&&me?.id&&x.created_by===me.id);
+     return '<div class="v307-extra-edit"><strong>'+escape(clock(x.departure_min))+
+       (x.line_no>0?' · Xe '+(x.line_no+1):'')+'</strong>'+
+       (canReason?'<input aria-label="Lý do giờ xe '+escape(clock(x.departure_min))+
+         '" maxlength="220" data-v28-reason="'+key+'" value="'+escape(x.reason||'')+'" placeholder="Lý do tăng chuyến">':
+         '<span>'+escape(x.reason||'Chưa có lý do')+'</span>')+
+       (['ADMIN','DH'].includes(who)?'<button type="button" data-v27-delete="'+key+'">Xóa</button>':'')+
+       '</div>';
    }).join('');
    return '<section class="v24-direction" data-v24-direction="'+direction+'"><div class="v24-route-title"><div><b>'+route+'</b><small>'+what+'</small></div>'+
-     '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' mốc giờ</div></div>'+
+     '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' giờ xe</div></div>'+
      vehicleSuggestions(directionRows)+
      '<p class="v222-scroll-hint">Cuộn ngang để xem đủ 4 phòng, tổng số người và gợi ý xe <span aria-hidden="true">↔</span></p>'+
      '<div class="v24-table-scroll" role="region" aria-label="Bảng xe '+route+'; vuốt ngang để xem đầy đủ 7 cột" tabindex="0"><table class="v24-table"><colgroup>'+
        '<col class="v222-col-time"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-total"><col class="v222-col-bus">'+
-       '</colgroup><thead><tr><th scope="col">GIỜ XE</th>'+
+       '</colgroup><thead><tr><th scope="col">GIỜ CHẠY</th>'+
        headings.map(t=>'<th scope="col">'+t+'</th>').join('')+'<th scope="col">TỔNG</th><th scope="col">GỢI Ý XE</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
-     (active?'<details class="v24-custom"><summary>+ THÊM GIỜ XE KHÁC CHO CHIỀU NÀY</summary>'+
+     (editExtras?'<details class="v307-extras"><summary>Quản lý giờ bổ sung ('+
+       directionRows.filter(x=>!x.defaultTime||x.line_no>0).length+')</summary>'+editExtras+'</details>':'')+
+     (active?'<details class="v24-custom"><summary>+ THÊM GIỜ XE</summary>'+
        '<div><label>Giờ chạy <input type="time" data-v24-time="'+direction+'" value="12:00"></label>'+
        '<label><input type="checkbox" data-v24-next="'+direction+'"> Ngày hôm sau (+1)</label>'+ '<label class="v28-custom-reason">Lý do thêm xe <input maxlength="220" data-v28-custom-reason="'+direction+'" placeholder="Ví dụ: Xe hỗ trợ họp chuyên môn" required></label>'+
        '<button type="button" data-v24-custom="'+direction+'">THÊM MỐC GIỜ</button></div></details>':'')+
@@ -137,14 +148,12 @@
  function template(who){
    const editablePart=allowedRoles.has(who);
    const activeField=who==='ADMIN'?'TẤT CẢ CỘT':headings[V.indexOf(fieldOf(who))]||'CHỈ XEM';
-   return '<div class="v24-wrap" data-v24-active="'+who+'"><div class="v24-heading">'+
-     '<div><div class="v24-eyebrow">SAGS · CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
-     '<p>Hai chiều xe · 04 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
-     '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
-     '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. <strong>Giờ xe mới tự xếp vào đúng thứ tự thời gian trong bảng</strong> (ví dụ 10:00 → 11:00 → 16:30), không dồn xuống cuối. Chọn <b>THÊM GIỜ XE KHÁC</b> rồi nhập số người tại dòng mới và bấm <b>LƯU TẤT CẢ THAY ĐỔI</b>.</div>'+
+   return '<div class="v24-wrap v307-compact" data-v24-active="'+who+'"><div class="v24-heading">'+
+     '<div><h2>XE GIAO CA</h2><p>GIỜ CHẠY · SỐ NGƯỜI · GỢI Ý XE</p></div>'+
+     '<div class="v24-access">'+(editablePart?'NHẬP: '+activeField:'CHỈ XEM')+'</div></div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
      (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
-     '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 4 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
+     '<p class="v24-footer">Ô trống = chưa có dữ liệu. Gợi ý chỉ có hiệu lực khi đủ 4 phòng xác nhận; ĐH quyết định điều xe.</p>'+
      '<div class="v24-status" role="status"></div></div>';
  }
  function mount(){
