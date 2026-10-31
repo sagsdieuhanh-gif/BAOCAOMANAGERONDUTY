@@ -43,12 +43,12 @@ assert.ok(exported.find(x=>x.direction==='CXR_NHA'&&x.departure_min===1185&&x.is
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js']){
- assert.ok(index.includes(file+'?v=3.09'),'Chronological model/export assets must bypass cache: '+file);
+ assert.ok(index.includes(file+'?v=3.10'),'Chronological model/export assets must bypass cache: '+file);
 }
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.09'),
+assert.ok(index.includes('v24-shuttle-grid.js?v=3.10'),
  'Restored shuttle personnel grid must bypass legacy asset cache');
 const migration=fs.readFileSync('server/v308-shuttle-eight-fixed.sql','utf8');
 assert.ok(migration.includes('(510,990,1110,1560,1935)'),'DB protects 08:30, 02:00 and 08:15');
 assert.ok(migration.includes('ops_remove_shuttle_addition'));
 assert.ok(migration.includes('ops_set_shuttle_reason'));
-console.log('PASS V3.09: eight official shuttle slots preserved in storage, including same-day 08:30 and next-day departures');
+console.log('PASS V3.10: eight official shuttle slots preserved in storage, including same-day 08:30 and next-day departures');
