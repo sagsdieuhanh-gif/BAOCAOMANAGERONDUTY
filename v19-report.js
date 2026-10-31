@@ -99,9 +99,16 @@
      trend(c.departures-prev.departure_count,'chuyến đi')+'. Tổng '+
      (total>priorTotal?'tăng '+(total-priorTotal):total<priorTotal?'giảm '+(priorTotal-total):'không đổi')+
      ' lượt'+(priorTotal?' ('+Math.abs((total-priorTotal)/priorTotal*100).toFixed(1).replace('.',',')+'%)':'')+'.';
+   const l1=c.firstPayload||null;
+   const priorL1=c.revision===2&&Number.isInteger(l1?.arrival_count)&&Number.isInteger(l1?.departure_count);
+   const l2Delta=priorL1?'Đối chiếu Lần 1 → Lần 2: đến '+l1.arrival_count+' → '+c.arrivals+
+     ', đi '+l1.departure_count+' → '+c.departures+' (chênh '+
+     (c.arrivals+c.departures-l1.arrival_count-l1.departure_count)+' lượt).':null;
    const summary='Đến: '+c.arrivals+' | Đi: '+c.departures+' | Quốc nội: '+(c.domestic??'CHỜ XÁC NHẬN')+
     ' lượt | Quốc tế: '+(c.international??'CHỜ XÁC NHẬN')+' lượt.';
-   const comparison='Ngày '+dateVN(prevDate(c.date))+': '+(priorTotal==null?'Chưa có số liệu đã xác nhận.':
+   const comparison=(c.revision===2&&l2Delta?l2Delta+'\n':'')+
+     'Ngày '+dateVN(prevDate(c.date))+': '+(priorTotal==null?
+       (c.revision===2?'Chưa có dữ liệu đối chiếu ngày trước; sử dụng Lần 1 làm mốc so sánh.':'Chưa có số liệu đã xác nhận.'):
     prev.departure_count+' đi, '+prev.arrival_count+' đến ('+priorTotal+' lượt).')+
     '\nNgày '+dateVN(c.date)+': '+c.departures+' đi, '+c.arrivals+' đến ('+total+' lượt).\n'+difference;
    const w=wide(c.rows),p=peaks(c.rows),short=lowGround(c.rows);
@@ -223,11 +230,14 @@
    ];
    const core=LABELS.map((label,i)=>({title:label,observation:observations[i],action:actions[i]}));
    const enhanced=window.SagsReportInsightsV211?.enrich(c,core);
+   // The user-facing report can paginate. L2 analysis must not cut a sentence
+   // or erase evidence just to fit an earlier narrow table layout.
+   const reportText=(value,max)=>c.revision===2?String(value??'').trim():crop(value,max);
    const topics=(enhanced||core).map((x,i)=>{
      const override=(c.controls||[]).find(row=>row.topic===i+1)||{};
      return {title:String(i+1).padStart(2,'0')+'. '+x.title.replace(/^\d+\.\s*/,''),owner:x.owner||'ĐH phối hợp các phòng',
-       observation:crop(known(override.observation)||x.observation||'CHỜ XÁC NHẬN',490),
-       action:crop(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.',620)};
+       observation:reportText(known(override.observation)||x.observation||'CHỜ XÁC NHẬN',490),
+       action:reportText(known(override.action)||x.action||'ĐH yêu cầu đơn vị liên quan xác nhận.',620)};
    });
    if(window.SagsPersonnelV212){
      const people=window.SagsPersonnelV212.summarize(c.unitPlans||[]);
@@ -245,19 +255,19 @@
      l2Changes=api.compare(c.sourcePayload,c.firstPayload||{});
      const z2=dep.filter(x=>['KHU 2','KHU 3'].includes(api.zone(x.bay)));
      if(z2.length){
-       topics[2].observation=crop('Lần 2: '+z2.length+' chuyến đi dự kiến đỗ khu vực 2–3, gồm '+
+       topics[2].observation=reportText('Lần 2: '+z2.length+' chuyến đi dự kiến đỗ khu vực 2–3, gồm '+
          z2.slice(0,6).map(x=>x.no+' vị trí '+x.bay).join(', ')+'. Cần lưu ý tuyến di chuyển xe và trang thiết bị.',490);
-       topics[2].action=crop('Phòng ĐH cập nhật bãi đỗ và hướng di chuyển phục vụ. PVSĐ bố trí xe, thiết bị phù hợp từng khu vực; khi tàu lăn hoặc đẩy lùi, chủ động điều chỉnh thứ tự di chuyển theo hướng dẫn khu bay.',620);
+       topics[2].action=reportText('Phòng ĐH cập nhật bãi đỗ và hướng di chuyển phục vụ. PVSĐ bố trí xe, thiết bị phù hợp từng khu vực; khi tàu lăn hoặc đẩy lùi, chủ động điều chỉnh thứ tự di chuyển theo hướng dẫn khu bay.',620);
      }
      if(review.high.length){
-       topics[6].observation=crop('Theo booking đã có, các chuyến cần chú ý lượng khách đặt chỗ gồm '+
+       topics[6].observation=reportText('Theo booking đã có, các chuyến cần chú ý lượng khách đặt chỗ gồm '+
          review.high.slice(0,6).map(x=>x.no+' ('+x.booking+')').join(', ')+'. Booking là dữ liệu dự kiến, không phải số khách thực đi.',490);
-       topics[6].action=crop('PVHK dựa trên booking để bố trí nhân sự làm thủ tục tại quầy check-in, phục vụ tại cửa boarding và đón, tiễn khách tại tàu bay theo từng chuyến; Kho Hàng và PVSĐ phối hợp công đoạn hành lý, tăng cường theo tình hình khách thực tế.',620);
+       topics[6].action=reportText('PVHK dựa trên booking để bố trí nhân sự làm thủ tục tại quầy check-in, phục vụ tại cửa boarding và đón, tiễn khách tại tàu bay theo từng chuyến; Kho Hàng và PVSĐ phối hợp công đoạn hành lý, tăng cường theo tình hình khách thực tế.',620);
      }
      if(review.ferry.length){
-       topics[8].observation=crop('Lần 2 ghi nhận chuyến có ký hiệu FERRY: '+review.ferry.map(x=>x.no).join(', ')+
+       topics[8].observation=reportText('Lần 2 ghi nhận chuyến có ký hiệu FERRY: '+review.ferry.map(x=>x.no).join(', ')+
          '. Đối chiếu lại FlightType, SSR và nhu cầu phục vụ.',490);
-       topics[8].action=crop('Phòng ĐH xác nhận tính chất chuyến với hãng/AOC; PVHK và PVSĐ bố trí lực lượng, xe và thiết bị theo yêu cầu thực tế được xác nhận, không áp dụng máy móc phương án chuyến chở khách.',620);
+       topics[8].action=reportText('Phòng ĐH xác nhận tính chất chuyến với hãng/AOC; PVHK và PVSĐ bố trí lực lượng, xe và thiết bị theo yêu cầu thực tế được xác nhận, không áp dụng máy móc phương án chuyến chở khách.',620);
      }
      const pick=new Map();
      for(const d of [...review.wide,...review.high,...review.ferry,...review.night,...z2])pick.set(d.no,d);
@@ -280,6 +290,38 @@
        bookingCount:review.booked,wideCount:review.wide.length,ferryCount:review.ferry.length
      };
    }
+   if(c.revision===2){
+     const assigned=(c.rows||[]).filter(x=>x.bay!=null);
+     const zoneFor=b=>[31,32,33,34,35,36,37,51,52,53,54,55].includes(Number(b))?'K1':
+       [38,39,40,41,42].includes(Number(b))?'K2':Number(b)>=56&&Number(b)<=71?'K3':'Khác';
+     const group=Object.fromEntries(['K1','K2','K3','Khác'].map(z=>[z,assigned.filter(x=>zoneFor(x.bay)===z)]));
+     topics[3].observation='Lịch Lần 2 đã có bãi cho '+assigned.length+'/'+c.rows.length+
+       ' hồ sơ chuyến: khu vực 1 '+group.K1.length+', khu vực 2 '+group.K2.length+
+       ', khu vực 3 '+group.K3.length+
+       (group.Khác.length?', vị trí khác '+group.Khác.length:'')+'.'+
+       (assigned.length<c.rows.length?' Còn '+(c.rows.length-assigned.length)+' hồ sơ chưa có bãi xác nhận.':'');
+     if(group.K2.length||group.K3.length)topics[3].observation+=
+       ' Các vị trí 38–42 và 56–71 cần chủ động thời gian di chuyển trang thiết bị khi tàu bay lăn.';
+     topics[3].action='PVSĐ chủ động bố trí nhân lực, xe thang và trang thiết bị tại khu vực phục vụ trước khi tàu bay lăn; liên hệ ATC nắm thứ tự tàu ra/vào bãi, xin phép đi qua đường công vụ khi cần theo quy trình. ĐH theo dõi các cụm chuyến ảnh hưởng và phối hợp điều chỉnh.';
+     if(!known(c.note?.weather_note))
+       topics[8].observation='Căn cứ lịch Lần 2, ưu tiên kiểm soát an toàn tuyến di chuyển người và phương tiện tại các khu bãi có tàu bay lăn; tiếp nhận các cảnh báo thời tiết/an ninh khi có thông tin chính thức.';
+     if(!known(c.note?.previous_issue)){
+       const ktsPlan=(c.unitPlans||[]).find(x=>x.unit==='KTS'&&x.status==='CONFIRMED');
+       const risk=String(ktsPlan?.details?.gse_risk||'').trim();
+       topics[9].observation=risk?'PVSĐ đã báo nội dung thiết bị cần theo dõi: '+risk:
+         'ĐH theo dõi kết quả xử lý các vấn đề phát sinh trong ca trên cơ sở báo cáo của từng đơn vị.';
+     }
+     // The saved cargo KG is actionable without PCS/ready-by estimates. Do not
+     // repeat optional missing metadata as a general unfinished report verdict.
+     if((c.cargoPlans||[]).some(x=>x.cargo_kg!=null)&&!known(c.note?.cargo_note)){
+       const booked=(c.cargoPlans||[]).filter(x=>x.cargo_kg!=null);
+       const totalKg=booked.reduce((n,x)=>n+Number(x.cargo_kg),0);
+       topics[6].observation='Kho Hàng đã cập nhật booking trọng lượng cho '+
+         booked.length+' chuyến, tổng '+totalKg.toLocaleString('vi-VN')+' kg. '+
+         booked.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg)).slice(0,5)
+           .map(x=>x.flight_no+' '+Number(x.cargo_kg).toLocaleString('vi-VN')+' kg').join('; ')+'.';
+     }
+   }
    if(c.note.special_operation_note)topics[0].observation+='\nĐH bổ sung: '+c.note.special_operation_note;
    const peakRows=p.map(x=>({
      slot:clock(x.minute)+' – '+clock(x.minute+30),
@@ -300,7 +342,14 @@
    ];
    const alerts=(window.SagsMissingV27?.analyze({transport:c.transport,additionalRows:c.additionalRows,staff,gse,cargoPlans:c.cargoPlans})||[]).filter(x=>x.type!=='XE GIAO CA');
    const cargo=new Map((c.flightCargo||[]).flatMap(x=>[x.arrival,x.departure].filter(Boolean).map(no=>[no,x.cargo_status])));
-   const enhancedPairs=(c.rows||[]).map(x=>({...x,cargo_status:cargo.get(x.departure)||cargo.get(x.arrival)||x.cargo_status||'UNKNOWN'}));
+   // Confirmed outbound cargo bookings also prove the flight has cargo even when
+   // the operational flight row has not yet been tagged with a cargo_status.
+   for(const plan of c.cargoPlans||[]){
+     if(plan.flight_no&&Number(plan.cargo_kg)>0)cargo.set(plan.flight_no,'CARGO');
+   }
+   const enhancedPairs=(c.rows||[]).map(x=>({...x,
+     cargo_status:cargo.get(x.departure)==='CARGO'||cargo.get(x.arrival)==='CARGO'?'CARGO':
+       cargo.get(x.departure)||cargo.get(x.arrival)||x.cargo_status||'UNKNOWN'}));
    const operationalSource=c.sourcePayload?{...c.sourcePayload,flights:enhancedPairs}:null;
    const confirmedContracts=(c.contracts||[]).filter(x=>window.SagsL2BriefV223?.verifiedContract(x));
    const operational=window.SagsOpsForecastV219?.summarize(operationalSource,enhancedPairs,c.staff,c.gse,confirmedContracts)||null;
@@ -314,11 +363,18 @@
      for(const item of dailyBrief.entries){
        const idx=topicIndex[item.key];if(idx==null)continue;
        const ctrl=(c.controls||[]).find(x=>x.topic===idx+1)||{};
-       if(!known(ctrl.observation))topics[idx].observation=crop(item.observation,490);
+       if(item.key==='checkin'){
+         // Booking is a contextual PVHK workload signal, not a replacement for
+         // the confirmed staffing observation or a sufficiency verdict.
+         if(!known(ctrl.observation))topics[idx].observation+=
+           '\nTổ chức quầy/gate: '+item.observation;
+         continue;
+       }
+       if(!known(ctrl.observation))topics[idx].observation=reportText(item.observation,490);
        // The staffing row must always keep the exact signed-off headcounts from Personnel,
        // while the situation-specific check-in advice is printed in the L2 table above.
-       if(item.key!=='checkin'&&!known(ctrl.action))topics[idx].action=crop(item.action,620);
-       if(item.key!=='checkin'&&!ctrl.owner)topics[idx].owner=item.owner;
+       if(!known(ctrl.action))topics[idx].action=reportText(item.action,620);
+       if(!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
