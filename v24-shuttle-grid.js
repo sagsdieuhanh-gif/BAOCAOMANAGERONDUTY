@@ -50,6 +50,38 @@
    if(!plan)return {label:'CHƯA THỂ TÍNH',kind:'pending'};
    return {...plan,kind:plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'};
  }
+ // A visual route-level recommendation remains visible even on a narrow phone.
+ // The legacy recommendation is the far-right column of a horizontally scrolling table;
+ // this strip restores vehicle imagery without claiming a plan for unconfirmed staff.
+ function vehicleSuggestions(directionRows){
+   const confirmed=directionRows.filter(x=>x.confirmed===V.length);
+   const pending=directionRows.length-confirmed.length;
+   const previews=confirmed.map(x=>{
+     const p=model().suggestVehicles(x.total);
+     if(!p)return null;
+     const units=p.units.map(item=>'<span class="v306-vehicle-thumb">'+
+       '<img loading="lazy" src="./assets/shuttle-'+item.seats+'.webp" alt="Xe '+item.seats+' chỗ">'+
+       '<b>×'+item.quantity+'</b></span>').join('');
+     return '<div class="v306-suggestion" data-v306-slot="'+escape(partKey(x))+'">'+
+       '<span class="v306-suggest-time">'+escape(clock(x.departure_min))+
+       (x.line_no>0?' <small>Xe bổ sung '+x.line_no+'</small>':'')+'</span>'+
+       '<span class="v306-suggest-vehicles">'+(units||'<span class="v306-none">Không cần xe</span>')+'</span>'+
+       '<span class="v306-suggest-text"><strong>'+escape(p.label)+'</strong>'+
+       '<small>'+escape(p.details||'')+' · '+x.total+' người đã xác nhận</small></span>'+
+       '</div>';
+   }).filter(Boolean);
+   const legend='<div class="v306-vehicle-legend">'+
+     '<div><img loading="lazy" src="./assets/shuttle-29.webp" alt="Xe 29 chỗ"><span>Xe 29 chỗ</span></div>'+
+     '<div><img loading="lazy" src="./assets/shuttle-45.webp" alt="Xe 45 chỗ"><span>Xe 45 chỗ</span></div>'+
+     '</div>';
+   return '<aside class="v306-vehicle-showcase" aria-label="Gợi ý loại xe theo giờ">'+
+     '<div class="v306-vehicle-header"><div><strong>🚌 GỢI Ý XE THEO GIỜ</strong>'+
+     '<p>Hệ thống tự tính phương án xe 29/45 chỗ từ tổng người của bốn đơn vị.</p></div>'+legend+'</div>'+
+     (previews.length?'<div class="v306-vehicle-list">'+previews.join('')+'</div>':
+       '<p class="v306-await">Chưa đủ 4 đơn vị xác nhận tại một mốc giờ nào để tính gợi ý xe chính thức.</p>')+
+     (pending?'<p class="v306-pending">'+pending+' mốc giờ còn chờ dữ liệu đủ 4 phòng; không tự chốt loại xe khi chưa đủ số người.</p>':'')+
+     '</aside>';
+ }
  function makeGrid(direction,all,who){
    const active=allowedRoles.has(who);
    const route=direction==='NHA_CXR'?'NHA TRANG → CAM RANH':'CAM RANH → NHA TRANG';
@@ -90,6 +122,7 @@
    }).join('');
    return '<section class="v24-direction" data-v24-direction="'+direction+'"><div class="v24-route-title"><div><b>'+route+'</b><small>'+what+'</small></div>'+
      '<div class="v24-route-number">'+directionRows.filter(x=>x.line_no===0).length+' mốc giờ</div></div>'+
+     vehicleSuggestions(directionRows)+
      '<p class="v222-scroll-hint">Cuộn ngang để xem đủ 4 phòng, tổng số người và gợi ý xe <span aria-hidden="true">↔</span></p>'+
      '<div class="v24-table-scroll" role="region" aria-label="Bảng xe '+route+'; vuốt ngang để xem đầy đủ 7 cột" tabindex="0"><table class="v24-table"><colgroup>'+
        '<col class="v222-col-time"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-unit"><col class="v222-col-total"><col class="v222-col-bus">'+
