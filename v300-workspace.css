@@ -647,3 +647,31 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  #v300Root .v308-example-buses img{width:52px!important;height:35px!important}
  #v300Root .v308-vehicle-showcase{margin:6px 2px!important;padding:8px!important}
 }
+
+/* V3.11 – report inputs: source-driven, progressive disclosure */
+#v300Root .v311-entry-guide{background:#e9f6f3;border:1px solid #b9ded6;border-radius:11px;padding:13px 16px;margin:0 0 14px;font-size:13px;line-height:1.6;color:#235967}
+#v300Root .v311-entry-guide b{color:#126b65}
+#v300Root .v311-source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#v300Root .v311-source-grid>div{background:#f3f8fa;border:1px solid #e3edf0;border-radius:10px;padding:12px}
+#v300Root .v311-source-grid small{display:block;color:#678493;font-size:10px;letter-spacing:.03em}
+#v300Root .v311-source-grid strong{display:block;color:#194963;font-size:20px}
+#v300Root .v311-advanced{margin-top:14px}
+#v300Root .v311-advanced summary{font-size:13px;padding:6px 0;color:#135866;cursor:pointer}
+#v300Root .v311-cargo-scroll{margin:12px 0;overflow:auto}
+#v300Root .v311-cargo-scroll .v300-table{min-width:570px}
+#v300Root .v311-cargo-scroll .v300-table input{width:100%;max-width:none;min-width:90px}
+#v300Root .v311-cargo-scroll .v300-table td{padding:7px}
+#v300Root .v311-add{margin-top:4px;background:#e7f5f1;color:#0e695d;border-color:#b7dcd1}
+#v300Root .v311-savebar{position:sticky;bottom:0;z-index:4;box-shadow:0 6px 20px #0d42501a}
+#v300Root .v311-savebar button{min-width:200px}
+/* Shuttle headcount entry: 6 clear columns, no vehicle proposals. */
+#v300Root .v307-compact .v24-table{width:100%!important;min-width:610px!important}
+#v300Root .v307-compact .v24-table col.v222-col-time{width:115px!important}
+#v300Root .v307-compact .v24-table col.v222-col-unit{width:100px!important}
+#v300Root .v307-compact .v24-table col.v222-col-total{width:100px!important}
+#v300Root .v307-compact .v24-table th:last-child{background:#176b79!important}
+#v300Root .v307-compact .v24-table .v24-total{background:#eaf6f6!important}
+#v300Root .v307-compact .v24-table td{padding:8px 5px!important}
+#v300Root .v307-compact .v24-table td input[data-v24-value]{max-width:88px;margin:auto}
+@media(max-width:780px){#v300Root .v307-compact .v24-table{min-width:610px!important}#v300Root .v311-source-grid{gap:6px}#v300Root .v311-source-grid>div{padding:9px}}
+@media(max-width:540px){#v300Root .v311-source-grid{grid-template-columns:1fr 1fr}#v300Root .v311-entry-guide{padding:11px}#v300Root .v311-savebar{position:static}}
