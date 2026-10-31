@@ -36,12 +36,14 @@
    for(let n29=0;n29<=Math.ceil(people/29);n29++){
     const count=n45+n29,seats=45*n45+29*n29,spare=seats-people;
     if(!count||spare<0)continue;
-    // Operational preference: use the fewest coaches, then favor 45-seat
-    // coaches over a pair of 29-seat coaches, then minimize spare seats.
-    // E.g. 50 travellers: 45+29, NOT 29+29.
+    // Use the fewest coaches, avoid combinations with 2+ small coaches
+    // when one 45C+29C can cover the same headcount, then minimize spare
+    // capacity. 50 people => 45C+29C, not 2x29C or 2x45C.
+    const excessiveSmall=n29>1?1:0,priorSmall=best?.n29>1?1:0;
     if(!best||count<best.count||
-       count===best.count&&n45>best.n45||
-       count===best.count&&n45===best.n45&&spare<best.spare){
+       count===best.count&&excessiveSmall<priorSmall||
+       count===best.count&&excessiveSmall===priorSmall&&spare<best.spare||
+       count===best.count&&excessiveSmall===priorSmall&&spare===best.spare&&n45>best.n45){
       best={people,count,seats,spare,n29,n45};
     }
    }
