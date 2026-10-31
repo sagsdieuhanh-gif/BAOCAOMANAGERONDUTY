@@ -44,46 +44,75 @@
      Array.from({length:win},(_,i)=>'<rect x="'+(7+i*(w-14)/win)+'" y="6" width="'+((w-20)/win)+'" height="6" rx="1" fill="#8bbccc"/>').join('')+
      '<circle cx="16" cy="22" r="4" fill="#25475c"/><circle cx="'+(w-16)+'" cy="22" r="4" fill="#25475c"/></svg>';
  };
- function classify(row){
-   if(row.confirmed<V.length)return {label:'CHỜ XÁC NHẬN',kind:'pending'};
-   const plan=model().suggestVehicles(row.total);
-   if(!plan)return {label:'CHƯA THỂ TÍNH',kind:'pending'};
-   return {...plan,kind:plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'};
+ // Provisional advice uses only numbers already entered. Missing departments
+ // are never silently counted as zero; the estimate is clearly labeled.
+ function proposal(values,fullyConfirmed=false){
+   const valid=values.filter(v=>v!==null&&v!==undefined&&v!==''&&
+      Number.isSafeInteger(Number(v))&&Number(v)>=0&&Number(v)<=500);
+   const entered=valid.length;
+   if(!entered)return {label:'CHƯA NHẬP QUÂN SỐ',kind:'pending',entered:0,people:null,
+     note:'Nhập số người để có gợi ý',units:[],count:0,official:false};
+   const people=valid.reduce((sum,n)=>sum+Number(n),0);
+   const plan=model().suggestVehicles(people);
+   if(!plan)return {label:'CHƯA THỂ TÍNH',kind:'pending',entered,people,
+     note:'Kiểm tra dữ liệu số người',units:[],count:0,official:false};
+   const official=fullyConfirmed&&entered===V.length;
+   return {...plan,entered,people,official,
+     label:official?plan.label:'TẠM TÍNH · '+plan.label,
+     note:official?plan.details+' · đủ 4/4 phòng':plan.details+' · '+entered+'/4 phòng (tạm tính)',
+     kind:official?(plan.count===0?'zero':plan.count===1?(plan.n29?'small':'big'):'multi'):'estimate'};
  }
- // A visual route-level recommendation remains visible even on a narrow phone.
- // The legacy recommendation is the far-right column of a horizontally scrolling table;
- // this strip restores vehicle imagery without claiming a plan for unconfirmed staff.
+ function classify(row){
+   return proposal(row.cells.map(v=>v?.quantity??null),row.confirmed===V.length);
+ }
+ function coachImages(plan,compact=false){
+   const cls=compact?'v306-vehicle-thumb':'v221-bus-type';
+   return (plan.units||[]).map(item=>
+     '<span class="'+cls+'"><img loading="lazy" src="./assets/shuttle-'+item.seats+'.webp"'+
+     ' alt="Xe SAGS '+item.seats+' chỗ" class="v220-coach-img"><b>×'+item.quantity+'</b></span>'
+   ).join('');
+ }
+ function vehicleCell(plan){
+   return (plan.units?.length?'<span class="v221-bus-types">'+coachImages(plan)+'</span>':'')+
+     '<span class="v308-plan-label"><b>'+escape(plan.label)+'</b></span>'+
+     (plan.people!==null?'<small>'+escape(plan.note)+'</small>':'');
+ }
+ function summaryCard(plan){
+   const images=coachImages(plan,true);
+   return '<span class="v306-suggest-vehicles">'+
+     (images||'<span class="v306-none">'+(plan.entered?'Không cần xe':'—')+'</span>')+
+     '</span><span class="v306-suggest-text"><strong>'+escape(plan.label)+'</strong>'+
+     '<small>'+escape(plan.note)+(plan.people!==null?' · '+plan.people+' người':'')+'</small></span>';
+ }
+ // Always-visible example guide, independent of network access or confirmation.
+ function vehicleGuide(){
+   const examples=[20,40,50,60].map(n=>{
+     const p=model().suggestVehicles(n);
+     return '<div class="v308-example" data-v308-example="'+n+'">'+
+       '<strong>'+n+' NGƯỜI</strong>'+
+       '<div class="v308-example-buses">'+coachImages(p,true)+'</div>'+
+       '<b>'+escape(p.label)+'</b></div>';
+   }).join('');
+   return '<section class="v308-guide" aria-label="Hướng dẫn gợi ý xe 29 và 45 chỗ">'+
+     '<div class="v308-guide-head"><strong>🚌 GỢI Ý XE 29 / 45 CHỖ</strong>'+
+     '<small>Phương án tham khảo: đủ ghế, ưu tiên ít xe và hạn chế ghế dư</small></div>'+
+     '<div class="v308-example-list">'+examples+'</div></section>';
+ }
  function vehicleSuggestions(directionRows){
-   const pending=directionRows.filter(x=>x.confirmed<V.length).length;
-   // Every scheduled hour receives a visual entry, whether or not four units
-   // have submitted. Only fully confirmed rows receive a vehicle choice.
-   const previews=directionRows.map(x=>{
-     const complete=x.confirmed===V.length;
-     const p=complete?model().suggestVehicles(x.total):null;
-     const units=(p?.units||[]).map(item=>'<span class="v306-vehicle-thumb">'+
-       '<img loading="lazy" src="./assets/shuttle-'+item.seats+'.webp" alt="Xe '+item.seats+' chỗ">'+
-       '<b>×'+item.quantity+'</b></span>').join('');
-     return '<div class="v306-suggestion" data-v306-slot="'+escape(partKey(x))+'">'+
-       '<span class="v306-suggest-time">'+escape(clock(x.departure_min))+
-       (x.line_no>0?' <small>Xe bổ sung '+x.line_no+'</small>':'')+'</span>'+
-       '<span class="v306-suggest-vehicles">'+(complete?units||'<span class="v306-none">Không cần xe</span>':
-         '<span class="v306-none">⏳</span>')+'</span>'+
-       '<span class="v306-suggest-text"><strong>'+(p?escape(p.label):'CHỜ XÁC NHẬN')+'</strong>'+
-       '<small>'+(p?escape(p.details||'')+' · '+x.total+' người':
-         'Đã nhập '+x.confirmed+'/4 phòng')+'</small></span>'+
-       '</div>';
-   }).filter(Boolean);
-   const legend='<div class="v306-vehicle-legend">'+
-     '<div><img loading="lazy" src="./assets/shuttle-29.webp" alt="Xe 29 chỗ"><span>Xe 29 chỗ</span></div>'+
-     '<div><img loading="lazy" src="./assets/shuttle-45.webp" alt="Xe 45 chỗ"><span>Xe 45 chỗ</span></div>'+
-     '</div>';
-   return '<aside class="v306-vehicle-showcase" aria-label="Gợi ý loại xe theo giờ">'+
-     '<div class="v306-vehicle-header"><div><strong>🚌 GỢI Ý XE THEO GIỜ</strong>'+
-     '<p>Hệ thống tự tính phương án xe 29/45 chỗ từ tổng người của bốn đơn vị.</p></div>'+legend+'</div>'+
+   const previews=directionRows.map(row=>{
+     const plan=classify(row);
+     return '<div class="v306-suggestion'+(plan.official?' v308-official':' v308-provisional')+
+       '" data-v306-slot="'+escape(partKey(row))+'">'+
+       '<span class="v306-suggest-time">'+escape(clock(row.departure_min))+
+       (model().isNextDay(row.departure_min)?'<small>HÔM SAU</small>':'')+
+       (row.line_no>0?' <small>Xe '+(row.line_no+1)+'</small>':'')+
+       '</span>'+summaryCard(plan)+'</div>';
+   });
+   return '<aside class="v306-vehicle-showcase v308-vehicle-showcase" aria-label="Gợi ý loại xe theo giờ">'+
+     '<div class="v308-live-head"><strong>GỢI Ý THEO TỪNG GIỜ XE</strong>'+
+       '<small>Tự tính ngay khi nhập số người; phân biệt tạm tính và đủ dữ liệu</small></div>'+
      (previews.length?'<div class="v306-vehicle-list">'+previews.join('')+'</div>':
-       '<p class="v306-await">Chưa có giờ xe để gợi ý.</p>')+
-     (pending?'<p class="v306-pending">'+pending+' mốc giờ còn chờ dữ liệu đủ 4 phòng; không tự chốt loại xe khi chưa đủ số người.</p>':'')+
-     '</aside>';
+      '<p class="v306-await">Chưa có giờ xe.</p>')+'</aside>';
  }
  function makeGrid(direction,all,who){
    const active=allowedRoles.has(who);
@@ -104,16 +133,12 @@
      }).join('');
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b>'+
+       (model().isNextDay(x.departure_min)?'<small class="v308-next-day">NGÀY HÔM SAU</small>':'')+
        (custom?'<span class="v307-added-badge">'+(child?'XE '+(x.line_no+1):'GIỜ THÊM')+'</span>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b>'+
          (x.confirmed<V.length?'<small>Đủ '+x.confirmed+'/4</small>':'')+'</td>'+
-       '<td class="v24-coach v24-'+cls.kind+'">'+
-         (cls.units?.length?'<span class="v221-bus-types">'+cls.units.map(x=>
-           '<span class="v221-bus-type"><img src="./assets/shuttle-'+x.seats+'.webp" alt="Xe SAGS '+x.seats+' chỗ" class="v220-coach-img"><b>×'+x.quantity+'</b></span>'
-         ).join('')+'</span>':'')+
-         '<span><b>'+escape(cls.label)+'</b></span>'+
-         (cls.seats?'<small>'+escape(cls.details)+'</small>':'')+'</td>'+
+       '<td class="v24-coach v24-'+cls.kind+'">'+vehicleCell(cls)+'</td>'+
        '</tr>';
    }).join('');
    // Keep delete and reason editing available in an optional compact drawer;
@@ -151,9 +176,9 @@
    return '<div class="v24-wrap v307-compact" data-v24-active="'+who+'" data-v307-render="clock-sorted"><div class="v24-heading">'+
      '<div><h2>XE GIAO CA</h2><p>GIỜ CHẠY · SỐ NGƯỜI · GỢI Ý XE</p></div>'+
      '<div class="v24-access">'+(editablePart?'NHẬP: '+activeField:'CHỈ XEM')+'</div></div>'+
-     makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
+     vehicleGuide()+makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
      (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
-     '<p class="v24-footer">Ô trống = chưa có dữ liệu. Gợi ý chỉ có hiệu lực khi đủ 4 phòng xác nhận; ĐH quyết định điều xe.</p>'+
+     '<p class="v24-footer">Gợi ý TẠM TÍNH chỉ dựa trên các ô đã nhập, không coi ô trống là 0. Đủ 4 phòng đã lưu mới là dữ liệu đầy đủ; Điều hành quyết định điều xe.</p>'+
      '<div class="v24-status" role="status"></div></div>';
  }
  function mount(){
@@ -171,6 +196,7 @@
      const div=document.createElement('div');div.className='v24-mount';div.id='v24-'+id;
      if(id==='tab-home')el.appendChild(div);else el.prepend(div);
      div.addEventListener('click',onClick);
+     div.addEventListener('input',onQuantityInput);
      div.addEventListener('keydown',onKeydown);
    });
  }
@@ -355,8 +381,49 @@
      if(next)next.focus();else e.currentTarget.querySelector('[data-v24-save-all]')?.focus();
    }
  }
+
+ // Live estimate when a department edits headcount: never save to Supabase
+ // until the existing LƯU TẤT CẢ THAY ĐỔI action is explicitly selected.
+ function onQuantityInput(e){
+   if(!e.target.matches('input[data-v24-value]'))return;
+   const tr=e.target.closest('tr[data-v24-key]');
+   const wrap=e.currentTarget.querySelector('.v24-wrap');
+   if(!tr||!wrap)return;
+   const key=tr.dataset.v24Key;
+   const stored=assemble(rows,lines).find(x=>partKey(x)===key);
+   if(!stored)return;
+   const cells=[...tr.querySelectorAll('td.v24-cell')];
+   const counts=cells.map((cell,i)=>{
+     const field=cell.querySelector('input[data-v24-value]');
+     if(!field)return stored.cells[i]?.quantity??null;
+     const value=field.value.trim();
+     return /^\d+$/.test(value)&&Number(value)<=500?Number(value):null;
+   });
+   const saved=stored.cells.map(v=>v?.quantity??null);
+   const dirty=counts.some((v,i)=>v!==saved[i]);
+   const plan=proposal(counts,stored.confirmed===V.length&&!dirty);
+   const total=tr.querySelector('.v24-total');
+   if(total){
+     const main=total.querySelector('b');
+     if(main)main.textContent=plan.people===null?'—':(plan.official?'':'~')+plan.people;
+     const note=total.querySelector('small');
+     if(note)note.textContent=plan.official?'':'Đủ '+plan.entered+'/4';
+   }
+   const coach=tr.querySelector('.v24-coach');
+   if(coach){coach.className='v24-coach v24-'+plan.kind;coach.innerHTML=vehicleCell(plan);}
+   const card=[...wrap.querySelectorAll('[data-v306-slot]')].find(x=>x.dataset.v306Slot===key);
+   if(card){
+     card.classList.toggle('v308-official',plan.official);
+     card.classList.toggle('v308-provisional',!plan.official);
+     const container=document.createElement('div');container.innerHTML=summaryCard(plan);
+     for(const cls of ['v306-suggest-vehicles','v306-suggest-text']){
+       const replacement=container.querySelector('.'+cls);
+       card.querySelector('.'+cls)?.replaceWith(replacement);
+     }
+   }
+ }
  function setUnit(role){
    viewRole=role;mount();show();refresh();
  }
- root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,collectChanges,pendingDraft,makeGrid}};
+ root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,proposal,vehicleGuide,vehicleSuggestions,collectChanges,pendingDraft,makeGrid}};
 })(typeof window!=='undefined'?window:globalThis);
