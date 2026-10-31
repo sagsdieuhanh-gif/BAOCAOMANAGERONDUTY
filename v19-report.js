@@ -372,6 +372,16 @@
            '\nTổ chức quầy/gate: '+item.observation;
          continue;
        }
+       if(item.key==='resource'){
+         const kts=(c.unitPlans||[]).find(x=>x.unit==='KTS'&&x.status==='CONFIRMED');
+         const note=String(kts?.details?.gse_risk||'').trim();
+         if(!known(ctrl.observation)){
+           topics[idx].observation=reportText(item.observation,490)+
+             (note?'\nPVSĐ đã cập nhật lưu ý thiết bị: '+note:'');
+         }
+         if(!known(ctrl.action))topics[idx].action=reportText(item.action,620);
+         continue;
+       }
        if(item.key==='stands'){
          // Keep the complete verified zone distribution, then detail the risk windows.
          if(!known(ctrl.observation))topics[idx].observation+=
