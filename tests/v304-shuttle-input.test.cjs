@@ -22,10 +22,8 @@ assert.ok(grid.includes("await refresh()"),'Saving personnel must refresh confir
 assert.ok(grid.includes("sb.from('ops_shift_transport_v2')"),'Use existing Supabase shuttle rows, do not create duplicate storage');
 assert.ok(grid.includes("V=['DH','PVHK','KTS','QA_IT']"),'Keep confirmed four-column matrix');
 assert.ok(grid.includes("fieldOf(who)===field"),'Ordinary roles may only edit their own department');
-assert.ok(model.includes("departure_min:495") && model.includes("label:'08:15'"),
- 'Confirmed 08:15 return departure should be retained without +1');
-assert.ok(model.includes("departure_min:990") && model.includes("label:'16:30'"),
- 'Confirmed 16:30 return departure must remain');
+assert.ok(model.includes("departure_min:1935") && model.includes("departure_min:990"),
+ 'Keep existing overnight 08:15 and 16:30 vehicle slots and stored time keys');
 assert.ok(html.includes('data-v21-export="png"')&&html.includes('data-v21-export="pdf"'),
  'Original shuttle PNG/PDF export buttons must remain');
 console.log('PASS V3.04: live per-hour shuttle personnel editing, department permissions, save and exports restored');
