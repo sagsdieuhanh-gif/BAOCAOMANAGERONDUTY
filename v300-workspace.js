@@ -64,8 +64,16 @@
    return '<div class="v300-shell"><aside class="v300-sidebar">'+
       '<div class="v300-logo"><span class="v300-emblem">S</span><div><strong>MANAGER ON DUTY</strong><small>SAGS · CXR</small></div></div>'+
       '<div class="v300-side-caption">KHÔNG GIAN DỰ BÁO</div><nav id="v300Nav" aria-label="Chức năng dự báo">'+
-      NAV.filter(([k])=>canOpen(k)).map(([k,label,ico,sub])=>'<button type="button" data-v300-route="'+k+'" aria-label="'+H(label)+'">'+
-      '<span class="v300-nav-icon">'+keyCode(ico)+'</span><span><strong>'+H(label)+'</strong><small>'+H(sub)+'</small></span></button>').join('')+
+      (()=>{const button=([k,label,ico,sub])=>'<button type="button" data-v300-route="'+k+'" aria-label="'+H(label)+'">'+
+       '<span class="v300-nav-icon">'+keyCode(ico)+'</span><span><strong>'+H(label)+'</strong><small>'+H(sub)+'</small></span></button>';
+       const main=Object.fromEntries(NAV.map(x=>[x[0],x]));
+       const departments=['DH','KTS','PVHK','KHO','QA_IT'].filter(canOpen).map(k=>button(main[k])).join('');
+       const other=['norms','shuttle','admin'].filter(canOpen).map(k=>button(main[k])).join('');
+       return ['overview','sources'].filter(canOpen).map(k=>button(main[k])).join('')+
+       (departments?'<details class="v300-nav-folder" open><summary>◎ &nbsp; CÁC PHÒNG</summary><div>'+departments+'</div></details>':'')+
+       ['analysis','report'].filter(canOpen).map(k=>button(main[k])).join('')+
+       (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
+      })()+
       '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.00</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
