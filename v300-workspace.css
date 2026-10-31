@@ -159,3 +159,185 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  #v300Root .v300-nav-folder[open]>div{display:flex;position:relative;gap:6px;overflow-x:auto;max-width:90vw;padding:5px}
  #v300Root .v300-nav-folder>div button{min-height:38px!important;flex:0 0 auto}
 }
+
+/* V3.01 · UNIFIED SIDE-BY-SIDE WORKSPACE
+   Same interaction model on PC, tablets and phones: left tool rail, right content.
+   On small screens only the width/label density changes, never navigation direction. */
+#v300Root .v300-sidebar{
+  position:sticky;
+  top:0;
+  align-self:start;
+  height:100dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:thin;
+  scrollbar-color:#60808f transparent;
+}
+#v300Root .v300-main{
+  min-width:0;
+  overflow-wrap:break-word;
+}
+#v300Root .v300-main .v300-table-wrap,
+#v300Root .v300-main .tablewrap,
+#v300Root .v300-main .v217-table-wrap{
+  max-width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+@media(max-width:850px){
+  body.v300-ready .layout{max-width:100%;padding:0}
+  #v300Root .v300-shell{
+    display:grid;
+    grid-template-columns:100px minmax(0,1fr);
+    align-items:start;
+    min-height:calc(100dvh - 55px);
+  }
+  #v300Root .v300-sidebar{
+    position:sticky;
+    top:0;
+    height:100dvh;
+    min-height:0;
+    width:100px;
+    padding:11px 7px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  #v300Root .v300-logo{display:none}
+  #v300Root .v300-side-caption{display:block;padding:4px 2px 6px;text-align:center;font-size:8px;line-height:1.35;letter-spacing:.05em}
+  #v300Root .v300-side-bottom{display:flex;padding:10px 1px 0;text-align:center;gap:6px;font-size:9px;line-height:1.35}
+  #v300Root #v300Nav{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    overflow:visible;
+    gap:5px;
+    padding:0;
+    min-width:0;
+  }
+  #v300Root #v300Nav button,
+  #v300Root .v300-nav-folder>div button{
+    display:flex;
+    flex:initial;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    width:100%;
+    min-width:0;
+    min-height:56px!important;
+    padding:7px 3px!important;
+    gap:4px;
+    border-radius:10px;
+  }
+  #v300Root #v300Nav button strong{
+    font-size:10px;
+    line-height:1.18;
+    font-weight:700;
+    overflow-wrap:anywhere;
+    white-space:normal;
+  }
+  #v300Root #v300Nav button small{display:none}
+  #v300Root .v300-nav-icon{
+    width:auto;
+    font-size:19px;
+    line-height:1.1;
+  }
+  #v300Root .v300-nav-folder{
+    display:block;
+    flex:none;
+    min-width:0;
+    width:100%;
+    border-top:1px solid #ffffff28;
+    border-bottom:1px solid #ffffff28;
+    padding:5px 0;
+    position:static;
+  }
+  #v300Root .v300-nav-folder summary{
+    display:block;
+    position:static;
+    min-height:40px;
+    width:100%;
+    padding:7px 3px;
+    text-align:center;
+    border:0;
+    border-radius:9px;
+    font-size:9px;
+    letter-spacing:0;
+    white-space:normal;
+    line-height:1.35;
+    background:transparent;
+    overflow-wrap:anywhere;
+  }
+  #v300Root .v300-nav-folder summary:after{
+    float:none;
+    display:block;
+    margin-top:1px;
+    font-size:11px;
+  }
+  #v300Root .v300-nav-folder[open]>div{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    position:static;
+    width:100%;
+    min-width:0;
+    max-width:none;
+    overflow:visible;
+    gap:4px;
+    padding:4px 0 5px;
+  }
+  #v300Root .v300-nav-folder>div button{background:#17485e}
+  #v300Root .v300-nav-folder>div button.on{background:#19717b}
+  #v300Root .v300-main{
+    min-width:0;
+    width:100%;
+    padding:17px 13px 24px;
+    overflow-x:hidden;
+  }
+  #v300Root .v300-top{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+  #v300Root .v300-tools{width:100%;justify-content:flex-start}
+  #v300Root .v300-top h1{font-size:clamp(21px,5.2vw,26px);line-height:1.2}
+  #v300Root .v300-card{padding:14px 12px;margin-bottom:11px}
+  #v300Root .v300-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #v300Root .v300-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #v300Root .v300-device-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #v300Root .v300-dept-head{padding:10px 11px;flex-wrap:wrap}
+  #v300Root .v300-report-preview{max-width:100%;overflow-x:auto}
+  #v300Root .v300-cta{padding:13px;gap:12px}
+  #v300Root .v300-savebar{padding:13px;gap:12px}
+}
+@media(max-width:540px){
+  #v300Root .v300-shell{grid-template-columns:82px minmax(0,1fr)}
+  #v300Root .v300-sidebar{width:82px;padding:9px 5px 12px}
+  #v300Root #v300Nav button,
+  #v300Root .v300-nav-folder>div button{min-height:52px!important;padding:6px 2px!important}
+  #v300Root #v300Nav button strong{font-size:9px}
+  #v300Root .v300-nav-icon{font-size:18px}
+  #v300Root .v300-side-caption{font-size:7.5px}
+  #v300Root .v300-side-bottom span{display:none}
+  #v300Root .v300-main{padding:13px 9px 24px}
+  #v300Root .v300-card{padding:12px 10px}
+  #v300Root .v300-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  #v300Root .v300-stat{padding:10px 8px;min-height:89px}
+  #v300Root .v300-stat span{font-size:8px}
+  #v300Root .v300-stat strong{font-size:17px}
+  #v300Root .v300-stat small{font-size:9px}
+  #v300Root .v300-step{padding:9px 5px;gap:5px}
+  #v300Root .v300-step>b{min-width:23px;height:23px;font-size:11px}
+  #v300Root .v300-step strong{font-size:10px}
+  #v300Root .v300-step small{font-size:9px}
+  #v300Root .v300-fields-grid{grid-template-columns:minmax(0,1fr)}
+  #v300Root .v300-savebar,#v300Root .v300-cta{flex-direction:column;align-items:stretch}
+}
+@media(max-width:360px){
+  #v300Root .v300-shell{grid-template-columns:74px minmax(0,1fr)}
+  #v300Root .v300-sidebar{width:74px;padding-inline:4px}
+  #v300Root .v300-main{padding-inline:8px}
+  #v300Root .v300-stats{grid-template-columns:minmax(0,1fr)}
+}
+@media print{
+  #v300Root .v300-shell{display:block!important}
+  #v300Root .v300-sidebar{display:none!important}
+  #v300Root .v300-main{width:100%!important;overflow:visible!important}
+}
