@@ -59,7 +59,7 @@ const e=window.SagsOfficeExportV29;
  assert.ok(landscape.includes('/MediaBox [0 0 842 595]'),'Shuttle image PDFs still use landscape paper');
  const index=fs.readFileSync('index.html','utf8');
  assert.ok(index.includes("APP_VERSION='V3.15'"));
- assert.ok(index.includes('office-export-v29.js?v=3.13'));
+ assert.ok(index.includes('office-export-v29.js?v=3.15'));
  assert.ok(index.includes('v300-workspace.js?v=3.15'));
  console.log('PASS V3.13: A4 portrait, compact text, full-content multiline table pagination, repeated headers, landscape shuttle retained');
 })().catch(e=>{console.error(e);process.exitCode=1});
