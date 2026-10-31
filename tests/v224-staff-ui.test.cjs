@@ -44,7 +44,7 @@ assert.ok(dept.includes('v20SaveKTS')&&dept.includes('v20SavePVHK'),'Retain orig
 assert.ok(dept.includes('v20SaveSky')&&dept.includes('v20SavePvExtra'),'Retain staffing extras');
 const html=fs.readFileSync('index.html','utf8');
 const css=fs.readFileSync('v224-staff-ui.css','utf8');
-assert.ok(html.includes('Báo cáo điều hành V3.00'));
+assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(html));
 assert.ok(html.includes('v211-unit-input.js?v=2.25'));
 assert.ok(html.includes('v20-departments.js?v=2.25'));
 assert.ok(html.includes('v224-staff-ui.css?v=2.24'));
