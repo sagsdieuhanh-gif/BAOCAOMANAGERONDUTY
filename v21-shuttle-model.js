@@ -36,8 +36,12 @@
    for(let n29=0;n29<=Math.ceil(people/29);n29++){
     const count=n45+n29,seats=45*n45+29*n29,spare=seats-people;
     if(!count||spare<0)continue;
-    if(!best||count<best.count||count===best.count&&spare<best.spare||
-       count===best.count&&spare===best.spare&&n45>best.n45){
+    // Operational preference: use the fewest coaches, then favor 45-seat
+    // coaches over a pair of 29-seat coaches, then minimize spare seats.
+    // E.g. 50 travellers: 45+29, NOT 29+29.
+    if(!best||count<best.count||
+       count===best.count&&n45>best.n45||
+       count===best.count&&n45===best.n45&&spare<best.spare){
       best={people,count,seats,spare,n29,n45};
     }
    }
