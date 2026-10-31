@@ -106,11 +106,13 @@
      (c.arrivals+c.departures-l1.arrival_count-l1.departure_count)+' lượt).':null;
    const summary='Đến: '+c.arrivals+' | Đi: '+c.departures+' | Quốc nội: '+(c.domestic??'CHỜ XÁC NHẬN')+
     ' lượt | Quốc tế: '+(c.international??'CHỜ XÁC NHẬN')+' lượt.';
-   const comparison=(c.revision===2&&l2Delta?l2Delta+'\n':'')+
-     'Ngày '+dateVN(prevDate(c.date))+': '+(priorTotal==null?
-       (c.revision===2?'Chưa có dữ liệu đối chiếu ngày trước; sử dụng Lần 1 làm mốc so sánh.':'Chưa có số liệu đã xác nhận.'):
-    prev.departure_count+' đi, '+prev.arrival_count+' đến ('+priorTotal+' lượt).')+
-    '\nNgày '+dateVN(c.date)+': '+c.departures+' đi, '+c.arrivals+' đến ('+total+' lượt).\n'+difference;
+   const previousDayComparison=priorTotal==null?'Không có dữ liệu đã xác nhận của ngày liền trước để so sánh.':
+     'Ngày '+dateVN(prevDate(c.date))+': '+prev.departure_count+' đi, '+prev.arrival_count+
+     ' đến ('+priorTotal+' lượt).\nNgày '+dateVN(c.date)+': '+
+     c.departures+' đi, '+c.arrivals+' đến ('+total+' lượt).\n'+difference;
+   // A completed L2 schedule has its own verified L1 baseline. Do not lead a
+   // finalized report with an unrelated missing previous-day total.
+   const comparison=priorL1?(l2Delta+(priorTotal==null?'':'\n'+previousDayComparison)):previousDayComparison;
    const w=wide(c.rows),p=peaks(c.rows),short=lowGround(c.rows);
    const staffDetails=(()=> {
      const units=[['DH','ĐH'],['PVHK','PVHK'],['KTS','PVSĐ']];
@@ -402,7 +404,7 @@
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
     '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, booking và các mốc khai thác được phân tích theo dữ liệu Lần 2, đối chiếu Lần 1; boarding chỉ được đánh giá khi nguồn có giờ.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
-    '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
+    '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr([(isL2?'Đối chiếu Lần 1 / Lần 2':'Biến động so với ngày hôm trước'),data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
     (data.operational?'<h3>PEAK HOURS · CAO ĐIỂM LƯỢT CHUYẾN THEO TỪNG GIỜ</h3>'+
        '<p>Bốn nhóm quốc tế đến/đi, quốc nội đến/đi theo giờ STA/STD, không cộng cặp đến–đi thành một. Đỉnh giờ: '+
          esc(data.operational.hours.peak.filter(x=>x.total>0).slice(0,3).map(x=>x.label+' ('+x.total+' lượt)').join('; ')||'chưa có giờ xác định')+
