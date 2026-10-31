@@ -40,7 +40,7 @@ assert.ok(css.includes('input[data-v24-value]')&&css.includes('max-width:100%!im
 assert.ok(css.includes('.v214-actions{position:relative!important'),'save toolbar should not cover rows on phone');
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(index));
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.06'));
+assert.ok(index.includes('v24-shuttle-grid.js?v=3.07'));
 assert.ok(index.includes('v222-shuttle-layout.css?v=2.22'));
 assert.ok(index.indexOf('v222-shuttle-layout.css')>index.indexOf('rns-admin.css'),'alignment overrides must load last');
 console.log('PASS V2.22: seven aligned cells, explicit column widths, sticky time, safe mobile inputs and existing shuttle recommendation');
