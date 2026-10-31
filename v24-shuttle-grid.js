@@ -26,9 +26,9 @@
      const k=partKey({...x,line_no:0});
      if(!slots.has(k))slots.set(k,{...x,line_no:0});
    }
-   const sorted=[...slots.values()].sort((a,b)=>
-     (a.direction===b.direction?0:a.direction==='NHA_CXR'?-1:1)||
-     a.departure_min-b.departure_min||a.line_no-b.line_no);
+   // Interleave fixed and custom times in the SAME chronological sequence.
+   // E.g. custom 11:00 must sit between 10:00 and 16:30, not at the end.
+   const sorted=model().order([...slots.values()]);
    return sorted.map(x=>{
      const cells=V.map(u=>values.find(v=>v.unit===u&&partKey(v)===partKey(x))||null);
      const confirmed=cells.filter(Boolean).length;
