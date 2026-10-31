@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.00
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.01
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -39,3 +39,9 @@
 - Trang chạy tại `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/`.
 - Mã nguồn triển khai nằm trên nhánh `main`, có thể xem lịch sử Git để quay lại V2.31 khi cần.
 - Kiểm chứng của tác giả: cú pháp JavaScript, phép tính thử về thiếu 01 CO cho 05 cặp VJ với 04 CO, bản xem trước báo cáo đồng cấu trúc 5 mục. Kiểm thử giao diện đăng nhập + lưu dữ liệu trực tiếp bằng tài khoản thật cần được thực hiện trước khi vận hành chính thức.
+
+## V3.01 – Bố cục thống nhất trên PC và mobile
+- **Mọi thiết bị có cùng kiểu hiển thị:** thanh chức năng theo chiều dọc **bên trái** và khu vực làm việc **bên phải**. Không chuyển thành thanh menu ngang ở màn hình điện thoại; người dùng chọn và điều hướng các mục như nhau.
+- PC: sidebar đủ tên chức năng và mô tả. Tablet: sidebar hẹp vừa. Mobile: thanh trái thu gọn còn 82 px (màn rất nhỏ: 74 px), hiển thị biểu tượng kèm tên ngắn, các phòng nằm trong nhóm CÁC PHÒNG, công cụ phụ trong nhóm CÔNG CỤ PHỤ.
+- Thanh công cụ trái cuộn riêng khi có nhiều mục, nội dung phải cuộn dọc và bảng dài được cuộn ngang **bên trong bảng**, không bắt toàn trang cuộn ngang. Khi in, thanh công cụ ẩn để giữ nội dung báo cáo.
+- CTA và toàn bộ luồng Lịch bay → Các phòng → Phân tích nguy cơ → Báo cáo TGĐ, quyền xem/nhập và xuất Word/PDF **giữ nguyên**.
