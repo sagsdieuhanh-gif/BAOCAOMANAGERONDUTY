@@ -153,9 +153,11 @@
       const result=await db().from('ops_minimum_service_norms').upsert(payload,{onConflict:'airline,aircraft_group,unit'});
       if(result.error)throw Error(result.error.message);
       delete draft[key()];
+      const index=profiles.findIndex(x=>x.airline===airline&&x.aircraft_group===group&&x.unit===unitName);
+      if(index>=0)profiles[index]=payload;else profiles.push(payload);
+      render();
       $('minServiceStatus').textContent='ĐÃ LƯU định mức '+airline+' / '+(group==='NARROW'?'thân hẹp':'thân rộng')+
         ' / '+UNITS[unitName]+'. Các ngày tiếp theo sử dụng lại.';
-      await refresh('norms');
     }catch(e){$('minServiceStatus').textContent='CHƯA LƯU: '+e.message}
     finally{saving=false;$('minServiceSave').disabled=false}
   }
