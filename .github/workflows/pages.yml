@@ -24,6 +24,7 @@ jobs:
           node tests/manager-root.test.cjs
           node tests/v301-unified-sidebar.test.cjs
           node tests/v303-direct-register.test.cjs
+          node tests/v304-shuttle-input.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
