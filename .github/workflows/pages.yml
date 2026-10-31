@@ -28,6 +28,9 @@ jobs:
           node tests/v305-shuttle-chronology.test.cjs
           node tests/v306-shuttle-vehicle-recommendations.test.cjs
           node tests/v307-shuttle-compact-order.test.cjs
+          node tests/v308-shuttle-eight-staff-vehicles.test.cjs
+          node tests/v309-shuttle-export-coach-banner.test.cjs
+          node tests/v310-shuttle-capacity-match.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
