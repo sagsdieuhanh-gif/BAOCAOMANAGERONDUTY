@@ -234,7 +234,8 @@
      topics[4].observation=people.headcountsConfirmed?
        'ĐH, PVHK và PVSĐ đã xác nhận quân số theo ca. Việc đáp ứng nhu cầu theo từng công đoạn chỉ được đánh giá khi có định mức và phân bổ thực tế được xác nhận.':
        'Quân số theo ca của một số phòng chưa được xác nhận đầy đủ; các số liệu đã nhập vẫn được trình bày tại bảng quân số bên dưới.';
-     topics[4].action=people.lines.join('\n');
+     topics[4].action=people.lines.map((line,i)=>i===2&&staffDetails.some(x=>x.unit==='KTS')?
+       '- Phòng PVSĐ: đã xác nhận số người theo từng nhóm công việc và ca trong bảng chi tiết bên dưới. Chưa cộng thành tổng nhân sự độc lập do cần loại trừ khả năng kiêm nhiệm.':line).join('\n');
      topics[4].owner='ĐH · PVHK · KTSĐ';
    }
    let l2Details=null,l2Changes=[];
