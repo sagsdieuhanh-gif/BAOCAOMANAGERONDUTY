@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.02
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.03
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -50,3 +50,11 @@
 - Trong **QUẢN LÝ TÀI KHOẢN**, gửi thư mời qua `sagscxr-radar-register` chỉ được ghi là **Supabase đã tiếp nhận yêu cầu**, không thể khẳng định email đã đến Inbox. Nếu chưa nhận, vào SAGSCXR-RNS → QUẢN LÝ TÀI KHOẢN → CHỜ XÁC MINH → LẤY LINK MỜI để tạo link kích hoạt và chia sẻ riêng qua email/Zalo.
 - Edge Function `sagscxr-radar-register` đã cập nhật redirect sang `https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/secure.html`, thay URL Vercel cũ; bảo toàn cấp quyền RNS Viewer/Radar và quy trình đăng nhập Supabase.
 - Cấu hình SMTP chuyên dụng và nhật ký email provider cần được kiểm tra để xác nhận chuyển phát tự động; không được báo đã gửi thành công chỉ dựa vào HTTP 200 của Auth.
+
+## V3.03 – Đăng ký trực tiếp và phân quyền tại thời điểm tạo
+- ADMIN mở **CÔNG CỤ PHỤ → QUẢN LÝ TÀI KHOẢN → TẠO TÀI KHOẢN MỚI**.
+- Nhập email, họ tên, quyền Manager/Radar (VIEWER, DH, KTS, PVHK, KHO, QA, IT), quyền RNS (VIEWER; EDITOR chỉ khi người tạo đồng thời là ADMIN RNS) và xác nhận email đã được kiểm tra.
+- Backend `sagscxr-radar-register` action `create` dùng `auth.admin.createUser` và cùng Auth RNS, đồng thời ghi `ops_members` + `sags_docs_members`. Không thể tự cấp Manager ADMIN qua form này. Email tồn tại bị từ chối, không ghi đè tài khoản cũ.
+- Mật khẩu tạm 20 ký tự được tạo ngẫu nhiên ở máy chủ, chỉ trả về sau khi hoàn tất hai bảng quyền và chỉ hiển thị trên phiên thao tác hiện tại. Không lưu bản rõ trong Firestore/Database/browser storage, không gửi email tự động. ADMIN phải chuyển riêng cho nhân viên.
+- Tài khoản mới phải **đăng nhập RNS trước** và đổi mật khẩu tạm theo luồng bắt buộc. Manager không cho truy cập nghiệp vụ khi `rns_must_change_password` còn hiệu lực. Sau khi đổi thành công, một email/mật khẩu dùng được trên cả hai hệ thống.
+- GỬI EMAIL MỜI vẫn giữ như phương án phụ, không bắt buộc để đăng ký. Danh sách đã có vẫn có chức năng cấp/chỉnh quyền Manager riêng mà không thay đổi quyền RNS.
