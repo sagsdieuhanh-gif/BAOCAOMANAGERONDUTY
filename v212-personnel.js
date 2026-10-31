@@ -30,13 +30,15 @@
       (st==='PENDING'&&value!=null?', chưa xác nhận đáp ứng':'')+
       (required!=null&&value!=null?', nhu cầu '+required+' NS':'')+')'+shortage(value,required,st);
    const shiftVariation=ms!==ns&&ms!=='PENDING'&&ns!=='PENDING';
+   const headcountConfirmed=confirmed&&m!=null&&n!=null;
    const headline=shiftVariation?'Khả năng đáp ứng '+def.service+': ca sáng '+human[ms].toLowerCase()+', ca đêm '+human[ns].toLowerCase():
+     headcountConfirmed&&ms==='PENDING'&&ns==='PENDING'?'Đã xác nhận quân số '+def.service+'; chưa đánh giá đủ/thiếu so với nhu cầu':
      status==='CHỜ XÁC NHẬN'?'CHỜ XÁC NHẬN '+def.service:
      status==='Chưa xác nhận đầy đủ'?'Chưa xác nhận đầy đủ khả năng đáp ứng '+def.service:
      status+' '+def.service;
    const countMorning=confirmed?m:null,countNight=confirmed?n:null;
    const line='- '+def.label+': '+headline+'. '+suffix('Sáng',countMorning,ms,rm)+'; '+suffix('Đêm',countNight,ns,rn)+'.';
-   return {unit,line,status,complete:ms!=='PENDING'&&ns!=='PENDING'&&m!=null&&n!=null,detail:{morning:m,night:n,required_morning:rm,required_night:rn,morning_status:ms,night_status:ns}};
+   return {unit,line,status,headcountConfirmed,complete:ms!=='PENDING'&&ns!=='PENDING'&&m!=null&&n!=null,detail:{morning:m,night:n,required_morning:rm,required_night:rn,morning_status:ms,night_status:ns}};
  }
  function summarize(rows=[]){
    const lines=departments.map(d=>{
@@ -44,7 +46,7 @@
      return formatUnit(d.unit,row?.details||{},row?.status==='CONFIRMED');
    });
    const incomplete=lines.filter(x=>!x.complete).map(x=>x.unit);
-   return {lines:lines.map(x=>x.line),byUnit:lines,complete:incomplete.length===0,incomplete};
+   return {lines:lines.map(x=>x.line),byUnit:lines,headcountsConfirmed:lines.every(x=>x.headcountConfirmed),complete:incomplete.length===0,incomplete};
  }
  function validate(details={}){
    for(const shift of needs){
