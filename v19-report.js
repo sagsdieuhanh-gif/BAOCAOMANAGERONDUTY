@@ -287,7 +287,75 @@
    }
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
+
+ // Revision 2 only: combine operational findings with action ownership.
+ // The established Revision 1 template remains unchanged.
+ function l2Html(data){
+   const tr=(arr,head)=>'<tr>'+arr.map(v=>(head?'<th>':'<td>')+esc(v).replace(/\n/g,'<br>')+(head?'</th>':'</td>')).join('')+'</tr>';
+   const norm=v=>String(v??'').trim().toLowerCase().replace(/\s+/g,' ');
+   const combine=(base,addition)=>{
+     const a=known(base),b=known(addition);
+     if(!b||norm(a).includes(norm(b)))return a;
+     return a?a+'\nBổ sung từ Điều hành: '+b:b;
+   };
+   const rows=data.dailyBrief.entries.map(e=>({key:e.key,title:e.title,observation:e.observation,action:e.action,owner:e.owner}));
+   const topicKeys={1:['change'],2:['peak'],3:['wide','cargo'],4:['stands'],5:['checkin','resource'],6:['resource'],7:['cargo'],8:['gate','peak'],9:[],10:[]};
+   // Explicitly entered control updates must not be discarded by the compact report.
+   for(const ctrl of data.c.controls||[]){
+     const no=Number(ctrl.topic),ob=known(ctrl.observation),act=known(ctrl.action);
+     if(!ob&&!act)continue;
+     const target=rows.find(row=>(topicKeys[no]||[]).includes(row.key));
+     if(target){
+       target.observation=combine(target.observation,ob);
+       target.action=combine(target.action,act);
+     }else{
+       const previous=data.topics?.[no-1];
+       rows.push({key:'control-'+no,title:previous?.title||'Nội dung kiểm soát '+no,
+         observation:ob||'Có cập nhật riêng từ Điều hành.',action:act||'Tiếp tục theo dõi.',
+         owner:known(ctrl.owner)||previous?.owner||'Phòng Điều hành'});
+     }
+   }
+   const addNote=(keys,title,note,owner)=>{
+     if(!known(note))return;
+     const target=rows.find(row=>keys.includes(row.key));
+     if(target)target.observation=combine(target.observation,note);
+     else rows.push({key:'note-'+rows.length,title,observation:note,
+       action:'Theo dõi và phối hợp theo thông tin đã cập nhật.',owner});
+   };
+   const nt=data.c.note||{};
+   addNote(['stands'],'Vị trí đỗ và thông tin AOC',nt.aoc_note,'PVSĐ · ĐH');
+   addNote(['wide','cargo'],'Yêu cầu khai thác đặc biệt',nt.special_operation_note,'Phòng Điều hành');
+   addNote([],'An toàn, an ninh và thời tiết',nt.weather_note,'ĐH · Đơn vị chuyên môn');
+   addNote([],'Tồn đọng cần xử lý',nt.previous_issue,'ĐH · Đơn vị liên quan');
+   const table='<table>'+tr(['Nội dung / chuyến trọng điểm','Nhận định khai thác và nguy cơ','Phương án phục vụ / Đơn vị thực hiện'],true)+
+     rows.map(x=>tr([x.title,x.observation,x.action+'\nĐơn vị: '+x.owner])).join('')+'</table>';
+   const pending=(data.alerts||[]).map(a=>a.unit+' · '+a.type+': '+a.detail);
+   const closing=known(data.dailyBrief.closing);
+   if(closing.startsWith('Các nội dung cần chốt thêm trước ca:')&&!pending.some(s=>norm(s).includes(norm(closing))))pending.push(closing);
+   const covered=norm(rows.map(x=>x.observation+' '+x.action).join(' '));
+   const reports=(data.quickReports||[]).filter(x=>known(x.report_text)&&!covered.includes(norm(x.report_text)));
+   const followup=pending.length||reports.length?
+     '<h3>III. THÔNG TIN CẦN XÁC NHẬN / BỔ SUNG</h3>'+
+     (pending.length?'<ul>'+pending.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')+
+     (reports.length?'<p><b>Thông tin mới từ các phòng:</b></p><ul>'+reports.map(x=>'<li>'+
+        esc(({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit)+' – '+x.report_text)+
+        '</li>').join('')+'</ul>':''):
+     '<h3>III. THÔNG TIN THEO DÕI</h3><p>Chưa có thông tin bổ sung hoặc yêu cầu xác nhận riêng từ các nguồn đang hiển thị.</p>';
+   const recommendation=known(nt.executive_recommendation)||'Chưa cập nhật kiến nghị cụ thể vượt thẩm quyền để trình Ban TGĐ.';
+   return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
+     '<div class="v218-revision-banner"><strong>BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT</strong><span>Đối chiếu Lần 1; đánh giá bãi đỗ, luồng xe, cao điểm, nhân lực, GSE, hàng hóa và yêu cầu phục vụ.</span></div>'+
+     '<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
+     '<h3>I. TỔNG QUAN KHAI THÁC</h3><table>'+
+     tr(['Chỉ tiêu','Số liệu / Biến động'],true)+tr(['Sản lượng',data.summary])+tr(['So sánh ngày trước',data.comparison])+'</table>'+
+     '<h3>II. NHẬN ĐỊNH KHAI THÁC VÀ PHƯƠNG ÁN PHỐI HỢP PHỤC VỤ</h3>'+
+     (!rows.some(x=>x.key==='peak')?'<p>'+esc(data.dailyBrief.lead)+'</p>':'')+
+     (data.dailyBrief.staffing?'<p><b>Quân số đã được đơn vị xác nhận:</b> '+esc(data.dailyBrief.staffing)+'.</p>':'')+
+     table+followup+
+     '<h3>IV. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(recommendation)+'</p>'+
+     '<p class="v19-footnote">Nguồn Lần 2: '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lịch Lần 1 được giữ làm mốc so sánh. Chi tiết Peak Hours và Radar xem tại tab chuyên biệt.</p></div>';
+ }
  function html(data){
+   if(data.c.revision===2&&data.dailyBrief)return l2Html(data);
    const fmtBay=b=>b==null?'CHỜ XÁC NHẬN':'Bãi '+b;
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
