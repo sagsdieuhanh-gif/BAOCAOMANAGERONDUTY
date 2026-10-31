@@ -73,9 +73,60 @@
        (/đã có tài khoản RNS|ALREADY_REGISTERED/.test(e.message)?' Dùng phần CẤP QUYỀN CHO TÀI KHOẢN ĐÃ CÓ ở dưới.':''),true);
    }finally{btn.disabled=false;}
  }
+
+ async function createAccount(){
+   const email=$('rnsCreateEmail')?.value.trim().toLowerCase()||'';
+   const displayName=$('rnsCreateName')?.value.trim()||'';
+   const target=$('rnsCreateUnit')?.value||'VIEWER';
+   const rnsRole=$('rnsCreateRnsRole')?.value||'viewer';
+   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)
+     return mark('rnsCreateStatus','Vui lòng nhập đúng email của nhân viên.',true);
+   if(!displayName||displayName.length>120)
+     return mark('rnsCreateStatus','Cần nhập họ tên nhân viên (tối đa 120 ký tự).',true);
+   if(!Object.hasOwn(roles,target)||target==='ADMIN'||!['viewer','editor'].includes(rnsRole))
+     return mark('rnsCreateStatus','Vai trò được chọn không hợp lệ.',true);
+   if(!$('rnsCreateVerifiedEmail')?.checked)
+     return mark('rnsCreateStatus','Hãy kiểm tra địa chỉ email và đánh dấu xác nhận trước khi tạo.',true);
+   if(!confirm('TẠO TÀI KHOẢN CHUNG RNS / MANAGER?\n\nEmail: '+email+'\nHọ tên: '+displayName+
+     '\nManager: '+(roles[target]||target)+'\nRNS: '+rnsRole.toUpperCase()+
+     '\n\nMật khẩu tạm sẽ chỉ được hiển thị 1 lần; nhân viên phải đổi khi đăng nhập RNS lần đầu.'))return;
+   const button=$('rnsCreateButton');
+   button.disabled=true;
+   dismissSecret();
+   mark('rnsCreateStatus','Đang đăng ký tài khoản và ghi hai bộ phân quyền…');
+   try{
+     const result=await invoke('create',{email,display_name:displayName,unit:target,
+       rns_role:rnsRole,email_verified_by_admin:true});
+     if(!result.temporary_password)throw Error('Máy chủ chưa trả về mật khẩu tạm. Kiểm tra trạng thái trước khi thử lại.');
+     $('rnsCreatedUser').textContent='Email: '+result.email+
+       ' · Manager: '+(roles[result.manager_unit]||result.manager_unit)+
+       ' · RNS: '+String(result.rns_role).toUpperCase();
+     $('rnsCreatedPassword').value=result.temporary_password;
+     $('rnsCreateSecretPanel').classList.remove('hidden');
+     mark('rnsCreateStatus','ĐÃ TẠO VÀ CẤP QUYỀN. Bàn giao mật khẩu tạm riêng cho nhân viên. Không cần gửi email mời.');
+     $('rnsCreateEmail').value='';$('rnsCreateName').value='';
+     $('rnsCreateVerifiedEmail').checked=false;
+     await loadShared();
+   }catch(e){mark('rnsCreateStatus','CHƯA TẠO ĐƯỢC: '+e.message,true)}
+   finally{button.disabled=false}
+ }
+ function dismissSecret(){
+   const input=$('rnsCreatedPassword');if(input)input.value='';
+   const display=$('rnsCreatedUser');if(display)display.textContent='';
+   $('rnsCreateSecretPanel')?.classList.add('hidden');
+ }
+ async function copySecret(){
+   const input=$('rnsCreatedPassword'),secret=input?.value||'';
+   if(!secret)return;
+   try{await navigator.clipboard.writeText(secret);mark('rnsCreateStatus','Đã sao chép mật khẩu tạm. Chỉ chuyển riêng cho đúng nhân viên.');}
+   catch{input.select();mark('rnsCreateStatus','Hãy sao chép phần mật khẩu đã được chọn.');}
+ }
  function init(){
    if(!$('rnsInvitePanel'))return;
    $('rnsInviteButton').onclick=invite;
+   $('rnsCreateButton').onclick=createAccount;
+   $('rnsCreateCopy').onclick=copySecret;
+   $('rnsCreateDismiss').onclick=dismissSecret;
    $('rnsSharedReload').onclick=loadShared;
    $('rnsLookup').oninput=filter;
    $('rnsSharedList').onclick=e=>{
