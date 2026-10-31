@@ -282,7 +282,7 @@
    })||null:null;
     const staffAssessment=c.revision===2?window.SagsStaffNormsV229?.assess({date:c.date,rows:enhancedPairs,norms:c.staffNorms,staff:c.staff,unitPlans:c.unitPlans,operational,cargoPlans:c.cargoPlans})||null:null;
    if(c.revision===2&&dailyBrief){
-     const topicIndex={peak:1,stands:3,gate:7,checkin:4,resource:5,wide:2,cargo:6,change:9};
+     const topicIndex={peak:1,stands:3,gate:7,checkin:4,resource:5,wide:2,cargo:6,change:0};
      for(const item of dailyBrief.entries){
        const idx=topicIndex[item.key];if(idx==null)continue;
        const ctrl=(c.controls||[]).find(x=>x.topic===idx+1)||{};
@@ -383,8 +383,8 @@
    const isL2=data.c.revision===2;
    const brief=isL2?data.dailyBrief?.entries||[]:[];
    const related={
-     0:['change'],1:[],2:['stands','wide'],3:['checkin'],
-     4:['resource'],5:['cargo'],6:['gate'],7:[],8:[]
+     0:['change'],1:['peak'],2:['wide'],3:['stands'],
+     4:['checkin'],5:['resource'],6:['cargo'],7:['gate'],8:[],9:[]
    };
    const appendL2=(base,index,field)=>{
      if(!isL2)return base;
@@ -392,13 +392,15 @@
      const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
      // Kết quả định mức quầy đã xác nhận chỉ bổ sung ở dòng nhân lực,
      // không tạo bảng độc lập hoặc lặp ở phần cảnh báo cao điểm.
-     if(index===3&&field==='observation'){
+     if(index===4&&field==='observation'){
        const note=data.minimumAssessment?.notes?.[0]?.text;
        if(note)fresh.push(crop(note,210));
      }
      if(!fresh.length)return base;
      const extra=fresh.filter(Boolean).join('; ');
-     return !extra||String(base).includes(extra)?base:String(base)+'\n(Cập nhật Lần 2: '+extra+')';
+     if(!extra||String(base).includes(extra))return base;
+     // Preserve the first-report baseline, emphasize verified L2 changes first.
+     return '(Cập nhật Lần 2: '+crop(extra,195)+')\n'+crop(base,155);
    };
    const updateTopic=(x,i)=>({...x,observation:appendL2(x.observation,i,'observation'),
      action:appendL2(x.action,i,'action')});
@@ -412,10 +414,10 @@
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,y.observation,y.action,y.owner])}).join('')+'</table>'+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,isL2?crop(y.observation,290):y.observation,isL2?crop(y.action,225):y.action,y.owner])}).join('')+'</table>'+
     '<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>'+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':'<p>Chưa có nội dung bổ sung từ các phòng.</p>')+
-    '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
+    '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+(isL2?data.peakRows.slice(0,2):data.peakRows).map(x=>tr([x.slot,x.flight,isL2?crop(x.risk,190):x.risk,isL2?crop(x.action,190):x.action])).join('')+'</table>'+
     '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(data.recommendation)+'</p>'+
     '<p class="v19-footnote">Nguồn '+(data.c.revision===2?'Lần 2':'Lần 1')+': '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lần 1 được giữ làm mốc so sánh.</p></div>';
