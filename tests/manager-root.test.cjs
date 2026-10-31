@@ -2,7 +2,9 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 for(const p of ['index.html','v19-report.js','v211-unit-input.js','v212-personnel.js','v21-shuttle-export.js','v24-shuttle-grid.js','office-export-v29.js','report-export-v29.js','assets/logo-sags.png'])assert.ok(fs.existsSync(p),'Missing '+p);
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(/V2\.2[0-9]/.test(index),'Manager app must be at root and up to date');
+for(const p of ['v300-workspace.js','v300-workspace.css'])assert.ok(fs.existsSync(p),'Missing V3 UI '+p);
+assert.ok(index.includes('v300-workspace.js')&&index.includes('v300-workspace.css'),'V3 workspace must be loaded');
+assert.ok(index.includes('V3.00'),'Manager forecast V3.00 must be at root and up to date');
 assert.ok(!index.includes('SAGS FORM LITE')&&!index.includes('radar-cxr/'));
 assert.ok(index.includes('v21ShuttleExportStatus'));
 assert.ok(index.includes('v19ReportPreview'));
@@ -18,4 +20,4 @@ const grid=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(grid.includes('data-v24-save-all')&&!grid.includes('data-v24-add='));
 const inputs=fs.readFileSync('v211-unit-input.js','utf8');
 assert.ok(inputs.includes('v224-shift-card')&&inputs.includes('_required')&&inputs.includes('data-v215-quick'),'Staff input simplified but retains requirements and paste');
-console.log('PASS: root Manager On Duty app, logo, report, transport exports and staff layout');
+console.log('PASS: D+1 workspace V3.00, original report/export engine and source data compatibility');
