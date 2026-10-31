@@ -342,12 +342,7 @@
      if(field==='action'&&[1,2,4,7].includes(index))return base;
      const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
      const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
-     // Kết quả định mức quầy đã xác nhận chỉ bổ sung ở dòng nhân lực,
-     // không tạo bảng độc lập hoặc lặp ở phần cảnh báo cao điểm.
-     if(index===4&&field==='observation'){
-       const note=data.minimumAssessment?.notes?.[0]?.text;
-       if(note)fresh.push(crop(note,210));
-     }
+     // Staffing row is a headcount summary only; do not append norm-based verdicts.
      if(!fresh.length)return base;
      const extra=fresh.filter(Boolean).join('; ');
      if(!extra||String(base).includes(extra))return base;
