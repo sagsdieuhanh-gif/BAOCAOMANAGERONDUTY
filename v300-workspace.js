@@ -85,7 +85,6 @@
      rootNode.addEventListener('click',handleClick);
      mounted=true;document.body.classList.add('v300-ready');
      $('day')?.addEventListener('change',()=>{draftReset();refresh()});
-     $('v300Nav').addEventListener('click',e=>{const btn=e.target.closest('[data-v300-route]');if(btn)go(btn.dataset.v300Route)});
    }
    refresh();return true;
  }
@@ -110,7 +109,7 @@
    for(let start=0;start<1800;start+=30){
      const active=pairs.filter(p=>{
        const dur=service?.(p),sta=p.sta_min,std=p.std_min;
-       if(!Number.isFinite(sta)||dur==null)return false;
+       if(p.ferry||!Number.isFinite(sta)||dur==null)return false;
        const end=Math.min(sta+dur,Number.isFinite(std)?std:Infinity);
        return start<end&&start+30>sta;
      });
