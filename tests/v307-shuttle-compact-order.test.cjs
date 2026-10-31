@@ -24,7 +24,7 @@ assert.equal(model.clock(1560),'02:00','Official 02:00 must not be marked (+1)')
 const html=grid.makeGrid(dir,rows,'DH');
 const times=[...html.matchAll(/class="v24-time"><b>(\d{2}:\d{2})<\/b>/g)].map(m=>m[1]);
 assert.deepEqual(times,['08:30','11:00','16:30','18:30','02:00','08:15'],'Rendered main rows must follow the actual service day then following day');
-assert.match(html,/v307-compact|v306-vehicle-showcase|v306-vehicle-list|GỢI Ý XE THEO GIỜ/,
+assert.match(html,/v307-compact|v306-vehicle-showcase|v306-vehicle-list|GỢI Ý THEO TỪNG GIỜ XE/,
  'Vehicle suggestions must remain visible');
 assert.ok(html.includes('data-v306-slot="CXR_NHA|660|0"'),'Added 11:00 must have visible vehicle suggestion');
 assert.ok(html.includes('v307-extras'),'Existing edit/delete controls must remain accessible but collapsed');
