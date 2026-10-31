@@ -37,8 +37,8 @@ assert.deepEqual(rows.filter(x=>x.direction===dir).map(x=>x.departure_min),
 assert.ok(m.suggestVehicles(60).n29===1&&m.suggestVehicles(60).n45===1,
  'The original 29/45-seat vehicle optimization must be retained');
 const partial=g.makeGrid(dir,g.assemble(four(660,[4,3,2,1]).slice(0,2),[]),'PVHK');
-assert.ok(partial.includes('shuttle-29.webp')&&partial.includes('shuttle-45.webp'),
- 'Car illustrations stay visible even if 4 units have not confirmed');
+assert.ok(g.vehicleGuide().includes('shuttle-29.webp')&&g.vehicleGuide().includes('shuttle-45.webp'),
+ 'Permanent guide shows both 29/45C bus illustrations even with incomplete staffing');
 assert.ok(partial.includes('chờ')||partial.includes('Chưa đủ'),
  'Incomplete staffing must not be presented as an official recommendation');
 assert.ok(partial.includes('data-v306-slot="CXR_NHA|660|0"'),
