@@ -48,7 +48,7 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo]=await Promise.all([
+   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo,staffNorms]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
@@ -59,12 +59,14 @@
     sb.from('ops_unit_quick_reports').select('unit,report_text,updated_at').eq('service_date',day),
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',2).maybeSingle(),
     sb.from('ops_service_contracts').select('*').eq('service_date',day),
-    sb.from('ops_flights').select('arrival,departure,cargo_status').eq('service_date',day)
+    sb.from('ops_flights').select('arrival,departure,cargo_status').eq('service_date',day),
+     sb.from('ops_staff_norms').select('*')
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(s2.error)throw Error('Không tải được lịch bay Lần 2: '+s2.error.message);
    if(contracts.error)throw Error('Không đọc được định mức hãng do PVHK xác nhận: '+contracts.error.message);
    if(flightCargo.error)throw Error('Không đọc được tình trạng cargo phục vụ dự báo nguồn lực: '+flightCargo.error.message);
+    if(staffNorms.error)throw Error('Không đọc được định mức nhân sự: '+staffNorms.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
    if(cp.error)throw Error('Không tải được kế hoạch Kho Hàng: '+cp.error.message);
    if(gi.error)throw Error('Không tải được danh sách xe hỏng: '+gi.error.message);
@@ -85,7 +87,7 @@
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
     note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:(s2.data||s.data)?.source_filename||'',revision:s2.data?2:1,sourcePayload:payload,firstPayload:s.data?.payload||null,
-    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],staff,gse};
+    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],staffNorms:staffNorms.data||[],staff,gse};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -273,6 +275,7 @@
    const confirmedContracts=(c.contracts||[]).filter(x=>window.SagsL2BriefV223?.verifiedContract(x));
    const operational=window.SagsOpsForecastV219?.summarize(operationalSource,enhancedPairs,c.staff,c.gse,confirmedContracts)||null;
    const dailyBrief=window.SagsL2BriefV223?.make({c,operational,changes:l2Changes})||null;
+    const staffAssessment=c.revision===2?window.SagsStaffNormsV229?.assess({date:c.date,rows:enhancedPairs,norms:c.staffNorms,staff:c.staff,unitPlans:c.unitPlans,operational,cargoPlans:c.cargoPlans})||null:null;
    if(c.revision===2&&dailyBrief){
      const topicIndex={peak:1,stands:3,gate:7,checkin:4,resource:5,wide:2,cargo:6,change:9};
      for(const item of dailyBrief.entries){
@@ -285,7 +288,7 @@
        if(item.key!=='checkin'&&!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,staffAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
 
  // Revision 2 only: combine operational findings with action ownership.
@@ -299,6 +302,7 @@
      return a?a+'\nBổ sung từ Điều hành: '+b:b;
    };
    const rows=data.dailyBrief.entries.map(e=>({key:e.key,title:e.title,observation:e.observation,action:e.action,owner:e.owner}));
+   if(data.staffAssessment?.entries?.length)rows.unshift(...data.staffAssessment.entries.map(e=>({key:e.key,title:e.title,observation:e.observation,action:e.action,owner:e.owner})));
    const topicKeys={1:['change'],2:['peak'],3:['wide','cargo'],4:['stands'],5:['checkin','resource'],6:['resource'],7:['cargo'],8:['gate','peak'],9:[],10:[]};
    // Explicitly entered control updates must not be discarded by the compact report.
    for(const ctrl of data.c.controls||[]){
@@ -330,28 +334,42 @@
    const table='<table>'+tr(['Nội dung / chuyến trọng điểm','Nhận định khai thác và nguy cơ','Phương án phục vụ / Đơn vị thực hiện'],true)+
      rows.map(x=>tr([x.title,x.observation,x.action+'\nĐơn vị: '+x.owner])).join('')+'</table>';
    const pending=(data.alerts||[]).map(a=>a.unit+' · '+a.type+': '+a.detail);
+   for(const reason of data.staffAssessment?.unresolved||[])if(!pending.includes(reason))pending.push(reason);
    const closing=known(data.dailyBrief.closing);
    if(closing.startsWith('Các nội dung cần chốt thêm trước ca:')&&!pending.some(s=>norm(s).includes(norm(closing))))pending.push(closing);
    const covered=norm(rows.map(x=>x.observation+' '+x.action).join(' '));
    const reports=(data.quickReports||[]).filter(x=>known(x.report_text)&&!covered.includes(norm(x.report_text)));
    const followup=pending.length||reports.length?
-     '<h3>III. THÔNG TIN CẦN XÁC NHẬN / BỔ SUNG</h3>'+
+     '<h3>IV. THÔNG TIN CẦN XÁC NHẬN / BỔ SUNG</h3>'+
      (pending.length?'<ul>'+pending.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul>':'')+
      (reports.length?'<p><b>Thông tin mới từ các phòng:</b></p><ul>'+reports.map(x=>'<li>'+
         esc(({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit)+' – '+x.report_text)+
         '</li>').join('')+'</ul>':''):
-     '<h3>III. THÔNG TIN THEO DÕI</h3><p>Chưa có thông tin bổ sung hoặc yêu cầu xác nhận riêng từ các nguồn đang hiển thị.</p>';
+     '<h3>IV. THÔNG TIN THEO DÕI</h3><p>Chưa có thông tin bổ sung hoặc yêu cầu xác nhận riêng từ các nguồn đang hiển thị.</p>';
    const recommendation=known(nt.executive_recommendation)||'Chưa cập nhật kiến nghị cụ thể vượt thẩm quyền để trình Ban TGĐ.';
+   const a=data.staffAssessment;
+   const manpower=a?.shiftRows?.length?'<h3>II. QUÂN SỐ THEO CA VÀ NHU CẦU CAO NHẤT 30 PHÚT</h3>'+
+    '<p>Quân số thực có lấy từ xác nhận của từng phòng. Nhu cầu theo định mức vị trí/loại tàu và các cặp chuyến đang phục vụ đồng thời. Tổng quân số không thay thế xác nhận từng vị trí.</p>'+
+    '<table>'+tr(['Đơn vị / ca','Quân số xác nhận','Nhu cầu cao nhất / 30 phút','Khung giờ và kết luận'],true)+
+    a.shiftRows.map(x=>tr([x.unitLabel+' / '+x.shift,x.actual??'CHỜ XÁC NHẬN',x.required??'CHỜ ĐỊNH MỨC',x.slot+' · '+x.state])).join('')+'</table>':'';
+   const first=data.c.firstPayload||{};
+   const firstArr=Number.isInteger(first.arrival_count)?first.arrival_count:first.totals?.arrival_count;
+   const firstDep=Number.isInteger(first.departure_count)?first.departure_count:first.totals?.departure_count;
+   const baseline=Number.isInteger(firstArr)&&Number.isInteger(firstDep)?
+    'Lần 1: '+firstArr+' đến, '+firstDep+' đi. Lần 2: '+data.c.arrivals+' đến, '+data.c.departures+' đi.':
+    'Lần 1: chưa có tổng lượt xác nhận để so sánh.';
+   const revision='<p><b>Đối chiếu nền Lần 1:</b> '+esc(baseline)+' Có '+esc(data.l2Changes?.length??0)+' nội dung thay đổi lịch/bãi/gate được hệ thống ghi nhận.</p>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
      '<div class="v218-revision-banner"><strong>BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT</strong><span>Đối chiếu Lần 1; đánh giá bãi đỗ, luồng xe, cao điểm, nhân lực, GSE, hàng hóa và yêu cầu phục vụ.</span></div>'+
      '<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
      '<h3>I. TỔNG QUAN KHAI THÁC</h3><table>'+
      tr(['Chỉ tiêu','Số liệu / Biến động'],true)+tr(['Sản lượng',data.summary])+tr(['So sánh ngày trước',data.comparison])+'</table>'+
-     '<h3>II. NHẬN ĐỊNH KHAI THÁC VÀ PHƯƠNG ÁN PHỐI HỢP PHỤC VỤ</h3>'+
+     revision+manpower+
+     '<h3>III. NHẬN ĐỊNH KHAI THÁC VÀ PHƯƠNG ÁN PHỐI HỢP PHỤC VỤ</h3>'+
      (!rows.some(x=>x.key==='peak')?'<p>'+esc(data.dailyBrief.lead)+'</p>':'')+
-     (data.dailyBrief.staffing?'<p><b>Quân số đã được đơn vị xác nhận:</b> '+esc(data.dailyBrief.staffing)+'.</p>':'')+
+     
      table+followup+
-     '<h3>IV. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(recommendation)+'</p>'+
+     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(recommendation)+'</p>'+
      '<p class="v19-footnote">Nguồn Lần 2: '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lịch Lần 1 được giữ làm mốc so sánh. Chi tiết Peak Hours và Radar xem tại tab chuyên biệt.</p></div>';
  }
  function html(data){
