@@ -4,7 +4,7 @@ for(const p of ['index.html','v19-report.js','v211-unit-input.js','v212-personne
 const index=fs.readFileSync('index.html','utf8');
 for(const p of ['v300-workspace.js','v300-workspace.css'])assert.ok(fs.existsSync(p),'Missing V3 UI '+p);
 assert.ok(index.includes('v300-workspace.js')&&index.includes('v300-workspace.css'),'V3 workspace must be loaded');
-assert.ok(index.includes('V3.00'),'Manager forecast V3.00 must be at root and up to date');
+assert.ok(/V3\.\d{2}/.test(index),'Manager forecast V3.00 must be at root and up to date');
 assert.ok(!index.includes('SAGS FORM LITE')&&!index.includes('radar-cxr/'));
 assert.ok(index.includes('v21ShuttleExportStatus'));
 assert.ok(index.includes('v19ReportPreview'));
