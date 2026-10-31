@@ -144,3 +144,18 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
 #v300Root .v300-secondary-row span{font-size:11px;color:#7a8a99}
 #v300Root .v300-check{display:flex;align-items:center;gap:8px;font-size:11px;color:#29505b;margin-top:12px;cursor:pointer}
 #v300Root .v300-check input{width:16px;height:16px;margin:0;flex:0 0 auto;accent-color:#0c7c7e}
+
+#v300Root .v300-nav-folder{border-top:1px solid #ffffff18;border-bottom:1px solid #ffffff18;padding:5px 0}
+#v300Root .v300-nav-folder summary{list-style:none;cursor:pointer;font-size:11px;font-weight:780;letter-spacing:.09em;color:#d8eef1;padding:12px 13px;border-radius:9px}
+#v300Root .v300-nav-folder summary::-webkit-details-marker{display:none}
+#v300Root .v300-nav-folder summary:after{content:"⌄";float:right;color:#95c7cb}
+#v300Root .v300-nav-folder[open] summary:after{content:"⌃"}
+#v300Root .v300-nav-folder>div{display:grid;gap:2px;padding-left:7px}
+#v300Root .v300-nav-folder>div button{min-height:46px!important}
+#v300Root .v300-nav-tools{margin-top:8px}
+@media(max-width:850px){
+ #v300Root .v300-nav-folder{flex:0 0 auto;position:relative;border:0;padding:0}
+ #v300Root .v300-nav-folder summary{background:#17485e;border:1px solid #ffffff22;min-height:42px;white-space:nowrap;padding:10px 13px;border-radius:10px}
+ #v300Root .v300-nav-folder[open]>div{display:flex;position:relative;gap:6px;overflow-x:auto;max-width:90vw;padding:5px}
+ #v300Root .v300-nav-folder>div button{min-height:38px!important;flex:0 0 auto}
+}
