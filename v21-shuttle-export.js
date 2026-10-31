@@ -11,7 +11,7 @@
  function normalize(data,children=[]){
    const getkey=x=>x.direction+'|'+x.departure_min+'|'+Number(x.line_no||0);
    const keys=new Map(model().defaults.map(x=>[getkey({...x,line_no:0}),{...x,line_no:0,is_custom:false}]));
-   for(const x of [...data,...children]){
+   for(const x of [...data,...children].filter(z=>!(z.direction==='CXR_NHA'&&Number(z.departure_min)===510))){
      const k=getkey(x);
      if(!keys.has(k))keys.set(k,{direction:x.direction,departure_min:x.departure_min,line_no:Number(x.line_no||0),is_custom:!model().isDefault(x.direction,x.departure_min)});
      const item=keys.get(k);
@@ -127,8 +127,8 @@
      plan.units.forEach((entry,j)=>{
        const bus=entry.seats===45?vehicles.big:vehicles.small;
        const x=px+116+j*57;
-       if(bus?.naturalWidth)c.drawImage(bus,x,169,52,32);
-       if(entry.quantity>1)t('×'+entry.quantity,x+49,180,11,C.navy,true,'right');
+       if(bus?.naturalWidth)c.drawImage(bus,x+10,174,32,20);
+       if(entry.quantity>1)t('×'+entry.quantity,x+48,180,10,C.navy,true,'right');
      });
      t((v.confirmed===UNITS.length?'':'TẠM TÍNH · ')+plan.label,
        px+9,203,12,v.confirmed===UNITS.length?C.green:C.orange,true,'left',248);
@@ -152,12 +152,12 @@
      if(special){shape(x+151,y+14,96,28,10,'#FCE4C0');t(v.line_no>0?'BỔ SUNG':'GIỜ THÊM',x+199,y+29,12,C.orange,true,'center');}
      const plan=v.confirmed>0?model().suggestVehicles(total):null;
      if(plan?.units.length){
-       const start=x+col-(plan.units.length>1?359:321);
+       const start=x+col-(plan.units.length>1?285:260);
        plan.units.forEach((entry,i)=>{
          const image=entry.seats===45?vehicles.big:vehicles.small;
-         const ix=start+i*137;
-         if(image?.naturalWidth)c.drawImage(image,ix,y+4,118,72);
-         if(entry.quantity>1)t('×'+entry.quantity,ix+107,y+20,18,C.navy,true,'right');
+         const ix=start+i*93;
+         if(image?.naturalWidth)c.drawImage(image,ix,y+13,70,43);
+         if(entry.quantity>1)t('×'+entry.quantity,ix+71,y+23,13,C.navy,true,'right');
        });
      }
      t(String(total),x+col-26,y+35,53,complete?C.navy:C.orange,true,'right');
