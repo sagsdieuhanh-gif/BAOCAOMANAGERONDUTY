@@ -37,7 +37,7 @@
   ['analysis','Phân tích nguy cơ','activity','Radar khai thác D+1','radar'],
   ['report','Báo cáo TGĐ','file-text','Xem, duyệt và xuất Word/PDF','report'],
   ['norms','Cấu hình định mức','settings-2','Chỉnh khi có thay đổi','norms'],
-  ['shuttle','Xe giao ca','bus-front','Chỉ mở khi cần xử lý xe','shuttle-report'],
+  ['shuttle','Xe giao ca','bus-front','Nhập số người và xuất bảng xe','shuttle-report'],
   ['admin','Quản lý tài khoản','shield','ADMIN','admin']
  ];
  const keyCode=n=>({'layout-dashboard':'◫','calendar-days':'▦',headset:'◉',truck:'▣',
@@ -68,13 +68,13 @@
        '<span class="v300-nav-icon">'+keyCode(ico)+'</span><span><strong>'+H(label)+'</strong><small>'+H(sub)+'</small></span></button>';
        const main=Object.fromEntries(NAV.map(x=>[x[0],x]));
        const departments=['DH','KTS','PVHK','KHO','QA_IT'].filter(canOpen).map(k=>button(main[k])).join('');
-       const other=['norms','shuttle','admin'].filter(canOpen).map(k=>button(main[k])).join('');
+       const other=['norms','admin'].filter(canOpen).map(k=>button(main[k])).join('');
        return ['overview','sources'].filter(canOpen).map(k=>button(main[k])).join('')+
        (departments?'<details class="v300-nav-folder" open><summary>◎ &nbsp; CÁC PHÒNG</summary><div>'+departments+'</div></details>':'')+
-       ['analysis','report'].filter(canOpen).map(k=>button(main[k])).join('')+
+       ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.03</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.04</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -370,7 +370,13 @@
    node.classList.add('v300-embedded');
    if(k==='sources')root.SagsSecondUI?.refresh?.();
    if(k==='norms')root.SagsMinimumV231?.refresh('norms');
-   if(k==='shuttle')root.SagsShuttleExport?.renderPreview?.();
+   if(k==='shuttle'){
+     // The old shuttle screen displayed exports only. V3.04 mounts the live
+     // editable V24 matrix in the same tab and refreshes its confirmed data.
+     root.SagsShuttleGridV24?.refresh?.();
+     root.SagsShuttleExport?.bind?.();
+     root.SagsShuttleExport?.renderPreview?.();
+   }
    if(k==='admin')root.RnsRadarAdmin?.loadShared?.();
  }
  function renderAnalysis(){
