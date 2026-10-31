@@ -74,7 +74,7 @@
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.10</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.11</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -244,56 +244,80 @@
     '<button class="v300-cta-btn" data-v300-route="report">XEM BÁO CÁO TGĐ →</button></div>';
  }
  function roleInputs(u){
-   const list=staffRoles[u]||[],plan=getUnitPlan(u);
-   if(!list.length)return '';
-   const rows=list.map(([k,name])=>{
-     const morning=getStaff(u,k,'SÁNG')?.quantity,night=getStaff(u,k,'ĐÊM')?.quantity;
-     return '<tr><td>'+H(name)+'</td><td><input inputmode="numeric" type="number" min="0" max="9999" data-v300-staff="'+H(k)+'|SÁNG" value="'+H(morning??'')+'" placeholder="—"></td>'+
-     '<td><input inputmode="numeric" type="number" min="0" max="9999" data-v300-staff="'+H(k)+'|ĐÊM" value="'+H(night??'')+'" placeholder="—"></td></tr>';
-   }).join('');
-   return wrapPanel('01 · Quân số khả dụng theo vai trò','Chỉ nhập số thực có. Nhu cầu và chênh lệch do hệ thống tính từ định mức được xác nhận.',
-     '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo quân số hôm trước</button><span>Chưa xác nhận ngày mới · phải kiểm tra trước khi lưu</span></div><div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Vị trí công việc</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-     '<p class="v300-hint">Ô trống = chưa xác nhận; 0 = đơn vị xác nhận không có người ở vị trí này. Không cộng trùng người kiêm nhiệm.</p>');
+   const roles=staffRoles[u]||[];
+   if(!roles.length)return '';
+   const primary={DH:['COORD'],KTS:['BAGGAGE','GSE_DRIVER'],PVHK:['PVHK_ARRIVAL_TEAM','PVHK_DEPARTURE_TEAM'],KHO:['WAREHOUSE_CARGO']}[u]||[];
+   const rows=items=>items.map(([code,label])=>'<tr><th scope="row">'+H(label)+'</th>'+
+     ['SÁNG','ĐÊM'].map(shift=>'<td><input type="number" min="0" max="9999" inputmode="numeric" aria-label="'+H(label)+' ca '+shift+'" data-v300-staff="'+H(code)+'|'+shift+'" value="'+H(getStaff(u,code,shift)?.quantity??'')+'" placeholder="—"></td>').join('')+'</tr>').join('');
+   const table=items=>'<div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Nhóm nhân sự</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows(items)+'</tbody></table></div>';
+   const main=roles.filter(x=>primary.includes(x[0])),other=roles.filter(x=>!primary.includes(x[0]));
+   return wrapPanel('01 · Quân số theo ca','Chỉ nhập số người thực sự có thể bố trí; không nhập lại các số liệu lịch bay.',
+     table(main)+(other.length?'<details class="v300-details v311-advanced"><summary>Nhóm nhân sự bổ sung ('+other.length+') · chỉ mở khi cần</summary>'+table(other)+'</details>':'')+
+     '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo hôm trước</button><span>Phải kiểm tra lại trước khi xác nhận ngày mới</span></div>'+
+     '<p class="v300-hint">Ô trống = chưa xác nhận · 0 = xác nhận không có người · Không cộng trùng nhân sự kiêm nhiệm.</p>');
  }
+ function cargoEntryRow(x={}){
+   const minute=x.ready_by_min;
+   const ready=minute==null?'':String(Math.floor((Number(minute)%1440)/60)).padStart(2,'0')+':'+String(Number(minute)%60).padStart(2,'0');
+   return '<tr data-v300-cargo-row><td><input data-v300-cargo="flight" aria-label="Chuyến bay đi" list="v300FlightOptions" maxlength="20" placeholder="Số chuyến" value="'+H(x.flight_no||'')+'"></td>'+
+     '<td><input data-v300-cargo="kg" aria-label="Booking KG" type="number" min="0" step="any" placeholder="KG" value="'+H(x.cargo_kg??'')+'"></td>'+
+     '<td><input data-v300-cargo="pcs" aria-label="PCS" type="number" min="0" step="1" placeholder="Không bắt buộc" value="'+H(x.cargo_pcs??'')+'"></td>'+
+     '<td><input data-v300-cargo="ready" aria-label="Giờ hàng sẵn sàng" type="time" value="'+H(ready)+'"></td></tr>';
+ }
+
  function issueFields(u){
    if(u==='KTS'){
-     const g=(state?.gse||[]).filter(x=>['STAIRS','BELT','TRACTOR','COBUS_LARGE','PUSHBACK','GPU','ASU'].includes(x.code));
-     const t=g.length?'<details class="v300-details"><summary>Thiết bị khả dụng theo nhóm (chỉ chỉnh nếu thay đổi)</summary>'+
-       '<div class="v300-device-grid">'+g.map(x=>'<label>'+H(x.code)+' · tối đa '+H(x.catalog_total)+
+     const groups=(state?.gse||[]).filter(x=>['STAIRS','BELT','TRACTOR','COBUS_LARGE','PUSHBACK','GPU','ASU'].includes(x.code));
+     const devices=groups.length?'<details class="v300-details v311-advanced"><summary>Điều chỉnh số thiết bị khả dụng (chỉ khi thay đổi)</summary>'+
+       '<div class="v300-device-grid">'+groups.map(x=>'<label>'+H(x.code)+' · tối đa '+H(x.catalog_total)+
        '<input data-v300-gse="'+H(x.code)+'" type="number" min="0" max="'+H(x.catalog_total)+'" placeholder="Chờ xác nhận" value="'+H(x.ready_count??'')+'"></label>').join('')+'</div></details>':'';
-     const issues=(state?.issues||[]).filter(x=>x.issue_status!=='RETURNED').slice(0,6).map(x=>H(x.equipment_id)+' · '+H(x.issue_status)).join('; ');
-     return wrapPanel('02 · Thiết bị và ngoại lệ','Chỉ khai báo thiết bị hỏng/hạn chế hoặc điều chỉnh số khả dụng; không nhập lại toàn bộ danh mục.',
-      (issues?'<p class="v300-hint">Đã ghi nhận: '+issues+'</p>':'')+
-      t+'<div class="v300-fields-grid"><label>Mã xe cần cập nhật (nếu có)<input data-v300-issue="id" placeholder="Ví dụ: 31806" maxlength="55"></label>'+
-      '<label>Tình trạng<select data-v300-issue="status"><option value="OUT_OF_SERVICE">Hỏng / ngưng sử dụng</option><option value="REPAIR">Đang sửa</option><option value="LIMITED">Hạn chế</option><option value="RETURNED">Đã phục hồi</option></select></label>'+
-      '<label class="v300-wide">Nội dung và ảnh hưởng<input data-v300-issue="fault" placeholder="Ghi ngắn: chuyến/thiết bị bị ảnh hưởng" maxlength="260"></label></div>');
+     return wrapPanel('02 · Thiết bị hạn chế / thay đổi','Chỉ nhập xe mới hỏng, hạn chế, phục hồi hoặc điều chỉnh số khả dụng. Không nhập lại danh mục.',
+       '<div class="v300-fields-grid"><label>Mã xe (nếu có thay đổi)<input data-v300-issue="id" maxlength="55" placeholder="Mã xe"></label>'+
+       '<label>Trạng thái<select data-v300-issue="status"><option value="OUT_OF_SERVICE">Hỏng / ngưng sử dụng</option><option value="REPAIR">Đang sửa</option><option value="LIMITED">Hạn chế</option><option value="RETURNED">Đã phục hồi</option></select></label>'+
+       '<label class="v300-wide">Ảnh hưởng phục vụ<input data-v300-issue="fault" maxlength="260" placeholder="Hỏng gì? Ảnh hưởng chuyến/bãi nào?"></label></div>'+devices);
    }
    if(u==='KHO'){
-     const deps=dataRows().filter(x=>x.no&&!x.ferry).slice(0,50);
-     const knownCargo=new Map((state?.cargo||[]).map(x=>[x.flight_no,x]));
-     const options=deps.map(x=>'<option value="'+H(x.no)+'"></option>').join('');
-     const list=(state?.cargo||[]).filter(x=>numKnown(x.cargo_kg)&&Number(x.cargo_kg)>0)
-       .map(x=>H(x.flight_no)+' '+H(x.cargo_kg)+' kg').slice(0,10).join('; ');
-     return wrapPanel('02 · Booking hàng đi','Chỉ nhập chuyến đã có xác nhận từ Kho. Không đoán hàng từ lịch.',
-       (list?'<p class="v300-hint">Đã nhập: '+list+'</p>':'')+'<datalist id="v300FlightOptions">'+options+'</datalist>'+
-       '<div class="v300-fields-grid"><label>Số hiệu chuyến<input data-v300-cargo="flight" list="v300FlightOptions" placeholder="VJ..." maxlength="20"></label>'+
-       '<label>Booking KG<input data-v300-cargo="kg" type="number" min="0" placeholder="Chưa xác nhận"></label>'+
-       '<label>PCS<input data-v300-cargo="pcs" type="number" min="0" placeholder="Tùy chọn"></label>'+
-       '<label>Giờ hàng sẵn sàng<input data-v300-cargo="ready" type="time"></label></div>');
+     const deps=dataRows().filter(x=>x.no&&!x.ferry),saved=(state?.cargo||[]).filter(x=>x.flight_no);
+     return wrapPanel('02 · Hàng đi đã được Kho xác nhận','Nhập nhiều chuyến trong một bảng rồi lưu một lần. Không suy đoán booking từ lịch bay.',
+       '<p class="v300-hint">Ưu tiên chuyến có hàng quay đầu ngắn. Phân biệt 100–200 kg, dưới 2,5 tấn và từ 2,5 tấn trở lên theo booking thực tế và thỏa thuận áp dụng.</p>'+
+       '<datalist id="v300FlightOptions">'+deps.map(x=>'<option value="'+H(x.no)+'"></option>').join('')+'</datalist>'+
+       '<div class="v300-table-wrap v311-cargo-scroll"><table class="v300-table"><thead><tr><th>Chuyến đi</th><th>Booking KG</th><th>PCS</th><th>Hàng sẵn sàng</th></tr></thead><tbody id="v311CargoBody">'+saved.map(cargoEntryRow).join('')+cargoEntryRow()+'</tbody></table></div>'+
+       '<button type="button" class="v311-add" data-v300-command="add-cargo">+ THÊM CHUYẾN CÓ HÀNG</button>'+
+       '<p class="v300-hint">Dòng trống không phải xác nhận chuyến không có hàng. KG phải là số từ 0 trở lên; chỉ nhập khi Kho có nguồn xác nhận.</p>');
    }
    return '';
  }
+
  function renderDepartment(u){
-   const plan=getUnitPlan(u),prev=plan?.details||{};
-   const notes=(noteFields[u]||[]).map(([k,label])=>'<label class="'+(k==='escalation'?'v300-wide':'')+'">'+H(label)+
-    '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" placeholder="Chỉ nhập khi có thay đổi hoặc nguy cơ cụ thể">'+H(prev[k]||'')+'</textarea></label>').join('');
-   const op=wrapPanel((u==='QA_IT'?'01':(u==='KTS'||u==='KHO'?'03':'02'))+' · Nhận định bổ sung / phương án','Có thể để trống khi lịch và dữ liệu nguồn đã phản ánh đầy đủ.',
-     '<div class="v300-fields-grid">'+notes+'</div><p class="v300-hint">Không nhập lại số chuyến, giờ bay, vị trí đỗ, khung cao điểm hoặc dữ liệu do phòng khác chịu trách nhiệm.</p>');
-   $('v300Page').innerHTML='<div class="v300-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · Dữ liệu theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
-     roleInputs(u)+issueFields(u)+op+
-     '<div class="v300-savebar"><div><strong>Một lần xác nhận cho ngày khai thác</strong><small>Chỉ xác nhận số liệu đã kiểm tra; phần còn trống không được suy ra là đủ.</small><label class="v300-check"><input type="checkbox" data-v300-no-exception> Không có ngoại lệ bổ sung ngoài dữ liệu đã khai báo</label></div>'+
-     '<button class="v300-primary" data-v300-command="save" data-unit="'+u+'">XÁC NHẬN & GỬI ĐIỀU HÀNH</button></div>';
+   const plan=getUnitPlan(u),details=plan?.details||{};
+   const focus={
+     DH:'Chỉ thêm nội dung thay đổi từ AOC, yêu cầu riêng của hãng/charter và đề xuất cần chỉ đạo.',
+     KTS:'Xác nhận người, GSE và phương án chuẩn bị trước khi tàu lăn; chú ý luồng đường công vụ K2/K3.',
+     PVHK:'Xác nhận quân số đội đến/đi và thay đổi thực tế có ảnh hưởng quầy, gate, boarding.',
+     KHO:'Xác nhận booking hàng đi, số KG/PCS và giờ sẵn sàng; không tự kết luận chuyến chưa nhập là không có hàng.',
+     QA_IT:'Chỉ ghi vấn đề đã xác nhận về an toàn, FOD, thời tiết hoặc tồn tại ảnh hưởng ca.'
+   };
+   const names=noteFields[u]||[],hasNotes=names.some(([k])=>details[k]);
+   const fields=names.map(([k,label])=>'<label>'+H(label)+
+     '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" placeholder="Chỉ ghi chuyến/khung giờ, nguy cơ cụ thể và phương án">'+H(details[k]||'')+'</textarea></label>').join('');
+   const comments=wrapPanel(u==='QA_IT'?'01 · Thông tin cần báo':'03 · Ngoại lệ / phương án bổ sung',
+     'Không cần viết lại số chuyến, giờ cao điểm và bãi đỗ: báo cáo đã tự tổng hợp từ nguồn.',
+     '<details class="v300-details v311-advanced" '+(hasNotes||u==='QA_IT'?'open':'')+'><summary>Ghi chú để đưa vào báo cáo ('+(hasNotes?'đang có nội dung':'tùy chọn')+')</summary><div class="v300-fields-grid">'+fields+'</div></details>');
+   const flights=getFlights(),dep=dataRows(),bays=flights.filter(x=>x.bay!=null).length;
+   const auto=wrapPanel('Dữ liệu tự lấy từ lịch bay · không phải nhập',
+     'Lịch Lần 1/Lần 2 cung cấp STA, STD, số chuyến, đăng bạ, vị trí đỗ và phân tích cao điểm.',
+     '<div class="v311-source-grid"><div><small>CẶP CHUYẾN</small><strong>'+H(flights.length||'Chưa có lịch')+'</strong></div>'+
+     '<div><small>BÃI CÓ NGUỒN</small><strong>'+H(bays)+'/'+H(flights.length)+'</strong></div>'+
+     '<div><small>CHARTER (##)</small><strong>'+H(dep.filter(x=>x.charter).length)+'</strong></div></div>');
+   $('v300Page').innerHTML='<div class="v300-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
+     '<div class="v311-entry-guide"><b>Phòng cần nhập:</b> '+H(focus[u])+'</div>'+auto+
+     roleInputs(u)+issueFields(u)+comments+
+     '<div class="v300-savebar v311-savebar"><div><strong>Xác nhận dữ liệu cho ngày '+H(date())+'</strong>'+
+     '<small>Thông tin bỏ trống vẫn là CHỜ XÁC NHẬN, không được mặc định đủ.</small>'+
+     '<label class="v300-check"><input type="checkbox" data-v300-no-exception '+(details.no_new_exceptions==='YES'?'checked':'')+'> Đã kiểm tra: không có ngoại lệ nào khác cần bổ sung</label></div>'+
+     '<button type="button" class="v300-primary" data-v300-command="save" data-unit="'+u+'">LƯU & XÁC NHẬN PHÒNG</button></div>';
  }
+
  async function getNewData(){
    if(!db())return;
    const day=date();
