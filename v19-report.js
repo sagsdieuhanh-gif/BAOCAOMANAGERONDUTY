@@ -370,6 +370,13 @@
            '\nTổ chức quầy/gate: '+item.observation;
          continue;
        }
+       if(item.key==='stands'){
+         // Keep the complete verified zone distribution, then detail the risk windows.
+         if(!known(ctrl.observation))topics[idx].observation+=
+           '\nKhung luồng xe cần lưu ý: '+item.observation;
+         if(!known(ctrl.action))topics[idx].action=item.action;
+         continue;
+       }
        if(!known(ctrl.observation))topics[idx].observation=reportText(item.observation,490);
        // The staffing row must always keep the exact signed-off headcounts from Personnel,
        // while the situation-specific check-in advice is printed in the L2 table above.
@@ -389,27 +396,12 @@
      0:['change'],1:['peak'],2:['wide'],3:['stands'],
      4:['checkin'],5:['resource'],6:['cargo'],7:['gate'],8:[],9:[]
    };
-   const appendL2=(base,index,field)=>{
-     if(!isL2)return base;
-     // For peak, widebody and boarding, the L2 action has already replaced the
-     // baseline during build(). Re-prepending a 185-character excerpt would
-     // truncate actual PVHK duties (check-in, gate/boarding, aircraft service).
-     // Explicitly edited actions retain precedence in the same way.
-     if(field==='action'&&[1,2,4,7].includes(index))return base;
-     const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
-     const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
-     // Staffing row is a headcount summary only; do not append norm-based verdicts.
-     if(!fresh.length)return base;
-     const extra=fresh.filter(Boolean).join('; ');
-     if(!extra||String(base).includes(extra))return base;
-     // Preserve the first-report baseline, emphasize verified L2 changes first.
-     return '(Cập nhật Lần 2: '+crop(extra,195)+')\n'+crop(base,155);
-   };
-   const updateTopic=(x,i)=>({...x,observation:appendL2(x.observation,i,'observation'),
-     action:appendL2(x.action,i,'action')});
+   // The L2 build already chooses the matching facts and verified overrides.
+   // Never prepend a 195-character excerpt or clip an existing sentence.
+   const updateTopic=x=>x;
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
-    '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, check-in, boarding, booking và ferry được phân tích theo lịch mới, đối chiếu Lần 1.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
+    '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, booking và các mốc khai thác được phân tích theo dữ liệu Lần 2, đối chiếu Lần 1; boarding chỉ được đánh giá khi nguồn có giờ.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr(['Biến động so với ngày hôm trước',data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
     (data.operational?'<h3>PEAK HOURS · CAO ĐIỂM LƯỢT CHUYẾN THEO TỪNG GIỜ</h3>'+
        '<p>Bốn nhóm quốc tế đến/đi, quốc nội đến/đi theo giờ STA/STD, không cộng cặp đến–đi thành một. Đỉnh giờ: '+
@@ -417,7 +409,7 @@
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,isL2?crop(y.observation,290):y.observation,i===4?y.action:isL2?crop(y.action,[0,1,2,3,7].includes(i)?560:225):y.action,y.owner])}).join('')+'</table>'+
+    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,y.observation,y.action,y.owner])}).join('')+'</table>'+
     '<h4>CHI TIẾT QUÂN SỐ ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ</h4>'+
     '<table>'+tr(['Phòng / Bộ phận','Vị trí công việc','Ca sáng','Ca đêm'],true)+
       (data.staffDetails?.length?data.staffDetails.map(x=>tr([
@@ -427,7 +419,7 @@
     '<p class="v19-footnote">Nguồn: số người đã xác nhận theo từng vị trí và từng ca của ngày khai thác; số 0 là dữ liệu đã xác nhận. Không cộng các nhóm PVSĐ thành tổng nhân sự độc lập khi chưa loại trừ nhân sự kiêm nhiệm.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
-    '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+(isL2?data.peakRows.slice(0,2):data.peakRows).map(x=>tr([x.slot,x.flight,isL2?crop(x.risk,190):x.risk,isL2?crop(x.action,460):x.action])).join('')+'</table>'+
+    '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
     '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(data.recommendation)+'</p>'+
     '<p class="v19-footnote">Nguồn '+(data.c.revision===2?'Lần 2':'Lần 1')+': '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lần 1 được giữ làm mốc so sánh.</p></div>';
