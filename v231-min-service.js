@@ -38,7 +38,7 @@
   const db=()=>typeof sb==='undefined'?null:sb;
   const actor=()=>typeof me==='undefined'?null:me;
   const permitted=u=>['DH','ADMIN'].includes(role())||role()===u;
-  const carrier=f=>String(f?.airline||f?.carrier||String(f?.departure||f?.arrival||f?.no||'').match(/^##?([A-Z0-9]{2,3})\d/)?.[1]||'').trim().toUpperCase();
+  const carrier=f=>String(f?.airline||f?.carrier||String(f?.departure||f?.arrival||f?.no||'').match(/^(?:##)?([A-Z0-9]{2,3})\d/)?.[1]||'').trim().toUpperCase();
   let mounted=false,lastSignature='',active=false,profiles=[],airlines=[],draft={},saving=false;
   const narrow=f=>{const s=String(f?.aircraft_type||f?.type||'').toUpperCase();
     if(/A3(30|40|50|80)|B?7(47|67|77|87)|B?777|B?787|B?767/.test(s))return 'WIDE';
