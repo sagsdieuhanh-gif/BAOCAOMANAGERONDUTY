@@ -108,7 +108,7 @@
      '<div><div class="v24-eyebrow">SAGS · CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</div><h2>Bảng nhập trực tiếp theo giờ xe</h2>'+
      '<p>Hai chiều xe · 04 cột đơn vị (QA và IT chung một cột) · lưu số người ngay trong ô tương ứng.</p></div>'+
      '<div class="v24-access">'+(editablePart?'ĐƯỢC NHẬP: '+activeField:'CHỈ ĐƯỢC XEM')+'</div></div>'+
-     '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. Muốn thêm giờ xe khác, mở mục <b>THÊM GIỜ XE KHÁC</b> phía dưới. Nhập xong cả hai chiều, bấm <b>LƯU TẤT CẢ THAY ĐỔI</b> một lần.</div>'+
+     '<div class="v24-explain">Ô nền trắng viền xanh là cột được nhập. Các phòng khác hiển thị khóa. <strong>Ô trống = chưa xác nhận</strong>; <strong>0 = xác nhận không có người</strong>. <strong>Giờ xe mới tự xếp vào đúng thứ tự thời gian trong bảng</strong> (ví dụ 10:00 → 11:00 → 16:30), không dồn xuống cuối. Chọn <b>THÊM GIỜ XE KHÁC</b> rồi nhập số người tại dòng mới và bấm <b>LƯU TẤT CẢ THAY ĐỔI</b>.</div>'+
      makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
      (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
      '<p class="v24-footer">Chỉ có xe 29 chỗ và 45 chỗ. Loại xe chỉ được gợi ý khi đủ 4 cột xác nhận; quyết định phát hành và điều xe thuộc ĐH. Xem ảnh/PDF tại tab <b>XE GIAO CA</b>.</p>'+
@@ -287,7 +287,11 @@
        const reasonResult=await sb.rpc('ops_set_shuttle_reason',{p_date:$('day').value,p_direction:direction,p_minute:minute,p_line:0,p_reason:reason});
        if(reasonResult.error)throw Error('Đã tạo mốc xe nhưng chưa lưu được lý do: '+reasonResult.error.message);
        await refresh();
-       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã thêm mốc '+clock(minute)+' cho chiều '+model().directionLabel[direction]+' – '+reason+'.');
+       // Lead staff straight to the inserted row; do not leave the impression
+       // that new times were appended at the end or require a manual reload.
+       const inserted=e.currentTarget.querySelector('[data-v24-key="'+direction+'|'+minute+'|0"]');
+       inserted?.scrollIntoView?.({behavior:'smooth',block:'center',inline:'nearest'});
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã chèn '+clock(minute)+' đúng thứ tự giờ trong chiều '+model().directionLabel[direction]+'. Nhập số người tại dòng mới và lưu tất cả thay đổi.');
      }
    }catch(error){message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Không lưu được: '+error.message,true)}
    finally{busy=false;b.disabled=false}
