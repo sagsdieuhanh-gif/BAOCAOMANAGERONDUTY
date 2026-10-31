@@ -174,7 +174,7 @@
          desc:shortages.join('; ')+'. Tính theo '+w.active.length+' cặp đang phục vụ và định mức đã xác nhận.',
          action:u==='DH'?'Cán bộ trực chủ động rà soát phân công CO, đề xuất tăng cường người đủ năng định từ ca khác hoặc trực tiếp hỗ trợ theo điều kiện, phê duyệt.':
            'PVSĐ bố trí lại tổ phục vụ, tập kết nhân lực trước giờ tàu lăn và đề xuất bổ sung người đủ năng định.',
-         weight:12});
+         weight:15});
      }
    }
    return out;
@@ -244,7 +244,7 @@
      '<td><input inputmode="numeric" type="number" min="0" max="9999" data-v300-staff="'+H(k)+'|ĐÊM" value="'+H(night??'')+'" placeholder="—"></td></tr>';
    }).join('');
    return wrapPanel('01 · Quân số khả dụng theo vai trò','Chỉ nhập số thực có. Nhu cầu và chênh lệch do hệ thống tính từ định mức được xác nhận.',
-     '<div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Vị trí công việc</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+     '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo quân số hôm trước</button><span>Chưa xác nhận ngày mới · phải kiểm tra trước khi lưu</span></div><div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Vị trí công việc</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
      '<p class="v300-hint">Ô trống = chưa xác nhận; 0 = đơn vị xác nhận không có người ở vị trí này. Không cộng trùng người kiêm nhiệm.</p>');
  }
  function issueFields(u){
@@ -283,7 +283,7 @@
      '<div class="v300-fields-grid">'+notes+'</div><p class="v300-hint">Không nhập lại số chuyến, giờ bay, vị trí đỗ, khung cao điểm hoặc dữ liệu do phòng khác chịu trách nhiệm.</p>');
    $('v300Page').innerHTML='<div class="v300-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · Dữ liệu theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
      roleInputs(u)+issueFields(u)+op+
-     '<div class="v300-savebar"><div><strong>Một lần xác nhận cho ngày khai thác</strong><small>Chỉ xác nhận số liệu đã kiểm tra; phần còn trống không được suy ra là đủ.</small></div>'+
+     '<div class="v300-savebar"><div><strong>Một lần xác nhận cho ngày khai thác</strong><small>Chỉ xác nhận số liệu đã kiểm tra; phần còn trống không được suy ra là đủ.</small><label class="v300-check"><input type="checkbox" data-v300-no-exception> Không có ngoại lệ bổ sung ngoài dữ liệu đã khai báo</label></div>'+
      '<button class="v300-primary" data-v300-command="save" data-unit="'+u+'">XÁC NHẬN & GỬI ĐIỀU HÀNH</button></div>';
  }
  async function getNewData(){
@@ -458,7 +458,10 @@
          plan_note:'',updated_by:user().id,updated_at:now};
      }
    }
-   if(!items.length&&!issue&&!cargo&&!gseChanges.length&&
+   const noException=!!page.querySelector('[data-v300-no-exception]')?.checked;
+   if(noException)details.no_new_exceptions='YES';
+   else details.no_new_exceptions='';
+   if(!noException&&!items.length&&!issue&&!cargo&&!gseChanges.length&&
       !(noteFields[u]||[]).some(([key])=>details[key]))return status('Chưa có dữ liệu để xác nhận. Có thể quay lại khi có nguồn.',true);
    saving=true; const saveBtn=page.querySelector('[data-v300-command="save"]');
    if(saveBtn)saveBtn.disabled=true;status('Đang lưu và kiểm tra các nguồn đã cập nhật…');
@@ -478,12 +481,33 @@
    }catch(e){status('Lưu chưa hoàn chỉnh: '+e.message+'. Kiểm tra dữ liệu trước khi lưu lại.',true)}
    finally{saving=false;if(saveBtn)saveBtn.disabled=false;}
  }
+ async function copyPrevious(u){
+   if(!allowed(u)||!db())return;
+   const today=date(),d=new Date(today+'T00:00:00Z');
+   if(!Number.isFinite(d.getTime()))return status('Ngày khai thác chưa hợp lệ.',true);
+   d.setUTCDate(d.getUTCDate()-1);
+   const before=d.toISOString().slice(0,10);
+   const answer=await db().from('ops_staff_capacity').select('role_code,shift,quantity,confirmed_at')
+     .eq('service_date',before).eq('unit',u);
+   if(answer.error)return status('Không tải được quân số tham khảo: '+answer.error.message,true);
+   let count=0;
+   for(const row of answer.data||[]){
+     if(!row.confirmed_at)continue;
+     const selector='[data-v300-staff="'+row.role_code+'|'+row.shift+'"]';
+     const input=$('v300Page')?.querySelector(selector);
+     if(input&&input.value===''){input.value=String(row.quantity);count++;}
+   }
+   status(count?'Đã điền tham khảo '+count+' ô quân số từ ngày '+before+
+     '. Cần kiểm tra và bấm XÁC NHẬN cho ngày '+today+'; chưa tự lưu.':
+     'Không có quân số đã xác nhận ở ngày '+before+' để tham khảo.');
+ }
  function handleClick(e){
    const route=e.target.closest('[data-v300-route]');if(route){go(route.dataset.v300Route);return}
    const command=e.target.closest('[data-v300-command]');if(!command)return;
    const cmd=command.dataset.v300Command;
    if(cmd==='refresh')refresh();
    if(cmd==='save')saveDepartment(command.dataset.unit);
+   if(cmd==='copy-previous')copyPrevious(command.dataset.unit);
    if(cmd==='preview')previewReport();
    if(cmd==='word')exportReport('docx');
    if(cmd==='pdf')exportReport('pdf');
