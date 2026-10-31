@@ -25,3 +25,8 @@ Mã nguồn các module ở thư mục gốc. `server/` lưu mã tham khảo và
 - Lịch bay, nhân sự, GSE và xe giao ca vẫn sử dụng cơ sở dữ liệu nghiệp vụ đã liên kết; việc xóa mã cũ khỏi nhánh chính không xóa dữ liệu Supabase.
 - Không tự lấy số ví dụ làm dữ liệu ngày; khi chưa xác nhận báo cáo ghi rõ cần bổ sung.
 - Người dùng ĐH/ADMIN kiểm tra kết quả xuất Word/PDF, ảnh/PDF trước khi phát hành chính thức.
+
+## V2.29 – Định mức nhân sự cho Báo cáo Lần 2
+- Định mức nhập một lần theo đơn vị, vị trí và loại tàu thân hẹp/thân rộng; lưu Supabase cùng nguồn xác nhận, không tự mặc định số người. Trống = CHỜ ĐỊNH MỨC, 0 chỉ dùng nếu đơn vị xác nhận.
+- Nhập quân số thật theo vai trò, ca sáng/đêm của từng ngày; so sánh tại khung 30 phút có cặp đến–đi cùng phục vụ. Chỉ tính chênh lệch khi đủ định mức và số xác nhận; tổng quân số chỉ cho biết thiếu tối thiểu, không chứng minh đủ từng vị trí.
+- Báo cáo Lần 2: đối chiếu Lần 1, bảng quân số/nhu cầu cao nhất theo ca, nhận định/chuyến/khung giờ và phương án cụ thể, thông tin còn chờ xác nhận. Lần 1 giữ nguyên mẫu. Định mức check-in theo hợp đồng vẫn ở PVHK.
