@@ -36,7 +36,8 @@ for(const num of [20,40,50,60])assert.ok(example.includes('data-v308-example="'+
 assert.ok(example.includes('shuttle-29.webp')&&example.includes('shuttle-45.webp'));
 assert.equal(model.suggestVehicles(20).n29,1);
 assert.equal(model.suggestVehicles(40).n45,1);
-assert.equal(model.suggestVehicles(50).n29,2);
+assert.equal(model.suggestVehicles(50).n29,1);
+assert.equal(model.suggestVehicles(50).n45,1);
 assert.equal(model.suggestVehicles(60).n29,1);
 assert.equal(model.suggestVehicles(60).n45,1);
 const estimate=ui.proposal([20,null,null,null],false);
