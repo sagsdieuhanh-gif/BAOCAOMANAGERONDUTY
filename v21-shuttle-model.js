@@ -6,13 +6,17 @@
   {direction:'NHA_CXR',departure_min:1170,label:'19:30'},
   {direction:'CXR_NHA',departure_min:990,label:'16:30'},
   {direction:'CXR_NHA',departure_min:1110,label:'18:30'},
-  {direction:'CXR_NHA',departure_min:1560,label:'02:00 (+1)'},
-  {direction:'CXR_NHA',departure_min:1935,label:'08:15 (+1)'}
+  {direction:'CXR_NHA',departure_min:1560,label:'02:00'},
+  {direction:'CXR_NHA',departure_min:1935,label:'08:15'}
  ];
  const directionLabel={NHA_CXR:'NHA → CXR · XE ĐI LÀM',CXR_NHA:'CXR → NHA · XE VỀ'};
  function clock(min){
   if(!Number.isInteger(min)||min<0||min>=2880)return '—';
-  return String(Math.floor(min/60)%24).padStart(2,'0')+':'+String(min%60).padStart(2,'0')+(min>=1440?' (+1)':'');
+  const wall=String(Math.floor(min/60)%24).padStart(2,'0')+':'+String(min%60).padStart(2,'0');
+  // Official route times are presented as HH:MM only. Preserve their stored
+  // 24h offset for the service day and backend; do not leak (+1) into UI.
+  if(defaults.some(x=>x.departure_min===min))return wall;
+  return wall+(min>=1440?' (+1)':'');
  }
  function parseClock(value,dayAfter=false){
   const m=String(value??'').match(/^(\d{2}):(\d{2})$/);
@@ -45,14 +49,18 @@
     details:best.seats+' ghế · dư '+best.spare+' ghế'};
  }
  function isDefault(direction,minute){return defaults.some(x=>x.direction===direction&&x.departure_min===minute)}
- // Thứ tự thời gian thực tế: theo chiều xe, ngày (+1), phút chạy, dòng xe bổ sung.
- // Không chia giờ mặc định và giờ thêm thành 2 nhóm: 10:00 → 11:00 → 16:30.
+ // Sort by clock time shown to staff; database keeps original cross-day
+ // minute keys. 10:00 → 11:00 → 16:30. 02:00 → 08:15 → 16:30 → 18:30.
  function compareSlots(a,b){
   const directions={NHA_CXR:0,CXR_NHA:1};
   const dir=(directions[a.direction]??2)-(directions[b.direction]??2);
   if(dir)return dir;
-  const minute=Number(a.departure_min)-Number(b.departure_min);
-  if(minute)return minute;
+  const time=(Number(a.departure_min)%1440)-(Number(b.departure_min)%1440);
+  if(time)return time;
+  // At the same clock time show the main/base row before a next-day repeat,
+  // followed by the extra vehicle rows in their persisted line order.
+  const day=Math.floor(Number(a.departure_min)/1440)-Math.floor(Number(b.departure_min)/1440);
+  if(day)return day;
   return Number(a.line_no||0)-Number(b.line_no||0);
  }
  function order(records){return [...records].sort(compareSlots);}
