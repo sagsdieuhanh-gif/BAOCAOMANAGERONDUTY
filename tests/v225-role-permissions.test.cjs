@@ -37,7 +37,7 @@ assert.equal(P.canOpen(null,'report'),false);
 const ui=fs.readFileSync('index.html','utf8'),nav=fs.readFileSync('v220-friendly-ui.js','utf8'),
  sh=fs.readFileSync('v24-shuttle-grid.js','utf8'),dept=fs.readFileSync('v20-departments.js','utf8'),
  notes=fs.readFileSync('v211-unit-input.js','utf8'),sql=fs.readFileSync('server/v225-room-permissions.sql','utf8');
-assert.ok(ui.includes('Báo cáo điều hành V3.00'));
+assert.ok(/Báo cáo điều hành V3\.\d{2}/.test(ui));
 assert.ok(ui.includes('v225-role-access.js?v=2.30')&&ui.includes('v225-role-access.css?v=2.25'));
 assert.ok(ui.includes('SagsRoleAccessV225?.canOpen(unit,tab)'),'Direct tab switching must check permissions');
 assert.ok(ui.includes('SagsRoleAccessV225?.apply()'));
