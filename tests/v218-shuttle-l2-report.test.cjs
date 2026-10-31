@@ -8,8 +8,8 @@ const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=glob
 assert.deepEqual(m.defaults.map(x=>[x.direction,x.departure_min]),[
  ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
 ],'All seven confirmed fixed times');
-assert.equal(m.clock(1935),'08:15 (+1)');
-assert.equal(m.clock(1560),'02:00 (+1)');
+assert.equal(m.clock(1935),'08:15');
+assert.equal(m.clock(1560),'02:00');
 assert.equal(m.isDefault('CXR_NHA',1560),true);
 assert.equal(m.isDefault('CXR_NHA',1260),false,'Other bus time can be added');
 assert.equal(m.isDefault('NHA_CXR',390),false);
@@ -56,4 +56,4 @@ const exporter=fs.readFileSync('report-export-v29.js','utf8');
 assert.ok(exporter.includes("(active.revision===2?'2':'1')"),'Official file must be labeled L1/L2');
 const draft=fs.readFileSync('v217-second-ui.js','utf8');
 assert.ok(draft.includes('v218PreviewL2')&&draft.includes('CHƯA ĐƯỢC DUYỆT / CHƯA LƯU'));
-console.log('PASS V2.19 fixed hours +1, four-unit vehicle totals, retained custom rows, L2 preview/export distinctions');
+console.log('PASS V3.07 clock labels, four-unit vehicle totals, retained custom rows, L2 preview/export distinctions');
