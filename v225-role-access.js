@@ -2,7 +2,7 @@
 /* V2.25 single role map: user interface only. The matching DB RLS is authoritative. */
 (function(root){
  const OWN={KTS:'pvsd',PVHK:'pvhk',KHO:'warehouse',QA:'qa_it',IT:'qa_it'};
- const ALL=['home','sources','pvsd','pvhk','warehouse','qa_it','staff','gse','doorclose','radar','report','radar-report','shuttle-report','quick','admin'];
+ const ALL=['home','sources','norms','pvsd','pvhk','warehouse','qa_it','staff','gse','doorclose','radar','report','radar-report','shuttle-report','quick','admin'];
  const SHARED=['radar','report','radar-report','shuttle-report'];
  function privileged(role){return role==='DH'||role==='ADMIN'}
  function canManage(role){return role==='ADMIN'}
@@ -13,6 +13,7 @@
  function canOpen(role,tab){
    if(!role)return false;
    if(tab==='admin')return canManage(role);
+   if(tab==='norms')return ['DH','ADMIN','KTS','PVHK','KHO'].includes(role);
    if(privileged(role))return true;
    if(SHARED.includes(tab))return true;
    return OWN[role]===tab;
@@ -67,7 +68,7 @@
    reveal(document.getElementById('tab-admin'),canManage(role));
    // Legacy editor tabs must never be shown to the wrong unit. The allowed department tab
    // remains available and server policies block cross-unit writes.
-   for(const tab of ['sources','pvsd','pvhk','warehouse','qa_it','gse','staff','doorclose','quick']){
+   for(const tab of ['sources','norms','pvsd','pvhk','warehouse','qa_it','gse','staff','doorclose','quick']){
      const element=document.getElementById('tab-'+tab);
      if(element&&!canOpen(role,tab))element.classList.add('v225-denied');
      else element?.classList.remove('v225-denied');
