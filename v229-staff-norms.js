@@ -50,12 +50,15 @@
    if(std!=null&&std>start)end=Math.min(end,std);
    const g=aircraftGroup(f);
    const no=String(f.departure||f.arrival||'—').toUpperCase();
-   const cargoStatus=f.cargo_status==='CARGO'||f.cargo_status==='NO_CARGO'?f.cargo_status:
-     cargoMap.has(no)?'CARGO':'UNKNOWN';
+   const plan=cargoMap.get(no);
+   // Hàng đi chỉ có căn cứ khi Kho hàng đã nhập khối lượng; không suy từ cờ lịch bay.
+   const cargoStatus=plan&&Number.isFinite(Number(plan.cargo_kg))&&Number(plan.cargo_kg)>0?'CARGO':'UNKNOWN';
    events.push({no,start,end,group:g,cargoStatus,flight:f});
   }
   const roleQty=(u,code,t)=>{
-   const rows=roleRows.filter(r=>r.unit===u&&r.role_code===code&&num(r.start_min)!=null&&num(r.end_min)!=null&&r.start_min<=t&&r.end_min>=t+30);
+   const rows=roleRows.filter(r=>r.unit===u&&
+     (r.role_code===code||(u==='KTS'&&code==='BAGGAGE'&&r.role_code==='SKYONE_BAGGAGE'))&&
+     num(r.start_min)!=null&&num(r.end_min)!=null&&r.start_min<=t&&r.end_min>=t+30);
    if(!rows.length)return null;
    return rows.reduce((n,r)=>n+num(r.quantity),0);
   };
