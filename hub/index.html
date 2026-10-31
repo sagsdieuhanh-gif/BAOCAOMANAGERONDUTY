@@ -4,180 +4,117 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07131e">
-<meta name="description" content="SAGS Link Hub - truy cập tập trung các hệ thống và công cụ làm việc.">
-<title>SAGS Link Hub | Trung tâm công cụ làm việc</title>
+<meta name="description" content="SAGS Link Hub - tập trung hệ thống điều hành, chuyến bay, hãng hàng không và công cụ làm việc.">
+<title>SAGS LINK HUB | Trung tâm công cụ làm việc</title>
 <style>
-:root{color-scheme:dark;--bg:#07131e;--txt:#f0f7fc;--muted:#93adbd;--line:rgba(183,223,245,.14);--mint:#70e0c2}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;min-height:100vh;font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:radial-gradient(900px 520px at 92% -8%,rgba(45,181,149,.16),transparent 70%),radial-gradient(760px 570px at 2% 40%,rgba(30,106,160,.14),transparent 68%),var(--bg);color:var(--txt)}
-a{color:inherit}
-.container{max-width:1180px;margin:auto;padding-inline:24px}
-.header{border-bottom:1px solid var(--line);background:rgba(5,17,28,.72);backdrop-filter:blur(12px)}
-.topbar{height:83px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:13px;text-decoration:none}
-.brand-icon{display:grid;place-items:center;width:47px;height:47px;border-radius:15px;background:linear-gradient(135deg,#145b50,#123048);border:1px solid #3d9e8d;color:#a2f8e2;font-size:25px;font-weight:850;box-shadow:0 10px 25px #0002}
-.brand-title{display:block;letter-spacing:.11em;font-size:15px;font-weight:850}
-.brand-sub{display:block;font-size:12px;color:#9cb6c5;margin-top:1px;letter-spacing:.01em}
-.time{color:#a2becd;font-size:13px;display:flex;gap:9px;align-items:center}
-.dot{height:8px;width:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px #4fe9c995}
-main{padding-top:57px;padding-bottom:60px}
-.overline{font-size:12px;color:#74dec4;font-weight:760;text-transform:uppercase;letter-spacing:.21em;margin:0 0 17px}
-h1{font-size:clamp(35px,5vw,59px);font-weight:850;letter-spacing:-.05em;line-height:1.14;margin:0;max-width:850px}
-h1 em{font-style:normal;background:linear-gradient(105deg,#70e3c3,#a8e8f1);background-clip:text;-webkit-background-clip:text;color:transparent}
-.intro{max-width:720px;margin:23px 0 24px;font-size:16px;color:#aec3d0}
-.stats{display:flex;align-items:center;gap:10px;font-size:13px;color:#a5bfcc}
-.stats strong{font-size:20px;color:#f8ffff}
-.pipe{width:1px;height:27px;background:var(--line);margin:0 9px}
-.search-row{margin-top:37px;max-width:670px;position:relative}
-.search-row input{width:100%;height:57px;border-radius:16px;border:1px solid #2c4c60;background:#102738;color:white;outline:none;padding:0 83px 0 50px;font:inherit;box-shadow:0 14px 35px #0002}
-.search-row input:focus{border-color:#66dabc;box-shadow:0 0 0 4px #66dabc16}
-.search-row input::placeholder{color:#879fb0}
-.search-icon{position:absolute;left:17px;top:18px;width:21px;height:21px;color:#91adbb;pointer-events:none}
-.key{position:absolute;right:15px;top:16px;color:#91aabb;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 7px;pointer-events:none}
-.filters{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}
-.filter{border:1px solid var(--line);border-radius:100px;background:transparent;color:#bad0dc;font:650 13px system-ui,-apple-system,"Segoe UI",sans-serif;padding:10px 15px;cursor:pointer;transition:background .2s,border-color .2s}
-.filter.active{background:#7de9cb;color:#08221f;border-color:#7de9cb}
-.filter:hover:not(.active){background:#182f40;border-color:#6bb7a9}
-section{margin-top:43px}
-.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
-h2{font-size:20px;font-weight:760;letter-spacing:-.025em;margin:0}
-.category-count{font-size:11px;color:#86a5b5;letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
-.card{--accent:#7ce6cb;--tint:rgba(54,174,152,.15);display:flex;position:relative;flex-direction:column;isolation:isolate;min-height:233px;overflow:hidden;padding:23px;border:1px solid var(--line);border-radius:21px;background:linear-gradient(140deg,#153043,#0b1c2c);text-decoration:none;transition:transform .2s,border-color .2s,box-shadow .2s}
-.card:before{content:"";position:absolute;z-index:-1;top:-85px;right:-65px;width:210px;height:210px;border-radius:100%;background:var(--tint)}
-.card:hover,.card:focus-visible{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 20px 32px #0004}
-.card-head{display:flex;justify-content:space-between;align-items:flex-start}
-.icon-box{width:61px;height:61px;display:grid;place-items:center;border-radius:18px;color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,#102535);border:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
-.icon-box svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.icon-box span{font-size:27px;font-weight:850;letter-spacing:-.07em;line-height:1}
-.tag{color:#abc3d0;border:1px solid var(--line);border-radius:7px;padding:4px 8px;letter-spacing:.08em;font-size:10px;font-weight:800}
-.card-title{font-size:20px;font-weight:790;letter-spacing:-.02em;margin:22px 0 4px;display:flex;align-items:center;gap:9px;line-height:1.3}
-.card-title:after{content:"↗";font-size:20px;color:var(--accent);font-weight:400;transition:transform .2s}
-.card:hover .card-title:after{transform:translate(3px,-3px)}
-.desc{font-size:13px;color:#9eb6c4;margin:6px 0 19px;flex:1}
-.domain{font-size:11px;color:#7898a9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.no-results{display:none;padding:39px 20px;margin-top:24px;text-align:center;border:1px dashed #486272;border-radius:16px;color:#a7c0d0}
-.no-results strong{display:block;color:#e9f6fc;font-size:17px;margin-bottom:5px}
-.info{display:flex;align-items:flex-start;gap:12px;padding:19px 20px;border:1px solid var(--line);background:#0d2434a8;border-radius:17px;margin-top:47px;color:#acc3d0;font-size:13px}
-.info svg{flex-shrink:0;width:21px;height:21px;color:#70e0c2}
-footer{padding:25px;text-align:center;color:#7e9aa9;font-size:12px;border-top:1px solid var(--line)}
-:focus-visible{outline:3px solid #80edca;outline-offset:3px}
-[hidden]{display:none!important}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:620px){.container{padding-inline:17px}.topbar{height:76px}.brand-title{font-size:13px}.brand-sub{font-size:11px}.time{font-size:11px}main{padding-top:40px}.intro{font-size:14px}.grid{grid-template-columns:1fr;gap:13px}.card{min-height:209px}.section-head h2{font-size:18px}.category-count{font-size:10px}.search-row input{height:54px}.search-icon{top:16px}.key{top:14px}.pipe{margin:0 4px}.stats{font-size:12px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+:root{color-scheme:dark;--bg:#07141e;--surface:#0e2635;--text:#eff9ff;--sub:#96adbd;--line:#274355;--mint:#85e6cb;--focus:#a1fbe4}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);font:14px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(70% 520px at 90% 0%,#17453c70,transparent 74%),radial-gradient(45% 600px at -5% 42%,#143f5a66,transparent 73%),var(--bg)}
+a{color:inherit}button,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}header{border-bottom:1px solid #29445699;background:#091923dd;backdrop-filter:blur(14px)}.wrap{max-width:1260px;margin:auto;padding-inline:26px}.header-row{height:79px;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{display:flex;align-items:center;gap:13px;text-decoration:none}.brand-symbol{height:46px;width:46px;border:1px solid #39887b;border-radius:15px;background:linear-gradient(125deg,#186353,#153344);display:grid;place-items:center;color:#acf6dd;font-size:24px;font-weight:900}.brand-name{display:block;font-size:15px;letter-spacing:.13em;font-weight:850}.brand-caption{display:block;color:#9bb4c0;font-size:11px;margin-top:2px}.clock{display:flex;align-items:center;gap:9px;color:#9fbaca;font-size:12px;white-space:nowrap}.clock:before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#70ebc4;box-shadow:0 0 12px #70ebc480}
+main{padding-top:52px;padding-bottom:65px}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.18em;color:#87e1ca;text-transform:uppercase;margin:0 0 15px}.hero h1{font-weight:850;letter-spacing:-.045em;font-size:clamp(31px,4.7vw,52px);line-height:1.18;margin:0;max-width:900px}.hero h1 span{color:#89e9d2}.lead{font-size:15px;color:#b3c8d5;max-width:740px;margin:18px 0}.numbers{display:flex;align-items:center;gap:12px;color:#9db6c5;font-size:12px;margin-top:20px}.numbers b{color:#f0faff;font-size:18px}.divider{width:1px;height:25px;background:#305268}
+.tools{margin-top:33px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.searchbox{display:flex;align-items:center;position:relative;flex:1 1 350px;max-width:570px}.searchbox input{width:100%;height:53px;background:#112c3c;color:#fff;border:1px solid #37566a;border-radius:14px;padding:0 48px 0 44px;outline:none}.searchbox input::placeholder{color:#88a4b6}.searchbox input:focus{border-color:#77e2c5;box-shadow:0 0 0 3px #77e2c526}.searchbox svg{width:19px;height:19px;position:absolute;left:15px;color:#9ab8c8}.shortkey{position:absolute;right:13px;border:1px solid #3a5b6d;padding:2px 6px;border-radius:6px;color:#99b0bd;font-size:11px}
+.filters{margin-top:17px;display:flex;flex-wrap:wrap;gap:8px}.filter{padding:9px 13px;border-radius:999px;color:#b4cad7;background:transparent;border:1px solid #345064;font-weight:650;font-size:12px;transition:.15s}.filter:hover{background:#183a4c}.filter.active{color:#092723;background:#8aecd2;border-color:#8aecd2}.filter .count{opacity:.72;margin-left:4px}
+.section{margin-top:45px}.section-head{margin-bottom:16px;display:flex;justify-content:space-between;align-items:end;gap:16px}.section-name{font-size:20px;letter-spacing:-.025em;margin:0;font-weight:800}.section-sub{color:var(--sub);font-size:12px;margin:4px 0 0}.section-num{font-size:12px;color:#8ca8b9;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{--accent:#8be2cb;--shade:#30726533;position:relative;min-width:0;display:flex;flex-direction:column;min-height:207px;padding:20px;border:1px solid #315064ab;border-radius:18px;background:linear-gradient(145deg,#173446,#0d2333 74%);overflow:hidden;isolation:isolate;transition:transform .16s,border-color .16s,box-shadow .16s}
+.card:before{content:"";position:absolute;z-index:-1;width:175px;height:175px;right:-86px;top:-90px;background:var(--shade);border-radius:50%}.card:hover,.card:focus-within{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 12px 24px #0004}
+.card-main{display:flex;flex:1;flex-direction:column;color:inherit;text-decoration:none;min-height:0}.card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.logo{width:55px;height:55px;display:grid;place-items:center;border-radius:16px;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 34%,transparent);background:color-mix(in srgb,var(--accent) 12%,#102635);flex-shrink:0}.logo svg{width:31px;height:31px;stroke-width:1.7;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;fill:none}.logo.mark{font-weight:900;font-size:20px;letter-spacing:-.045em}.logo.mark.long{font-size:13px;letter-spacing:.02em}.badge{color:#a1c2d0;background:#183445;border:1px solid #35576b;border-radius:6px;font-size:9px;font-weight:850;letter-spacing:.055em;padding:4px 6px;max-width:140px;line-height:1.3;text-align:right}.card h3{font-size:16px;line-height:1.34;margin:20px 0 5px;letter-spacing:-.01em;font-weight:760}.card-desc{font-size:12px;color:#aec4d1;margin:0 0 15px;flex:1;line-height:1.5}.card-foot{display:flex;align-items:center;justify-content:space-between;gap:9px;color:#8ca6b6;font-size:11px;border-top:1px solid #2e4d5e8c;padding-top:12px}.host{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.arrow{font-size:19px;color:var(--accent);line-height:1;flex-shrink:0}
+.fav{position:absolute;top:75px;right:19px;width:31px;height:31px;border:1px solid #34586b;background:#0c2635;color:#8faabb;border-radius:9px;display:grid;place-items:center;z-index:2}.fav svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}.fav:hover{color:#fbe2a4;border-color:#d7b66c}.fav.saved{color:#f4d47c;background:#4c412538;border-color:#b49b4e}.fav.saved svg{fill:currentColor}.card-note{display:flex;align-items:start;gap:6px;color:#e5c297;font-size:11px;margin-top:9px}.card-note:before{content:"⚠";flex-shrink:0}
+.empty{display:none;margin-top:30px;border:1px dashed #446679;border-radius:17px;padding:40px 15px;text-align:center;color:#a9c2d0}.empty strong{display:block;color:#f1fbff;margin-bottom:7px;font-size:16px}
+.tip{display:flex;align-items:start;gap:13px;color:#b6cbd5;background:#102a3a;border:1px solid #315063;border-radius:17px;padding:18px 20px;margin-top:48px;font-size:12px}.tip svg{flex-shrink:0;width:22px;height:22px;color:#82e5ca}.tip strong{color:#eaf7fc}
+footer{border-top:1px solid #284456;text-align:center;color:#7f9ba9;padding:24px 12px;font-size:12px}
+@media(max-width:1060px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:740px){.wrap{padding-inline:17px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{min-height:194px;padding:15px}.fav{right:13px;top:67px}.card h3{font-size:15px}.logo{width:50px;height:50px}.section{margin-top:36px}.section-name{font-size:18px}.hero h1{font-size:35px}.lead{font-size:13px}}
+@media(max-width:440px){.brand-symbol{width:43px;height:43px}.brand-name{font-size:12px}.brand-caption{font-size:10px}.clock{font-size:10px}.header-row{height:74px}.hero h1{font-size:31px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:13px;min-height:202px;border-radius:15px}.logo{width:45px;height:45px;border-radius:13px}.logo svg{width:27px;height:27px}.logo.mark{font-size:17px}.logo.mark.long{font-size:11px}.badge{font-size:8px;padding:3px 5px}.card h3{font-size:14px;margin:18px 0 5px}.card-desc{font-size:11px}.card-foot{font-size:10px}.fav{top:62px;right:11px;width:29px;height:29px}.section-sub{font-size:11px}.section-num{font-size:11px}}
+@media(max-width:355px){.grid{grid-template-columns:1fr}.card{min-height:165px}.fav{top:15px;right:15px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
 <body>
-<header class="header">
-  <div class="container topbar">
-    <a class="brand" href="./" aria-label="Trở về trang chủ SAGS Link Hub">
-      <span class="brand-icon" aria-hidden="true">S</span>
-      <span><span class="brand-title">SAGS LINK HUB</span><span class="brand-sub">Trung tâm công cụ làm việc</span></span>
-    </a>
-    <div class="time"><span class="dot" aria-hidden="true"></span><time id="now">Giờ Việt Nam</time></div>
-  </div>
-</header>
-<main class="container">
-  <p class="overline">SAGS / Workplace Dashboard</p>
-  <h1>Mọi công cụ làm việc.<br><em>Chỉ một nơi truy cập.</em></h1>
-  <p class="intro">Không cần nhớ nhiều đường link. Bấm vào bất kỳ biểu tượng nào bên dưới để mở ngay hệ thống bạn cần — trên điện thoại hoặc máy tính.</p>
-  <div class="stats"><strong>07</strong> đường dẫn <span class="pipe" aria-hidden="true"></span><strong>01</strong> trang quản lý</div>
-  <div class="search-row" role="search">
-    <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7" stroke="currentColor" stroke-width="2" fill="none"></circle><path d="m16 16 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-    <input id="search" type="search" placeholder="Tìm ứng dụng, báo cáo, email, chuyến bay..." aria-label="Tìm ứng dụng" autocomplete="off">
-    <span class="key" aria-hidden="true">Ctrl K</span>
-  </div>
-  <div class="filters" role="group" aria-label="Lọc theo nhóm">
-    <button type="button" class="filter active" data-filter="all" aria-pressed="true">Tất cả (7)</button>
-    <button type="button" class="filter" data-filter="sags" aria-pressed="false">Hệ thống SAGS (3)</button>
-    <button type="button" class="filter" data-filter="tools" aria-pressed="false">Công cụ hỗ trợ (4)</button>
-  </div>
-  <section class="group" data-group="sags" aria-labelledby="sags-title">
-    <div class="section-head"><h2 id="sags-title">Hệ thống &amp; dự án SAGS</h2><span class="category-count">03 ứng dụng</span></div>
-    <div class="grid">
-      <a class="card" data-search="manager on duty báo cáo ca trực điều hành quản lý sags" href="https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY" target="_blank" rel="noopener noreferrer" style="--accent:#67e7c3;--tint:rgba(33,193,147,.14)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M9 3h6M8 9h8M8 13h8M8 17h5"></path></svg></span><span class="tag">SAGS</span></div>
-        <h3 class="card-title">Manager On Duty</h3><p class="desc">Báo cáo và quản lý công việc ca trực.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
-      </a>
-      <a class="card" data-search="e report e-report sags báo cáo điện tử" href="https://sagsdieuhanh-gif.github.io/E-REPORT-SAGS" target="_blank" rel="noopener noreferrer" style="--accent:#81b5ff;--tint:rgba(58,108,213,.20)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1Z"></path><path d="M14 3v5h5M8 13h8M8 17h6"></path></svg></span><span class="tag">SAGS</span></div>
-        <h3 class="card-title">E-REPORT SAGS</h3><p class="desc">Truy cập hệ thống báo cáo điện tử.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
-      </a>
-      <a class="card" data-search="sagscxr rns sags cxr-rns cxr rns nghiệp vụ" href="https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/" target="_blank" rel="noopener noreferrer" style="--accent:#ffc67c;--tint:rgba(232,148,64,.15)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 19 18-7-7-2-3-7-3 10-5 2Z"></path><path d="m12 15 2 4M4 21h16"></path></svg></span><span class="tag">SAGS</span></div>
-        <h3 class="card-title">SAGSCXR–RNS</h3><p class="desc">Truy cập ứng dụng nghiệp vụ CXR–RNS.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
-      </a>
-    </div>
-  </section>
-  <section class="group" data-group="tools" aria-labelledby="tools-title">
-    <div class="section-head"><h2 id="tools-title">Công cụ hỗ trợ công việc</h2><span class="category-count">04 tiện ích</span></div>
-    <div class="grid">
-      <a class="card" data-search="flightradar24 flight radar theo dõi chuyến bay máy bay" href="https://www.flightradar24.com/" target="_blank" rel="noopener noreferrer" style="--accent:#f7ce63;--tint:rgba(227,181,60,.14)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m6 15 14-7-6-1-2-4-2 7-4 2Z"></path></svg></span><span class="tag">FLIGHT</span></div>
-        <h3 class="card-title">Flightradar24</h3><p class="desc">Theo dõi chuyến bay và vị trí máy bay.</p><span class="domain">flightradar24.com</span>
-      </a>
-      <a class="card" data-search="mail sags thư điện tử email hộp thư" href="https://mail.sags.vn/" target="_blank" rel="noopener noreferrer" style="--accent:#91cafb;--tint:rgba(74,145,211,.15)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg></span><span class="tag">EMAIL</span></div>
-        <h3 class="card-title">Email SAGS</h3><p class="desc">Mở hộp thư điện tử công việc SAGS.</p><span class="domain">mail.sags.vn</span>
-      </a>
-      <a class="card" data-search="vietjet fs vietjetair bay flight services" href="https://fs.vietjetair.com/" target="_blank" rel="noopener noreferrer" style="--accent:#fd9291;--tint:rgba(217,82,87,.17)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 20 18-8-7-2-3-7-3 10-5 2Z"></path><path d="M8 20h12"></path></svg></span><span class="tag">VIETJET</span></div>
-        <h3 class="card-title">Vietjet FS</h3><p class="desc">Truy cập hệ thống FS của Vietjet Air.</p><span class="domain">fs.vietjetair.com</span>
-      </a>
-      <a class="card" data-search="chatgpt chat gpt ai trí tuệ nhân tạo openai trợ lý" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" style="--accent:#85ead7;--tint:rgba(63,192,167,.15)">
-        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3.8A4.5 4.5 0 0 1 18 6a4.5 4.5 0 0 1 2 7.5 4.5 4.5 0 0 1-5 6.6 4.5 4.5 0 0 1-8-2.1A4.5 4.5 0 0 1 4.2 11a4.5 4.5 0 0 1 5.8-7.2Z"></path><path d="m7 9 5-3 5 3v6l-5 3-5-3V9Zm0 0 10 6m0-6L7 15"></path></svg></span><span class="tag">AI</span></div>
-        <h3 class="card-title">ChatGPT</h3><p class="desc">Hỗ trợ soạn thảo, phân tích và tìm ý tưởng.</p><span class="domain">chatgpt.com</span>
-      </a>
-    </div>
-  </section>
-  <div class="no-results" id="no-results" role="status"><strong>Không tìm thấy công cụ</strong>Hãy thử từ khóa khác hoặc chọn “Tất cả”.</div>
-  <aside class="info">
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10v.5"></path></svg>
-    <span><strong>Mẹo sử dụng:</strong> Lưu trang này vào dấu trang hoặc màn hình chính điện thoại. Mỗi biểu tượng sẽ mở website tương ứng trong tab mới; các hệ thống yêu cầu đăng nhập vẫn sử dụng tài khoản riêng của bạn.</span>
-  </aside>
+<header><div class="wrap header-row">
+<a class="brand" href="./" aria-label="SAGS LINK HUB - về đầu trang"><span class="brand-symbol" aria-hidden="true">S</span><span><span class="brand-name">SAGS LINK HUB</span><span class="brand-caption">Trung tâm công cụ làm việc</span></span></a>
+<span id="clock" class="clock">Giờ Việt Nam</span>
+</div></header>
+<main class="wrap">
+<div class="hero"><p class="eyebrow">SAGS · WORKPLACE DASHBOARD</p><h1>Mọi đường dẫn công việc.<br><span>Chỉ một nơi truy cập.</span></h1>
+<p class="lead">Đã sắp xếp theo từng nhóm công việc để bạn dễ tìm và dễ mở. Chạm vào biểu tượng hoặc tên công cụ để đến đúng trang; bấm ngôi sao để lưu công cụ yêu thích trên thiết bị này.</p>
+<div class="numbers"><b id="total">18</b> đường dẫn <span class="divider"></span><b>05</b> nhóm công việc <span class="divider"></span><b id="saved-number">0</b> yêu thích</div></div>
+<div class="tools"><div class="searchbox" role="search">
+<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/></svg>
+<input id="search" type="search" placeholder="Tìm hãng, công cụ, báo cáo, địa chỉ..." aria-label="Tìm trong các liên kết" autocomplete="off">
+<span class="shortkey" aria-hidden="true">Ctrl K</span></div></div>
+<nav id="filters" class="filters" aria-label="Lọc danh mục"></nav>
+<div id="sections"></div>
+<div id="empty" class="empty" role="status"><strong>Không tìm thấy đường dẫn</strong>Thử từ khóa khác hoặc bấm "Tất cả".</div>
+<div class="tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.5"/></svg><div><strong>Lưu ý truy cập:</strong> Một số hệ thống cần tài khoản hoặc mạng doanh nghiệp mới đăng nhập được. Link <strong>192.168.102.250</strong> dùng mạng nội bộ; link HTTP có thể hiện cảnh báo bảo mật. Trang này chỉ giúp mở đường dẫn, không lưu mật khẩu và không thay đổi dữ liệu trong các hệ thống.</div></div>
 </main>
-<footer>SAGS Link Hub · Trung tâm truy cập công cụ làm việc</footer>
+<footer>SAGS Link Hub · 18 đường dẫn · Lưu trang này vào màn hình chính để truy cập nhanh.</footer>
 <script>
 (function(){
-  "use strict";
-  var search=document.getElementById("search");
-  var buttons=Array.from(document.querySelectorAll(".filter"));
-  var sections=Array.from(document.querySelectorAll(".group"));
-  var empty=document.getElementById("no-results");
-  var selected="all";
-  function normalize(value){return (value||"").toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");}
-  function update(){
-    var q=normalize(search.value.trim()), visible=0;
-    sections.forEach(function(section){
-      var matches=0;
-      section.querySelectorAll(".card").forEach(function(card){
-        var allowed=(selected==="all"||selected===section.dataset.group);
-        var text=normalize((card.dataset.search||"")+" "+card.textContent);
-        var show=allowed && (!q||text.indexOf(q)!==-1);
-        card.hidden=!show;
-        if(show){matches++;visible++;}
-      });
-      section.hidden=matches===0;
-    });
-    empty.style.display=visible?"none":"block";
-  }
-  buttons.forEach(function(button){button.addEventListener("click",function(){
-    selected=button.dataset.filter;
-    buttons.forEach(function(btn){var active=btn===button;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});
-    update();
-  });});
-  search.addEventListener("input",update);
-  window.addEventListener("keydown",function(event){
-    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();search.focus();search.select();}
-    if(event.key==="Escape"&&document.activeElement===search){search.value="";update();search.blur();}
-  });
-  function clock(){
-    try{document.getElementById("now").textContent=new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/Ho_Chi_Minh",weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date())+" · VN";}
-    catch(e){document.getElementById("now").textContent="Giờ Việt Nam";}
-  }
-  clock();setInterval(clock,60000);update();
+"use strict";
+var GROUPS=[{"id":"sags","title":"Ứng dụng SAGS","subtitle":"Truy cập các dự án đang vận hành","symbol":"layers"},{"id":"flight","title":"Điều hành & dữ liệu chuyến bay","subtitle":"Theo dõi hoạt động, CTOT và dữ liệu bay","symbol":"radar"},{"id":"airline","title":"Cổng hãng hàng không","subtitle":"Các hệ thống đối tác và cổng đăng nhập","symbol":"plane"},{"id":"office","title":"Văn phòng & hỗ trợ","subtitle":"Email, lịch họp và trợ lý AI","symbol":"briefcase"},{"id":"network","title":"IP & hệ thống nội bộ","subtitle":"Đường dẫn kỹ thuật và mạng riêng","symbol":"shield"}];
+var ITEMS=[{"id":"manager","group":"sags","name":"Manager On Duty","desc":"Báo cáo và điều hành ca trực SAGS","url":"https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY","brand":"SAGS","icon":"clipboard","color":"#5fe0bf","terms":"manager duty báo cáo ca trực"},{"id":"ereport","group":"sags","name":"E-REPORT SAGS","desc":"Hệ thống báo cáo điện tử SAGS","url":"https://sagsdieuhanh-gif.github.io/E-REPORT-SAGS","brand":"SAGS","icon":"report","color":"#8eb9ff","terms":"e report báo cáo"},{"id":"rns","group":"sags","name":"SAGSCXR–RNS","desc":"Hệ thống nghiệp vụ CXR–RNS","url":"https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/","brand":"SAGS","icon":"plane","color":"#ffd28e","terms":"sags cxr rns nghiệp vụ"},{"id":"atfm","group":"flight","name":"VATM CTOT","desc":"Phân phối CTOT và thông tin ATFM","url":"https://atfm.vatm.vn/CTOTDistributor","brand":"VATM / ATFM","icon":"clockplane","color":"#82e0cf","terms":"vatm atfm ctot điều tiết luồng bay"},{"id":"sunview","group":"flight","name":"Flight360 – Chuyến bay","desc":"Danh sách chuyến bay Sun PhuQuoc Airways","url":"https://flight360.sunphuquocairways.com/flight-360/flight-operations/flight-view?pageSize=20&currentPage=1","brand":"SUN PHUQUOC","icon":"flightboard","color":"#eac17c","terms":"sun phuquoc airways flight view flight operations 360"},{"id":"smis","group":"flight","name":"SMIS – Flight Data","desc":"Truy cập dữ liệu chuyến bay SAGS CXR","url":"https://smis.sagscxr.vn/login?ReturnUrl=%2Fflight-data","brand":"SAGS CXR","icon":"database","color":"#91c6ff","terms":"smis sagscxr flight data dữ liệu bay"},{"id":"fr24","group":"flight","name":"Flightradar24","desc":"Bản đồ theo dõi vị trí máy bay","url":"https://www.flightradar24.com/","brand":"FLIGHT RADAR","icon":"radar","color":"#f8d36b","terms":"radar aircraft flight plane máy bay trực tuyến"},{"id":"sunlogin","group":"airline","name":"Sun PhuQuoc – Đăng nhập","desc":"Cổng đăng nhập Flight360","url":"https://flight360.sunphuquocairways.com/auth/signin","brand":"SUN PHUQUOC","icon":"sun","color":"#f1c786","terms":"sun phu quoc airways flight360 signin"},{"id":"vietjet","group":"airline","name":"Vietjet FS","desc":"Cổng hệ thống FS Vietjet Air","url":"https://fs.vietjetair.com/","brand":"VIETJET","icon":"vj","color":"#ff8d83","terms":"vietjet air fs hệ thống"},{"id":"scoot","group":"airline","name":"Scoot Ground Portal","desc":"Cổng đăng nhập nghiệp vụ mặt đất Scoot","url":"https://os.flyscoot.com/GroundPortal/Login","brand":"SCOOT","icon":"scoot","color":"#f7d763","terms":"flyscoot os groundportal login"},{"id":"vietravel","group":"airline","name":"Vietravel VFM","desc":"Đăng nhập hệ thống VFM","url":"https://vfm.vietravelairlines.vn/Login.aspx","brand":"VIETRAVEL","icon":"vfm","color":"#94c8ff","terms":"vietravel airlines vfm sign in"},{"id":"jinair","group":"airline","name":"Jin Air SSO","desc":"Cổng đăng nhập Jin Air","url":"https://sso.jinair.com/login","brand":"JIN AIR","icon":"jin","color":"#9ae0ba","terms":"jinair jin air sso korea"},{"id":"vistair","group":"airline","name":"Vistair DocuNet","desc":"Đăng nhập tài liệu Vistair / Comply365","url":"https://login.vistair.com/login?service=https%3A%2F%2Fdocunet-online.vistair.com%2Fj_spring_cas_security_check","brand":"VISTAIR","icon":"book","color":"#bcaaff","terms":"docunet comply365 documentation login tài liệu"},{"id":"email","group":"office","name":"Email SAGS","desc":"Hộp thư điện tử công việc","url":"https://mail.sags.vn/","brand":"SAGS MAIL","icon":"mail","color":"#85c7fb","terms":"email thư công việc mail"},{"id":"eoffice","group":"office","name":"eOffice – Lịch họp","desc":"Quản lý lịch họp phòng ban SAGS CXR","url":"https://eoffice.sagscxr.vn/app/meeting-schedule-management/meeting-department","brand":"SAGS CXR","icon":"calendar","color":"#b4a5ff","terms":"eoffice lịch họp meeting department"},{"id":"chatgpt","group":"office","name":"ChatGPT","desc":"Trợ lý AI cho công việc và báo cáo","url":"https://chatgpt.com/","brand":"OPENAI","icon":"sparkle","color":"#8ce4d3","terms":"chat gpt ai hỗ trợ soạn thảo"},{"id":"camera","group":"network","name":"Camera nội bộ","desc":"Trang camera / xem trước trên mạng nội bộ","url":"http://192.168.102.250:82/doc/page/login.asp?_1787447745732&page=preview","brand":"CHỈ MẠNG NỘI BỘ","icon":"camera","color":"#ffa98c","terms":"camera cctv lan local preview 192.168.102.250","warning":"Chỉ truy cập khi kết nối mạng nội bộ phù hợp."},{"id":"ipsite","group":"network","name":"Hệ thống IP 118.69.213.84","desc":"Liên kết theo địa chỉ IP (chưa rõ tên hệ thống)","url":"http://118.69.213.84/","brand":"ĐỊA CHỈ IP","icon":"server","color":"#b4cce2","terms":"ip 118.69.213.84 hệ thống http","warning":"Liên kết HTTP; tránh nhập thông tin nhạy cảm nếu kết nối không bảo mật."}];
+var ICONS={
+clipboard:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5h6M9 10h6m-6 4h6m-6 4h4"/>',
+report:'<path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM14 3v5h5"/><path d="m8 17 3-3 2 1 3-4"/>',
+plane:'<path d="m3 19 18-7-7-2-3-7-3 10-5 2Z"/><path d="M8 20h12"/>',
+clockplane:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2M6 20l3-4"/>',
+flightboard:'<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M9 10v10m3-7 6 3-6 2 1-2-1-3Z"/>',
+database:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/>',
+radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 19 5M3 12h3"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2m0-14-2 2M5 19l2-2"/>',
+book:'<path d="M12 5c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V4c-3-1-6-1-9 1Zm0 0v15"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>',
+calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 10h18M8 15h3m3 0h2"/>',
+sparkle:'<path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/><path d="M18 3v4m-2-2h4"/>',
+camera:'<rect x="3" y="7" width="13" height="11" rx="2"/><path d="m16 11 5-3v9l-5-3M9 18v3M5 21h8"/>',
+server:'<rect x="4" y="3" width="16" height="8" rx="2"/><rect x="4" y="13" width="16" height="8" rx="2"/><path d="M8 7h.01M8 17h.01M12 7h5M12 17h5"/>'
+};
+var MARKS={vj:"VJ",scoot:"S",vfm:"VFM",jin:"LJ"};
+var selected="all",saved=[];
+try{var v=JSON.parse(localStorage.getItem("sags-linkhub-favs-v2")||"[]");if(Array.isArray(v))saved=v.filter(function(id){return ITEMS.some(function(x){return x.id===id;});});}catch(e){}
+var search=document.getElementById("search"),root=document.getElementById("sections"),filterRoot=document.getElementById("filters"),empty=document.getElementById("empty");
+function el(tag,className,text){var node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
+function icon(name){var s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("viewBox","0 0 24 24");s.setAttribute("aria-hidden","true");s.innerHTML=ICONS[name]||ICONS.book;return s;}
+function norm(v){return String(v||"").toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");}
+function createCard(item){
+var card=el("article","card");card.style.setProperty("--accent",item.color);card.style.setProperty("--shade",item.color+"25");card.dataset.id=item.id;
+var a=el("a","card-main");a.href=item.url;a.target="_blank";a.rel="noopener noreferrer";a.setAttribute("aria-label","Mở "+item.name+" trong tab mới");
+var top=el("div","card-top"),logo=el("span","logo"+(MARKS[item.icon]?" mark":""));
+if(MARKS[item.icon]){logo.textContent=MARKS[item.icon];if(MARKS[item.icon].length>2)logo.classList.add("long");}else logo.appendChild(icon(item.icon));
+top.appendChild(logo);top.appendChild(el("span","badge",item.brand));a.appendChild(top);
+a.appendChild(el("h3","",item.name));a.appendChild(el("p","card-desc",item.desc));
+var foot=el("div","card-foot"),host=el("span","host");host.textContent=new URL(item.url).host;foot.appendChild(host);foot.appendChild(el("span","arrow","↗"));a.appendChild(foot);
+if(item.warning)a.appendChild(el("div","card-note",item.warning));
+card.appendChild(a);
+var star=el("button","fav");star.type="button";star.title="Đánh dấu yêu thích: "+item.name;star.setAttribute("aria-label","Đánh dấu yêu thích "+item.name);
+star.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3 6.2 6.8 1-4.9 4.8 1.2 6.8L12 17.6l-6.1 3.2 1.2-6.8-4.9-4.8 6.8-1L12 2Z"/></svg>';
+function showStar(){var on=saved.indexOf(item.id)!==-1;star.classList.toggle("saved",on);star.setAttribute("aria-pressed",String(on));star.title=on?"Bỏ yêu thích":"Đánh dấu yêu thích";}
+star.addEventListener("click",function(){var i=saved.indexOf(item.id);if(i===-1)saved.push(item.id);else saved.splice(i,1);try{localStorage.setItem("sags-linkhub-favs-v2",JSON.stringify(saved));}catch(e){}showStar();filterUpdate();});showStar();card.appendChild(star);return card;
+}
+var cards=[];
+GROUPS.forEach(function(g){
+var section=el("section","section");section.dataset.group=g.id;
+var head=el("div","section-head"),left=el("div"),h=el("h2","section-name",g.title);left.appendChild(h);left.appendChild(el("p","section-sub",g.subtitle));head.appendChild(left);var cnt=el("span","section-num");head.appendChild(cnt);section.appendChild(head);
+var grid=el("div","grid");ITEMS.filter(function(x){return x.group===g.id;}).forEach(function(item){var card=createCard(item);cards.push({item:item,node:card});grid.appendChild(card);});
+section.appendChild(grid);root.appendChild(section);section._count=cnt;
+});
+var filterDefs=[{id:"all",name:"Tất cả",count:ITEMS.length},{id:"fav",name:"★ Yêu thích" }].concat(GROUPS.map(function(g){return{id:g.id,name:g.title,count:ITEMS.filter(function(i){return i.group===g.id;}).length};}));
+filterDefs.forEach(function(f){var b=el("button","filter",f.name);b.type="button";b.dataset.filter=f.id;if(f.count!==undefined)b.appendChild(el("span","count","("+f.count+")"));b.addEventListener("click",function(){selected=f.id;filterUpdate();});filterRoot.appendChild(b);});
+function filterUpdate(){
+var q=norm(search.value.trim()),total=0;document.getElementById("saved-number").textContent=String(saved.length);
+filterRoot.querySelectorAll("button").forEach(function(b){var yes=b.dataset.filter===selected;b.classList.toggle("active",yes);b.setAttribute("aria-pressed",String(yes));});
+root.querySelectorAll(".section").forEach(function(sec){var n=0;cards.forEach(function(c){
+if(c.item.group!==sec.dataset.group)return;
+var item=c.item;
+var searchable=norm(item.name+" "+item.desc+" "+item.brand+" "+item.terms+" "+item.url);
+var allowed=(selected==="all"||selected===item.group||(selected==="fav"&&saved.indexOf(item.id)!==-1));
+var match=allowed&&(!q||searchable.includes(q));c.node.hidden=!match;if(match){n++;total++;}
+});sec.hidden=n===0;sec._count.textContent=n+" liên kết";});empty.style.display=total?"none":"block";
+}
+search.addEventListener("input",filterUpdate);
+window.addEventListener("keydown",function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();search.focus();search.select();}if(e.key==="Escape"&&document.activeElement===search){search.value="";filterUpdate();search.blur();}});
+document.getElementById("total").textContent=String(ITEMS.length);
+function clock(){try{document.getElementById("clock").textContent=new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/Ho_Chi_Minh",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date())+" · VN";}catch(e){document.getElementById("clock").textContent="Giờ Việt Nam";}}clock();setInterval(clock,60000);filterUpdate();
 })();
 </script>
 </body>
