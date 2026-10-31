@@ -21,7 +21,7 @@
      const unknown=rows.filter(x=>!x.aircraft_type).length;
      return {
        observation:unknown?'Theo lịch, chưa ghi nhận A330/B777; còn '+unknown+' chuyến chưa có thông tin loại tàu.':'Theo lịch hiện có chưa ghi nhận tàu A330/B777.',
-       action:'Phòng ĐH theo dõi thay đổi loại tàu; nếu có tàu thân rộng, PVSĐ chuẩn bị thiết bị phù hợp và PVHK bố trí người phục vụ.',
+       action:'Phòng ĐH theo dõi thay đổi loại tàu; nếu có tàu thân rộng, PVSĐ chuẩn bị thiết bị phù hợp; PVHK rà soát người làm thủ tục check-in tại quầy, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo chuyến.',
        owner:'ĐH · PVSĐ · PVHK'
      };
    }
@@ -42,7 +42,7 @@
    const actions=[
     'Phòng ĐH theo dõi sát '+wide.slice(0,4).map(pair).join(', ')+', lưu ý giờ tàu về, vị trí đỗ và tiến độ phục vụ.',
     'Phòng PVSĐ chuẩn bị nhân sự và thiết bị phù hợp tàu thân rộng. Tình hình: '+ktsFlags+'.',
-    'Phòng PVHK chủ động đón khách, cửa ra tàu và xử lý hành lý theo lượng khách dự kiến; lực lượng phục vụ '+flag(pvhk,'widebody_ready')+'.'
+    'Phòng PVHK sắp xếp người làm thủ tục tại quầy check-in, phục vụ cửa boarding và đón, tiễn khách tại tàu bay theo lượng khách dự kiến; tình trạng lực lượng '+flag(pvhk,'widebody_ready')+'.'
    ];
    if(a.length&&b.length)actions.push('Nếu A330/B777 trùng giờ, PVSĐ ưu tiên thiết bị cho chuyến cần phục vụ trước, sau đó điều chuyển cuốn chiếu khi hoàn tất công việc.');
    if(night.length)actions.push('Ca tối chuẩn bị người và thiết bị trước khi tàu về, tránh bị động khi các chuyến tập trung.');

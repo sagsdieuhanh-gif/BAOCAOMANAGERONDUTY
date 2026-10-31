@@ -74,7 +74,7 @@
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.11</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.12</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -198,8 +198,8 @@
      if(win.tight.length)risk+=' Có '+win.tight.length+' cặp quay đầu sát.';
      list.push({type:'peak',unit:'ĐH · PVSĐ · PVHK',title:win.slot+' · Cao điểm',
        desc:risk,action:win.area.length?
-       'PVSĐ chủ động chuẩn bị người/thiết bị trước khi tàu lăn, phối hợp ATC về thứ tự tàu và phép qua đường công vụ theo quy trình. ĐH theo dõi các chuyến ưu tiên.':
-       'ĐH xác định chuyến quay đầu ngắn cần ưu tiên; PVSĐ/PVHK bố trí trước nguồn lực, chỉ điều chuyển sau khi hoàn tất công đoạn.',
+       'PVSĐ chủ động chuẩn bị người, thiết bị trước khi tàu lăn và phối hợp ATC về thứ tự tàu, phép qua đường công vụ theo quy trình. PVHK bố trí nhân sự quầy check-in, cửa boarding và đón, tiễn tại tàu bay theo từng chuyến. ĐH theo dõi các chuyến ưu tiên.':
+       'ĐH xác định các chuyến quay đầu ngắn cần ưu tiên; PVSĐ tập kết người, thiết bị đúng bãi. PVHK rà soát nhân sự làm thủ tục ở quầy check-in, cửa boarding và điểm đón, tiễn tại tàu bay theo các chuyến chồng giờ; chỉ điều người khi công đoạn trước đã hoàn tất.',
        weight:win.score});
    }
    list.push(...deficits(f));
@@ -293,7 +293,7 @@
    const focus={
      DH:'Chỉ thêm nội dung thay đổi từ AOC, yêu cầu riêng của hãng/charter và đề xuất cần chỉ đạo.',
      KTS:'Xác nhận người, GSE và phương án chuẩn bị trước khi tàu lăn; chú ý luồng đường công vụ K2/K3.',
-     PVHK:'Xác nhận quân số đội đến/đi và thay đổi thực tế có ảnh hưởng quầy, gate, boarding.',
+     PVHK:'Bố trí người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo lịch chuyến; nhập quân số thực có hoặc thay đổi ảnh hưởng.',
      KHO:'Xác nhận booking hàng đi, số KG/PCS và giờ sẵn sàng; không tự kết luận chuyến chưa nhập là không có hàng.',
      QA_IT:'Chỉ ghi vấn đề đã xác nhận về an toàn, FOD, thời tiết hoặc tồn tại ảnh hưởng ca.'
    };

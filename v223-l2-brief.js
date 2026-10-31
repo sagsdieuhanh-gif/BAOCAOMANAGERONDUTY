@@ -60,7 +60,7 @@
      push('peak','Điều phối trong giờ cao điểm',
        'Trong khoảng '+clock(topW.start)+'–'+clock(topW.start+30)+
          ', dự kiến có '+topW.total+' cặp cùng phục vụ ('+flights+').'+issue+priority,
-       'ĐH thống nhất thứ tự tiếp nhận chuyến; PVSĐ và PVHK xử lý dứt điểm các công đoạn của chuyến có giờ quay đầu sát, đồng thời giữ người và phương tiện cho những chuyến còn chồng lấn. Chỉ điều chuyển sang lượt kế tiếp khi công đoạn trước đã hoàn tất, có đủ thời gian tiếp cận bãi và xác nhận thiết bị khả dụng.',
+       'ĐH thống nhất thứ tự ưu tiên các chuyến; PVSĐ chủ động tổ và trang thiết bị tại bãi. PVHK phân bổ người theo giờ mở quầy check-in, phục vụ cửa boarding/gate và đón khách đến, tiễn khách đi tại tàu bay; không rút người khỏi vị trí còn đang phục vụ. Chỉ điều chuyển người, thiết bị sau khi công đoạn trước hoàn tất và bảo đảm thời gian tiếp cận bãi.',
        'ĐH · PVSĐ · PVHK',3);
    }
    const bays=(op.stand||[]).filter(x=>['K2','K3'].includes(x.zone));
@@ -94,7 +94,7 @@
        ' dự kiến về muộn, có thể kéo lùi tiến độ quay đầu.');
      push('gate','Gate, boarding và thời điểm tàu đến',
        phrases.join(' '),
-       'PVHK đối chiếu trực tiếp giờ boarding và bố trí gate từng chuyến với AOC, nhất là khi giờ đến được cập nhật muộn hơn lịch. Ưu tiên giữ lực lượng tại gate cho các chuyến sát nhau; trường hợp không thể tách thời gian boarding thì báo ĐH thống nhất phương án điều chỉnh gate hoặc bổ sung nhân sự trước giờ mở cửa.',
+       'PVHK đối chiếu gate và giờ boarding từng chuyến với AOC, phân công nhân sự kiểm tra thẻ lên tàu và hướng dẫn khách tại cửa boarding; đồng thời giữ người làm thủ tục ở quầy check-in và đội đón, tiễn khách tại tàu bay. Khi hai chuyến chồng giờ boarding, rà soát điều tiết nhân sự thực có; nếu không đáp ứng thì báo ĐH phối hợp thống nhất phương án trước giờ mở cửa.',
        'PVHK · ĐH · AOC',verified.length?4:3);
    }
    const byBooking=deps.filter(x=>!x.ferry&&Number.isFinite(x.booking_sum)&&x.booking_sum>0)
@@ -125,8 +125,8 @@
      push('checkin','Booking, quầy check-in và nhân sự PVHK',
        bookings+counter,
        checkIssue?.checkin?.shortage>0?
-        'PVHK cần rà lại ca và chuyển bớt quân số từ công đoạn ít áp lực sang đội check-in ở khung trên; trường hợp không còn lực lượng dự phòng, đề nghị ĐH phối hợp bố trí tăng cường trước thời điểm mở quầy. Việc chuyển người phải giữ đủ lực lượng boarding và chuyến đến đang phục vụ.':
-        'PVHK bố trí quân số theo các quầy đang mở đồng thời, không chỉ theo tổng người của cả ca; theo dõi lượng khách làm thủ tục thực tế để điều chỉnh khi booking thay đổi. ĐH yêu cầu làm rõ các định mức hoặc phân bổ theo vị trí còn thiếu trước khi nhận định đủ nhân lực.',
+        'PVHK bố trí người trực quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo từng chuyến. Khi thiếu người ở quầy, rà lại thời gian mở/đóng quầy để điều tiết từ công đoạn ít áp lực nếu thực tế cho phép; hoặc báo ĐH phối hợp tăng cường. Không rút người ở công đoạn đang phục vụ chỉ dựa vào tổng quân số ca.':
+        'PVHK phân người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo giờ từng chuyến. Theo dõi số quầy đang mở và lượng khách thực tế để điều tiết, nhưng không rút người khỏi công đoạn đang phục vụ. ĐH yêu cầu xác nhận định mức và phân bổ từng vị trí trước khi nhận định đủ nhân lực.',
        'PVHK · ĐH',checkIssue?.checkin?.shortage>0?5:2);
    }
    const shortages=windows.filter(w=>w.total>0&&(
@@ -171,7 +171,7 @@
      push('wide','Tàu thân rộng và chuyến cần chuẩn bị riêng',
        'Lịch Lần 2 có '+wide.length+' lượt/cặp liên quan A330 hoặc B777: '+focus.join(', ')+'.'+
        (wideNight?' Có chuyến rơi vào ca tối, cần rà lại khả năng phối hợp với các chuyến lân cận.':''),
-       'PVSĐ xác nhận loại xe thang, khả năng tiếp cận tàu và tổ bốc xếp phù hợp từng đăng bạ; PVHK tính quầy, gate, đội phục vụ khách theo booking và yêu cầu hãng. ĐH hạn chế điều cùng một bộ thiết bị sang hai chuyến thân rộng sát nhau khi chưa đủ thời gian quay vòng.',
+       'PVSĐ xác nhận loại xe thang, khả năng tiếp cận tàu và tổ bốc xếp phù hợp từng đăng bạ; PVHK rà soát nhân sự làm thủ tục ở quầy, boarding tại gate và đón, tiễn khách tại tàu bay theo booking, giờ bay và yêu cầu hãng. ĐH hạn chế điều cùng một bộ thiết bị sang hai chuyến thân rộng sát nhau khi chưa đủ thời gian quay vòng.',
        'PVSĐ · PVHK · ĐH',3);
    }
    const cargo=(c.cargoPlans||[]).filter(x=>x.flight_no);
@@ -206,7 +206,7 @@
        'Lịch cập nhật có '+distinct.length+(changes.length>distinct.length?' trong số '+changes.length:'')+
        ' thay đổi cần kiểm tra lại kế hoạch, gồm '+
        distinct.map(x=>x.flight+' ('+x.type+')').join(', ')+'.',
-       'ĐH thông báo đúng các thay đổi có tác động tới giờ tập kết nhân sự, vị trí đỗ hoặc gate cho PVHK và PVSĐ. Phòng liên quan rà lại kế hoạch xe, quầy và phân người; tránh giữ phương án phân bổ của Lần 1 khi giờ hoặc bãi đã điều chỉnh.',
+       'ĐH thông báo thay đổi giờ, bãi đỗ hoặc gate cho PVHK và PVSĐ. PVHK cập nhật lịch trực quầy check-in, bố trí người tại cửa boarding và đội đón, tiễn khách ở tàu bay; PVSĐ rà lại vị trí tập kết người, thiết bị. Không giữ phương án Lần 1 khi nguồn lịch Lần 2 đã thay đổi.',
        'ĐH · PVHK · PVSĐ',3);
    }
    if(!entries.length){
