@@ -477,7 +477,7 @@
        details['pvb_'+k+'_required']='';
      }
    }
-   let issue=null,cargo=null,gseChanges=[];
+   let issue=null,cargo=[],gseChanges=[];
    if(u==='KTS'){
      const id=page.querySelector('[data-v300-issue="id"]')?.value.trim()||'';
      const fault=page.querySelector('[data-v300-issue="fault"]')?.value.trim()||'';
@@ -501,23 +501,32 @@
      }
    }
    if(u==='KHO'){
-     const flight_no=page.querySelector('[data-v300-cargo="flight"]')?.value.trim().toUpperCase()||'';
-     const kg=page.querySelector('[data-v300-cargo="kg"]')?.value.trim()||'';
-     const pcs=page.querySelector('[data-v300-cargo="pcs"]')?.value.trim()||'';
-     const ready=page.querySelector('[data-v300-cargo="ready"]')?.value.trim()||'';
-     if(flight_no){
-       if(!/^[A-Z0-9]{2,20}$/.test(flight_no)||!kg)return status('Kho: nhập đúng số hiệu và booking KG đã xác nhận.',true);
-       const weight=Number(kg),qty=pcs?Number(pcs):null;
-       if(!Number.isFinite(weight)||weight<0||qty!=null&&(!Number.isInteger(qty)||qty<0))return status('Booking KG/PCS không hợp lệ.',true);
+     const seen=new Set(),available=new Set(dataRows().filter(x=>x.no&&!x.ferry).map(x=>String(x.no).toUpperCase().replace(/^##/,'')));
+     for(const row of page.querySelectorAll('[data-v300-cargo-row]')){
+       const flight_no=(row.querySelector('[data-v300-cargo="flight"]')?.value||'').trim().toUpperCase().replace(/^##/,''),
+         kg=(row.querySelector('[data-v300-cargo="kg"]')?.value||'').trim(),
+         pcs=(row.querySelector('[data-v300-cargo="pcs"]')?.value||'').trim(),
+         ready=(row.querySelector('[data-v300-cargo="ready"]')?.value||'').trim();
+       if(!flight_no&&!kg&&!pcs&&!ready)continue;
+       if(!/^[A-Z0-9]{2,20}$/.test(flight_no)||!kg)return status('Kho: mỗi dòng cần số hiệu chuyến và KG được xác nhận.',true);
+       if(available.size&&!available.has(flight_no))return status('Kho: chuyến '+flight_no+' không có trong lịch đi; vui lòng kiểm tra.',true);
+       if(seen.has(flight_no))return status('Kho: chuyến '+flight_no+' bị nhập trùng.',true);
+       seen.add(flight_no);
+       const weight=Number(kg),qty=pcs===''?null:Number(pcs);
+       if(!Number.isFinite(weight)||weight<0||(qty!=null&&(!Number.isInteger(qty)||qty<0)))
+         return status('Kho: KG phải là số không âm; PCS nếu nhập phải là số nguyên không âm.',true);
        const ready_by_min=ready?Number(ready.split(':')[0])*60+Number(ready.split(':')[1]):null;
-       cargo={service_date:day,flight_no,cargo_kg:weight,cargo_pcs:qty,ready_by_min,
-         plan_note:'',updated_by:user().id,updated_at:now};
+       const original=(state.cargo||[]).find(x=>x.flight_no===flight_no);
+       if(original&&Number(original.cargo_kg)===weight&&Number(original.cargo_pcs??-1)===Number(qty??-1)&&
+          Number(original.ready_by_min??-1)===Number(ready_by_min??-1))continue;
+       cargo.push({service_date:day,flight_no,cargo_kg:weight,cargo_pcs:qty,ready_by_min,
+         plan_note:original?.plan_note||'',updated_by:user().id,updated_at:now});
      }
    }
    const noException=!!page.querySelector('[data-v300-no-exception]')?.checked;
    if(noException)details.no_new_exceptions='YES';
    else details.no_new_exceptions='';
-   if(!noException&&!items.length&&!issue&&!cargo&&!gseChanges.length&&
+   if(!noException&&!items.length&&!issue&&!cargo.length&&!gseChanges.length&&
       !(noteFields[u]||[]).some(([key])=>details[key]))return status('Chưa có dữ liệu để xác nhận. Có thể quay lại khi có nguồn.',true);
    saving=true; const saveBtn=page.querySelector('[data-v300-command="save"]');
    if(saveBtn)saveBtn.disabled=true;status('Đang lưu và kiểm tra các nguồn đã cập nhật…');
@@ -526,7 +535,7 @@
      if(items.length)await write(db().from('ops_staff_capacity').upsert(items,{onConflict:'service_date,unit,role_code,shift'}),'Quân số');
      if(gseChanges.length)await write(db().from('ops_gse_capacity').upsert(gseChanges,{onConflict:'service_date,code'}),'GSE');
      if(issue)await write(db().from('ops_gse_issues').upsert(issue,{onConflict:'service_date,equipment_id'}),'Thiết bị hạn chế');
-     if(cargo)await write(db().from('ops_warehouse_cargo_plan').upsert(cargo,{onConflict:'service_date,flight_no'}),'Kho hàng');
+     if(cargo.length)await write(db().from('ops_warehouse_cargo_plan').upsert(cargo,{onConflict:'service_date,flight_no'}),'Kho hàng');
      const old=getUnitPlan(u);
      await write(db().from('ops_unit_forecasts').upsert({
        service_date:day,unit:u,details,status:'CONFIRMED',revision:(old?.revision||0)+1,
@@ -561,6 +570,7 @@
    const route=e.target.closest('[data-v300-route]');if(route){go(route.dataset.v300Route);return}
    const command=e.target.closest('[data-v300-command]');if(!command)return;
    const cmd=command.dataset.v300Command;
+   if(cmd==='add-cargo'){$('v311CargoBody')?.insertAdjacentHTML('beforeend',cargoEntryRow());return;}
    if(cmd==='refresh')refresh();
    if(cmd==='save')saveDepartment(command.dataset.unit);
    if(cmd==='copy-previous')copyPrevious(command.dataset.unit);
