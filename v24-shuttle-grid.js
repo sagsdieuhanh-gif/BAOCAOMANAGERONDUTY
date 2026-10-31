@@ -183,7 +183,7 @@
    return '<div class="v24-wrap v307-compact" data-v24-active="'+who+'" data-v307-render="clock-sorted"><div class="v24-heading">'+
      '<div><h2>XE GIAO CA</h2><p>GIỜ CHẠY · SỐ NGƯỜI · GỢI Ý XE</p></div>'+
      '<div class="v24-access">'+(editablePart?'NHẬP: '+activeField:'CHỈ XEM')+'</div></div>'+
-     vehicleGuide()+makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
+     makeGrid('NHA_CXR',assemble(rows,lines),who)+makeGrid('CXR_NHA',assemble(rows,lines),who)+
      (editablePart?'<div class="v214-actions"><span>Lưu số người của phòng ở cả hai chiều xe và lý do xe bổ sung đã chỉnh sửa.</span><button type="button" class="primary" data-v24-save-all>LƯU TẤT CẢ THAY ĐỔI</button></div>':'')+
      '<p class="v24-footer">Xe đề xuất theo đúng số người của từng giờ; sức chứa của các xe không được thấp hơn số người đã nhập. TẠM TÍNH khi chưa đủ 4 phòng; Điều hành quyết định điều xe.</p>'+
      '<div class="v24-status" role="status"></div></div>';
