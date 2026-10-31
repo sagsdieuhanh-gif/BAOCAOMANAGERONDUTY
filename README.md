@@ -122,3 +122,8 @@
 - Kho hàng nhập nhiều chuyến có booking xác nhận trên cùng một bảng, lưu cùng lúc; các thông tin không xác nhận để trống, không coi bằng 0.
 - Xe giao ca: bảng nhập chỉ có giờ, 4 phòng và tổng; không hiển thị ảnh/gợi ý xe. Hình xe trên ảnh PNG/PDF thu nhỏ. CXR→NHA có 16:30, 18:30, 02:00 và 08:15 ngày hôm sau; không có chuyến 08:30 trong ngày.
 - Hướng dẫn cập nhật: [HDSD_MANAGER_V3.11.md](HDSD_MANAGER_V3.11.md).
+
+### V3.12 · Phân công PVHK đúng công đoạn
+
+- Báo cáo Lần 1/Lần 2: PVHK gồm **quầy làm thủ tục check-in, gate/boarding, đón khách chuyến đến và tiễn khách chuyến đi tại tàu bay**. Phương án diễn đạt theo lịch chuyến, giờ cao điểm và nguồn nhân sự xác nhận, không thu gọn thành chỉ “đón, tiễn khách”.
+- Xem [HDSD_MANAGER_V3.12.md](HDSD_MANAGER_V3.12.md) để biết quy tắc diễn giải và các trường hợp cao điểm/đổi giờ/bãi.
