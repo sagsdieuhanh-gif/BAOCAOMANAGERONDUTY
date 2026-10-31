@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07131e">
+<meta name="description" content="SAGS Link Hub - truy cập tập trung các hệ thống và công cụ làm việc.">
+<title>SAGS Link Hub | Trung tâm công cụ làm việc</title>
+<style>
+:root{color-scheme:dark;--bg:#07131e;--txt:#f0f7fc;--muted:#93adbd;--line:rgba(183,223,245,.14);--mint:#70e0c2}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:radial-gradient(900px 520px at 92% -8%,rgba(45,181,149,.16),transparent 70%),radial-gradient(760px 570px at 2% 40%,rgba(30,106,160,.14),transparent 68%),var(--bg);color:var(--txt)}
+a{color:inherit}
+.container{max-width:1180px;margin:auto;padding-inline:24px}
+.header{border-bottom:1px solid var(--line);background:rgba(5,17,28,.72);backdrop-filter:blur(12px)}
+.topbar{height:83px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:13px;text-decoration:none}
+.brand-icon{display:grid;place-items:center;width:47px;height:47px;border-radius:15px;background:linear-gradient(135deg,#145b50,#123048);border:1px solid #3d9e8d;color:#a2f8e2;font-size:25px;font-weight:850;box-shadow:0 10px 25px #0002}
+.brand-title{display:block;letter-spacing:.11em;font-size:15px;font-weight:850}
+.brand-sub{display:block;font-size:12px;color:#9cb6c5;margin-top:1px;letter-spacing:.01em}
+.time{color:#a2becd;font-size:13px;display:flex;gap:9px;align-items:center}
+.dot{height:8px;width:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 12px #4fe9c995}
+main{padding-top:57px;padding-bottom:60px}
+.overline{font-size:12px;color:#74dec4;font-weight:760;text-transform:uppercase;letter-spacing:.21em;margin:0 0 17px}
+h1{font-size:clamp(35px,5vw,59px);font-weight:850;letter-spacing:-.05em;line-height:1.14;margin:0;max-width:850px}
+h1 em{font-style:normal;background:linear-gradient(105deg,#70e3c3,#a8e8f1);background-clip:text;-webkit-background-clip:text;color:transparent}
+.intro{max-width:720px;margin:23px 0 24px;font-size:16px;color:#aec3d0}
+.stats{display:flex;align-items:center;gap:10px;font-size:13px;color:#a5bfcc}
+.stats strong{font-size:20px;color:#f8ffff}
+.pipe{width:1px;height:27px;background:var(--line);margin:0 9px}
+.search-row{margin-top:37px;max-width:670px;position:relative}
+.search-row input{width:100%;height:57px;border-radius:16px;border:1px solid #2c4c60;background:#102738;color:white;outline:none;padding:0 83px 0 50px;font:inherit;box-shadow:0 14px 35px #0002}
+.search-row input:focus{border-color:#66dabc;box-shadow:0 0 0 4px #66dabc16}
+.search-row input::placeholder{color:#879fb0}
+.search-icon{position:absolute;left:17px;top:18px;width:21px;height:21px;color:#91adbb;pointer-events:none}
+.key{position:absolute;right:15px;top:16px;color:#91aabb;font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 7px;pointer-events:none}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}
+.filter{border:1px solid var(--line);border-radius:100px;background:transparent;color:#bad0dc;font:650 13px system-ui,-apple-system,"Segoe UI",sans-serif;padding:10px 15px;cursor:pointer;transition:background .2s,border-color .2s}
+.filter.active{background:#7de9cb;color:#08221f;border-color:#7de9cb}
+.filter:hover:not(.active){background:#182f40;border-color:#6bb7a9}
+section{margin-top:43px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
+h2{font-size:20px;font-weight:760;letter-spacing:-.025em;margin:0}
+.category-count{font-size:11px;color:#86a5b5;letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.card{--accent:#7ce6cb;--tint:rgba(54,174,152,.15);display:flex;position:relative;flex-direction:column;isolation:isolate;min-height:233px;overflow:hidden;padding:23px;border:1px solid var(--line);border-radius:21px;background:linear-gradient(140deg,#153043,#0b1c2c);text-decoration:none;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card:before{content:"";position:absolute;z-index:-1;top:-85px;right:-65px;width:210px;height:210px;border-radius:100%;background:var(--tint)}
+.card:hover,.card:focus-visible{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 20px 32px #0004}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start}
+.icon-box{width:61px;height:61px;display:grid;place-items:center;border-radius:18px;color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,#102535);border:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.icon-box svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-box span{font-size:27px;font-weight:850;letter-spacing:-.07em;line-height:1}
+.tag{color:#abc3d0;border:1px solid var(--line);border-radius:7px;padding:4px 8px;letter-spacing:.08em;font-size:10px;font-weight:800}
+.card-title{font-size:20px;font-weight:790;letter-spacing:-.02em;margin:22px 0 4px;display:flex;align-items:center;gap:9px;line-height:1.3}
+.card-title:after{content:"↗";font-size:20px;color:var(--accent);font-weight:400;transition:transform .2s}
+.card:hover .card-title:after{transform:translate(3px,-3px)}
+.desc{font-size:13px;color:#9eb6c4;margin:6px 0 19px;flex:1}
+.domain{font-size:11px;color:#7898a9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.no-results{display:none;padding:39px 20px;margin-top:24px;text-align:center;border:1px dashed #486272;border-radius:16px;color:#a7c0d0}
+.no-results strong{display:block;color:#e9f6fc;font-size:17px;margin-bottom:5px}
+.info{display:flex;align-items:flex-start;gap:12px;padding:19px 20px;border:1px solid var(--line);background:#0d2434a8;border-radius:17px;margin-top:47px;color:#acc3d0;font-size:13px}
+.info svg{flex-shrink:0;width:21px;height:21px;color:#70e0c2}
+footer{padding:25px;text-align:center;color:#7e9aa9;font-size:12px;border-top:1px solid var(--line)}
+:focus-visible{outline:3px solid #80edca;outline-offset:3px}
+[hidden]{display:none!important}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.container{padding-inline:17px}.topbar{height:76px}.brand-title{font-size:13px}.brand-sub{font-size:11px}.time{font-size:11px}main{padding-top:40px}.intro{font-size:14px}.grid{grid-template-columns:1fr;gap:13px}.card{min-height:209px}.section-head h2{font-size:18px}.category-count{font-size:10px}.search-row input{height:54px}.search-icon{top:16px}.key{top:14px}.pipe{margin:0 4px}.stats{font-size:12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="container topbar">
+    <a class="brand" href="./" aria-label="Trở về trang chủ SAGS Link Hub">
+      <span class="brand-icon" aria-hidden="true">S</span>
+      <span><span class="brand-title">SAGS LINK HUB</span><span class="brand-sub">Trung tâm công cụ làm việc</span></span>
+    </a>
+    <div class="time"><span class="dot" aria-hidden="true"></span><time id="now">Giờ Việt Nam</time></div>
+  </div>
+</header>
+<main class="container">
+  <p class="overline">SAGS / Workplace Dashboard</p>
+  <h1>Mọi công cụ làm việc.<br><em>Chỉ một nơi truy cập.</em></h1>
+  <p class="intro">Không cần nhớ nhiều đường link. Bấm vào bất kỳ biểu tượng nào bên dưới để mở ngay hệ thống bạn cần — trên điện thoại hoặc máy tính.</p>
+  <div class="stats"><strong>07</strong> đường dẫn <span class="pipe" aria-hidden="true"></span><strong>01</strong> trang quản lý</div>
+  <div class="search-row" role="search">
+    <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="7" stroke="currentColor" stroke-width="2" fill="none"></circle><path d="m16 16 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+    <input id="search" type="search" placeholder="Tìm ứng dụng, báo cáo, email, chuyến bay..." aria-label="Tìm ứng dụng" autocomplete="off">
+    <span class="key" aria-hidden="true">Ctrl K</span>
+  </div>
+  <div class="filters" role="group" aria-label="Lọc theo nhóm">
+    <button type="button" class="filter active" data-filter="all" aria-pressed="true">Tất cả (7)</button>
+    <button type="button" class="filter" data-filter="sags" aria-pressed="false">Hệ thống SAGS (3)</button>
+    <button type="button" class="filter" data-filter="tools" aria-pressed="false">Công cụ hỗ trợ (4)</button>
+  </div>
+  <section class="group" data-group="sags" aria-labelledby="sags-title">
+    <div class="section-head"><h2 id="sags-title">Hệ thống &amp; dự án SAGS</h2><span class="category-count">03 ứng dụng</span></div>
+    <div class="grid">
+      <a class="card" data-search="manager on duty báo cáo ca trực điều hành quản lý sags" href="https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY" target="_blank" rel="noopener noreferrer" style="--accent:#67e7c3;--tint:rgba(33,193,147,.14)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"></rect><path d="M9 3h6M8 9h8M8 13h8M8 17h5"></path></svg></span><span class="tag">SAGS</span></div>
+        <h3 class="card-title">Manager On Duty</h3><p class="desc">Báo cáo và quản lý công việc ca trực.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
+      </a>
+      <a class="card" data-search="e report e-report sags báo cáo điện tử" href="https://sagsdieuhanh-gif.github.io/E-REPORT-SAGS" target="_blank" rel="noopener noreferrer" style="--accent:#81b5ff;--tint:rgba(58,108,213,.20)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h1Z"></path><path d="M14 3v5h5M8 13h8M8 17h6"></path></svg></span><span class="tag">SAGS</span></div>
+        <h3 class="card-title">E-REPORT SAGS</h3><p class="desc">Truy cập hệ thống báo cáo điện tử.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
+      </a>
+      <a class="card" data-search="sagscxr rns sags cxr-rns cxr rns nghiệp vụ" href="https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/" target="_blank" rel="noopener noreferrer" style="--accent:#ffc67c;--tint:rgba(232,148,64,.15)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 19 18-7-7-2-3-7-3 10-5 2Z"></path><path d="m12 15 2 4M4 21h16"></path></svg></span><span class="tag">SAGS</span></div>
+        <h3 class="card-title">SAGSCXR–RNS</h3><p class="desc">Truy cập ứng dụng nghiệp vụ CXR–RNS.</p><span class="domain">sagsdieuhanh-gif.github.io</span>
+      </a>
+    </div>
+  </section>
+  <section class="group" data-group="tools" aria-labelledby="tools-title">
+    <div class="section-head"><h2 id="tools-title">Công cụ hỗ trợ công việc</h2><span class="category-count">04 tiện ích</span></div>
+    <div class="grid">
+      <a class="card" data-search="flightradar24 flight radar theo dõi chuyến bay máy bay" href="https://www.flightradar24.com/" target="_blank" rel="noopener noreferrer" style="--accent:#f7ce63;--tint:rgba(227,181,60,.14)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m6 15 14-7-6-1-2-4-2 7-4 2Z"></path></svg></span><span class="tag">FLIGHT</span></div>
+        <h3 class="card-title">Flightradar24</h3><p class="desc">Theo dõi chuyến bay và vị trí máy bay.</p><span class="domain">flightradar24.com</span>
+      </a>
+      <a class="card" data-search="mail sags thư điện tử email hộp thư" href="https://mail.sags.vn/" target="_blank" rel="noopener noreferrer" style="--accent:#91cafb;--tint:rgba(74,145,211,.15)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg></span><span class="tag">EMAIL</span></div>
+        <h3 class="card-title">Email SAGS</h3><p class="desc">Mở hộp thư điện tử công việc SAGS.</p><span class="domain">mail.sags.vn</span>
+      </a>
+      <a class="card" data-search="vietjet fs vietjetair bay flight services" href="https://fs.vietjetair.com/" target="_blank" rel="noopener noreferrer" style="--accent:#fd9291;--tint:rgba(217,82,87,.17)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 20 18-8-7-2-3-7-3 10-5 2Z"></path><path d="M8 20h12"></path></svg></span><span class="tag">VIETJET</span></div>
+        <h3 class="card-title">Vietjet FS</h3><p class="desc">Truy cập hệ thống FS của Vietjet Air.</p><span class="domain">fs.vietjetair.com</span>
+      </a>
+      <a class="card" data-search="chatgpt chat gpt ai trí tuệ nhân tạo openai trợ lý" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" style="--accent:#85ead7;--tint:rgba(63,192,167,.15)">
+        <div class="card-head"><span class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 3.8A4.5 4.5 0 0 1 18 6a4.5 4.5 0 0 1 2 7.5 4.5 4.5 0 0 1-5 6.6 4.5 4.5 0 0 1-8-2.1A4.5 4.5 0 0 1 4.2 11a4.5 4.5 0 0 1 5.8-7.2Z"></path><path d="m7 9 5-3 5 3v6l-5 3-5-3V9Zm0 0 10 6m0-6L7 15"></path></svg></span><span class="tag">AI</span></div>
+        <h3 class="card-title">ChatGPT</h3><p class="desc">Hỗ trợ soạn thảo, phân tích và tìm ý tưởng.</p><span class="domain">chatgpt.com</span>
+      </a>
+    </div>
+  </section>
+  <div class="no-results" id="no-results" role="status"><strong>Không tìm thấy công cụ</strong>Hãy thử từ khóa khác hoặc chọn “Tất cả”.</div>
+  <aside class="info">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6m0-10v.5"></path></svg>
+    <span><strong>Mẹo sử dụng:</strong> Lưu trang này vào dấu trang hoặc màn hình chính điện thoại. Mỗi biểu tượng sẽ mở website tương ứng trong tab mới; các hệ thống yêu cầu đăng nhập vẫn sử dụng tài khoản riêng của bạn.</span>
+  </aside>
+</main>
+<footer>SAGS Link Hub · Trung tâm truy cập công cụ làm việc</footer>
+<script>
+(function(){
+  "use strict";
+  var search=document.getElementById("search");
+  var buttons=Array.from(document.querySelectorAll(".filter"));
+  var sections=Array.from(document.querySelectorAll(".group"));
+  var empty=document.getElementById("no-results");
+  var selected="all";
+  function normalize(value){return (value||"").toLocaleLowerCase("vi").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d");}
+  function update(){
+    var q=normalize(search.value.trim()), visible=0;
+    sections.forEach(function(section){
+      var matches=0;
+      section.querySelectorAll(".card").forEach(function(card){
+        var allowed=(selected==="all"||selected===section.dataset.group);
+        var text=normalize((card.dataset.search||"")+" "+card.textContent);
+        var show=allowed && (!q||text.indexOf(q)!==-1);
+        card.hidden=!show;
+        if(show){matches++;visible++;}
+      });
+      section.hidden=matches===0;
+    });
+    empty.style.display=visible?"none":"block";
+  }
+  buttons.forEach(function(button){button.addEventListener("click",function(){
+    selected=button.dataset.filter;
+    buttons.forEach(function(btn){var active=btn===button;btn.classList.toggle("active",active);btn.setAttribute("aria-pressed",String(active));});
+    update();
+  });});
+  search.addEventListener("input",update);
+  window.addEventListener("keydown",function(event){
+    if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="k"){event.preventDefault();search.focus();search.select();}
+    if(event.key==="Escape"&&document.activeElement===search){search.value="";update();search.blur();}
+  });
+  function clock(){
+    try{document.getElementById("now").textContent=new Intl.DateTimeFormat("vi-VN",{timeZone:"Asia/Ho_Chi_Minh",weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date())+" · VN";}
+    catch(e){document.getElementById("now").textContent="Giờ Việt Nam";}
+  }
+  clock();setInterval(clock,60000);update();
+})();
+</script>
+</body>
+</html>
