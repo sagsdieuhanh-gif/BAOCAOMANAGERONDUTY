@@ -38,8 +38,7 @@
   const roleRows=staff.filter(x=>x.confirmed_at&&num(x.quantity)!=null);
   const planMap=new Map((unitPlans||[]).filter(x=>x.status==='CONFIRMED').map(x=>[x.unit,x.details||{}]));
   const cargoMap=new Map((cargoPlans||[]).map(x=>[String(x.flight_no||'').toUpperCase(),x]));
-  const source=(operational?.windows||[]).map(x=>x.start);
-  const ticks=source.length?source:Array.from({length:96},(_,i)=>i*30);
+  const ticks=Array.from({length:96},(_,i)=>i*30);
   const events=[],unresolved=new Set(),windows=[];
   const serviceM=root.SagsOpsForecastV219?.serviceM;
   for(const f of rows){
