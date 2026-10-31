@@ -45,8 +45,16 @@
     details:best.seats+' ghế · dư '+best.spare+' ghế'};
  }
  function isDefault(direction,minute){return defaults.some(x=>x.direction===direction&&x.departure_min===minute)}
- function order(records){return [...records].sort((a,b)=>
-  (a.direction===b.direction?0:a.direction==='NHA_CXR'?-1:1)
-  ||a.departure_min-b.departure_min);}
- root.SagsShuttleModel={defaults,directionLabel,clock,parseClock,isDefault,order,suggestVehicles};
+ // Thứ tự thời gian thực tế: theo chiều xe, ngày (+1), phút chạy, dòng xe bổ sung.
+ // Không chia giờ mặc định và giờ thêm thành 2 nhóm: 10:00 → 11:00 → 16:30.
+ function compareSlots(a,b){
+  const directions={NHA_CXR:0,CXR_NHA:1};
+  const dir=(directions[a.direction]??2)-(directions[b.direction]??2);
+  if(dir)return dir;
+  const minute=Number(a.departure_min)-Number(b.departure_min);
+  if(minute)return minute;
+  return Number(a.line_no||0)-Number(b.line_no||0);
+ }
+ function order(records){return [...records].sort(compareSlots);}
+ root.SagsShuttleModel={defaults,directionLabel,clock,parseClock,isDefault,compareSlots,order,suggestVehicles};
 })(typeof window!=='undefined'?window:globalThis);
