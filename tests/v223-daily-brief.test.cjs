@@ -38,7 +38,8 @@ const cA={date:'2026-10-31',revision:2,rows:rowsA,sourcePayload:payloadA,contrac
 const reportA=writer.make({c:cA,operational:ops.summarize(payloadA,rowsA,staff,gse,contracts),
  changes:[{flight:'VJ701',type:'THAY ĐỔI BÃI ĐỖ',from:51,to:39}]});
 assert.ok(reportA.entries.length>=5&&reportA.entries.length<=7);
-assert.ok(reportA.staffing.includes('PVHK: sáng 59 người')&&reportA.staffing.includes('thiếu 2 người'));
+assert.ok(!reportA.entries.filter(x=>['checkin','resource'].includes(x.key)).some(x=>/chênh thiếu|thiếu \d+ người|đáp ứng theo số|định mức.*thiếu/i.test(x.observation+' '+x.action)));
+assert.ok(reportA.staffing.includes('PVHK: sáng 59 người')&&reportA.staffing.includes('đêm 52 người'));
 
 assert.ok(reportA.lead.includes('19:00')||reportA.lead.includes('19:30'));
 assert.ok(reportA.entries.some(x=>x.key==='stands'&&x.observation.includes('K2')));
