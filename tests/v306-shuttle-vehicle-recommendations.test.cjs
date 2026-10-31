@@ -17,7 +17,8 @@ const extra=[{direction:dir,departure_min:660,line_no:0,reason:'Xe tăng cườn
 const rows=g.assemble(full,extra);
 const grid=g.makeGrid(dir,rows,'DH');
 assert.ok(grid.includes('v306-vehicle-showcase'),'Vehicle recommendation must be prominent before wide table');
-assert.ok(grid.includes('🚌 GỢI Ý XE THEO GIỜ'),'Keep visible recommendation heading');
+assert.ok(g.vehicleGuide().includes('🚌 GỢI Ý XE 29 / 45 CHỖ'),'Keep permanently visible 29/45-seat examples');
+assert.ok(grid.includes('GỢI Ý THEO TỪNG GIỜ XE'),'Keep the per-hour live recommendation heading');
 assert.ok(grid.includes('shuttle-29.webp')&&grid.includes('shuttle-45.webp'),
  'Both SAGS bus pictures must be available in the visible recommendation');
 assert.ok(grid.includes('data-v306-slot="CXR_NHA|660|0"'),
@@ -42,8 +43,8 @@ assert.ok(partial.includes('chờ')||partial.includes('Chưa đủ'),
  'Incomplete staffing must not be presented as an official recommendation');
 assert.ok(partial.includes('data-v306-slot="CXR_NHA|660|0"'),
  'Each scheduled time remains visible in the summary even while awaiting data');
-assert.ok(partial.includes('CHỜ XÁC NHẬN'),
- 'The incomplete hour must not display an invented vehicle type');
+assert.ok(partial.includes('TẠM TÍNH'),
+ 'The incomplete hour must show provisional vehicle type without presenting it as final');
 const stylesheet=fs.readFileSync('v300-workspace.css','utf8');
 assert.ok(stylesheet.includes('.v306-vehicle-showcase'));
 assert.ok(stylesheet.includes('.v306-vehicle-legend img'));
