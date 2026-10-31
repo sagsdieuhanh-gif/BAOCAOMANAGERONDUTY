@@ -18,7 +18,9 @@
      if(!node)throw Error('Không tạo được bản xem trước V2.18. Vui lòng kiểm tra đã duyệt lịch bay Lần 2 và nguồn dữ liệu.');
      const date=$('day')?.value||'UNKNOWN';
      const filename='SAGS_CXR_DU_BAO_LAN_'+(active.revision===2?'2':'1')+'_'+date.replaceAll('-','')+'.'+format;
-     const result=await root.SagsOfficeExportV29.exportElement(node,format,filename);
+     const hidePendingWarnings=format==='pdf'&&$('v315PdfHidePending')?.checked===true;
+     const result=await root.SagsOfficeExportV29.exportElement(
+       node,format,filename,{hidePendingWarnings});
      if(status)status.textContent='Đã tạo '+filename+' ('+Math.round(result.bytes/1024)+' KB).';
    }catch(err){
      if(status)status.textContent='CHƯA XUẤT ĐƯỢC: '+err.message;
