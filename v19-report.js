@@ -232,10 +232,25 @@
    ];
    const core=LABELS.map((label,i)=>({title:label,observation:observations[i],action:actions[i]}));
    const enhanced=window.SagsReportInsightsV211?.enrich(c,core);
+   // Keep all ten sections even if the optional insights module is not loaded
+   // (e.g., a stale device cache or a partial module load). Index 4 must always
+   // remain "Nhân lực khai thác", and index 9 the last follow-up section.
+   const prepared=enhanced||(()=>{
+     const out=core.slice(),wideRows=wide(c.rows||[]);
+     out.splice(2,0,{
+       title:'Tàu thân rộng/chuyến đặc biệt',
+       observation:wideRows.length?'Theo lịch có '+wideRows.length+
+         ' cặp liên quan A330/B777: '+wideRows.map(f=>f.departure||f.arrival).join(', ')+'.':
+         'Theo lịch không ghi nhận cặp A330/B777.',
+       action:'PVSĐ chuẩn bị thiết bị phù hợp đăng bạ; PVHK sắp xếp người tại quầy, gate/boarding và tại tàu bay theo chuyến.',
+       owner:'PVSĐ · PVHK · ĐH'
+     });
+     return out;
+   })();
    // The user-facing report can paginate. L2 analysis must not cut a sentence
    // or erase evidence just to fit an earlier narrow table layout.
    const reportText=(value,max)=>c.revision===2?String(value??'').trim():crop(value,max);
-   const topics=(enhanced||core).map((x,i)=>{
+   const topics=prepared.map((x,i)=>{
      const override=(c.controls||[]).find(row=>row.topic===i+1)||{};
      return {title:String(i+1).padStart(2,'0')+'. '+x.title.replace(/^\d+\.\s*/,''),owner:x.owner||'ĐH phối hợp các phòng',
        observation:reportText(known(override.observation)||x.observation||'CHỜ XÁC NHẬN',490),
