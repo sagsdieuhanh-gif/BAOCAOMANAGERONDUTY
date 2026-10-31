@@ -127,3 +127,9 @@
 
 - Báo cáo Lần 1/Lần 2: PVHK gồm **quầy làm thủ tục check-in, gate/boarding, đón khách chuyến đến và tiễn khách chuyến đi tại tàu bay**. Phương án diễn đạt theo lịch chuyến, giờ cao điểm và nguồn nhân sự xác nhận, không thu gọn thành chỉ “đón, tiễn khách”.
 - Xem [HDSD_MANAGER_V3.12.md](HDSD_MANAGER_V3.12.md) để biết quy tắc diễn giải và các trường hợp cao điểm/đổi giờ/bãi.
+
+
+### V3.13 · PDF báo cáo A4 dọc
+
+- Xuất PDF báo cáo trên **A4 dọc**, có lề in, cỡ chữ gọn và bảng tự xuống dòng; bảng dài lặp lại tiêu đề khi chuyển trang, không làm mất nội dung. Xuất Word và PDF ảnh xe giao ca giữ nguyên cơ chế riêng.
+- Hướng dẫn chi tiết: [HDSD_MANAGER_V3.13.md](HDSD_MANAGER_V3.13.md).
