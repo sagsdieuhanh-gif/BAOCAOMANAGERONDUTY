@@ -6,8 +6,8 @@ require('../v24-shuttle-grid.js');
 require('../v21-shuttle-export.js');
 const m=globalThis.SagsShuttleModel,g=globalThis.SagsShuttleGridV24._test,e=globalThis.SagsShuttleExport._test;
 assert.deepEqual(m.defaults.map(x=>[x.direction,x.departure_min]),[
- ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',510],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
-],'All eight confirmed fixed times');
+ ['NHA_CXR',420],['NHA_CXR',1050],['NHA_CXR',1170],['CXR_NHA',990],['CXR_NHA',1110],['CXR_NHA',1560],['CXR_NHA',1935]
+],'Seven confirmed fixed times');
 assert.equal(m.clock(1935),'08:15');
 assert.equal(m.clock(1560),'02:00');
 assert.equal(m.isDefault('CXR_NHA',1560),true);
@@ -44,7 +44,7 @@ assert.ok(src.includes("['DH','PVHK','KTS','QA_IT']"));
 assert.ok(!src.includes("['DH','KTS','PVHK','KHO','QA_IT']"));
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes('v218ReportStatus')&&/V3\.\d{2}/.test(index));
-assert.ok(index.includes('v21-shuttle-model.js?v=3.10'));
+assert.ok(index.includes('v21-shuttle-model.js?v=3.11'));
 const output=fs.readFileSync('v21-shuttle-export.js','utf8');
 assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complete?C.navy'));
 const report=fs.readFileSync('v19-report.js','utf8');
@@ -56,4 +56,4 @@ const exporter=fs.readFileSync('report-export-v29.js','utf8');
 assert.ok(exporter.includes("(active.revision===2?'2':'1')"),'Official file must be labeled L1/L2');
 const draft=fs.readFileSync('v217-second-ui.js','utf8');
 assert.ok(draft.includes('v218PreviewL2')&&draft.includes('CHƯA ĐƯỢC DUYỆT / CHƯA LƯU'));
-console.log('PASS V3.10 clock labels, four-unit vehicle totals, retained custom rows, L2 preview/export distinctions');
+console.log('PASS V3.11 clock labels, four-unit vehicle totals, retained custom rows, L2 preview/export distinctions');
