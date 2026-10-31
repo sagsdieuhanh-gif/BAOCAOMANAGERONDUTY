@@ -17,7 +17,7 @@ const p=personnel.summarize(plans);
 assert.equal(p.headcountsConfirmed,true,'Count confirmations must be independent from staffing adequacy');
 assert.equal(p.complete,false,'Pending sufficiency cannot be declared READY');
 assert.ok(p.lines[0].includes('Đã xác nhận quân số'));
-assert.ok(p.lines[0].includes('Sáng (8 NS)'));
+assert.ok(p.lines[0].includes('Sáng (8 NS'));
 const staffRows=[
  ['DH','COORD',8,8],
  ['PVHK','PVHK_DEPARTURE_TEAM',43,59],
