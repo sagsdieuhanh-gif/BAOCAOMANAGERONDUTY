@@ -297,6 +297,8 @@
      const zoneFor=b=>[31,32,33,34,35,36,37,51,52,53,54,55].includes(Number(b))?'K1':
        [38,39,40,41,42].includes(Number(b))?'K2':Number(b)>=56&&Number(b)<=71?'K3':'Khác';
      const group=Object.fromEntries(['K1','K2','K3','Khác'].map(z=>[z,assigned.filter(x=>zoneFor(x.bay)===z)]));
+     const standOverride=(c.controls||[]).find(x=>x.topic===4)||{};
+     if(!known(standOverride.observation)){
      topics[3].observation='Lịch Lần 2 đã có bãi cho '+assigned.length+'/'+c.rows.length+
        ' hồ sơ chuyến: khu vực 1 '+group.K1.length+', khu vực 2 '+group.K2.length+
        ', khu vực 3 '+group.K3.length+
@@ -304,10 +306,11 @@
        (assigned.length<c.rows.length?' Còn '+(c.rows.length-assigned.length)+' hồ sơ chưa có bãi xác nhận.':'');
      if(group.K2.length||group.K3.length)topics[3].observation+=
        ' Các vị trí 38–42 và 56–71 cần chủ động thời gian di chuyển trang thiết bị khi tàu bay lăn.';
-     topics[3].action='PVSĐ chủ động bố trí nhân lực, xe thang và trang thiết bị tại khu vực phục vụ trước khi tàu bay lăn; liên hệ ATC nắm thứ tự tàu ra/vào bãi, xin phép đi qua đường công vụ khi cần theo quy trình. ĐH theo dõi các cụm chuyến ảnh hưởng và phối hợp điều chỉnh.';
-     if(!known(c.note?.weather_note))
+     }
+     if(!known(standOverride.action))topics[3].action='PVSĐ chủ động bố trí nhân lực, xe thang và trang thiết bị tại khu vực phục vụ trước khi tàu bay lăn; liên hệ ATC nắm thứ tự tàu ra/vào bãi, xin phép đi qua đường công vụ khi cần theo quy trình. ĐH theo dõi các cụm chuyến ảnh hưởng và phối hợp điều chỉnh.';
+     if(!known(c.note?.weather_note)&&!known((c.controls||[]).find(x=>x.topic===9)?.observation))
        topics[8].observation='Căn cứ lịch Lần 2, ưu tiên kiểm soát an toàn tuyến di chuyển người và phương tiện tại các khu bãi có tàu bay lăn; tiếp nhận các cảnh báo thời tiết/an ninh khi có thông tin chính thức.';
-     if(!known(c.note?.previous_issue)){
+     if(!known(c.note?.previous_issue)&&!known((c.controls||[]).find(x=>x.topic===10)?.observation)){
        const ktsPlan=(c.unitPlans||[]).find(x=>x.unit==='KTS'&&x.status==='CONFIRMED');
        const risk=String(ktsPlan?.details?.gse_risk||'').trim();
        topics[9].observation=risk?'PVSĐ đã báo nội dung thiết bị cần theo dõi: '+risk:
@@ -315,7 +318,8 @@
      }
      // The saved cargo KG is actionable without PCS/ready-by estimates. Do not
      // repeat optional missing metadata as a general unfinished report verdict.
-     if((c.cargoPlans||[]).some(x=>x.cargo_kg!=null)&&!known(c.note?.cargo_note)){
+     if((c.cargoPlans||[]).some(x=>x.cargo_kg!=null)&&!known(c.note?.cargo_note)&&
+       !known((c.controls||[]).find(x=>x.topic===7)?.observation)){
        const booked=(c.cargoPlans||[]).filter(x=>x.cargo_kg!=null);
        const totalKg=booked.reduce((n,x)=>n+Number(x.cargo_kg),0);
        topics[6].observation='Kho Hàng đã cập nhật booking trọng lượng cho '+
