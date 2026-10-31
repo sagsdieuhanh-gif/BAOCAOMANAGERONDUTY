@@ -178,9 +178,9 @@
      c.note.previous_issue||'Chưa ghi nhận tồn tại từ ca trước cần xử lý trong ngày.'
    ];
    const actions=[
-     'Phòng ĐH theo dõi giờ đến, giờ đi và các chuyến tập trung; phối hợp PVSĐ chuẩn bị trang thiết bị, PVHK bố trí người đón, tiễn khách. Khi lịch thay đổi, điều chỉnh thứ tự phục vụ phù hợp.',
-     'Phòng ĐH ưu tiên các chuyến quay đầu ngắn và các chuyến sát giờ khởi hành. PVSĐ tập trung nhân sự, thiết bị làm dứt điểm từng chuyến; làm xong chuyến trước rồi điều chuyển quân số, thiết bị cuốn chiếu sang chuyến tiếp theo. PVHK phối hợp để bảo đảm tiến độ đón, tiễn khách.'+nightGuidance,
-     'Phòng ĐH cập nhật vị trí đỗ sau thông tin AOC, lưu ý các bãi xa khu vực trung tâm nếu có. PVSĐ chủ động tuyến di chuyển xe, thiết bị; PVHK bố trí lực lượng tại khu vực phục vụ phù hợp.',
+     'Phòng ĐH theo dõi giờ đến, giờ đi và các chuyến tập trung; phối hợp PVSĐ chuẩn bị nhân lực, trang thiết bị. PVHK sắp xếp nhân sự làm thủ tục tại quầy check-in, phục vụ tại cửa ra tàu bay (gate/boarding), đón khách chuyến đến và tiễn khách chuyến đi tại tàu bay theo lịch từng chuyến. Khi lịch thay đổi, các đơn vị điều chỉnh kế hoạch phục vụ.',
+     'Phòng ĐH ưu tiên các chuyến quay đầu ngắn và các chuyến sát giờ khởi hành. PVSĐ tập trung nhân sự, thiết bị làm dứt điểm từng chuyến rồi điều chuyển sau khi hoàn tất công đoạn. PVHK rà soát quân số theo giờ mở quầy check-in, giờ boarding tại gate và lượt đón, tiễn khách tại tàu bay; bố trí tăng cường khi các công đoạn chồng lấn, không điều người khỏi vị trí còn đang phục vụ.'+nightGuidance,
+     'Phòng ĐH cập nhật vị trí đỗ sau thông tin AOC, lưu ý các bãi xa khu vực trung tâm nếu có. PVSĐ chủ động tuyến di chuyển xe, thiết bị; PVHK căn cứ bãi đỗ, gate và lịch bay để sắp xếp nhân sự phục vụ boarding tại cửa ra tàu bay, đón khách đến và tiễn khách đi tại tàu bay, đồng thời duy trì công tác làm thủ tục tại quầy.',
      'Phòng ĐH tổng hợp quân số từng phòng theo ca sáng và ca đêm; các đơn vị chủ động sắp xếp lực lượng theo giờ cao điểm và tăng cường cho những chuyến quay đầu ngắn.',
      activeIssues.length?
        'PVSĐ rà soát các xe đang hạn chế sử dụng, bố trí thiết bị thay thế và ưu tiên chuyến có thời gian quay đầu ngắn.'+(issueAlternatives?' Phương án thay thế đã báo: '+issueAlternatives+'.':' ĐH phối hợp điều chỉnh thiết bị khi cần.'):
@@ -188,7 +188,7 @@
      plans.length?
        'Kho Hàng ưu tiên chuẩn bị, bàn giao hàng cho '+(heavyCargo.length?heavyCargo[0][1].map(x=>x.flight_no).join(', '):plans.slice(0,3).map(x=>x.flight_no).join(', '))+'; PVSĐ bố trí xe kéo hàng và nhân sự tiếp nhận theo tiến độ từng chuyến. ĐH phối hợp khi các chuyến dồn giờ.':
        'Kho Hàng cập nhật hàng sẵn sàng trước giờ phục vụ; PVSĐ chủ động xe kéo và người nhận hàng. ĐH phối hợp điều chỉnh khi nhiều chuyến tập trung.',
-     'Phòng ĐH theo dõi giờ đáp thực tế, chủ động điều phối khi tàu về muộn. PVSĐ và PVHK ưu tiên hoàn thành công việc cho chuyến quay đầu ngắn, báo sớm khi có nguy cơ ảnh hưởng giờ đi.',
+     'Phòng ĐH theo dõi giờ đáp thực tế, chủ động điều phối khi tàu về muộn. PVSĐ ưu tiên hoàn tất công đoạn tại tàu bay; PVHK kiểm soát tiến độ làm thủ tục tại quầy, boarding ở gate và bố trí người đón, tiễn khách tại tàu bay, báo sớm khi nguy cơ ảnh hưởng giờ đi.',
      'Phòng Điều hành làm đầu mối tiếp nhận và kiểm chứng thông tin an ninh, an toàn, thời tiết và các sự việc phát sinh trong khai thác; tổng hợp mức độ ảnh hưởng, phát cảnh báo kịp thời đến các phòng/đơn vị liên quan trong toàn công ty, đồng thời theo dõi việc tiếp nhận và phối hợp xử lý. Các đơn vị chuyên môn chịu trách nhiệm triển khai biện pháp phòng ngừa, phản hồi kết quả để ĐH cập nhật tình hình chung.',
      'Các phòng tiếp tục xử lý các tồn tại đã được xác nhận từ ca trước, ưu tiên những nội dung ảnh hưởng trực tiếp đến chuyến bay; báo ĐH kết quả và khó khăn phát sinh.'
    ];
@@ -222,7 +222,7 @@
      if(review.high.length){
        topics[6].observation=crop('Theo booking đã có, các chuyến cần chú ý lượng khách đặt chỗ gồm '+
          review.high.slice(0,6).map(x=>x.no+' ('+x.booking+')').join(', ')+'. Booking là dữ liệu dự kiến, không phải số khách thực đi.',490);
-       topics[6].action=crop('PVHK chủ động lực lượng tại quầy và cửa ra tàu theo booking; Kho Hàng và PVSĐ phối hợp vận chuyển hành lý, tăng cường theo diễn biến thực tế khi khách tập trung.',620);
+       topics[6].action=crop('PVHK dựa trên booking để bố trí nhân sự làm thủ tục tại quầy check-in, phục vụ tại cửa boarding và đón, tiễn khách tại tàu bay theo từng chuyến; Kho Hàng và PVSĐ phối hợp công đoạn hành lý, tăng cường theo tình hình khách thực tế.',620);
      }
      if(review.ferry.length){
        topics[8].observation=crop('Lần 2 ghi nhận chuyến có ký hiệu FERRY: '+review.ferry.map(x=>x.no).join(', ')+
@@ -235,7 +235,7 @@
      l2Details={
        rows:notable.map(d=>{
          const risks=[];
-         if(/A330|B777/i.test(d.type))risks.push('Tàu thân rộng: PVSĐ kiểm tra thiết bị phù hợp; PVHK chủ động nhân sự phục vụ');
+         if(/A330|B777/i.test(d.type))risks.push('Tàu thân rộng: PVSĐ kiểm tra thiết bị phù hợp; PVHK rà soát người làm thủ tục tại quầy, gate/boarding và đón, tiễn tại tàu');
          if(d.ferry)risks.push('Có ký hiệu FERRY: xác nhận tính chất chuyến và phương án phục vụ');
          if(d.booking_sum>=300)risks.push('Booking cao: ưu tiên bố trí quầy, gate và hành lý theo thực tế');
          if(['KHU 2','KHU 3'].includes(api.zone(d.bay)))risks.push('Bãi xa: lưu ý tuyến xe, thiết bị');
@@ -257,14 +257,14 @@
      risk:'Có '+x.items.length+' cặp chuyến tập trung trong cùng thời điểm'+
        (x.items.some(y=>/330|777/i.test(y.aircraft_type||''))?', gồm tàu thân rộng.':'.')+
        (x.items.some(isTightGround)?' Một số chuyến có thời gian quay đầu ngắn.':''),
-     action:'Phòng ĐH theo dõi giờ đến thực tế và thống nhất thứ tự ưu tiên. PVSĐ tập trung làm dứt điểm từng chuyến rồi điều chuyển nhân sự, thiết bị sang chuyến tiếp theo; PVHK phối hợp đón, tiễn khách.'+
+     action:'Phòng ĐH theo dõi giờ đến thực tế và thống nhất thứ tự ưu tiên. PVSĐ hoàn tất từng chuyến trước khi điều chuyển người, thiết bị; PVHK bố trí nhân sự tại quầy check-in, gate/boarding và điểm đón, tiễn khách tại tàu bay, tránh điều người khi công đoạn vẫn đang phục vụ.'+
        (x.minute>=1080&&x.items.some(f=>['AK','FD'].includes(flightCarrier(f))||KOREAN_CARRIERS.includes(flightCarrier(f)))?
          ' Ca tối ưu tiên '+nightGroups(x.items)+' trong khung giờ này.':'')
    }));
    if(!peakRows.length)peakRows.push({slot:'Chưa xác định',flight:'Chưa có',risk:'Chưa đủ lịch giờ để xác định khung cao điểm.',action:'ĐH tiếp tục cập nhật và đối chiếu lịch bay.'});
    const coord=[
-    ['Cao điểm và các chuyến quay đầu sát','PVHK, PVSĐ xác nhận quân số và phương án tăng cường; tập trung phục vụ dứt điểm từng chuyến, sau đó điều chuyển lực lượng sang chuyến kế tiếp.','ĐH · PVHK · PVSĐ','Trước giờ cao điểm; cập nhật khi lịch thay đổi'],
-    ['Tàu rộng A330/B777','PVSĐ kiểm tra xe, thiết bị và nhân sự đáp ứng tàu A330/B777; PVHK chủ động người phục vụ khách và hành lý theo từng chuyến.','PVSĐ · PVHK · ĐH','Trước khi phục vụ chuyến tàu thân rộng'],
+    ['Cao điểm và các chuyến quay đầu sát','PVHK rà soát quân số thực tế ở quầy check-in, cửa boarding và đội đón, tiễn khách tại tàu bay theo khung giờ; PVSĐ xác nhận nhân lực, thiết bị tại bãi. Chỉ điều chuyển khi công đoạn đang phục vụ đã kết thúc.','ĐH · PVHK · PVSĐ','Trước giờ cao điểm; cập nhật khi lịch thay đổi'],
+    ['Tàu rộng A330/B777','PVSĐ kiểm tra xe, thiết bị và nhân sự đáp ứng tàu A330/B777; PVHK dự kiến người làm thủ tục tại quầy, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo booking, giờ khai thác từng chuyến.','PVSĐ · PVHK · ĐH','Trước khi phục vụ chuyến tàu thân rộng'],
     ['Bãi đỗ, cầu ống và đường công vụ','Sau họp AOC, cập nhật bãi đỗ và thông báo sớm các vị trí cần bố trí lại tuyến xe, thiết bị.','ĐH · AOC/Cảng · PVSĐ','Sau thông tin AOC, trước giờ phục vụ'],
     ['Hành lý, cargo và tồn tại từ ca trước','Kho Hàng báo giờ hàng sẵn sàng; PVHK, PVSĐ phối hợp theo tiến độ phục vụ; QA/IT cập nhật vấn đề an toàn hoặc tồn tại cần lưu ý.','Kho · PVHK · PVSĐ · QA/IT','Trước ca và khi có thay đổi']
    ];
