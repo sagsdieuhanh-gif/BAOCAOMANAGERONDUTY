@@ -118,8 +118,11 @@
        '. Đã xác nhận bản Lần 2 trên máy chủ; có thể xuất báo cáo.';
      if(typeof load==='function')await load();
      if(typeof renderRadar==='function')renderRadar();
-     window.SagsReportV19?.preview?.();
-     notice('Đã lưu nguồn Lần 2; Lần 1 vẫn được giữ làm mốc so sánh.');
+     // Immediately rebuild both the legacy preview and the unified workspace
+     // from the server-confirmed L2 snapshot. No second manual entry is needed.
+     await window.SagsReportV19?.preview?.();
+     await window.SagsWorkspaceV300?.refresh?.();
+     notice('Đã lưu và cập nhật báo cáo Lần 2 theo lịch mới; Lần 1 được giữ làm mốc đối chiếu.');
    }catch(e){if(state)state.textContent='CHƯA LƯU ĐƯỢC: '+e.message;alert('Không lưu được Lần 2: '+e.message);if(b)b.disabled=false;}
    finally{busy=false}
  }

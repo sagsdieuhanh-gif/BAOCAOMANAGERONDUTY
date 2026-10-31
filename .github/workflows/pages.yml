@@ -36,6 +36,7 @@ jobs:
           node tests/v313-report-pdf-portrait.test.cjs
           node tests/v314-report-staff-visibility.test.cjs
           node tests/v315-staff-count-only-report.test.cjs
+          node tests/v316-l2-report-complete.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs

@@ -146,3 +146,10 @@
 - Quân số chỉ nêu số người thực tế theo ca/vị trí; không phán đoán đủ/thiếu theo định mức.
 - Tích **“Ẩn thông tin chưa xác nhận khi xuất PDF”** để không đưa khối cảnh báo GSE/Kho hàng chờ xác nhận vào PDF. Bản xem trước và Word giữ nguyên nội dung; bỏ tích để đưa cảnh báo trở lại PDF.
 - Xem [HDSD_MANAGER_V3.15.md](HDSD_MANAGER_V3.15.md).
+
+
+### V3.16 · Dự báo Lần 2 tự dựng bản nhận định hoàn chỉnh
+
+- Sau khi **DUYỆT VÀ LƯU LẦN 2**, hệ thống tự làm mới báo cáo và workspace từ dữ liệu đã lưu; giữ nguyên Lần 1 đối chiếu.
+- Đầy đủ 10 mục, bố trí theo khu bãi thực tế, booking/PVHK, KG Kho hàng, quân số các phòng và ghi chú PVSĐ; không cắt câu, không chèn thông tin thiếu dạng chung chung, không suy đoán boarding hoặc đánh giá đủ/thiếu người.
+- Chi tiết: [HDSD_MANAGER_V3.16.md](HDSD_MANAGER_V3.16.md).
