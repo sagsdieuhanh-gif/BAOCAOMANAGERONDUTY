@@ -94,7 +94,7 @@
        ' dự kiến về muộn, có thể kéo lùi tiến độ quay đầu.');
      push('gate','Gate, boarding và thời điểm tàu đến',
        phrases.join(' '),
-       'PVHK đối chiếu gate và giờ boarding từng chuyến với AOC, phân công nhân sự kiểm tra thẻ lên tàu và hướng dẫn khách tại cửa boarding; đồng thời giữ người làm thủ tục ở quầy và đội đón, tiễn khách tại tàu bay. Khi hai chuyến chồng giờ boarding, rà soát điều tiết nhân sự thực có; nếu không đáp ứng thì báo ĐH phối hợp thống nhất phương án trước giờ mở cửa.',
+       'PVHK đối chiếu gate và giờ boarding từng chuyến với AOC, phân công nhân sự kiểm tra thẻ lên tàu và hướng dẫn khách tại cửa boarding; đồng thời giữ người làm thủ tục ở quầy check-in và đội đón, tiễn khách tại tàu bay. Khi hai chuyến chồng giờ boarding, rà soát điều tiết nhân sự thực có; nếu không đáp ứng thì báo ĐH phối hợp thống nhất phương án trước giờ mở cửa.',
        'PVHK · ĐH · AOC',verified.length?4:3);
    }
    const byBooking=deps.filter(x=>!x.ferry&&Number.isFinite(x.booking_sum)&&x.booking_sum>0)
