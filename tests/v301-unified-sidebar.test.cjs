@@ -18,9 +18,9 @@ assert.match(tablet[1],/#v300Root \.v300-nav-folder\[open\]>div\s*\{\s*display:g
 assert.match(unified,/@media\(max-width:540px\)\{\s*#v300Root \.v300-shell\{grid-template-columns:82px minmax\(0,1fr\)/);
 assert.match(unified,/@media\(max-width:360px\)\{\s*#v300Root \.v300-shell\{grid-template-columns:74px minmax\(0,1fr\)/);
 assert.match(css,/#v300Root \.v300-main \.tablewrap,[\s\S]*?overflow-x:auto/,'Wide tables scroll inside content instead of moving page');
-assert.match(index,/Báo cáo điều hành V3\.10/);
-assert.match(index,/const APP_VERSION='V3\.10'/);
-assert.match(js,/id="v300Version">V3\.10/);
+assert.match(index,/Báo cáo điều hành V3\.11/);
+assert.match(index,/const APP_VERSION='V3\.11'/);
+assert.match(js,/id="v300Version">V3\.11/);
 assert.ok(index.indexOf('v300-workspace.css?v=3.10')>index.indexOf('v225-role-access.css'),'Unified layout stylesheet must load last');
 assert.ok(index.includes('v300-workspace.js?v=3.10'));
 assert.ok(js.includes('v300-cta')&&js.includes('XEM BÁO CÁO TGĐ'),'Existing CTA must survive the layout change');
