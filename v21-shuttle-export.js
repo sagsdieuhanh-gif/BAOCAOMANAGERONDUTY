@@ -105,24 +105,33 @@
    t('NGÀY KHAI THÁC',1255,70,14,C.muted,true,'center');
    t(day,1255,110,26,C.navy,true,'center');
    line(48,157,1374);
-   // Compact illustrated bus advice permanently INSIDE the PNG/PDF image,
-   // above both route tables. The examples follow exactly the same algorithm
-   // as the data rows (fewest coaches, 45C preferred, then spare seats).
+   // Show only REAL headcounts from this service day: never put a generic
+   // 20-person/29-seat example above a 40+ person departure in the export.
+   // Largest occupied slots appear first in the compact preview strip;
+   // each departure's own card below also contains its individual proposal.
+   const highlights=rows.filter(r=>r.confirmed>0&&Number.isSafeInteger(Number(r.total)))
+     .sort((x,y)=>y.total-x.total||model().compareSlots(x,y)).slice(0,4);
    shape(outer,164,W-outer*2,57,11,'#E6F7F1','#9ED8CB');
    t('GỢI Ý XE',outer+14,181,16,C.green,true);
-   t('29 / 45 CHỖ',outer+14,204,15,C.navy,true);
-   [20,40,50,60].forEach((people,i)=>{
-     const px=outer+213+i*278;
-     const plan=model().suggestVehicles(people);
+   t('THEO GIỜ',outer+14,204,15,C.navy,true);
+   if(!highlights.length){
+     t('Chưa nhập số người — hình xe chỉ hiện sau khi có quân số từng giờ.',
+       outer+230,193,16,C.muted,true);
+   }
+   highlights.forEach((v,i)=>{
+     const px=outer+213+i*278,plan=model().suggestVehicles(v.total);
+     if(!plan)return;
      shape(px,169,267,47,8,C.white,'#D0E8E4');
-     t(people+' NGƯỜI',px+9,181,13,C.navy,true);
+     const hour=model().clock(v.departure_min);
+     t(hour+' · '+v.total+' NGƯỜI',px+9,181,12,C.navy,true);
      plan.units.forEach((entry,j)=>{
        const bus=entry.seats===45?vehicles.big:vehicles.small;
-       const x=px+111+j*55;
-       if(bus?.naturalWidth)c.drawImage(bus,x,169,53,33);
-       if(entry.quantity>1)t('×'+entry.quantity,x+48,180,11,C.navy,true,'right');
+       const x=px+116+j*57;
+       if(bus?.naturalWidth)c.drawImage(bus,x,169,52,32);
+       if(entry.quantity>1)t('×'+entry.quantity,x+49,180,11,C.navy,true,'right');
      });
-     t(plan.label,px+9,203,13,C.green,true,'left',248);
+     t((v.confirmed===UNITS.length?'':'TẠM TÍNH · ')+plan.label,
+       px+9,203,12,v.confirmed===UNITS.length?C.green:C.orange,true,'left',248);
    });
    function heading(x,title,sub,count){
      shape(x,228,col,51,10,C.soft);
