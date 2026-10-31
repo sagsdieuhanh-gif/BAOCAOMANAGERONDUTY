@@ -74,8 +74,8 @@
    const rows=input.rows||[],a=rows.filter(x=>x.direction==='NHA_CXR'),b=rows.filter(x=>x.direction==='CXR_NHA');
    const max=Math.max(a.length,b.length);
    if(max>65)throw Error('Quá nhiều mốc xe cho một ảnh, vui lòng kiểm tra các giờ bổ sung.');
-   const W=1420,outer=34,col=660,gap=30,cardH=158,step=169,startY=241;
-   const footY=startY+step*max+12,H=footY+245;
+   const W=1420,outer=34,col=660,gap=30,cardH=158,step=169,startY=294;
+   const footY=startY+step*max+12,H=footY+190;
    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
    const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
    const C={navy:'#173C56',blue:'#136D90',ink:'#203D53',muted:'#637D8D',line:'#D9E5EB',
@@ -105,11 +105,30 @@
    t('NGÀY KHAI THÁC',1255,70,14,C.muted,true,'center');
    t(day,1255,110,26,C.navy,true,'center');
    line(48,157,1374);
+   // Compact illustrated bus advice permanently INSIDE the PNG/PDF image,
+   // above both route tables. The examples follow exactly the same algorithm
+   // as the data rows (fewest coaches, 45C preferred, then spare seats).
+   shape(outer,164,W-outer*2,57,11,'#E6F7F1','#9ED8CB');
+   t('GỢI Ý XE',outer+14,181,16,C.green,true);
+   t('29 / 45 CHỖ',outer+14,204,15,C.navy,true);
+   [20,40,50,60].forEach((people,i)=>{
+     const px=outer+213+i*278;
+     const plan=model().suggestVehicles(people);
+     shape(px,169,267,47,8,C.white,'#D0E8E4');
+     t(people+' NGƯỜI',px+9,181,13,C.navy,true);
+     plan.units.forEach((entry,j)=>{
+       const bus=entry.seats===45?vehicles.big:vehicles.small;
+       const x=px+111+j*55;
+       if(bus?.naturalWidth)c.drawImage(bus,x,169,53,33);
+       if(entry.quantity>1)t('×'+entry.quantity,x+48,180,11,C.navy,true,'right');
+     });
+     t(plan.label,px+9,203,13,C.green,true,'left',248);
+   });
    function heading(x,title,sub,count){
-     shape(x,176,col,51,10,C.soft);
-     shape(x,176,5,51,2,C.blue);
-     t(title,x+17,194,21,C.navy,true);
-     t(sub+' · '+count+' mốc',x+17,216,14,C.muted);
+     shape(x,228,col,51,10,C.soft);
+     shape(x,228,5,51,2,C.blue);
+     t(title,x+17,246,21,C.navy,true);
+     t(sub+' · '+count+' mốc',x+17,268,14,C.muted);
    }
    heading(outer,'NHA TRANG → CAM RANH','XE ĐI LÀM',a.length);
    heading(outer+col+gap,'CAM RANH → NHA TRANG','XE VỀ',b.length);
@@ -119,8 +138,10 @@
      shape(x,y,col,cardH,11,special?C.pale:C.white,special?'#D6AC73':C.line);
      shape(x,y,5,cardH,2,special?C.orange:complete?C.green:C.blue);
      t(model().clock(v.departure_min),x+18,y+30,29,C.navy,true);
+     if(model().isNextDay(v.departure_min))
+       t('NGÀY HÔM SAU',x+18,y+57,12,C.orange,true);
      if(special){shape(x+151,y+14,96,28,10,'#FCE4C0');t(v.line_no>0?'BỔ SUNG':'GIỜ THÊM',x+199,y+29,12,C.orange,true,'center');}
-     const plan=complete?model().suggestVehicles(total):null;
+     const plan=v.confirmed>0?model().suggestVehicles(total):null;
      if(plan?.units.length){
        const start=x+col-(plan.units.length>1?359:321);
        plan.units.forEach((entry,i)=>{
@@ -143,9 +164,10 @@
      if(v.missing?.length){
        t('CHƯA XÁC NHẬN: '+v.missing.join(', '),x+19,y+131,12,C.red,true,'left',col-220);
      }else t('Đã đủ 4 đơn vị xác nhận',x+19,y+131,12,C.green,true);
-     if(complete&&plan){
-       t('GỢI Ý: '+plan.label,x+col-16,y+128,13,total>45?C.orange:C.blue,true,'right',252);
-       if(plan.count)t(plan.details,x+col-16,y+146,12,C.muted,false,'right',215);
+     if(plan){
+       t((complete?'GỢI Ý: ':'TẠM TÍNH: ')+plan.label,
+         x+col-16,y+128,13,complete?C.blue:C.orange,true,'right',270);
+       if(plan.count)t(plan.details,x+col-16,y+146,12,C.muted,false,'right',230);
      }
      if(special){
        t('LÝ DO THÊM XE: '+(v.note||'Chưa ghi lý do'),x+19,y+148,12,C.orange,true,'left',col-40);
@@ -162,13 +184,9 @@
      t(label,x,footY+24,13,C.muted,true);
      t(n,x,footY+58,29,i===4&&n?C.orange:C.navy,true);
    });
-   t('Số 0 được tính là đã xác nhận. Số người trước khi đủ 4 phòng là tổng tạm tính.',outer+10,footY+107,15,C.ink);
-   t('Mốc xe bổ sung được tô vàng nhạt, lý do ghi ngay trong cùng dòng. ĐH quyết định phương án xe.',outer+10,footY+133,14,C.muted);
-   t('GỢI Ý LOẠI XE THEO SỨC CHỨA · CHƯA XÁC NHẬN SỐ XE KHẢ DỤNG',outer+10,footY+169,14,C.navy,true);
-   if(vehicles.small?.naturalWidth)c.drawImage(vehicles.small,outer+450,footY+149,126,74);
-   t('29 CHỖ',outer+580,footY+189,19,C.blue,true);
-   if(vehicles.big?.naturalWidth)c.drawImage(vehicles.big,outer+760,footY+149,126,74);
-   t('45 CHỖ',outer+890,footY+189,19,C.blue,true);
+   t('TẠM TÍNH: dựa trên số người đã nhập. ĐỦ DỮ LIỆU: đã có 4/4 phòng xác nhận.',outer+10,footY+109,15,C.ink);
+   t('Giờ xe bổ sung có nền vàng. Xe ngày hôm sau có nhãn riêng. ĐH quyết định điều xe.',outer+10,footY+136,14,C.muted);
+   t('Hình ảnh và gợi ý chỉ là phương án sức chứa, không xác nhận xe khả dụng.',outer+10,footY+162,13,C.blue,true);
    return canvas;
  }
  function download(url,filename){
