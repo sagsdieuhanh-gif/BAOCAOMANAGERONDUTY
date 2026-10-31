@@ -1,4 +1,4 @@
-# BAOCAOMANAGERONDUTY — SAGS CXR · V3.04
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.05
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
@@ -73,3 +73,12 @@
 7. Dữ liệu `ops_shift_transport_v2`, `ops_shift_transport_rows`, các RPC, quy tắc bảo mật hiện có được giữ nguyên; chỉ khôi phục đường dẫn tới giao diện nhập.
 
 **Phạm vi:** Đây là sửa lỗi hiển thị của V3.03. Các module nghiệp vụ và báo cáo D+1 khác giữ nguyên.
+
+## V3.05 – Tự sắp xếp giờ xe bổ sung
+
+- Trong **XE GIAO CA → THÊM GIỜ XE KHÁC**, sau khi nhập giờ chạy và lý do rồi bấm THÊM MỐC GIỜ, hệ thống **tự chèn dòng theo thứ tự tăng dần của giờ xe**, không đưa giờ tự thêm xuống cuối bảng.
+- Ví dụ chiều xe có **10:00** và **16:30**, thêm giờ **11:00** thì bảng nhập hiển thị **10:00 → 11:00 → 16:30**. Mỗi chiều xe sắp xếp riêng. Nhiều xe cùng giờ có dòng bổ sung nằm ngay dưới mốc chính.
+- Giờ xe ngày hôm sau (+1) được đối chiếu theo thời điểm có tính ngày, không đặt nhầm trước các giờ của ngày hiện tại. Không đổi mốc thời gian gốc trong dữ liệu đã lưu.
+- Sau khi thêm, giao diện tự tải lại và đưa người dùng đến dòng vừa chèn để nhập số người; không cần tải lại trang thủ công. Các ô chưa xác nhận không tự coi là 0.
+- Bản xem trước và xuất **PNG/PDF** dùng đúng bộ sắp xếp chung với màn hình nhập, bảo đảm cùng thứ tự giờ. Phân quyền theo phòng, quy tắc xe 29/45 chỗ, mốc xe và dữ liệu Supabase không thay đổi.
+- Kiểm thử hồi quy mới: `tests/v305-shuttle-chronology.test.cjs` cho trường hợp 10:00, 11:00, 16:30, xe bổ sung cùng giờ và qua ngày.
