@@ -1,43 +1,41 @@
-# BAOCAOMANAGERONDUTY — SAGS-CXR
+# BAOCAOMANAGERONDUTY — SAGS CXR · V3.00
 
-Ứng dụng **báo cáo dự báo điều hành khai thác** tại CXR.
+Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
 
-Ứng dụng chạy trực tiếp tại thư mục gốc repository, không còn thư mục `radar-cxr/` và không triển khai SAGS FORM LITE/E-Report cũ trong bản phát hành hiện tại.
+## Thiết kế V3.00
 
-## Chức năng
-- Lịch bay và dự báo khai thác theo ngày, cặp chuyến đến–đi.
-- Báo cáo TGĐ (10 mục kiểm soát theo mẫu), xuất Word/PDF, có logo SAGS.
-- Radar cao điểm độc lập, xuất Word/PDF.
-- Xe giao ca theo 5 đơn vị, hai chiều xe, thêm giờ và lý do, lưu cả hai chiều một lần, xuất PNG/PDF.
-- Nhập quân số ca sáng/ca đêm và đánh giá đủ/thiếu theo từng phòng.
-- Ô dán nhanh thông tin nghiệp vụ của các phòng, lưu và gửi ĐH để tổng hợp vào báo cáo.
+- Giao diện mới `v300-workspace.js` và `v300-workspace.css`: Tổng quan → Lịch bay → Cập nhật theo phòng → Phân tích nguy cơ → Báo cáo TGĐ; Cấu hình định mức và Xe giao ca là công cụ phụ, không thuộc luồng nhập liệu thường ngày.
+- Một ngày khai thác; mỗi phòng có một giao diện nhập tập trung và một nút **XÁC NHẬN & GỬI ĐIỀU HÀNH**. Xác nhận chỉ áp dụng phần dữ liệu được nhập; ô trống không đồng nghĩa 0 hoặc đủ.
+- Quân số theo vai trò và ca lưu ở `ops_staff_capacity`; ghi chú phòng và trạng thái xác nhận ở `ops_unit_forecasts`; GSE ở `ops_gse_capacity`/`ops_gse_issues`; booking Kho hàng ở `ops_warehouse_cargo_plan`. Không tạo bộ dữ liệu ngành dọc song song, không chép thông tin chuyến từ lịch vào các biểu mẫu phòng.
+- Định mức phục vụ tối thiểu theo hãng/tàu/công đoạn được lưu riêng ở `ops_minimum_service_norms`, nhập một lần, chỉ được dùng khi có xác nhận. Thiếu một phần định mức, năng định hoặc quân số = **CHỜ XÁC NHẬN**, không suy diễn đủ.
+- Dùng lịch bay Lần 1 làm nền; sau khi có Lần 2 thì cập nhật bãi đỗ và những thay đổi thực sự. Báo cáo Lần 2 giữ **mẫu 5 mục từ Lần 1**, bảng kiểm soát 10 nội dung, xuất Word/PDF. Bảng nhân sự ca riêng trong báo cáo đã bỏ.
+- Trên trang Tổng quan luôn có nút CTA **XEM BÁO CÁO TGĐ**, trên phần Phân tích có nút CTA **XEM BẢN DỰ BÁO**, và trên trang phòng có CTA **XÁC NHẬN & GỬI ĐIỀU HÀNH**.
+- Để bảo vệ dữ liệu và khả năng xuất báo cáo, phiên bản V3.00 **giữ cơ chế đăng nhập RNS/Supabase, bộ nhập lịch, bộ báo cáo và phần xuất file đã được kiểm chứng** dưới lớp tương thích. Những giao diện nhập trùng, mục Nhân sự/GSE tách rời và trình bày Lần 2 dài dòng không còn thuộc luồng chính. Không xóa bảng dữ liệu hoặc tài liệu lịch sử.
 
-Mã nguồn các module ở thư mục gốc. `server/` lưu mã tham khảo và migration nghiệp vụ, `tests/` lưu kiểm thử. GitHub Pages chỉ đóng gói những file cần chạy và `assets/logo-sags.png`.
+## Hướng dẫn sử dụng nhanh
 
-## Báo cáo dự báo Lần 2 (V2.28)
-- Lần 1: giữ nguyên biểu mẫu chuẩn và cấu trúc kiểm soát theo mẫu hiện có.
-- Lần 2: hợp nhất khung cao điểm, bãi đỗ/đường công vụ, tàu thân rộng, nhân lực, GSE, hàng hóa và chuyến đặc biệt trong **một bảng nhận định – nguy cơ – phương án – đơn vị thực hiện**; không lặp lại bảng 10 nội dung, cảnh báo cao điểm hay bảng phối hợp.
-- Thông tin điều hành nhập thủ công, bổ sung từ các phòng và mục chờ xác nhận vẫn được bảo lưu, chỉ thể hiện riêng khi mang thông tin mới. Dữ liệu chưa được đơn vị xác nhận không tự suy đoán.
-- Với bãi đỗ và đường công vụ, **PVSĐ chủ động phối hợp ATC**; với charter (ký hiệu ##), **Phòng Điều hành trao đổi hãng** rồi thông tin đến đơn vị liên quan; hàng đi phân tích theo số liệu Kho Hàng đã xác nhận và điều kiện thỏa thuận áp dụng.
-- Preview và xuất Word/PDF của Lần 2 sử dụng cùng bố cục gộp.
+1. **Đăng nhập:** sử dụng tài khoản RNS như cũ; số phiên bản hiển thị góc tài khoản.
+2. **Lịch bay:** tải Excel của ngày D+1 để lập Lần 1; sau khi có bãi đỗ cập nhật Lần 2. Các cách nhập thủ công/đối chiếu chỉ mở khi cần.
+3. **Các phòng:** chọn đúng phòng (PVSĐ, PVHK, Kho hàng, Điều hành, QA/IT). Nhập quân số thực có theo vai trò và ca, thiết bị hạn chế hoặc booking/ghi chú riêng nếu có. Người có quyền chỉ chỉnh đơn vị phụ trách, hoặc ĐH/ADMIN chỉnh hỗ trợ.
+4. **Tham khảo hôm trước:** nút sao chép chỉ điền vào ô đang trống để tham khảo, **không tự lưu hay xác nhận**. Người dùng cần kiểm tra số liệu trước khi xác nhận ngày mới.
+5. **Không có ngoại lệ mới:** đánh dấu ô này khi đã rà soát mà không có ngoại lệ ngoài dữ liệu đã lưu. Việc này không tự xác nhận quân số hay định mức còn thiếu.
+6. **Phân tích nguy cơ:** hệ thống ưu tiên chồng lấn 30 phút, khu vực bãi 2–3, chuyến quay đầu ngắn, thiết bị hỏng/hạn chế và thiếu CO/bốc xếp/lái GSE khi có đầy đủ định mức + quân số xác nhận. Nguồn chưa xác nhận không được dùng làm kết luận đủ.
+7. **Báo cáo TGĐ:** chọn tạo bản xem trước, rà soát Lần 1/Lần 2 và xuất Word hoặc PDF bằng tài khoản ĐH/ADMIN. Lần 2 chỉ bổ sung nhận định ở mục liên quan.
+8. **Cấu hình định mức:** chọn hãng, thân rộng/thân hẹp và đơn vị; nhập định mức tối thiểu khi được xác nhận. Các con số VJ mẫu chỉ là gợi ý, chưa tự lưu.
+9. **CTA:** các nút hành động quan trọng ở Tổng quan, Phân tích và màn hình đơn vị vẫn được giữ; không có module độc lập tên `CTA` được xác định trong mã nguồn phiên bản trước.
 
-## An toàn
-- Lịch bay, nhân sự, GSE và xe giao ca vẫn sử dụng cơ sở dữ liệu nghiệp vụ đã liên kết; việc xóa mã cũ khỏi nhánh chính không xóa dữ liệu Supabase.
-- Không tự lấy số ví dụ làm dữ liệu ngày; khi chưa xác nhận báo cáo ghi rõ cần bổ sung.
-- Người dùng ĐH/ADMIN kiểm tra kết quả xuất Word/PDF, ảnh/PDF trước khi phát hành chính thức.
+## Nguyên tắc nghiệp vụ quan trọng
 
-## V2.29 – Định mức nhân sự cho Báo cáo Lần 2
-- Định mức nhập một lần theo đơn vị, vị trí và loại tàu thân hẹp/thân rộng; lưu Supabase cùng nguồn xác nhận, không tự mặc định số người. Trống = CHỜ ĐỊNH MỨC, 0 chỉ dùng nếu đơn vị xác nhận.
-- Nhập quân số thật theo vai trò, ca sáng/đêm của từng ngày; so sánh tại khung 30 phút có cặp đến–đi cùng phục vụ. Chỉ tính chênh lệch khi đủ định mức và số xác nhận; tổng quân số chỉ cho biết thiếu tối thiểu, không chứng minh đủ từng vị trí.
-- Báo cáo Lần 2: đối chiếu Lần 1, bảng quân số/nhu cầu cao nhất theo ca, nhận định/chuyến/khung giờ và phương án cụ thể, thông tin còn chờ xác nhận. Lần 1 giữ nguyên mẫu. Định mức check-in theo hợp đồng vẫn ở PVHK.
+- Một cặp đến–đi là **một cặp khai thác** khi phân tích chồng lấn, không cộng thành hai cặp.
+- Thời lượng phục vụ quy ước: VJ/9G/VU/AK/FD 30 phút; hãng Hàn Quốc 60 phút; hãng khác theo lịch. Không tự coi STD là thời điểm GSE đã sẵn sàng cho chuyến kế tiếp.
+- Khu 1: bãi 31–37, 51–55; khu 2: bãi 38–42; khu 3: bãi 56–71. PVSĐ chủ động chuẩn bị xe, người và phối hợp ATC đối với luồng đường công vụ theo quy trình; ĐH cập nhật AOC và phối hợp chung.
+- Chuyến charter có ký hiệu `##`; Điều hành xác nhận yêu cầu riêng với hãng, thông tin tới PVSĐ/Kho khi liên quan.
+- Hàng đi chỉ phân tích sau khi Kho xác nhận booking/khối lượng; các trường trống là **chờ xác nhận**, không phải 0.
+- Không giả định việc chia sẻ nhân sự giữa check-in, boarding, bốc xếp hoặc lái xe khi chưa có cửa sổ công đoạn và khả năng di chuyển đã xác nhận.
+- Báo cáo là dự báo trước ngày khai thác; không trình bày giả định như kết quả khai thác thực tế.
 
-## V2.30 – Đường dẫn ĐỊNH MỨC riêng, nhận biết phiên bản
-- Sau đăng nhập, vào **CẬP NHẬT → ĐỊNH MỨC NHÂN SỰ** (nút chính, không nằm trong Nâng cao). Điều hành/ADMIN xem và chỉnh tất cả phòng; PVSĐ, PVHK và Kho hàng chỉ chỉnh phần thuộc đơn vị mình. Người không có quyền không thấy mục.
-- Trong phần ĐỊNH MỨC, nhập người/chuyến cho tàu thân hẹp và thân rộng, nguồn định mức, và quân số sáng/đêm thực tế. Bấm **LƯU ĐỊNH MỨC / QUÂN SỐ**. Định mức lưu dùng chung qua ngày; quân số theo ngày chọn. Cột trống là CHỜ XÁC NHẬN, không tự điền 0.
-- Sau đăng nhập, góc trên bên phải hiển thị **Tên tài khoản – VAI TRÒ  V2.30** cạnh nút Đăng xuất. Nhãn phiên bản tăng khi phát hành và được nạp từ hằng `APP_VERSION` của bản giao diện.
+## Kỹ thuật và kiểm chứng
 
-## V2.31 – Định mức phục vụ tối thiểu và Báo cáo Lần 2 theo mẫu Lần 1
-- Vào **CẬP NHẬT → ĐỊNH MỨC TỐI THIỂU**. Chọn hãng, tàu thân hẹp/thân rộng và đơn vị; chỉ nhập số tối thiểu theo công đoạn. Không còn yêu cầu nhập “nguồn định mức”, “quân số sáng” và “quân số đêm” trên giao diện này. Quân số thực có tiếp tục nhập ở phần nhân sự riêng.
-- Các nhóm: CO kiêm Loading (chỉ 1 người đủ năng định); PVHK check-in, chia sẻ nhóm quầy và Skyboard, gate/boarding/thang; sân đỗ lái đầu kéo, lái băng chuyền, bốc xếp hầm và dưới sân; Kho hàng số nhân sự cho chuyến có hàng.
-- **ĐIỀN MẪU GỢI Ý VJ THÂN HẸP** chỉ điền số minh họa do người dùng đề xuất trên giao diện, KHÔNG tự lưu hoặc coi là định mức WI/SLA. Chỉ khi nhân viên rà soát và bấm LƯU mới được dùng để dự báo. Quy tắc 2 chuyến cùng nhóm quầy được dùng chung khi khả thi theo giờ thực tế, chuyến thứ 3 thêm nhóm quầy.
-- Báo cáo Lần 2 **giữ nguyên mẫu 5 mục, cấu trúc, bảng kiểm soát và thứ tự mục của Lần 1**. Không dựng bảng nhân lực ca sáng/đêm độc lập hoặc bảng nhận định Lần 2 riêng. Chỉ chèn ghi chú “Cập nhật Lần 2” ngắn dưới mục có dữ liệu mới (bãi đỗ, nhân lực, quầy/gate, hàng hóa). Không tự khẳng định đủ/thiếu nếu chưa xác nhận định mức, lịch sử dụng và quân số.
+- Trang chạy tại `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/`.
+- Mã nguồn triển khai nằm trên nhánh `main`, có thể xem lịch sử Git để quay lại V2.31 khi cần.
+- Kiểm chứng của tác giả: cú pháp JavaScript, phép tính thử về thiếu 01 CO cho 05 cặp VJ với 04 CO, bản xem trước báo cáo đồng cấu trúc 5 mục. Kiểm thử giao diện đăng nhập + lưu dữ liệu trực tiếp bằng tài khoản thật cần được thực hiện trước khi vận hành chính thức.
