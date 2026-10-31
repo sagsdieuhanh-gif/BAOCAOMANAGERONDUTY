@@ -48,7 +48,7 @@
  }
  async function source(){
    const day=E('day').value;
-   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo,staffNorms]=await Promise.all([
+   const [s,n,cp,gi,bus,shuttleRows,unitInputs,quickReports,s2,contracts,flightCargo,staffNorms,minimumNorms]=await Promise.all([
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',1).maybeSingle(),
     sb.from('ops_report_notes').select('*').eq('service_date',day).maybeSingle(),
     sb.from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
@@ -60,13 +60,15 @@
     sb.from('ops_forecast_snapshots').select('payload,source_filename').eq('service_date',day).eq('revision',2).maybeSingle(),
     sb.from('ops_service_contracts').select('*').eq('service_date',day),
     sb.from('ops_flights').select('arrival,departure,cargo_status').eq('service_date',day),
-     sb.from('ops_staff_norms').select('*')
+     sb.from('ops_staff_norms').select('*'),
+     sb.from('ops_minimum_service_norms').select('*')
    ]);
    if(s.error)throw Error('Không tải được nguồn Lần 1: '+s.error.message);
    if(s2.error)throw Error('Không tải được lịch bay Lần 2: '+s2.error.message);
    if(contracts.error)throw Error('Không đọc được định mức hãng do PVHK xác nhận: '+contracts.error.message);
    if(flightCargo.error)throw Error('Không đọc được tình trạng cargo phục vụ dự báo nguồn lực: '+flightCargo.error.message);
     if(staffNorms.error)throw Error('Không đọc được định mức nhân sự: '+staffNorms.error.message);
+    if(minimumNorms.error)throw Error('Không đọc được định mức phục vụ tối thiểu: '+minimumNorms.error.message);
    if(n.error)throw Error('Không tải được ghi chú: '+n.error.message);
    if(cp.error)throw Error('Không tải được kế hoạch Kho Hàng: '+cp.error.message);
    if(gi.error)throw Error('Không tải được danh sách xe hỏng: '+gi.error.message);
@@ -87,7 +89,7 @@
    return {date:day,rows:arr,arrivals:count('arrival_count',arrived),departures:count('departure_count',departed),
     domestic:qn,international:qt,author:E('sessionLabel').textContent.split(' · ')[0]||me?.email||'Trực ban Điều hành',
     note:n.data||{},cargoPlans:cp.data||[],equipmentIssues:gi.data||[],transport:bus.data||[],additionalRows:shuttleRows.data||[],sourceFile:(s2.data||s.data)?.source_filename||'',revision:s2.data?2:1,sourcePayload:payload,firstPayload:s.data?.payload||null,
-    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],staffNorms:staffNorms.data||[],staff,gse};
+    prior:prevTotals,controls,unitPlans:unitInputs.data||[],quickReports:quickReports.data||[],contracts:contracts.data||[],flightCargo:flightCargo.data||[],staffNorms:staffNorms.data||[],minimumNorms:minimumNorms.data||[],staff,gse};
  }
  function build(c){
    const total=c.arrivals+c.departures,prev=c.prior,priorTotal=prev?.arrival_count!=null&&prev?.departure_count!=null?prev.arrival_count+prev.departure_count:null;
@@ -275,6 +277,9 @@
    const confirmedContracts=(c.contracts||[]).filter(x=>window.SagsL2BriefV223?.verifiedContract(x));
    const operational=window.SagsOpsForecastV219?.summarize(operationalSource,enhancedPairs,c.staff,c.gse,confirmedContracts)||null;
    const dailyBrief=window.SagsL2BriefV223?.make({c,operational,changes:l2Changes})||null;
+   const minimumAssessment=c.revision===2?window.SagsMinimumV231?.assess({
+     pairs:enhancedPairs,sourcePayload:c.sourcePayload,profiles:c.minimumNorms,staff:c.staff
+   })||null:null;
     const staffAssessment=c.revision===2?window.SagsStaffNormsV229?.assess({date:c.date,rows:enhancedPairs,norms:c.staffNorms,staff:c.staff,unitPlans:c.unitPlans,operational,cargoPlans:c.cargoPlans})||null:null;
    if(c.revision===2&&dailyBrief){
      const topicIndex={peak:1,stands:3,gate:7,checkin:4,resource:5,wide:2,cargo:6,change:9};
@@ -288,7 +293,7 @@
        if(item.key!=='checkin'&&!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,staffAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,staffAssessment,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
 
  // Revision 2 only: combine operational findings with action ownership.
@@ -384,11 +389,16 @@
    const appendL2=(base,index,field)=>{
      if(!isL2)return base;
      const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
-     const values=sources.map(x=>field==='observation'?x.observation:x.action)
-       .filter(Boolean).map(v=>crop(v,200));
-     if(!values.length)return base;
-     const extra=values.join('; ');
-     return String(base).includes(extra)?base:String(base)+'\n(Cập nhật Lần 2: '+extra+')';
+     const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
+     // Kết quả định mức quầy đã xác nhận chỉ bổ sung ở dòng nhân lực,
+     // không tạo bảng độc lập hoặc lặp ở phần cảnh báo cao điểm.
+     if(index===3&&field==='observation'){
+       const note=data.minimumAssessment?.notes?.[0]?.text;
+       if(note)fresh.push(crop(note,210));
+     }
+     if(!fresh.length)return base;
+     const extra=fresh.filter(Boolean).join('; ');
+     return !extra||String(base).includes(extra)?base:String(base)+'\n(Cập nhật Lần 2: '+extra+')';
    };
    const updateTopic=(x,i)=>({...x,observation:appendL2(x.observation,i,'observation'),
      action:appendL2(x.action,i,'action')});
