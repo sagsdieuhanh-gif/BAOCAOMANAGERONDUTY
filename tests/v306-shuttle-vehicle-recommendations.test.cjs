@@ -40,8 +40,10 @@ assert.ok(partial.includes('shuttle-29.webp')&&partial.includes('shuttle-45.webp
  'Car illustrations stay visible even if 4 units have not confirmed');
 assert.ok(partial.includes('chờ')||partial.includes('Chưa đủ'),
  'Incomplete staffing must not be presented as an official recommendation');
-assert.ok(!partial.includes('data-v306-slot="CXR_NHA|660|0"'),
- 'Do not invent a confirmed vehicle plan when some departments are missing');
+assert.ok(partial.includes('data-v306-slot="CXR_NHA|660|0"'),
+ 'Each scheduled time remains visible in the summary even while awaiting data');
+assert.ok(partial.includes('CHỜ XÁC NHẬN'),
+ 'The incomplete hour must not display an invented vehicle type');
 const stylesheet=fs.readFileSync('v300-workspace.css','utf8');
 assert.ok(stylesheet.includes('.v306-vehicle-showcase'));
 assert.ok(stylesheet.includes('.v306-vehicle-legend img'));
