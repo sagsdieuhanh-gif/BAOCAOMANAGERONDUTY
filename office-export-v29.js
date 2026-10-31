@@ -76,16 +76,19 @@
     }
     return out;
   }
-  const paper={width:1587,height:1122,margin:58};
-  function pdfFromJpegs(jpegs){
+  // A4 portrait at 2x raster resolution (595x842 PDF points). All measurements below are pixels.
+  const paper={width:1190,height:1684,margin:62,footer:38};
+  function pdfFromJpegs(jpegs,options={}){
+    // Reports use ISO A4 portrait. Shuttle canvas PDFs keep their historical landscape layout.
+    const portrait=options.orientation==='portrait',pdfW=portrait?595:842,pdfH=portrait?842:595;
     const objects=[null,null];const add=x=>{objects.push(x);return objects.length};
     const pageRefs=[];
     for(const item of jpegs){
       const jpeg=item.bytes,iw=item.width,ih=item.height;
       const img=add(concat([bytes('<< /Type /XObject /Subtype /Image /Width '+iw+' /Height '+ih+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+jpeg.length+' >>\nstream\n'),jpeg,bytes('\nendstream')]));
-      const commands='q 842 0 0 595 0 0 cm /P Do Q';
+      const commands='q '+pdfW+' 0 0 '+pdfH+' 0 0 cm /P Do Q';
       const cm=add('<< /Length '+commands.length+' >>\nstream\n'+commands+'\nendstream');
-      const pg=add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /XObject << /P '+img+' 0 R >> >> /Contents '+cm+' 0 R >>');
+      const pg=add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pdfW+' '+pdfH+'] /Resources << /XObject << /P '+img+' 0 R >> >> /Contents '+cm+' 0 R >>');
       pageRefs.push(pg+' 0 R');
     }
     objects[0]='<< /Type /Catalog /Pages 2 0 R >>';
@@ -108,73 +111,132 @@
     await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Không tạo được hình Radar; kiểm tra dữ liệu biểu đồ.'));image.src=url;});
     return image;
   }
-  async function exportPdf(blocks){
+  // Lay out report content in portrait pages without shrinking the whole
+  // landscape report into unreadable A4. Long table cells may flow onto the next
+  // sheet; the table heading is repeated and no confirmed text is discarded.
+  async function renderPdfPages(blocks){
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất PDF.');
-    const {width:W,height:H,margin:M}=paper;
-    let page,ctx,y;const pages=[];
-    const ctxFont=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px "Times New Roman", serif';};
+    const {width:W,height:H,margin:M,footer}=paper;
+    const bottom=H-M-footer,contentW=W-M*2,top=M+18;
+    const pages=[];let canvas,ctx,y;
+    const font=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px Arial, "Times New Roman", sans-serif';};
     function newPage(){
-      page=document.createElement('canvas');page.width=W;page.height=H;
-      ctx=page.getContext('2d');ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,W,H);
-      ctx.fillStyle='#173D57';ctx.fillRect(M,26,W-2*M,5);
-      y=M+22;pages.push(page);
+      canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+      ctx=canvas.getContext('2d');if(!ctx)throw Error('Thiết bị không hỗ trợ tạo PDF.');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+      ctx.fillStyle='#17536F';ctx.fillRect(M,29,contentW,4);
+      y=top;pages.push(canvas);
     }
-    function enough(h){if(y+h>H-M-32)newPage();}
-    function para(t,{font=22,bold=false,color='#243C4F',after=14,indent=0}={}){
-      ctxFont(font,bold);
-      const ls=lines(ctx,t,W-2*M-indent),lh=Math.round(font*1.35);
-      for(let i=0;i<ls.length;i++){
-        enough(lh+3);ctxFont(font,bold);ctx.fillStyle=color;ctx.fillText(ls[i],M+indent,y+font);y+=lh;
+    function free(height){if(y+height>bottom)newPage();}
+    function paragraph(value,{size=19,bold=false,color='#243C4F',after=11,indent=0,heading=false}={}){
+      font(size,bold);
+      const content=lines(ctx,value,contentW-indent),lh=Math.ceil(size*1.33);
+      if(heading&&y+Math.min(content.length,2)*lh+after>bottom)newPage();
+      for(const l of content){
+        free(lh+3);font(size,bold);ctx.fillStyle=color;
+        ctx.fillText(l,M+indent,y+size);y+=lh;
       }
       y+=after;
     }
-    function table(rows,header){
+    function ratiosFor(rows,cols){
+      const head=(rows[0]||[]).join(' ').toLowerCase();
+      if(cols===2)return [.28,.72];
+      if(cols===3)return [.21,.40,.39];
+      if(cols===4){
+        if(/đơn vị liên quan/.test(head)&&/nhận định/.test(head))return [.16,.29,.43,.12];
+        if(/thời hạn/.test(head))return [.18,.49,.13,.20];
+        if(/phương án xử lý/.test(head))return [.14,.20,.27,.39];
+        return [.17,.25,.36,.22];
+      }
+      if(cols===5)return [.23,.18,.19,.22,.18];
+      return Array(cols).fill(1/cols);
+    }
+    function table(rows,hasHeader){
       if(!rows.length)return;
-      const cols=Math.max(1,...rows.map(x=>x.length)),wid=W-2*M;
-      const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
-      const ratios=cols===2?[.27,.73]:cols===3?[.20,.40,.40]:cols===4?(control?[.17,.28,.43,.12]:[.18,.20,.28,.34]):cols===5?[.23,.19,.17,.20,.21]:Array(cols).fill(1/cols);
-      const widths=ratios.map(x=>x*wid);
-      const renderRow=(values,isHeader)=>{
-        const fs=isHeader?18:17,lh=22,pad=8;
-        ctxFont(fs,isHeader);
-        const cellLines=Array.from({length:cols},(_,i)=>lines(ctx,String(values[i]??''),widths[i]-2*pad));
-        const rh=Math.max(42,...cellLines.map(x=>x.length*lh+2*pad));
-        enough(Math.min(rh,780));
-        let x=M;
-        cellLines.forEach((ll,i)=>{
-          ctx.fillStyle=isHeader?'#194D6C':'#FFFFFF';ctx.fillRect(x,y,widths[i],rh);
-          ctx.lineWidth=1;ctx.strokeStyle='#B7C9D5';ctx.strokeRect(x,y,widths[i],rh);
-          ctx.fillStyle=isHeader?'#FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(String(values[i]??''))?'#B91C1C':'#233B4C';
-          ctxFont(fs,isHeader);
-          ll.forEach((line,j)=>ctx.fillText(line,x+pad,y+pad+fs+j*lh));
+      const cols=Math.max(1,...rows.map(r=>r.length)),ratios=ratiosFor(rows,cols);
+      const widths=ratios.map(v=>v*contentW),pad=7,fs=16,lh=21,minHeight=36;
+      const wrapRow=(row,isHead)=>{
+        font(isHead?17:fs,isHead);
+        return Array.from({length:cols},(_,i)=>lines(ctx,String(row[i]??''),Math.max(24,widths[i]-pad*2)));
+      };
+      const prepared=rows.map((r,i)=>wrapRow(r,hasHeader&&i===0));
+      const heightOf=row=>Math.max(minHeight,Math.max(...row.map(x=>x.length))*lh+2*pad);
+      const header=hasHeader?prepared[0]:null,headerHeight=header?heightOf(header):0;
+      const draw=(preparedRow,from,count,isHead)=>{
+        const rh=Math.max(minHeight,count*lh+2*pad);let x=M;
+        for(let i=0;i<cols;i++){
+          const part=preparedRow[i].slice(from,from+count);
+          ctx.fillStyle=isHead?'#194D6C':'#fff';ctx.fillRect(x,y,widths[i],rh);
+          ctx.strokeStyle='#B7C9D5';ctx.lineWidth=1;ctx.strokeRect(x,y,widths[i],rh);
+          ctx.fillStyle=isHead?'#fff':/chờ xác nhận|chưa xác nhận/i.test(rows[0]?.[i]||'')?'#233B4C':'#243B4F';
+          // Highlight only the lines containing unconfirmed data, not an entire table column.
+          font(isHead?17:fs,isHead);
+          part.forEach((line,j)=>{
+            if(!isHead&&/chờ xác nhận|chưa xác nhận/i.test(line))ctx.fillStyle='#B91C1C';
+            else ctx.fillStyle=isHead?'#fff':'#243B4F';
+            ctx.fillText(line,x+pad,y+pad+(isHead?17:fs)+j*lh);
+          });
           x+=widths[i];
-        });
+        }
         y+=rh;
       };
-      for(let i=0;i<rows.length;i++){
-        if(y>H-M-120){newPage();if(header&&i>0)renderRow(rows[0],true);}
-        renderRow(rows[i],header&&i===0);
+      function repeatHeader(){
+        if(!header)return;
+        if(y+headerHeight>bottom)newPage();
+        draw(header,0,Math.max(...header.map(a=>a.length)),true);
       }
-      y+=16;
+      for(let ri=0;ri<prepared.length;ri++){
+        const cells=prepared[ri],isHead=hasHeader&&ri===0;
+        const totalLines=Math.max(1,...cells.map(x=>x.length));
+        const wholeHeight=heightOf(cells),usablePage=bottom-top-(isHead?0:headerHeight);
+        if(wholeHeight<=usablePage&&y+wholeHeight>bottom){
+          newPage();if(!isHead)repeatHeader();
+        }
+        let at=0;
+        while(at<totalLines){
+          if(bottom-y<minHeight){newPage();if(!isHead)repeatHeader();}
+          const fit=Math.floor((bottom-y-2*pad)/lh);
+          if(fit<1){newPage();if(!isHead)repeatHeader();continue;}
+          const n=Math.min(totalLines-at,fit);
+          draw(cells,at,n,isHead);at+=n;
+          if(at<totalLines){newPage();if(!isHead)repeatHeader();}
+        }
+      }
+      y+=13;
     }
     newPage();
-    for(const b of blocks){
-      if(b.kind==='heading'){enough(60);para(b.text,{font:b.level<=2?30:b.level===3?25:22,bold:true,color:'#145278',after:18});}
-      else if(b.kind==='paragraph')para(b.text,{font:22,color:b.pending?'#B91C1C':'#273E52'});
-      else if(b.kind==='table')table(b.rows,b.header);
-      else if(b.kind==='image'){
-        const im=await svgImage(b.svg,b.src);
-        const targetW=b.logo?165:W-2*M,targetH=b.logo?Math.round(targetW*im.height/im.width):Math.min(575,Math.round(targetW*im.height/im.width));
-        enough(targetH+20);ctx.drawImage(im,M,y,targetW,targetH);y+=targetH+16;
+    for(const block of blocks){
+      if(block.kind==='heading'){
+        free(46);
+        paragraph(block.text,{size:block.level<=2?25:block.level===3?21:19,
+          bold:true,color:'#145278',after:14,heading:true});
+      }else if(block.kind==='paragraph'){
+        paragraph(block.text,{size:19,color:block.pending?'#B91C1C':'#273E52'});
+      }else if(block.kind==='table'){
+        table(block.rows,block.header);
+      }else if(block.kind==='image'){
+        const image=await svgImage(block.svg,block.src);
+        const naturalW=Math.max(1,image.naturalWidth||image.width||1);
+        const naturalH=Math.max(1,image.naturalHeight||image.height||1);
+        const targetW=block.logo?150:contentW;
+        const targetH=Math.min(block.logo?190:480,Math.round(targetW*naturalH/naturalW));
+        free(targetH+18);ctx.drawImage(image,M,y,targetW,targetH);y+=targetH+16;
       }
     }
-    const jpegs=pages.map((canvas,i)=>{
-      const ctx=canvas.getContext('2d');
-      ctx.fillStyle='#728395';ctxFont(18,false);
-      ctx.fillText('SAGS-CXR · TRANG '+(i+1)+'/'+pages.length,M,H-20);
-      return {bytes:toBytes(canvas.toDataURL('image/jpeg',.88)),width:canvas.width,height:canvas.height};
+    pages.forEach((p,i)=>{
+      const c=p.getContext('2d');c.fillStyle='#758496';
+      c.font='16px Arial, sans-serif';
+      c.fillText('SAGS-CXR · TRANG '+(i+1)+'/'+pages.length,M,H-29);
     });
-    return pdfFromJpegs(jpegs);
+    return pages;
+  }
+  async function exportPdf(blocks){
+    const canvases=await renderPdfPages(blocks);
+    const jpegs=canvases.map(canvas=>({
+      bytes:toBytes(canvas.toDataURL('image/jpeg',.90)),
+      width:canvas.width,height:canvas.height
+    }));
+    return pdfFromJpegs(jpegs,{orientation:'portrait'});
   }
   function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false}={}){
     const lines=String(v??'').split('\n');
@@ -254,5 +316,5 @@
     download(blob,filename);
     return {bytes:blob.size,blocks:blocks.length,format};
   }
-  root.SagsOfficeExportV29={blocksFromDOM,exportDocx,exportPdf,exportCanvasPdf,exportElement,_test:{zip,pdfFromJpegs,crc32}};
+  root.SagsOfficeExportV29={blocksFromDOM,exportDocx,exportPdf,exportCanvasPdf,exportElement,_test:{zip,pdfFromJpegs,crc32,renderPdfPages,paper}};
 })(window);
