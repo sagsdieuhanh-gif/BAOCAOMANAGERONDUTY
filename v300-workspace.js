@@ -127,6 +127,58 @@
    }
    return {pairs,critical:winners,total:records.length};
  }
+
+ function aircraftGroup(f){
+   const s=String(f.aircraft_type||'').toUpperCase().replace(/\s/g,'');
+   if(/A3(30|40|50|80)|B?7(47|67|77|87)/.test(s))return 'WIDE';
+   if(/A(318|319|320|321|220)|B?7(17|27|37|57)|ATR|AT[47]|E(170|175|190|195)|DH8|DHC|C919/.test(s))return 'NARROW';
+   return null;
+ }
+ function confirmedStaff(u,code,t){
+   const rows=(state.staff||[]).filter(x=>x.unit===u&&x.role_code===code&&x.confirmed_at&&
+     Number.isFinite(Number(x.quantity))&&Number(x.start_min)<=t&&Number(x.end_min)>=t+30);
+   return rows.length?rows.reduce((sum,x)=>sum+Number(x.quantity),0):null;
+ }
+ function deficits(forecastData){
+   const saved=(state.minimumNorms||[]).filter(x=>x.confirmed_by);
+   const norms=new Map(saved.map(x=>[x.airline+'|'+x.aircraft_group+'|'+x.unit,x.norm||{}]));
+   const out=[];
+   const count=(x,k)=>Number.isInteger(x?.[k])&&x[k]>=0?x[k]:null;
+   for(const w of forecastData.critical){
+     const required={DH:{COORD:0},KTS:{BAGGAGE:0,GSE_DRIVER:0}},all={DH:true,KTS:true};
+     for(const f of w.active){
+       const a=String(f.airline||f.carrier||'').toUpperCase()||
+         (String(f.departure||f.arrival||'').replace(/^##/,'').match(/^([A-Z0-9]{2})(?=\d)/)||[])[1];
+       const group=aircraftGroup(f);
+       if(!a||!group){all.DH=false;all.KTS=false;continue;}
+       const dh=norms.get(a+'|'+group+'|DH'),kts=norms.get(a+'|'+group+'|KTS');
+       const co=count(dh,'co_loading');
+       if(co==null)all.DH=false;else required.DH.COORD+=co;
+       const hold=count(kts,'hold_workers'),ground=count(kts,'ground_workers'),
+         tractor=count(kts,'tractor_driver'),belt=count(kts,'belt_driver');
+       if([hold,ground,tractor,belt].some(x=>x==null))all.KTS=false;
+       else{required.KTS.BAGGAGE+=hold+ground;required.KTS.GSE_DRIVER+=tractor+belt;}
+     }
+     for(const u of ['DH','KTS']){
+       if(!all[u])continue;
+       const shortages=[];
+       for(const [code,need] of Object.entries(required[u])){
+         const available=confirmedStaff(u,code,w.start);
+         if(need>0&&available!=null&&available<need){
+           const label={COORD:'CO kiêm Loading',BAGGAGE:'Bốc xếp',GSE_DRIVER:'Lái GSE'}[code];
+           shortages.push(label+' cần '+need+', có '+available+', thiếu '+(need-available));
+         }
+       }
+       if(shortages.length)out.push({type:'shortage',unit:tagUnit[u],
+         title:w.slot+' · Nhân lực có nguy cơ thiếu',
+         desc:shortages.join('; ')+'. Tính theo '+w.active.length+' cặp đang phục vụ và định mức đã xác nhận.',
+         action:u==='DH'?'Cán bộ trực chủ động rà soát phân công CO, đề xuất tăng cường người đủ năng định từ ca khác hoặc trực tiếp hỗ trợ theo điều kiện, phê duyệt.':
+           'PVSĐ bố trí lại tổ phục vụ, tập kết nhân lực trước giờ tàu lăn và đề xuất bổ sung người đủ năng định.',
+         weight:12});
+     }
+   }
+   return out;
+ }
  function highlights(){
    if(!state)return [];
    const list=[],f=forecast(),issues=(state.issues||[]).filter(x=>x.issue_status!=='RETURNED'),
@@ -142,6 +194,7 @@
        'ĐH xác định chuyến quay đầu ngắn cần ưu tiên; PVSĐ/PVHK bố trí trước nguồn lực, chỉ điều chuyển sau khi hoàn tất công đoạn.',
        weight:win.score});
    }
+   list.push(...deficits(f));
    if(issues.length)list.push({type:'gse',unit:'PVSĐ',title:'Thiết bị hạn chế',
      desc:issues.length+' thiết bị đang báo hỏng/hạn chế: '+issues.slice(0,3).map(x=>x.equipment_id).join(', ')+'.',
      action:'PVSĐ xác nhận xe thay thế khả dụng trước cao điểm; không tính xe đang sửa vào nguồn lực.',weight:6});
@@ -196,7 +249,7 @@
  }
  function issueFields(u){
    if(u==='KTS'){
-     const g=(state?.gse||[]).filter(x=>['STAIRS','BELT','TRACTOR','COBUS_LARGE','PUSHBACK','LOADER_TOTAL','GPU','ASU'].includes(x.code));
+     const g=(state?.gse||[]).filter(x=>['STAIRS','BELT','TRACTOR','COBUS_LARGE','PUSHBACK','GPU','ASU'].includes(x.code));
      const t=g.length?'<details class="v300-details"><summary>Thiết bị khả dụng theo nhóm (chỉ chỉnh nếu thay đổi)</summary>'+
        '<div class="v300-device-grid">'+g.map(x=>'<label>'+H(x.code)+' · tối đa '+H(x.catalog_total)+
        '<input data-v300-gse="'+H(x.code)+'" type="number" min="0" max="'+H(x.catalog_total)+'" placeholder="Chờ xác nhận" value="'+H(x.ready_count??'')+'"></label>').join('')+'</div></details>':'';
@@ -243,13 +296,14 @@
     db().from('ops_gse_capacity').select('*').eq('service_date',day),
     db().from('ops_gse_issues').select('*').eq('service_date',day),
     db().from('ops_warehouse_cargo_plan').select('*').eq('service_date',day),
-    db().from('ops_flights').select('*').eq('service_date',day)
+    db().from('ops_flights').select('*').eq('service_date',day),
+    db().from('ops_minimum_service_norms').select('*')
    ];
    const results=await Promise.all(queries);
    for(const r of results)if(r.error)throw Error(r.error.message);
-   const [snaps,plans,staff,gse,issues,cargo,flights]=results.map(r=>r.data||[]);
+   const [snaps,plans,staff,gse,issues,cargo,flights,minimumNorms]=results.map(r=>r.data||[]);
    return {snap1:snaps.find(x=>x.revision===1),snap2:snaps.find(x=>x.revision===2),
-    plans,staff,gse,issues,cargo,flights};
+    plans,staff,gse,issues,cargo,flights,minimumNorms};
  }
  async function refresh(){
    if(!mounted||loading||!user())return;
