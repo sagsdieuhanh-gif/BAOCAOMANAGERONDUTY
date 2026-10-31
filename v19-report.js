@@ -305,6 +305,11 @@
    };
    const appendL2=(base,index,field)=>{
      if(!isL2)return base;
+     // For peak, widebody and boarding, the L2 action has already replaced the
+     // baseline during build(). Re-prepending a 185-character excerpt would
+     // truncate actual PVHK duties (check-in, gate/boarding, aircraft service).
+     // Explicitly edited actions retain precedence in the same way.
+     if(field==='action'&&[1,2,7].includes(index))return base;
      const sources=brief.filter(x=>(related[index]||[]).includes(x.key));
      const fresh=sources.length?[crop(field==='observation'?sources[0].observation:sources[0].action,185)]:[];
      // Kết quả định mức quầy đã xác nhận chỉ bổ sung ở dòng nhân lực,
