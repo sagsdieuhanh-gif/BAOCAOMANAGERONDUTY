@@ -52,7 +52,7 @@ for(const revision of [1,2]){
  const html=report.renderHtml(data);
  for(const field of ['CHI TIẾT QUÂN SỐ','Điều phối','Đội khách đi','Bốc xếp','SKYONE','59 người','43 người','0 người','18 người','15 người','8 người','7 người'])
    assert.ok(html.includes(field),'Report revision '+revision+' missing '+field);
- assert.ok(html.includes('khả năng kiêm nhiệm'),'Must not conflate role count with unique employee count');
+ assert.ok(html.includes('nhân sự kiêm nhiệm'),'Must not conflate role count with unique employee count');
  assert.ok(!html.includes('KHUNG_SKYONE_BAGGAGE_'),'Overlapping custom shift should not be double-counted');
 }
 assert.ok(fs.readFileSync('v19-report.js','utf8').includes("sb.from('ops_staff_capacity').select"),
