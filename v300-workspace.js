@@ -279,7 +279,7 @@
    const plan=getUnitPlan(u),prev=plan?.details||{};
    const notes=(noteFields[u]||[]).map(([k,label])=>'<label class="'+(k==='escalation'?'v300-wide':'')+'">'+H(label)+
     '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" placeholder="Chỉ nhập khi có thay đổi hoặc nguy cơ cụ thể">'+H(prev[k]||'')+'</textarea></label>').join('');
-   const op=wrapPanel((u==='QA_IT'?'01':'03')+' · Nhận định bổ sung / phương án','Có thể để trống khi lịch và dữ liệu nguồn đã phản ánh đầy đủ.',
+   const op=wrapPanel((u==='QA_IT'?'01':(u==='KTS'||u==='KHO'?'03':'02'))+' · Nhận định bổ sung / phương án','Có thể để trống khi lịch và dữ liệu nguồn đã phản ánh đầy đủ.',
      '<div class="v300-fields-grid">'+notes+'</div><p class="v300-hint">Không nhập lại số chuyến, giờ bay, vị trí đỗ, khung cao điểm hoặc dữ liệu do phòng khác chịu trách nhiệm.</p>');
    $('v300Page').innerHTML='<div class="v300-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · Dữ liệu theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
      roleInputs(u)+issueFields(u)+op+
@@ -335,10 +335,28 @@
    if(view==='report')return renderReport();
    if(view==='sources'||view==='norms'||view==='shuttle'||view==='admin')return attachLegacy(view);
  }
+ function prepareSource(node){
+   if(node.dataset.v300Prepared)return;
+   const panels=[...node.children].filter(el=>el.classList.contains('panel'));
+   if(panels.length>1){
+     const extra=document.createElement('details');extra.className='v300-source-extra v300-details';
+     const head=document.createElement('summary');
+     head.textContent='Mở nhập thủ công / đối chiếu dữ liệu và lịch đã lưu (khi cần)';
+     extra.appendChild(head);
+     panels.slice(1).forEach(panel=>extra.appendChild(panel));
+     node.appendChild(extra);
+   }
+   const banner=document.createElement('div');banner.className='v300-source-banner';
+   banner.innerHTML='<strong>01 · LỊCH BAY LÀ NGUỒN DUY NHẤT CHO DỰ BÁO</strong>'+
+    '<p>Dùng file Excel để lập Lần 1. Khi có lịch cập nhật bãi đỗ, lưu Lần 2; không nhập lại sản lượng/giờ bay vào biểu mẫu các phòng.</p>';
+   node.prepend(banner);
+   node.dataset.v300Prepared='1';
+ }
  function attachLegacy(k){
    const target={sources:'tab-sources',norms:'tab-norms',shuttle:'tab-shuttle-report',admin:'tab-admin'}[k];
    const node=$(target);
    if(!node){$('v300Page').innerHTML=wrapPanel('Chưa sẵn sàng','','Không tìm thấy công cụ đã lưu.');return}
+   if(k==='sources')prepareSource(node);
    $('v300Page').replaceChildren(node);
    node.classList.remove('hidden');
    node.classList.add('v300-embedded');
