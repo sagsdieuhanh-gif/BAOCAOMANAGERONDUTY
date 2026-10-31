@@ -25,12 +25,13 @@ assert.ok(l1.topics[1].action.includes('giờ mở quầy check-in'));
 assert.ok(l1.peakRows[0].action.includes('quầy check-in'));
 assert.ok(!text.includes('PVHK bố trí người đón, tiễn khách.'),'Remove truncated legacy sentence');
 const op={
+ hours:{peak:[],verified:0,unverified:[]},
  top:[{start:600,total:2,active:['VJ701','VJ703']}],handoffs:[],stand:[],
  windows:[{start:600,total:2,active:['VJ701','VJ703'],checkin:{openFlights:['VJ701','VJ703'],required:4,available:3,shortage:1},
    gse:[],baggage:{shortage:0},driver:{shortage:0},cobusDrivers:{shortage:0},gateStaff:{shortage:0},unknownCargo:0}],
  gate:{warnings:[{gate:'G2',a:'VJ701',b:'VJ703',start:600,verified:true}],risky:[]}
 };
-globalThis.SagsOpsForecastV219={summarize:()=>op};
+globalThis.SagsOpsForecastV219={summarize:()=>op,svg:()=>'<svg></svg>'};
 const l2=report.build({...base,revision:2,sourcePayload:{flights,source_detail:{
  arrivals:[],departures:[{no:'VJ701',carrier:'VJ',t:635,gate:'G2',booking_sum:125},
  {no:'VJ703',carrier:'VJ',t:642,gate:'G2',booking_sum:120}]} }});
