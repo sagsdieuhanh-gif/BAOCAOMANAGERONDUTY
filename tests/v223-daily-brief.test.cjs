@@ -67,7 +67,7 @@ assert.ok(writer.make({c:{...cA,revision:1},operational:ops.summarize(payloadA,r
 const main=fs.readFileSync('v19-report.js','utf8'),index=fs.readFileSync('index.html','utf8');
 assert.ok(main.includes('SagsL2BriefV223?.make')&&main.includes('const brief=isL2?data.dailyBrief?.entries||[]:[];'),
  'Confirmed L2 findings must be inserted in the corresponding L1 section, not a duplicate report');
-assert.ok(main.includes("!known(ctrl.action)")&&main.includes("item.key!=='checkin'"),'Manual editorial action overrides and confirmed personnel totals must take priority');
+assert.ok(main.includes("!known(ctrl.action)")&&main.includes("item.key==='checkin'"),'Manual editorial action overrides and confirmed personnel totals must take priority');
 assert.ok(index.includes('v223-l2-brief.js'),'Daily engine must load on every page');
 assert.ok(index.indexOf('v223-l2-brief.js')<index.indexOf('v19-report.js'),'Engine before report builder');
 assert.ok(fs.readFileSync('report-export-v29.js','utf8').includes('SagsOfficeExportV29.exportElement'),
