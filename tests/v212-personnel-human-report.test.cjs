@@ -30,9 +30,9 @@ const confirmed=[
 const staff=P.summarize(confirmed);
 assert.ok(staff.complete);
 assert.equal(staff.incomplete.length,0);
-assert.equal(staff.lines[0],'- Phòng ĐH: Đảm bảo nhân sự PVB. Sáng (20 NS); Đêm (18 NS).');
-assert.equal(staff.lines[1],'- Phòng PVHK: Đảm bảo nhân sự phục vụ bay. Sáng (59 NS); Đêm (52 NS).');
-assert.equal(staff.lines[2],'- Phòng KTSĐ: Chưa đảm bảo nhân sự PVB. Sáng (74 NS), cần bổ sung lực lượng; Đêm (73 NS), cần bổ sung lực lượng.');
+assert.equal(staff.lines[0],'- Phòng ĐH: Quân số đã xác nhận. Sáng (20 NS); Đêm (18 NS).');
+assert.equal(staff.lines[1],'- Phòng PVHK: Quân số đã xác nhận. Sáng (59 NS); Đêm (52 NS).');
+assert.equal(staff.lines[2],'- Phòng KTSĐ: Quân số đã xác nhận. Sáng (74 NS); Đêm (73 NS).');
 const draft=P.summarize(confirmed.map(x=>({...x,status:'DRAFT'})));
 assert.ok(!draft.complete);
 assert.ok(!draft.lines.join(' ').includes('59 NS'),'Draft figures must not leak into official forecast');
@@ -62,4 +62,5 @@ for(const term of ['pvb_morning','pvb_night','pvb_morning_status','pvb_night_sta
 const html=fs.readFileSync('index.html','utf8');
 assert.ok(html.indexOf('v212-personnel.js')<html.indexOf('v211-unit-input.js'));
 assert.ok(html.indexOf('v212-personnel.js')<html.indexOf('v19-report.js'));
+assert.ok(!staff.lines.join(' ').match(/Đảm bảo|Chưa đảm bảo|cần bổ sung lực lượng|thiếu [0-9]/i));
 console.log('PASS V2.12 per-unit staffing totals, draft protection, live preview fields and manager-style report language');
