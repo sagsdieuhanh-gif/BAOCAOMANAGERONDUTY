@@ -64,12 +64,12 @@ function data(day,revision){
 for(const day of Object.keys(schedule))for(const rev of [1,2]){
  const obj=data(day,rev),r=mod.build(obj),html=mod.renderHtml(r),cfg=schedule[day];
  assert.equal(r.topics.length,10,'All ten subjects present');
- assert.ok(html.includes('v321-executive')&&html.includes('v321-report-block'),'Executive layout active');
+ assert.ok(html.includes('v322-two-page')&&html.includes('v322-topic-table'),'Compact executive report restored');
  assert.ok(!html.includes('Nguồn: quân số xác nhận')&&!html.includes('Nguồn Lần 2: Book4.xlsx'));
  assert.ok(!html.includes('Lần 1 được giữ làm mốc so sánh'),'Hidden raw source only');
  assert.ok(!html.includes('II. BẢNG KIỂM SOÁT'),'Dense four-column analysis removed');
  assert.ok(html.includes('II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN'));
- assert.ok(html.includes('class="v321-key"')&&html.includes('class="v321-value"'));
+ assert.ok(html.includes('v322-peak-table')&&html.includes('v322-coord-table'));
  assert.ok(!html.includes('Chưa có nội dung bổ sung từ các phòng.'),'No empty boilerplate heading');
  assert.ok(!html.includes('Đề nghị các phòng chủ động bố trí lực lượng'),'No generic AI recommendation');
  assert.ok(r.topics[0].observation.includes(cfg.arr+' chuyến đến'));
@@ -92,9 +92,9 @@ for(const day of Object.keys(schedule))for(const rev of [1,2]){
  if(day==='2026-10-31'){
    assert.ok(r.topics[4].observation.includes('đánh dấu hạn chế'));
    assert.ok(r.topics[2].observation.includes('QQE530'));
-   assert.ok(r.topics[2].observation.includes('chưa thống nhất'));
-   assert.ok(!r.topics[2].observation.includes('Charter: QQE530. Ferry: QQE530'));
-   assert.ok(!r.topics[2].observation.includes('Charter: .'));
+   assert.ok(r.topics[2].observation.includes('Charter (##)')&&r.topics[2].observation.includes('phục vụ bình thường'));
+   assert.ok(!r.topics[2].observation.includes('cần xác nhận loại hình'));
+   assert.ok(!r.topics[2].action.includes('ĐH làm rõ loại hình chuyến QQE530'));
  }
  if(day==='2026-11-02'){
    assert.ok(r.topics[4].observation.includes('3/3 nhóm'));
@@ -110,9 +110,9 @@ const r=mod.build(manual);
 assert.equal(r.topics[3].observation,manual.controls[0].observation);
 assert.equal(r.topics[3].action,manual.controls[0].action);
 const editor=fs.readFileSync('v321-executive-editorial.js','utf8');
-assert.ok(editor.includes('const changeWord=')&&editor.includes('conflicting'));
+assert.ok(editor.includes('const changeWord=')&&!editor.includes('const conflicting=deps'));
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes("APP_VERSION='V3.21'"));
-assert.ok(index.indexOf('v321-executive-editorial.js?v=3.21')<index.indexOf('v19-report.js?v=3.21'));
-assert.ok(index.includes('v300-workspace.css?v=3.21'));
-console.log('PASS V3.21: 6 actual-date L1/L2 scenarios, concise executive presentation, no source footer, correct stand/cargo/ATC, overrides');
+assert.ok(index.includes("APP_VERSION='V3.22'"));
+assert.ok(index.indexOf('v321-executive-editorial.js?v=3.22')<index.indexOf('v19-report.js?v=3.22'));
+assert.ok(index.includes('v300-workspace.css?v=3.22'));
+console.log('PASS V3.22: 6 actual-date L1/L2 scenarios, concise executive presentation, no source footer, correct stand/cargo/ATC, overrides');
