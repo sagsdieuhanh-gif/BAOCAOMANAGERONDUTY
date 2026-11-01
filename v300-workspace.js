@@ -281,7 +281,7 @@
    const main=roles.filter(x=>primary.includes(x[0])),other=roles.filter(x=>!primary.includes(x[0]));
    const hasSaved=roles.some(([code])=>['SÁNG','ĐÊM'].some(sh=>getStaff(u,code,sh)));
    if(u==='DH'){
-     const plan=getUnitPlan('DH'),d=plan?.status==='CONFIRMED'?plan.details||{}:{};
+     const plan=getUnitPlan('DH'),d=plan?.details||{};
      const saved=(v)=>v==null||String(v).trim()===''?'CHỜ XÁC NHẬN':H(v)+' người';
      const summary='<div class="v318-shift-summary v319-dh-total">'+
        [['CA SÁNG','morning'],['CA TỐI','night']].map(([name,k])=>
@@ -591,7 +591,7 @@
    const noException=!!page.querySelector('[data-v300-no-exception]')?.checked;
    if(noException)details.no_new_exceptions='YES';
    else details.no_new_exceptions='';
-   if(!noException&&!items.length&&!(u==='DH'&&page.querySelector('[data-v319-dh-total]')?.value.trim())&&!issue&&!cargo.length&&!gseChanges.length&&
+   if(!noException&&!items.length&&!(u==='DH'&&[...page.querySelectorAll('[data-v319-dh-total]')].some(el=>el.value.trim()))&&!issue&&!cargo.length&&!gseChanges.length&&
       !(noteFields[u]||[]).some(([key])=>details[key]))return status('Chưa có dữ liệu để xác nhận. Có thể quay lại khi có nguồn.',true);
    saving=true; const saveBtn=page.querySelector('[data-v300-command="save"]');
    if(saveBtn)saveBtn.disabled=true;status('Đang lưu và kiểm tra các nguồn đã cập nhật…');
