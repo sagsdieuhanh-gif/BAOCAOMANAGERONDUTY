@@ -97,9 +97,24 @@
      const b=known(d.pvb_night)?d.pvb_night:'chưa nhập';
      return 'sáng '+a+', tối '+b;
    };
+   const roster=root.SagsStaffRosterV320;
+   const breakdown=u=>roster&&(
+     unit(u).personnel_structure==='V3.20'||(c.staff||[]).some(r=>r.unit===u&&
+       (u==='PVHK'?r.role_code==='PVHK_OFFICE':
+         ['KTS_OFFICE','KTS_RAMP_TEAM','KTS_HLSD_SKO','KTS_PVTT'].includes(r.role_code))));
+   const teamText=(u)=>u==='PVHK'?'PVHK':'PVSĐ';
+   const teamFacts=(u)=>{
+     if(!roster||!breakdown(u))return teamText(u)+' ('+showShift(unit(u))+')';
+     const getShift=(shift,label)=>roster.groups(c.staff||[],u,shift)
+       .filter(x=>x.members.some(m=>m.count!=null))
+       .map(g=>g.label+' '+roster.pretty(g)).join('; ');
+     const m=getShift('SÁNG','sáng'),n=getShift('ĐÊM','tối');
+     return teamText(u)+' theo tổ/đội: sáng ['+(m||'chưa xác nhận')+']; tối ['+
+       (n||'chưa xác nhận')+']';
+   };
    result[4]=record(
-     'Các phòng đã cập nhật quân số thực tế theo ca: Phòng ĐH ('+showShift(dh)+'), PVHK ('+showShift(pv)+
-       '), PVSĐ ('+showShift(kts)+'). '+
+     'Quân số theo ca: Phòng ĐH ('+showShift(dh)+'); '+teamFacts('PVHK')+
+       '; '+teamFacts('KTS')+'. '+
      (booking.length?'Các chuyến có booking cao: '+list(booking.slice(0,3).map(x=>x.no+' '+x.booking_sum+' khách'),3)+
        ' (booking, không phải PAX thực đi).':'Không suy diễn tải hành khách khi lịch không có booking xác nhận.'),
      'ĐH đối chiếu tổng quân số phòng và phân bổ nhiệm vụ trực; PVHK dự kiến nhân lực làm thủ tục check-in, gate/boarding và đón/tiễn tại tàu bay theo từng khung giờ có booking. PVSĐ lập tổ phục vụ từng bãi. Không đánh giá đủ/thiếu nhân sự từ tổng đầu người nếu chưa đối chiếu định mức áp dụng.',
