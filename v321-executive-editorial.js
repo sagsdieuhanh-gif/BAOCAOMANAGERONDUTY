@@ -85,11 +85,14 @@
      departedChange=changes?c.departures-prev.departure_count:0;
    const facts=[];
    const a=(observation,action,owner)=>({observation,action,owner});
+   const changeWord=n=>n>0?'tăng '+n+' chuyến':n<0?'giảm '+(-n)+' chuyến':'không đổi';
    facts[0]=a(
      'Dự kiến '+c.arrivals+' chuyến đến, '+c.departures+' chuyến đi ('+full+
        ' hồ sơ/cặp khai thác).'+
-       (changes?' So với Lần 1: đến '+(arrivedChange===0?'không đổi':(arrivedChange>0?'+':'')+arrivedChange)+
-         ', đi '+(departedChange===0?'không đổi':(departedChange>0?'+':'')+departedChange)+' chuyến.':''),
+       (changes?(arrivedChange===0&&departedChange===0?
+         ' Sản lượng đến/đi không đổi so với Lần 1.':
+         ' So với Lần 1: lượt đến '+changeWord(arrivedChange)+
+           ', lượt đi '+changeWord(departedChange)+'.'):''),
      revision?'ĐH đối chiếu danh sách chuyến và các điều chỉnh STA/STD, vị trí đỗ, gate trên lịch Lần 2; chuyển những thay đổi liên quan đến bộ phận phục vụ trước khi triển khai.':
        'ĐH rà soát số hiệu, chặng và STA/STD theo lịch Lần 1; cập nhật thay đổi từ AOC để chuẩn bị phân bổ bãi, nhân sự và thiết bị.',
      'ĐH chủ trì; PVHK và PVSĐ phối hợp');
@@ -165,8 +168,7 @@
      outbound.length?'Hàng đi: '+outbound.length+' chuyến, '+nf(totalKg(outbound))+' kg ('+
        nf(totalKg(outbound)/1000)+' tấn). Chuyến cần ưu tiên theo booking: '+
        unique(heavyOutbound.map(x=>x.flight_no+' '+nf(x.cargo_kg)+' kg'),4)+'.':
-       'Chưa có booking trọng lượng hàng đi được Kho Hàng xác nhận trong hồ sơ.'+
-       (inbound.length?'':' Không đồng nghĩa xác nhận không có hàng.')+
+       'Kho Hàng chưa cập nhật booking trọng lượng hàng đi trong hồ sơ.'+
        (inbound.length?' Hàng đến: '+inbound.length+' chuyến, '+nf(totalKg(inbound))+' kg.':''),
      outbound.length?
        'Kho Hàng xác nhận tiến độ bàn giao hàng đi cho '+unique(heavyOutbound.map(x=>x.flight_no),4)+
