@@ -525,10 +525,10 @@
    ],'coord')).join('');
 
    return '<div class="v19-report-sheet v211-compact v321-executive"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
-    '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, booking và các mốc khai thác được phân tích theo dữ liệu Lần 2, đối chiếu Lần 1; boarding chỉ được đánh giá khi nguồn có giờ.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
+    '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO LẦN 2 · KẾ HOẠCH CẬP NHẬT':'BÁO CÁO LẦN 1 · KẾ HOẠCH SƠ BỘ')+'</strong></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr([(isL2?'Đối chiếu Lần 1 / Lần 2':'Biến động so với ngày hôm trước'),data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
-    (data.operational?'<h3>PEAK HOURS · CAO ĐIỂM LƯỢT CHUYẾN THEO TỪNG GIỜ</h3>'+
-       '<p>Bốn nhóm quốc tế đến/đi, quốc nội đến/đi theo giờ STA/STD, không cộng cặp đến–đi thành một. Đỉnh giờ: '+
+    (data.operational?'<h3>PHÂN BỔ LƯỢT BAY THEO GIỜ (STA / STD)</h3>'+
+       '<p>Phân bổ chuyến đến/đi theo giờ dự kiến, bao gồm quốc nội và quốc tế. Giờ có sản lượng tập trung: '+
          esc(data.operational.hours.peak.filter(x=>x.total>0).slice(0,3).map(x=>x.label+' ('+x.total+' lượt)').join('; ')||'chưa có giờ xác định')+
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
