@@ -477,7 +477,10 @@
    window.SagsReportEditorialV319?.refine(c,topics,{
      peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
    });
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,staffByShift,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
+   window.SagsExecutiveEditorialV321?.refine(c,topics,{
+     peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
+   });
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,staffByShift,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị riêng được cập nhật trong hồ sơ. Những vấn đề vượt thẩm quyền phải kèm ảnh hưởng khai thác và phương án đề xuất trước khi trình Ban TGĐ.'};
  }
 
  function html(data){
