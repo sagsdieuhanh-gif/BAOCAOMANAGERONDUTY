@@ -69,6 +69,6 @@ const missing=window.SagsReportV19.build({...base,staff:staff.filter(x=>x.role_c
 assert.equal(missing.pvsdSummary[1].morning,null);
 assert.equal(missing.pvsdSummary[0].morning,50,'Missing subgroup cannot alter PVSĐ total');
 const ui=fs.readFileSync('index.html','utf8');
-for(const x of ["APP_VERSION='V3.18'",'v19-report.js?v=3.18','v300-workspace.js?v=3.18','v300-workspace.css?v=3.18'])
+for(const x of ["APP_VERSION='V3.19'",'v19-report.js?v=3.19','v300-workspace.js?v=3.19','v300-workspace.css?v=3.19'])
  assert.ok(ui.includes(x),'Version/cache missing '+x);
-console.log('PASS V3.18: prior PVSĐ staffing data and details retained; distinct morning/evening cells');
+console.log('PASS V3.19: prior PVSĐ staffing data and details retained; distinct morning/evening cells');
