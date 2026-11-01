@@ -30,7 +30,9 @@
      '<td>'+(x.radar_unit==='ADMIN'?'—':
        '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
        '" data-rns-name="'+esc(x.display_name||'')+'">CẤP QUYỀN</button>'+
-       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA / RESET</button>':'') )+'</td></tr>').join('');
+       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA HỒ SƠ</button>':'')+
+       (x.id&&x.radar_unit&&x.radar_active===true?
+         '<button type="button" class="rnsPick rnsResetQuick" data-rns-reset="'+esc(x.id)+'">ĐẶT LẠI MẬT KHẨU</button>':'') )+'</td></tr>').join('');
    div.innerHTML='<div class="rnsTableHead">'+visible.length+' / '+accounts.length+' tài khoản dùng chung RNS/Supabase</div>'+
      '<div class="tablewrap"><table class="rnsSharedTable"><thead><tr><th>EMAIL RNS</th><th>HỌ TÊN</th><th>QUYỀN RNS</th><th>QUYỀN RADAR</th><th>THAO TÁC</th></tr></thead><tbody>'+
      (rows||'<tr><td colspan="5">Không có tài khoản phù hợp.</td></tr>')+'</tbody></table></div>';
@@ -192,6 +194,7 @@
      $('rnsResetSecretPanel').classList.remove('hidden');
      mark('rnsEditStatus','Đã đặt lại mật khẩu cho '+u.email+
        '. Bàn giao riêng; nhân viên phải đổi tại RNS trước khi dùng Manager.');
+     $('rnsResetSecretPanel')?.scrollIntoView?.({behavior:'smooth',block:'center'});
    }catch(err){mark('rnsEditStatus','Reset mật khẩu chưa thành công: '+err.message,true)}
    finally{accountBusy=false;$('rnsEditReset').disabled=!picked;}
  }
@@ -217,6 +220,8 @@
    deselect();
    $('rnsLookup').oninput=filter;
    $('rnsSharedList').onclick=e=>{
+     const reset=e.target.closest('[data-rns-reset]');
+     if(reset){selectAccount(reset.dataset.rnsReset);resetAccount();return;}
      const edit=e.target.closest('[data-rns-edit]');
      if(edit){selectAccount(edit.dataset.rnsEdit);return}
      const b=e.target.closest('[data-rns-existing]');
