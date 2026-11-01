@@ -675,3 +675,16 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
 #v300Root .v307-compact .v24-table td input[data-v24-value]{max-width:88px;margin:auto}
 @media(max-width:780px){#v300Root .v307-compact .v24-table{min-width:610px!important}#v300Root .v311-source-grid{gap:6px}#v300Root .v311-source-grid>div{padding:9px}}
 @media(max-width:540px){#v300Root .v311-source-grid{grid-template-columns:1fr 1fr}#v300Root .v311-entry-guide{padding:11px}#v300Root .v311-savebar{position:static}}
+
+
+/* V3.17 – compact PVSĐ confirmation card: all four values share one cell. */
+#v300Root .v317-pvsd-one-cell{border:1px solid #c9dce6;border-radius:10px;background:#f1f8fa;padding:12px 14px;line-height:1.65;font-size:12px}
+#v300Root .v317-pvsd-one-cell>strong{display:block;font-size:11px;letter-spacing:.035em;color:#145470;margin-bottom:3px}
+#v300Root .v317-pvsd-one-cell>div{color:#244257;overflow-wrap:anywhere}
+#v300Root .v317-pvsd-one-cell>div span{display:inline}
+#v300Root .v317-pvsd-one-cell>small{display:block;color:#657d8d;margin-top:5px;font-size:11px}
+#v300Root .v317-pvsd-edit{margin-top:10px}
+#v300Root .v317-pvsd-edit>summary{cursor:pointer;font-size:12px;font-weight:700;padding:10px 12px}
+#v300Root .v317-pvsd-extra{margin-top:9px}
+.v19-report-sheet table.v317-pvsd-summary{width:100%;table-layout:auto;margin-top:4px}
+.v19-report-sheet table.v317-pvsd-summary td{font-size:12px;line-height:1.6;padding:9px 12px;overflow-wrap:anywhere}
