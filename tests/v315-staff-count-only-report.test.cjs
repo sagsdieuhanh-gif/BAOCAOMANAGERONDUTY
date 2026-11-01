@@ -37,7 +37,7 @@ for(const revision of [1,2]){
  assert.ok(action.includes('8 NS'));
  assert.ok(!/thiếu|đủ|đảm bảo|đáp ứng|định mức/i.test(action),'No rating in staffing section: '+action);
  const html=context.window.SagsReportV19.renderHtml(report);
- assert.ok(html.includes('CHI TIẾT QUÂN SỐ ĐÃ XÁC NHẬN'));
+ assert.ok(html.includes('QUÂN SỐ THEO CA ĐÃ XÁC NHẬN'));
  assert.ok(!html.includes('chưa phải kết luận đủ/thiếu'));
 }
 const office={window:{},TextEncoder,Blob,Uint8Array,atob:global.atob};
@@ -64,7 +64,7 @@ assert.ok(files.office.includes("format==='pdf'?options:{}"),'Word should never 
 assert.ok(files.native.includes("$('v315PdfHidePending')?.checked===true"));
 assert.ok(files.workspace.includes("$('v315WorkspaceHidePending')?.checked===true"));
 assert.ok(files.index.includes('id="v315PdfHidePending"'));
-assert.ok(files.index.includes("APP_VERSION='V3.17'"));
+assert.ok(files.index.includes("APP_VERSION='V3.18'"));
 assert.ok(files.index.includes('office-export-v29.js?v=3.15'));
 assert.ok(files.index.includes('report-export-v29.js?v=3.15'));
 console.log('PASS V3.15: report shows only confirmed headcounts; PDF-only optional hide warnings leaves Word and preview untouched');
