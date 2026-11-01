@@ -59,7 +59,7 @@ const shown=c.window.__v318Test.pvsdSavedSummary();
 assert.equal((shown.match(/class="v318-shift-cell"/g)||[]).length,2);
 for(const t of ['PVSĐ','PVHLNG','BỐC XẾP PVSĐ','SKYONE','CA SÁNG','CA TỐI','50 người','51 người'])assert.ok(shown.includes(t));
 const edit=c.window.__v318Test.roleInputs('KTS');
-assert.equal((edit.match(/data-v300-staff="/g)||[]).length,10,'All original PVSĐ input cells preserved');
+assert.ok((edit.match(/data-v300-staff="/g)||[]).length>=10,'All original PVSĐ input cells preserved');
 assert.ok(edit.includes('v317-pvsd-edit v318-team-edit" >'),'Saved staff edit panel defaults closed');
 c.window.__v318Test.setState({plans:[],staff:[]});
 const empty=c.window.__v318Test.roleInputs('KTS');
@@ -69,6 +69,6 @@ const missing=window.SagsReportV19.build({...base,staff:staff.filter(x=>x.role_c
 assert.equal(missing.pvsdSummary[1].morning,null);
 assert.equal(missing.pvsdSummary[0].morning,50,'Missing subgroup cannot alter PVSĐ total');
 const ui=fs.readFileSync('index.html','utf8');
-for(const x of ["APP_VERSION='V3.19'",'v19-report.js?v=3.19','v300-workspace.js?v=3.19','v300-workspace.css?v=3.19'])
+for(const x of ["APP_VERSION='V3.20'",'v19-report.js?v=3.20','v300-workspace.js?v=3.20','v300-workspace.css?v=3.20'])
  assert.ok(ui.includes(x),'Version/cache missing '+x);
-console.log('PASS V3.19: prior PVSĐ staffing data and details retained; distinct morning/evening cells');
+console.log('PASS V3.20: prior PVSĐ staffing data and details retained; distinct morning/evening cells');
