@@ -167,8 +167,8 @@
    const deptRole=(unit,name)=>staffDetails.find(x=>x.unit===unit&&x.role===name);
    const staffByShift=[
      {label:'ĐH',groups:[
-       {name:'Điều phối',morning:deptRole('DH','Điều phối')?.morning??null,
-         night:deptRole('DH','Điều phối')?.night??null}
+       {name:'Nhân sự',morning:pvsdCount((c.unitPlans||[]).find(x=>x.unit==='DH'&&x.status==='CONFIRMED')?.details?.pvb_morning),
+         night:pvsdCount((c.unitPlans||[]).find(x=>x.unit==='DH'&&x.status==='CONFIRMED')?.details?.pvb_night)}
      ]},
      {label:'PVHK',groups:[
        {name:'Đội đến',morning:deptRole('PVHK','Đội khách đến')?.morning??null,
@@ -452,6 +452,11 @@
        if(!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
+   // Apply the same technical editorial rules to L1 and L2, after all legacy
+   // derived notes, without overriding observations explicitly signed off by DH.
+   window.SagsReportEditorialV319?.refine(c,topics,{
+     peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
+   });
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,staffByShift,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
 

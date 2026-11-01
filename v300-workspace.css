@@ -703,3 +703,13 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
 .v19-report-sheet table.v318-staff-by-shift .v318-staff-shift-cell{font-size:11.5px;line-height:1.6;overflow-wrap:anywhere;white-space:normal}
 .v19-report-sheet table.v318-staff-by-shift .v318-staff-inline{display:inline}
 @media(max-width:460px){#v300Root .v318-shift-summary{column-gap:6px;padding:8px}#v300Root .v318-shift-cell{padding:7px}#v300Root .v318-shift-cell>div{font-size:11px}}
+
+
+/* V3.19 – total Department Operations headcount is not coordinator headcount. */
+#v300Root .v319-dh-total{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:7px 0 12px}
+#v300Root .v319-dh-total .v318-shift-cell{display:flex;flex-direction:column;gap:8px;border:1px solid #c6e1e7;background:#f3fafb}
+#v300Root .v319-dh-total input{width:100%;max-width:100%;border-radius:9px;font-size:18px;height:46px;font-weight:750}
+#v300Root .v319-dh-total small{color:#6a8494;font-size:11px}
+#v300Root .v319-dh-role{margin-top:10px}
+#v300Root .v319-dh-role summary{cursor:pointer;font-weight:650;padding:9px}
+@media(max-width:480px){#v300Root .v319-dh-total{gap:7px}#v300Root .v319-dh-total input{font-size:15px}}

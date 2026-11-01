@@ -3,7 +3,7 @@
  const $=id=>document.getElementById(id);
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const roles={ADMIN:'ADMIN (RNS)',DH:'ĐIỀU HÀNH',KTS:'PVSĐ',PVHK:'PVHK',KHO:'KHO HÀNG',QA:'QA',IT:'IT',VIEWER:'CHỈ XEM'};
- let loading=null,accounts=[];
+ let loading=null,accounts=[],picked=null,accountBusy=false;
  async function invoke(action,payload={}){
    if(typeof unit==='undefined'||unit!=='ADMIN')throw Error('Chỉ ADMIN của Radar được quản lý tài khoản.');
    if(typeof sb==='undefined'||!sb)throw Error('Không có kết nối xác thực Supabase.');
@@ -29,7 +29,8 @@
      (x.radar_unit&&!x.radar_active?' · ĐÃ KHÓA':'')+'</td>'+
      '<td>'+(x.radar_unit==='ADMIN'?'—':
        '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
-       '" data-rns-name="'+esc(x.display_name||'')+'">CHỌN CẤP QUYỀN</button>')+'</td></tr>').join('');
+       '" data-rns-name="'+esc(x.display_name||'')+'">CẤP QUYỀN</button>'+
+       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA / RESET</button>':'') )+'</td></tr>').join('');
    div.innerHTML='<div class="rnsTableHead">'+visible.length+' / '+accounts.length+' tài khoản dùng chung RNS/Supabase</div>'+
      '<div class="tablewrap"><table class="rnsSharedTable"><thead><tr><th>EMAIL RNS</th><th>HỌ TÊN</th><th>QUYỀN RNS</th><th>QUYỀN RADAR</th><th>THAO TÁC</th></tr></thead><tbody>'+
      (rows||'<tr><td colspan="5">Không có tài khoản phù hợp.</td></tr>')+'</tbody></table></div>';
@@ -121,6 +122,86 @@
    try{await navigator.clipboard.writeText(secret);mark('rnsCreateStatus','Đã sao chép mật khẩu tạm. Chỉ chuyển riêng cho đúng nhân viên.');}
    catch{input.select();mark('rnsCreateStatus','Hãy sao chép phần mật khẩu đã được chọn.');}
  }
+
+ function closeReset(){
+   if($('rnsResetSecret'))$('rnsResetSecret').value='';
+   $('rnsResetSecretPanel')?.classList.add('hidden');
+ }
+ function deselect(){
+   picked=null;closeReset();
+   for(const id of ['rnsEditIdentity','rnsEditEmail','rnsEditName'])if($(id))$(id).value='';
+   if($('rnsEditSave'))$('rnsEditSave').disabled=true;
+   if($('rnsEditReset'))$('rnsEditReset').disabled=true;
+   mark('rnsEditStatus','Chọn một tài khoản đã có từ danh sách phía trên.');
+ }
+ function selectAccount(id){
+   const x=accounts.find(a=>a.id===id);
+   if(!x||!x.radar_unit||x.radar_unit==='ADMIN'||x.rns_role==='admin')
+     return mark('rnsEditStatus','Tài khoản ADMIN được bảo vệ, không sửa tại đây.',true);
+   picked=x.id;closeReset();
+   $('rnsEditIdentity').value=x.email;
+   $('rnsEditEmail').value=x.email;
+   $('rnsEditName').value=x.display_name||'';
+   $('rnsEditUnit').value=x.radar_unit;
+   $('rnsEditActive').checked=x.radar_active===true;
+   $('rnsEditSave').disabled=false;
+   $('rnsEditReset').disabled=x.radar_active!==true;
+   mark('rnsEditStatus','Đang chọn '+x.email+'. Mật khẩu cũ không thể xem lại.');
+   $('rnsManagerEditPanel')?.scrollIntoView?.({behavior:'smooth',block:'start'});
+ }
+ async function editAccount(){
+   if(!picked||accountBusy)return;
+   const u=accounts.find(a=>a.id===picked);if(!u)return;
+   const email=$('rnsEditEmail').value.trim().toLowerCase();
+   const name=$('rnsEditName').value.trim(),target=$('rnsEditUnit').value;
+   const active=$('rnsEditActive').checked;
+   if(!name||name.length>120)return mark('rnsEditStatus','Họ tên phải từ 1–120 ký tự.',true);
+   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>254)
+     return mark('rnsEditStatus','Email không hợp lệ.',true);
+   if(!Object.hasOwn(roles,target)||target==='ADMIN')
+     return mark('rnsEditStatus','Không có quyền cấp vai trò ADMIN tại đây.',true);
+   const changedEmail=email!==u.email.toLowerCase();
+   if(changedEmail&&!confirm('Xác nhận địa chỉ email mới '+email+
+     ' thực sự thuộc đúng nhân viên? Email đăng nhập RNS và Manager sẽ thay đổi.'))return;
+   if(!confirm('LƯU HỒ SƠ '+u.email+'\nHọ tên: '+name+'\nQuyền: '+roles[target]+
+     '\nTrạng thái Manager: '+(active?'Đang cấp':'Khóa')+'\nQuyền RNS giữ nguyên.'))return;
+   accountBusy=true;$('rnsEditSave').disabled=true;closeReset();
+   mark('rnsEditStatus','Đang cập nhật hồ sơ…');
+   try{
+     const changed=await invoke('update',{user_id:picked,email,display_name:name,
+       unit:target,active,confirm:true,confirm_email_change:changedEmail});
+     await loadShared();
+     selectAccount(changed.user_id);
+     mark('rnsEditStatus',changed.message||'Đã cập nhật hồ sơ Manager.');
+     if(typeof loadAssignedMembers==='function')await loadAssignedMembers();
+   }catch(err){mark('rnsEditStatus','Cập nhật chưa hoàn tất: '+err.message,true)}
+   finally{accountBusy=false;$('rnsEditSave').disabled=!picked;}
+ }
+ async function resetAccount(){
+   if(!picked||accountBusy)return;
+   const u=accounts.find(a=>a.id===picked);
+   if(!u||!u.radar_active)return;
+   if(!confirm('ĐẶT LẠI MẬT KHẨU cho '+u.email+
+     '?\nMật khẩu cũ sẽ hết hiệu lực. Mật khẩu tạm mới được sinh ngẫu nhiên và chỉ hiển thị một lần.'))return;
+   accountBusy=true;$('rnsEditReset').disabled=true;closeReset();
+   mark('rnsEditStatus','Đang tạo mật khẩu tạm mới…');
+   try{
+     const changed=await invoke('reset_password',{user_id:picked,confirm:true});
+     if(!changed.temporary_password)throw Error('Máy chủ chưa trả về mật khẩu tạm, cần kiểm tra trạng thái tài khoản.');
+     $('rnsResetSecret').value=changed.temporary_password;
+     $('rnsResetSecretPanel').classList.remove('hidden');
+     mark('rnsEditStatus','Đã đặt lại mật khẩu cho '+u.email+
+       '. Bàn giao riêng; nhân viên phải đổi tại RNS trước khi dùng Manager.');
+   }catch(err){mark('rnsEditStatus','Reset mật khẩu chưa thành công: '+err.message,true)}
+   finally{accountBusy=false;$('rnsEditReset').disabled=!picked;}
+ }
+ async function copyReset(){
+   const pwd=$('rnsResetSecret')?.value||'';if(!pwd)return;
+   try{await navigator.clipboard.writeText(pwd);
+     mark('rnsEditStatus','Đã sao chép mật khẩu tạm. Chỉ chuyển riêng cho đúng nhân viên.');
+   }catch{$('rnsResetSecret').select();mark('rnsEditStatus','Đã chọn mật khẩu tạm để sao chép.');}
+ }
+
  function init(){
    if(!$('rnsInvitePanel'))return;
    $('rnsInviteButton').onclick=invite;
@@ -128,8 +209,16 @@
    $('rnsCreateCopy').onclick=copySecret;
    $('rnsCreateDismiss').onclick=dismissSecret;
    $('rnsSharedReload').onclick=loadShared;
+   $('rnsEditSave').onclick=editAccount;
+   $('rnsEditReset').onclick=resetAccount;
+   $('rnsEditClear').onclick=deselect;
+   $('rnsResetCopy').onclick=copyReset;
+   $('rnsResetDismiss').onclick=closeReset;
+   deselect();
    $('rnsLookup').oninput=filter;
    $('rnsSharedList').onclick=e=>{
+     const edit=e.target.closest('[data-rns-edit]');
+     if(edit){selectAccount(edit.dataset.rnsEdit);return}
      const b=e.target.closest('[data-rns-existing]');
      if(!b)return;
      $('memberEmail').value=b.dataset.rnsExisting||'';
