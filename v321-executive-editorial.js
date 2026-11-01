@@ -5,7 +5,7 @@
  * Manual controls and signed unit notes always take precedence. */
 (function(root){
  const FAST=new Set(['VJ','9G','VU','AK','FD']);
- const KR=new Set(['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP','WE']);
+ const KR=new Set(['KE','OZ','BX','TW','RF','LJ','ZE','RS','7C','YP']);
  const has=x=>x!=null&&String(x).trim()!=='';
  const nf=x=>Number(x).toLocaleString('vi-VN',{maximumFractionDigits:2});
  const hh=x=>x==null?'—':String(Math.floor((x%1440)/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0')+(x>=1440?' (+1)':'');
@@ -36,7 +36,8 @@
    const near=rs.filter(nearTurn).sort((a,b)=>duration(a)-duration(b));
    const wide=rs.filter(x=>/A\s?330|B\s?777/i.test(x.aircraft_type||''));
    const charter=deps.filter(x=>x.charter||String(x.no||'').startsWith('##'));
-   const ferry=deps.filter(x=>x.ferry);
+   const ferry=deps.filter(x=>x.ferry&&!x.charter&&!String(x.no||'').startsWith('##'));
+   const conflicting=deps.filter(x=>x.ferry&&(x.charter||String(x.no||'').startsWith('##')));
    const saved=(c.unitPlans||[]).filter(x=>x.status==='CONFIRMED');
    const dept=u=>saved.find(x=>x.unit===u)?.details||{};
    const dh=dept('DH'),pv=dept('PVHK'),kts=dept('KTS'),qa=dept('QA_IT');
@@ -67,6 +68,17 @@
    const gseNotes=has(kts.gse_risk)?String(kts.gse_risk).split(/\r?\n/)
      .map(x=>x.replace(/^\s*[-+•]\s*/,'').trim()).filter(Boolean):[];
    const hasGse=issue.length||gseNotes.length;
+   const technicalText=x=>{
+     if(/(?:xe kéo|xes*430|kéo đẩy).*430|430.*lốp/i.test(x)){
+       return 'Xe kéo đẩy 430: PVSĐ báo lốp phù/mòn không đều; chưa có xác nhận hoàn tất thay lốp';
+     }
+     if(/xinfa.*30704.*30703/i.test(x)){
+       return 'Xe XINFA 30704: PVSĐ báo đang cho xe 30703 mượn bơm nước'+
+         (/nằm xsc|nằm xưởng/i.test(x)?', hiện nằm tại xưởng sửa chữa':'');
+     }
+     return x;
+   };
+   const conciseGse=unique(gseNotes.map(technicalText),3);
    const changes=revision&&Number.isInteger(prev.arrival_count)&&Number.isInteger(prev.departure_count);
    const arrivedChange=changes?c.arrivals-prev.arrival_count:0,
      departedChange=changes?c.departures-prev.departure_count:0;
@@ -92,12 +104,16 @@
    facts[2]=a(
      (wide.length?'Tàu thân rộng: '+unique(wide.map(x=>flight(x)+
        (x.bay!=null?' bãi '+x.bay:'')),5)+'.':'Theo lịch chưa ghi nhận lượt A330/B777.')+
-       (charter.length?' Charter: '+unique(charter.map(x=>x.no),5)+'.':'')+
-       (ferry.length?' Ferry: '+unique(ferry.map(x=>x.no),5)+'.':''),
+       (charter.length?' Charter: '+unique(charter.filter(x=>!x.ferry).map(x=>x.no),5)+'.':'')+
+       (ferry.length?' Ferry: '+unique(ferry.map(x=>x.no),5)+'.':'')+
+       (conflicting.length?' Chuyến '+unique(conflicting.map(x=>x.no),5)+
+         ' có dấu hiệu charter và ferry chưa thống nhất; cần xác nhận loại hình.':''),
      (wide.length?'PVSĐ kiểm tra cấu hình xe thang/GSE theo loại tàu, đối chiếu thiết bị khả dụng trước thời điểm phục vụ; PVHK bố trí nhân lực theo tải khách và mốc boarding được xác nhận.':
        'Phục vụ theo loại tàu và yêu cầu hãng đã có trong lịch.')+
-       (charter.length?' ĐH xác nhận yêu cầu đặc thù charter với hãng và chuyển PVSĐ, Kho Hàng khi có phát sinh.':'')+
-       (ferry.length?' Với ferry, ĐH xác nhận phạm vi phục vụ, không mặc định như chuyến chở khách.':''),
+       (charter.some(x=>!x.ferry)?' ĐH xác nhận yêu cầu đặc thù charter với hãng và chuyển PVSĐ, Kho Hàng khi có phát sinh.':'')+
+       (ferry.length?' Với ferry, ĐH xác nhận phạm vi phục vụ, không mặc định như chuyến chở khách.':'')+
+       (conflicting.length?' ĐH làm rõ loại hình chuyến '+unique(conflicting.map(x=>x.no),5)+
+         ' với hãng trước khi ban hành phương án phục vụ.':''),
      'ĐH; PVSĐ; PVHK; Kho Hàng khi có liên quan');
    facts[3]=a(
      missing.length===full?
@@ -115,6 +131,7 @@
      'PVSĐ chủ trì; ĐH và PVHK phối hợp');
    const dhStaff=has(dh.pvb_morning)||has(dh.pvb_night);
    const pvCoverage=coverage('PVHK'),ktCoverage=coverage('KTS');
+   const staffingFlag=['pvb_morning_status','pvb_night_status'].some(k=>kts[k]==='LIMITED');
    const pvFact=roleSummary('PVHK')?
      'PVHK đã nhập '+(pvCoverage?.count[0]||0)+'/'+(pvCoverage?.expected||0)+' nhóm ca sáng, '+
        (pvCoverage?.count[1]||0)+'/'+(pvCoverage?.expected||0)+' nhóm ca tối':
@@ -128,6 +145,7 @@
    facts[4]=a(
      (dhStaff?staffUnit('ĐH',dh):'ĐH chưa có xác nhận tổng nhân sự theo ca')+
        '. '+pvFact+'. '+ktFact+'.'+
+       (staffingFlag?' PVSĐ đã tự đánh dấu hạn chế bố trí lực lượng theo ca; cần đối chiếu phương án tăng cường.':'')+
        (peakPax.length?' Booking khách đáng chú ý: '+
          unique(peakPax.map(x=>x.no+' '+x.booking_sum+' khách'),3)+'.':''),
      'PVHK phân bổ nhân sự đội đi/đến theo lịch check-in, gate và tàu bay; PVSĐ bố trí tổ HLSĐ, HLNG, PVTT theo các cụm chuyến. ĐH phối hợp điều chỉnh phân công khi thời gian phục vụ chồng lấn; không đánh giá đủ/thiếu nhân sự chỉ từ quân số tổng.',
@@ -135,7 +153,7 @@
    facts[5]=a(hasGse?
      'PVSĐ báo '+(issue.length?issue.length+' thiết bị hạn chế/ngưng khai thác'+
        (gseNotes.length?'; kèm ghi chú kỹ thuật: ':'. '):'nội dung kỹ thuật: ')+
-       (gseNotes.length?unique(gseNotes,3):unique(issue.map(x=>x.equipment_id+
+       (gseNotes.length?conciseGse:unique(issue.map(x=>x.equipment_id+
          (x.fault?' – '+x.fault:'')),4))+'.':
      'Chưa có cập nhật hạn chế kỹ thuật cụ thể; số lượng GSE khả dụng chưa đủ căn cứ để kết luận mức đáp ứng.',
      hasGse?
@@ -180,7 +198,7 @@
      'PVSĐ; PVHK; ĐH tiếp nhận thông tin');
    const follow=has(c.note?.previous_issue)?String(c.note.previous_issue):
      has(qa.open_capa)?'QA/IT cập nhật tồn tại: '+String(qa.open_capa):
-     hasGse?'Nội dung kỹ thuật PVSĐ đang theo dõi đã được nêu tại mục GSE; kết quả khắc phục chưa được xác nhận tại hồ sơ này.':'';
+     hasGse?'Chưa có kết quả khắc phục được xác nhận đối với các nội dung kỹ thuật PVSĐ đã báo.':'';
    facts[9]=a(follow||'Chưa có tồn tại cụ thể được các đơn vị ghi trong mục theo dõi của hồ sơ ngày.',
      follow?'Đơn vị phụ trách xác nhận thời hạn xử lý, phương án dự phòng và tình trạng khắc phục; ĐH chỉ báo cáo kết quả hoàn tất khi có xác nhận.':
        'Các đầu mối chỉ bổ sung tồn tại có ảnh hưởng khai thác kèm mã chuyến/thiết bị và thời điểm cần xử lý.',
