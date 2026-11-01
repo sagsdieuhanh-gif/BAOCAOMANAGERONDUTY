@@ -243,6 +243,24 @@
     '<div class="v300-cta"><div><strong>Hoàn thiện dự báo D+1</strong><span>Kiểm tra những nguy cơ đã có căn cứ rồi phát hành báo cáo.</span></div>'+
     '<button class="v300-cta-btn" data-v300-route="report">XEM BÁO CÁO TGĐ →</button></div>';
  }
+ // Read-only compact confirmation view. The underlying 5 role fields are
+ // preserved and can always be reopened for corrections; nothing is re-summed
+ // in this display to avoid counting shared duties twice.
+ function pvsdSavedSummary(){
+   const plan=getUnitPlan('KTS'),details=plan?.status==='CONFIRMED'?plan.details||{}:{};
+   const n=x=>x==null||String(x).trim()===''?'CHỜ XÁC NHẬN':H(x)+' người';
+   const count=(code,shift)=>getStaff('KTS',code,shift)?.quantity;
+   const groups=[
+     ['PVSĐ',details.pvb_morning,details.pvb_night],
+     ['PVHLNG',count('TERMINAL_BAGGAGE','SÁNG'),count('TERMINAL_BAGGAGE','ĐÊM')],
+     ['BỐC XẾP PVSĐ',count('BAGGAGE','SÁNG'),count('BAGGAGE','ĐÊM')],
+     ['SKYONE',count('SKYONE_BAGGAGE','SÁNG'),count('SKYONE_BAGGAGE','ĐÊM')]
+   ];
+   return '<div class="v317-pvsd-one-cell" role="group" aria-label="Tóm tắt nhân sự PVSĐ đã lưu">'+
+     '<strong>QUÂN SỐ PVSĐ ĐÃ LƯU</strong><div>'+
+     groups.map(([label,morning,night])=>'<span><b>'+H(label)+':</b> Sáng '+n(morning)+' / Đêm '+n(night)+'</span>').join(' · ')+
+     '</div><small>PVSĐ là tổng phòng đã lưu; ba nhóm còn lại là số theo công việc, không cộng thêm vào tổng.</small></div>';
+ }
  function roleInputs(u){
    const roles=staffRoles[u]||[];
    if(!roles.length)return '';
@@ -251,8 +269,14 @@
      ['SÁNG','ĐÊM'].map(shift=>'<td><input type="number" min="0" max="9999" inputmode="numeric" aria-label="'+H(label)+' ca '+shift+'" data-v300-staff="'+H(code)+'|'+shift+'" value="'+H(getStaff(u,code,shift)?.quantity??'')+'" placeholder="—"></td>').join('')+'</tr>').join('');
    const table=items=>'<div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Nhóm nhân sự</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows(items)+'</tbody></table></div>';
    const main=roles.filter(x=>primary.includes(x[0])),other=roles.filter(x=>!primary.includes(x[0]));
+   const hasSaved=roles.some(([code])=>['SÁNG','ĐÊM'].some(sh=>getStaff(u,code,sh)));
+   const inputs=u==='KTS'?
+     pvsdSavedSummary()+
+     '<details class="v300-details v317-pvsd-edit" '+(!hasSaved?'open':'')+'><summary>NHẬP / CHỈNH SỬA QUÂN SỐ CHI TIẾT</summary>'+
+     table(main)+(other.length?'<div class="v317-pvsd-extra">'+table(other)+'</div>':'')+'</details>':
+     table(main)+(other.length?'<details class="v300-details v311-advanced"><summary>Nhóm nhân sự bổ sung ('+other.length+') · chỉ mở khi cần</summary>'+table(other)+'</details>':'');
    return wrapPanel('01 · Quân số theo ca','Chỉ nhập số người thực sự có thể bố trí; không nhập lại các số liệu lịch bay.',
-     table(main)+(other.length?'<details class="v300-details v311-advanced"><summary>Nhóm nhân sự bổ sung ('+other.length+') · chỉ mở khi cần</summary>'+table(other)+'</details>':'')+
+     inputs+
      '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo hôm trước</button><span>Phải kiểm tra lại trước khi xác nhận ngày mới</span></div>'+
      '<p class="v300-hint">Ô trống = chưa xác nhận · 0 = xác nhận không có người · Không cộng trùng nhân sự kiêm nhiệm.</p>');
  }
