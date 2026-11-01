@@ -36,7 +36,10 @@
    for(const p of pairs){const a=area(p.bay);if(a)zones[a].push(p);}
    const affected=[...zones.K2,...zones.K3],unknown=pairs.filter(x=>x.bay==null);
    const priority=peaks.slice().sort((a,b)=>b.items.length-a.items.length||a.minute-b.minute)[0];
-   const cargos=plans.filter(x=>x.flight_no&&known(x.cargo_kg)&&Number.isFinite(Number(x.cargo_kg)));
+   const cargoModel=root.SagsCargoBookingV320;
+   const cargoSides=cargoModel?.split(plans,pairs,details)||{departure:plans,arrival:[],unmatched:[]};
+   const cargos=cargoSides.departure.filter(x=>x.flight_no&&known(x.cargo_kg)&&Number.isFinite(Number(x.cargo_kg)));
+   const inboundCargo=cargoSides.arrival.filter(x=>x.flight_no&&known(x.cargo_kg)&&Number.isFinite(Number(x.cargo_kg)));
    const topCargo=cargos.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg)).slice(0,4);
    const cargoHeavy=cargos.filter(x=>Number(x.cargo_kg)>=2500);
    const staffDetails=context.staffByShift||[];
@@ -129,17 +132,25 @@
      issues.length?'PVSĐ kiểm tra tình trạng kỹ thuật, xác nhận thiết bị thay thế đúng năng lực và bãi phục vụ; không phân bổ xe đang ngưng sử dụng. Ưu tiên hỗ trợ các cặp quay đầu sát, chỉ điều xe khi công đoạn trước hoàn tất.':
        'PVSĐ kiểm tra phương tiện theo danh mục khả dụng và đối chiếu yêu cầu tàu thân rộng/cao điểm; chỉ đưa thiết bị vào phương án khi đã kiểm tra tình trạng và thời gian điều chuyển.',
      'PVSĐ chủ trì · ĐH');
+   const cargoSummary=(listRows,kind)=>listRows.length?
+     kind+': '+listRows.length+' chuyến, '+show(listRows.reduce((v,x)=>v+Number(x.cargo_kg),0))+' kg'+
+       ' ('+show(listRows.reduce((v,x)=>v+Number(x.cargo_kg),0)/1000)+' tấn). '+
+       listRows.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg)).slice(0,6)
+         .map(x=>x.flight_no+' '+show(x.cargo_kg)+' kg').join('; ')+'.':'';
    result[6]=record(
-     cargos.length?'Kho Hàng đã xác nhận booking KG cho '+cargos.length+' chuyến, tổng '+
-       show(cargos.reduce((v,x)=>v+Number(x.cargo_kg),0))+' kg. '+
-       topCargo.map(x=>x.flight_no+' '+show(x.cargo_kg)+' kg').join('; ')+'.':
-       'Chưa có booking KG được Kho Hàng xác nhận cho ngày khai thác.',
-     cargos.length?'Kho Hàng xác nhận thời điểm bàn giao theo từng booking đã nhập; PVSĐ chuẩn bị phương tiện, nhân sự tiếp nhận hàng cho các chuyến '+
-       list(topCargo.map(x=>x.flight_no),4)+'.'+
-       (cargoHeavy.length?' Đối với nhóm từ 2,5 tấn ('+list(cargoHeavy.map(x=>x.flight_no),4)+
-         '), rà soát phương án vận chuyển/bốc xếp theo thỏa thuận hãng.':'')+
-       ' Booking dưới 2,5 tấn chỉ áp dụng phương án phù hợp khi thỏa thuận hiện hành cho phép.':
-       'Kho Hàng kiểm tra booking thực tế và cung cấp khối lượng đã xác nhận; khi phát sinh hàng đi, PVSĐ bố trí phương tiện theo thời gian quay đầu và điều kiện phục vụ của hãng.',
+     (cargoSummary(cargos,'Hàng đi đã xác nhận')||
+       'Chưa có booking KG hàng đi được Kho Hàng xác nhận.')+
+     (inboundCargo.length?' '+cargoSummary(inboundCargo,'Hàng đến đã xác nhận'):'')+
+     (cargoSides.unmatched.length?' '+cargoSides.unmatched.length+
+       ' booking chưa đối chiếu được chiều chuyến với lịch, không cộng vào hai tổng.':''),
+     (cargos.length?'Kho Hàng xác nhận thời điểm bàn giao hàng đi và bố trí vận chuyển cho '+
+       list(topCargo.map(x=>x.flight_no),4)+
+       '; PVSĐ chuẩn bị phương tiện, nhân sự nhận hàng trước công đoạn xếp hàng tại tàu bay.':
+       'Kho Hàng kiểm tra booking hàng đi theo chuyến đã xác nhận; PVSĐ chỉ lập phương án xe kéo/xếp hàng đi khi có nguồn.')+
+     (cargoHeavy.length?' Các chuyến hàng đi từ 2,5 tấn ('+list(cargoHeavy.map(x=>x.flight_no),4)+
+       ') cần đối chiếu phương án theo thỏa thuận hãng.':'')+
+     (cargos.length?' Booking hàng đi dưới 2,5 tấn chỉ áp dụng phương án phù hợp nếu thỏa thuận hiện hành cho phép.':'')+
+     (inboundCargo.length?' Đối với hàng đến, Kho Hàng phối hợp PVSĐ tiếp nhận, dỡ và vận chuyển từ tàu bay về khu vực bàn giao theo booking xác nhận; không dùng hàng đến để đánh giá năng lực xếp hàng đi.':''),
      'Kho Hàng · PVSĐ · ĐH');
    result[7]=record(
      turns.length?'Các cặp có thời gian đỗ theo lịch sát chuẩn phục vụ: '+
