@@ -853,3 +853,42 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  .v19-report-sheet.v322-two-page table th,
  .v19-report-sheet.v322-two-page table td{padding:2px 3px}
 }
+
+
+/* V3.24 · data-first department entry + accessible ADMIN account management */
+#v300Root .v324-dept-head{margin-bottom:10px;padding:12px 16px}
+#v300Root .v324-entry-help{border:1px solid #dbe8ee;border-radius:10px;background:#f8fbfd;margin:0 0 11px;padding:9px 13px;color:#446273;font-size:12px}
+#v300Root .v324-entry-help summary{font-weight:750;cursor:pointer;list-style-position:inside}
+#v300Root .v324-entry-help p{margin:9px 0 3px;line-height:1.65}
+#v300Root .v324-auto-summary{padding:0;overflow:hidden;border-color:#dce6eb;box-shadow:none;margin-bottom:15px}
+#v300Root .v324-auto-summary>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;cursor:pointer;padding:13px 16px;list-style-position:inside}
+#v300Root .v324-auto-summary>summary>span:first-child{display:flex;flex-direction:column;gap:3px}
+#v300Root .v324-auto-summary>summary strong{font-size:12px;color:#24495c;letter-spacing:.015em}
+#v300Root .v324-auto-summary>summary small{font-size:11px;color:#6b8391}
+#v300Root .v324-auto-pills{display:flex;gap:7px;flex-wrap:wrap}
+#v300Root .v324-auto-pills b{border-radius:999px;background:#edf4f8;color:#2b6072;padding:5px 9px;font-size:11px;white-space:nowrap}
+#v300Root .v324-auto-body{border-top:1px solid #e0ebef;padding:11px 16px 15px}
+#v300Root .v324-auto-body>p{font-size:12px;color:#677c8a;margin:0 0 10px}
+#v300Root .v324-savebar{border-color:#bddbd9;box-shadow:0 7px 20px #102d3c12}
+#v300Root .v324-savebar .v300-primary{font-weight:800;white-space:nowrap}
+#v300Root .v300-card{margin-bottom:14px}
+#v300Root .v320-shift-card{background:#fafcfd}
+#v300Root .v320-staff-group{border-color:#e0e9ef}
+#v300Root [data-v300-staff]:focus-visible,#v300Root [data-v319-dh-total]:focus-visible,
+#v300Root [data-v300-cargo]:focus-visible{outline:2px solid #138e93;outline-offset:1px}
+#v300Root #tab-admin .rnsAdminHeader{margin-bottom:13px}
+#v300Root #tab-admin #rnsSharedPanel,#v300Root #tab-admin #rnsManagerEditPanel{border-color:#c9dde7}
+#v300Root #tab-admin .rnsResetQuick{background:#e9f4f2;border-color:#b7d8d0;color:#11614f;font-weight:750;margin-left:5px}
+#v300Root #tab-admin .rnsResetQuick:hover{background:#d7eee7}
+#v300Root .v324-admin-optional{background:#f7fbfd;border:1px solid #e0eaf0;border-radius:12px;margin:10px 0;padding:11px 15px}
+#v300Root .v324-admin-optional>summary{font-weight:700;color:#345a6b;cursor:pointer}
+#v300Root .v324-admin-optional>#rnsInvitePanel{margin:12px 0 0}
+@media(max-width:740px){
+ #v300Root .v324-auto-summary>summary{align-items:flex-start;padding:12px 13px}
+ #v300Root .v324-auto-pills{width:100%;gap:5px}
+ #v300Root .v324-auto-pills b{font-size:10px}
+ #v300Root .v324-savebar{position:static;gap:12px;padding:13px}
+ #v300Root .v324-savebar button{width:100%;min-width:0;min-height:44px}
+ #v300Root .v320-roster-grid{gap:10px}
+ #v300Root #tab-admin .rnsResetQuick{margin:5px 0 0}
+}
