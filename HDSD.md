@@ -296,3 +296,14 @@ Trực ban kiểm tra bảng chờ rồi bấm **LƯU DANH SÁCH ĐÃ DUYỆT** 
 - **PCS và giờ hàng sẵn sàng là tùy chọn**, không bị coi là “thiếu booking KG” khi chưa có nguồn. 0 kg chỉ hợp lệ khi Kho Hàng đã xác nhận thực sự.
 - Phần báo cáo tách tổng hàng đi và hàng đến, ưu tiên phương án xe kéo/xếp hàng đi theo booking và ground time; đối với hàng đến, lập phương án dỡ, tiếp nhận và vận chuyển về kho. Không cộng hàng đến vào trọng lượng hàng đi.
 - Bản V3.20 giữ nguyên cơ chế lưu Supabase theo số chuyến/ngày, không tự điền số liệu ví dụ và không thay đổi các dòng dữ liệu thật nếu chưa có thao tác lưu.
+
+
+## V3.21 – CHUẨN BÁO CÁO ĐIỀU HÀNH DÀNH CHO BAN TGĐ
+
+**Tham chiếu:** [HDSD_MANAGER_V3.21.md](HDSD_MANAGER_V3.21.md).
+
+Từ bản này, báo cáo Lần 1 và Lần 2 được biên tập theo quy tắc: (1) chỉ dùng dữ liệu có nguồn xác nhận; (2) nêu đúng chuyến, khung giờ, bãi và nguy cơ trước khi giao phương án; (3) phân biệt PVSĐ và ĐH khi liên hệ ATC, điều chuyển thiết bị; (4) không suy đoán số GSE khả dụng, quân số đủ/thiếu, booking hay kết quả xử lý; (5) không tạo câu khác nhau bằng cách đảo từ ngẫu nhiên.
+
+Nội dung 10 mục hiển thị thành các khối riêng; từng khối gồm **Nhận định – Phương án tổ chức phục vụ – Đơn vị thực hiện**. Phần cao điểm, phối hợp và các thẻ phân tích trên workspace cũng được dàn lại rõ hàng. Hai chú thích kỹ thuật về cơ cấu quân số và tên file nguồn Book4.xlsx được ẩn khỏi báo cáo nhìn thấy/Word/PDF, nhưng dữ liệu gốc không xóa. Các ghi chú đã chỉnh thủ công được giữ quyền ưu tiên.
+
+Bộ mẫu được kiểm tra bằng 6 phiên bản nguồn L1/L2 ngày 31/10, 01/11 và 02/11/2026; cách viết phải phù hợp dữ liệu từng ngày, kể cả khi Lần 1 chưa có bãi, Lần 2 có tuyến K2/K3, ngày có booking hàng đi hoặc ngày thiếu xác nhận.
