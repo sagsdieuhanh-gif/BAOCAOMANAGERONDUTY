@@ -480,6 +480,9 @@
    window.SagsExecutiveEditorialV321?.refine(c,topics,{
      peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
    });
+   window.SagsExecutiveEditorialV321?.support(c,peakRows,coord,{
+     peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
+   });
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,staffByShift,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị riêng được các phòng gửi để trình Ban TGĐ.'};
  }
 
