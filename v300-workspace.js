@@ -669,25 +669,37 @@
      }
    }
    if(u==='KHO'){
-     const seen=new Set(),available=new Set(dataRows().filter(x=>x.no&&!x.ferry).map(x=>String(x.no).toUpperCase().replace(/^##/,'')));
+     const model=root.SagsCargoBookingV320;
+     if(!model)return status('Chưa tải được bộ quy đổi booking KG/TẤN.',true);
+     const pairs=getFlights(),detail=state?.snap2?.payload?.source_detail||
+       state?.snap1?.payload?.source_detail||{};
+     const hasSchedule=pairs.length||detail.departures?.length||detail.arrivals?.length;
+     const seen=new Set();
      for(const row of page.querySelectorAll('[data-v300-cargo-row]')){
-       const flight_no=(row.querySelector('[data-v300-cargo="flight"]')?.value||'').trim().toUpperCase().replace(/^##/,''),
-         kg=(row.querySelector('[data-v300-cargo="kg"]')?.value||'').trim(),
+       const side=row.dataset.v320CargoSide;
+       const flight_no=model.normalize(row.querySelector('[data-v300-cargo="flight"]')?.value),
+         entered=(row.querySelector('[data-v300-cargo="kg"]')?.value||'').trim(),
+         unit=row.querySelector('[data-v300-cargo="unit"]')?.value||'',
          pcs=(row.querySelector('[data-v300-cargo="pcs"]')?.value||'').trim(),
          ready=(row.querySelector('[data-v300-cargo="ready"]')?.value||'').trim();
-       if(!flight_no&&!kg&&!pcs&&!ready)continue;
-       if(!/^[A-Z0-9]{2,20}$/.test(flight_no)||!kg)return status('Kho: mỗi dòng cần số hiệu chuyến và KG được xác nhận.',true);
-       if(available.size&&!available.has(flight_no))return status('Kho: chuyến '+flight_no+' không có trong lịch đi; vui lòng kiểm tra.',true);
-       if(seen.has(flight_no))return status('Kho: chuyến '+flight_no+' bị nhập trùng.',true);
+       if(!flight_no&&!entered&&!pcs&&!ready)continue;
+       if(!/^[A-Z0-9]{2,20}$/.test(flight_no)||entered==='')
+         return status('Kho: mỗi dòng phải có số hiệu chuyến và khối lượng booking.',true);
+       if(!['departure','arrival'].includes(side))return status('Không xác định được bảng HÀNG ĐI / HÀNG ĐẾN.',true);
+       const matched=model.direction(flight_no,pairs,detail);
+       if(hasSchedule&&matched!==side)
+         return status('Kho: '+flight_no+' không khớp danh sách chuyến '+(side==='departure'?'ĐI':'ĐẾN')+
+           ' trong lịch đã nhập. Kiểm tra số hiệu trước khi lưu.',true);
+       if(seen.has(flight_no))return status('Kho: booking '+flight_no+' bị nhập trùng.',true);
        seen.add(flight_no);
-       const weight=Number(kg),qty=pcs===''?null:Number(pcs);
-       if(!Number.isFinite(weight)||weight<0||(qty!=null&&(!Number.isInteger(qty)||qty<0)))
-         return status('Kho: KG phải là số không âm; PCS nếu nhập phải là số nguyên không âm.',true);
+       const kg=model.toKg(entered,unit),qty=pcs===''?null:Number(pcs);
+       if(kg==null)return status('Kho: booking '+flight_no+' chưa hợp lệ. Chọn đúng KG hoặc TẤN; khối lượng phải quy đổi thành số kg hợp lệ.',true);
+       if(qty!=null&&(!Number.isInteger(qty)||qty<0))return status('Kho: PCS '+flight_no+' phải là số nguyên không âm.',true);
        const ready_by_min=ready?Number(ready.split(':')[0])*60+Number(ready.split(':')[1]):null;
-       const original=(state.cargo||[]).find(x=>x.flight_no===flight_no);
-       if(original&&Number(original.cargo_kg)===weight&&Number(original.cargo_pcs??-1)===Number(qty??-1)&&
+       const original=(state.cargo||[]).find(x=>model.normalize(x.flight_no)===flight_no);
+       if(original&&Number(original.cargo_kg)===kg&&Number(original.cargo_pcs??-1)===Number(qty??-1)&&
           Number(original.ready_by_min??-1)===Number(ready_by_min??-1))continue;
-       cargo.push({service_date:day,flight_no,cargo_kg:weight,cargo_pcs:qty,ready_by_min,
+       cargo.push({service_date:day,flight_no,cargo_kg:kg,cargo_pcs:qty,ready_by_min,
          plan_note:original?.plan_note||'',updated_by:user().id,updated_at:now});
      }
    }
