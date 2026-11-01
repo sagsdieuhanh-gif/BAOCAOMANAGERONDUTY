@@ -76,5 +76,5 @@ assert.ok(topics[6].observation.includes('Hàng đến đã xác nhận: 3 chuy�
 assert.ok(topics[6].action.includes('dỡ')&&topics[6].action.includes('xếp hàng đi'));
 const ui=fs.readFileSync('index.html','utf8');
 assert.ok(ui.includes('v320-cargo-booking.js?v=3.20'));
-assert.ok(ui.includes("APP_VERSION='V3.21'"));
-console.log('PASS V3.21: separate cargo arrival/departure booking, kg/ton conversion, live totals and real-flight validation');
+assert.ok(ui.includes("APP_VERSION='V3.22'"));
+console.log('PASS V3.22: separate cargo arrival/departure booking, kg/ton conversion, live totals and real-flight validation');
