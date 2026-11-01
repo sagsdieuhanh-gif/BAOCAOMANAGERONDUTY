@@ -88,7 +88,7 @@
    const changeWord=n=>n>0?'tăng '+n+' chuyến':n<0?'giảm '+(-n)+' chuyến':'không đổi';
    facts[0]=a(
      'Dự kiến '+c.arrivals+' chuyến đến, '+c.departures+' chuyến đi ('+full+
-       ' hồ sơ/cặp khai thác).'+
+       ' cặp/chuyến trong kế hoạch).'+
        (changes?(arrivedChange===0&&departedChange===0?
          ' Sản lượng đến/đi không đổi so với Lần 1.':
          ' So với Lần 1: lượt đến '+changeWord(arrivedChange)+
@@ -123,10 +123,10 @@
      missing.length===full?
        'Lịch Lần 1 chưa có vị trí đỗ; chưa đủ căn cứ xác định chuyến chịu ảnh hưởng tại K2/K3.':
        'Vị trí đỗ: K1 '+sections.K1.length+', K2 '+sections.K2.length+', K3 '+
-       sections.K3.length+' hồ sơ/cặp.'+
+       sections.K3.length+' cặp/chuyến.'+
        (risky.length?' Các bãi có nguy cơ gián đoạn đường công vụ: '+
          unique(risky.map(x=>flight(x)+' bãi '+x.bay),5)+'.':'')+
-       (missing.length?' Còn '+missing.length+' hồ sơ chưa xác định khu/bãi.':''),
+       (missing.length?' Còn '+missing.length+' cặp/chuyến chưa xác định khu/bãi.':''),
      risky.length?'PVSĐ lập phương án tập kết xe thang, GSE và lực lượng trước giờ tàu bay lăn tại '+
        (sections.K2.length&&sections.K3.length?'K2/K3':sections.K2.length?'K2':'K3')+
        '; chủ động trao đổi ATC về thứ tự tàu lăn và xin phép qua đường công vụ khi cần. ĐH cập nhật các thay đổi bãi đến PVHK.':
@@ -168,7 +168,7 @@
      outbound.length?'Hàng đi: '+outbound.length+' chuyến, '+nf(totalKg(outbound))+' kg ('+
        nf(totalKg(outbound)/1000)+' tấn). Chuyến cần ưu tiên theo booking: '+
        unique(heavyOutbound.map(x=>x.flight_no+' '+nf(x.cargo_kg)+' kg'),4)+'.':
-       'Kho Hàng chưa cập nhật booking trọng lượng hàng đi trong hồ sơ.'+
+       'Kho Hàng chưa cập nhật booking trọng lượng hàng đi cho ngày khai thác.'+
        (inbound.length?' Hàng đến: '+inbound.length+' chuyến, '+nf(totalKg(inbound))+' kg.':''),
      outbound.length?
        'Kho Hàng xác nhận tiến độ bàn giao hàng đi cho '+unique(heavyOutbound.map(x=>x.flight_no),4)+
@@ -202,7 +202,7 @@
    const follow=has(c.note?.previous_issue)?String(c.note.previous_issue):
      has(qa.open_capa)?'QA/IT cập nhật tồn tại: '+String(qa.open_capa):
      hasGse?'Chưa có kết quả khắc phục được xác nhận đối với các nội dung kỹ thuật PVSĐ đã báo.':'';
-   facts[9]=a(follow||'Chưa có tồn tại cụ thể được các đơn vị ghi trong mục theo dõi của hồ sơ ngày.',
+   facts[9]=a(follow||'Các đơn vị chưa gửi nội dung tồn tại cụ thể cần xử lý.',
      follow?'Đơn vị phụ trách xác nhận thời hạn xử lý, phương án dự phòng và tình trạng khắc phục; ĐH chỉ báo cáo kết quả hoàn tất khi có xác nhận.':
        'Các đầu mối chỉ bổ sung tồn tại có ảnh hưởng khai thác kèm mã chuyến/thiết bị và thời điểm cần xử lý.',
      'Đơn vị liên quan; ĐH theo dõi');
