@@ -189,3 +189,10 @@
 - **Không hiển thị** đoạn chú thích “Nguồn: quân số xác nhận…” và dòng nguồn tên file “Nguồn Lần 2: Book4.xlsx…” trong báo cáo trình Ban TGĐ. Dữ liệu nguồn vẫn được giữ để kiểm tra khi cần.
 - Bộ lời nhận định/phương án mới dùng bãi, cặp chuyến, giờ khai thác, booking và GSE đã xác nhận; nhận diện cờ charter/ferry mâu thuẫn để yêu cầu xác minh thay vì khẳng định hai loại hình; không thay lời ĐH đã duyệt.
 - [HDSD_MANAGER_V3.21.md](HDSD_MANAGER_V3.21.md).
+
+
+### V3.22 – Báo cáo trình BGĐ gọn ~2 trang A4
+
+- Giữ lời nhận định V3.21, đưa bảng 10 nội dung trở lại 3 cột gọn, tương tự cách trình bày cũ; thu nhỏ khoảng cách và tối ưu PDF/Word A4 dọc, không cắt dữ liệu để ép số trang.
+- `##` chỉ xác định charter: các chuyến vẫn phục vụ bình thường, không phát cảnh báo hay mặc định ferry do ký hiệu này.
+- [HDSD_MANAGER_V3.22.md](HDSD_MANAGER_V3.22.md).
