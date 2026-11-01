@@ -123,6 +123,8 @@ Deno.serve(async(req:Request)=>{
       }
       if(!existing.active)return fail("ACCOUNT_INACTIVE",409,
         "Tài khoản Manager đang khóa, cần mở quyền trước khi cấp lại mật khẩu.");
+      if(!rnsAccount?.active)return fail("RNS_ACCESS_INACTIVE",409,
+        "RNS đang khóa quyền; nhân viên không thể thực hiện bước đổi mật khẩu tạm. Cần kiểm tra quyền RNS trước.");
       if(!target.user.email_confirmed_at)return fail("EMAIL_NOT_VERIFIED",409);
       const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#";
       const random:number[]=[],limit=Math.floor(256/alphabet.length)*alphabet.length;
