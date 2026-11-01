@@ -493,6 +493,34 @@
    // Never prepend a 195-character excerpt or clip an existing sentence.
    const updateTopic=x=>x;
    const tr=(arr,th)=>'<tr>'+arr.map(x=>(th?'<th>':'<td>')+esc(x).replace(/\n/g,'<br>')+(th?'</th>':'</td>')).join('')+'</tr>';
+   // Executive-facing document: one issue per aligned block, never a dense
+   // four-column wall of prose. All text escaped, including manual notes.
+   const readable=(raw)=>{
+     const text=String(raw??'').trim();
+     if(!text)return '<span class="v321-muted">Không có nội dung được xác nhận.</span>';
+     const items=text.split(/(?:\r?\n+|;\s+(?=[A-ZÀ-ỸĐ0-9])|(?<=[.!?])\s+(?=[A-ZÀ-ỸĐ]))/u)
+       .map(x=>x.trim()).filter(Boolean);
+     return items.map(x=>'<div class="v321-content-line">'+esc(x)+'</div>').join('');
+   };
+   const executiveBlock=(heading,rows,kind='topic')=>
+     '<section class="v321-report-block v321-'+kind+'"><h4 class="v321-block-heading">'+esc(heading)+'</h4>'+
+     '<table class="v321-detail-table"><tbody>'+
+       rows.filter(x=>String(x[1]??'').trim()).map(([label,content])=>
+         '<tr><td class="v321-key">'+esc(label)+'</td><td class="v321-value">'+readable(content)+'</td></tr>').join('')+
+     '</tbody></table></section>';
+   const topicBlocks=(data.topics||[]).map((x,i)=>{
+     const y=updateTopic(x,i);
+     return executiveBlock(y.title||String(i+1),[
+       ['Nhận định',y.observation],['Phương án tổ chức phục vụ',y.action],['Đơn vị thực hiện',y.owner]
+     ]);
+   }).join('');
+   const peakBlocks=(data.peakRows||[]).map(x=>executiveBlock(x.slot,[
+     ['Cặp chuyến',x.flight],['Nguy cơ',x.risk],['Phương án',x.action]
+   ],'peak')).join('');
+   const coordinationBlocks=(data.coord||[]).map(x=>executiveBlock(x[0],[
+     ['Yêu cầu phối hợp',x[1]],['Đơn vị',x[2]],['Mốc xác nhận',x[3]]
+   ],'coord')).join('');
+
    return '<div class="v19-report-sheet v211-compact"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
     '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO PHÂN TÍCH LẦN 2 · ĐÃ DUYỆT':'BẢN DỰ BÁO LẦN 1 · CHỜ NGUỒN LẦN 2')+'</strong><span>'+(data.c.revision===2?'Bãi đỗ, gate, booking và các mốc khai thác được phân tích theo dữ liệu Lần 2, đối chiếu Lần 1; boarding chỉ được đánh giá khi nguồn có giờ.':'Sau khi ĐH duyệt và lưu lịch ARRIVAL/DEPARTURE, phân tích Lần 2 sẽ có ở đây.')+'</span></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr([(isL2?'Đối chiếu Lần 1 / Lần 2':'Biến động so với ngày hôm trước'),data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
@@ -502,7 +530,7 @@
          '. Tổng lượt có đủ phân loại: '+data.operational.hours.verified+
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
-    '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,y.observation,y.action,y.owner])}).join('')+'</table>'+
+    '<h3>II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ</h3>'+topicBlocks+
     '<h4>QUÂN SỐ THEO CA ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ</h4>'+
     '<table class="v318-staff-by-shift"><thead><tr><th>Bộ phận</th><th>CA SÁNG</th><th>CA TỐI</th></tr></thead><tbody>'+
       (data.staffByShift||[]).map(x=>'<tr><th scope="row">'+esc(x.label)+'</th>'+
@@ -511,13 +539,13 @@
             (g[shift]==null?'CHỜ XÁC NHẬN':esc(g[shift])+(g.formatted?'':' người'))+'</span>').join('')+
         '</td>').join('')+'</tr>').join('')+
       '</tbody></table>'+
-    '<p class="v19-footnote">Nguồn: quân số xác nhận theo từng ca và tổ/đội. PVHK gồm Cán bộ Phòng, đội đi và đội đến. PVSĐ gồm Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT, Xưởng SC; SKO/TC thể hiện đúng từng bộ phận. Ô trống là chưa xác nhận, số 0 là giá trị đã xác nhận. SKYONE tổng của cấu trúc cũ không tự phân bổ sang các nhóm mới; không cộng các nhóm vào tổng PVSĐ khi chưa xác nhận không trùng người.</p>'+
-    (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
-    (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
-    '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
-    '<h3>IV. PHỐI HỢP THỰC HIỆN</h3><table>'+tr(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],true)+data.coord.map(x=>tr(x)).join('')+'</table>'+
+
+    (data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
+    (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':'')+
+    '<h3>III. KHUNG GIỜ CẦN ƯU TIÊN ĐIỀU PHỐI</h3>'+peakBlocks+
+    '<h3>IV. PHÂN CÔNG PHỐI HỢP VÀ MỐC KIỂM SOÁT</h3>'+coordinationBlocks+
     '<h3>V. KIẾN NGHỊ BAN TGĐ</h3><p>'+esc(data.recommendation)+'</p>'+
-    '<p class="v19-footnote">Nguồn '+(data.c.revision===2?'Lần 2':'Lần 1')+': '+esc(data.c.sourceFile||'Lịch đã lưu; chờ xác nhận tên file')+'. Lần 1 được giữ làm mốc so sánh.</p></div>';
+    '</div>';
  }
  let lib=null;
  async function ensureDocx(){
@@ -568,7 +596,7 @@
        t(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],data.coord,[2650,3150,1650,3050]),
        hd('V. KIẾN NGHỊ BAN TGĐ'),
        p(data.recommendation),
-       p('Nguồn Dự báo Lần 1: '+(data.c.sourceFile||'Chưa chốt')+'. Xem Radar trực tuyến: '+SITE,{size:17,before:150})
+       p('SAGS-CXR | Phòng Điều hành',{size:17,before:150})
      ]}]
    });
  }
