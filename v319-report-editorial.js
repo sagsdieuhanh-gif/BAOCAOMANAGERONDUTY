@@ -72,7 +72,7 @@
        'ĐH rà soát các mốc STA/STD, PVHK kiểm tra giờ mở quầy và gate; PVSĐ điều phối thiết bị theo thứ tự tàu đến thực tế.',
      'ĐH · PVSĐ · PVHK');
    const charter=deps.filter(x=>x.charter||String(x.no||'').startsWith('##'));
-   const ferry=deps.filter(x=>x.ferry);
+   const ferry=deps.filter(x=>x.ferry&&!x.charter);
    result[2]=record(
      (wide.length?'Tàu thân rộng A330/B777: '+list(wide.map(f=>name(f)+
        (f.bay!=null?' (bãi '+f.bay+')':'')),5)+'.':'Không ghi nhận loại A330/B777 trong lịch đã nhập.')+
@@ -80,7 +80,7 @@
      (ferry.length?' Chuyến có ký hiệu ferry: '+list(ferry.map(x=>x.no),5)+'.':''),
      (wide.length?'PVSĐ chuẩn bị xe thang, phương tiện và GSE đúng cấu hình tàu; PVHK phân bổ nhân sự làm thủ tục, boarding và phục vụ khách tại tàu bay theo booking đã xác nhận. ':
        'Các đơn vị sử dụng danh mục trang thiết bị tương ứng loại tàu trên lịch. ')+
-     (charter.length?'ĐH chủ động làm rõ yêu cầu phục vụ riêng với hãng charter, sau đó chuyển PVSĐ và Kho Hàng chuẩn bị. ':'')+
+     (charter.length?'Chuyến charter tiếp tục phục vụ bình thường theo lịch, trừ khi hãng có yêu cầu được xác nhận. ':'')+
      (ferry.length?'ĐH xác nhận phạm vi dịch vụ ferry với hãng, không mặc định áp dụng định mức chuyến chở khách.':''),
      'ĐH · PVSĐ · PVHK · Kho Hàng');
    result[3]=record(

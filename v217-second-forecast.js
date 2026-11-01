@@ -76,7 +76,7 @@
      const provisional=rawNo.replace(/^##/,'');
      if(!/^[A-Z0-9]{2,20}$/.test(provisional)){fatal.push(kind+' dòng '+(i+1)+': số hiệu '+rawNo+' không hợp lệ.');continue;}
      // ## is the schedule convention for a CHARTER (non-scheduled) flight, not a parse error.
-     if(rawNo!==provisional)issues.push(kind+' '+provisional+': chuyến thuê chuyến không thường lệ (CHARTER), ký hiệu ## theo lịch nguồn.');
+     // ## is identification only: preserve charter=true, no issue or abnormal-service flag.
      if(seen.has(provisional)){fatal.push(kind+' dòng '+(i+1)+': trùng số hiệu '+provisional+'.');continue}
      seen.add(provisional);
      const scheduled=time(cell(r,kind==='ARRIVAL'?'STA':'STD'));
@@ -158,7 +158,7 @@
      flights:pairs,issues,source_detail:{arrivals:arrs,departures:deps}};
    return {payload,stats:{arrival_count:arrs.length,departure_count:deps.length,matched_reg:pairs.filter(x=>x.match_method==='REG').length,
      matched_route:pairs.filter(x=>x.match_method==='ROUTE_UNIQUE').length,unmatched:pairs.filter(x=>/_ONLY$/.test(x.match_method)).length,
-     widebody:deps.filter(x=>/A330|B777/i.test(x.type)).length,ferry:deps.filter(x=>x.ferry).length,
+     widebody:deps.filter(x=>/A330|B777/i.test(x.type)).length,ferry:deps.filter(x=>x.ferry&&!x.charter).length,
      booked:deps.filter(x=>x.booking_parts).length},fatal};
  }
  function parseTables(aRows,dRows){
@@ -168,7 +168,7 @@
    fatals.push(...a.fatal,...d.fatal);
    if(!a.flights.length||!d.flights.length)throw Error('Cần có chuyến đến và chuyến đi hợp lệ.');
    const x=buildPayload(a.flights,d.flights,da,issues,fatals);
-   for(const f of d.flights)if(f.ferry&&f.flight_type==='PAX')issues.push(f.no+': SSR/Nature cho thấy FERRY nhưng FlightType là PAX; cần xác nhận tính chất chuyến.');
+   for(const f of d.flights)if(f.ferry&&!f.charter&&f.flight_type==='PAX')issues.push(f.no+': SSR/Nature cho thấy FERRY nhưng FlightType là PAX; cần xác nhận tính chất chuyến.');
    return {meta:{service_date:da,source_sheet:'ARRIVAL+DEPARTURE'},arrivals:a.flights,departures:d.flights,
      payload:x.payload,stats:x.stats,issues,fatal:fatals};
  }
@@ -218,7 +218,7 @@
  function analyze(payload){
    const pairs=payload.flights||[],deps=payload.source_detail?.departures||[];
    const wide=deps.filter(x=>/A330|B777/i.test(x.type));
-   const ferry=deps.filter(x=>x.ferry);
+   const ferry=deps.filter(x=>x.ferry&&!x.charter);
    const high=deps.filter(x=>x.booking_sum!=null&&x.booking_sum>=300);
    const night=deps.filter(x=>x.t>=1080);
    const gateCheck=[];

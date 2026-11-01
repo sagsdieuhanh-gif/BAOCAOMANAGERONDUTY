@@ -116,10 +116,11 @@
   // Lay out report content in portrait pages without shrinking the whole
   // landscape report into unreadable A4. Long table cells may flow onto the next
   // sheet; the table heading is repeated and no confirmed text is discarded.
-  async function renderPdfPages(blocks){
+  async function renderPdfPages(blocks,options={}){
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất PDF.');
-    const {width:W,height:H,margin:M,footer}=paper;
-    const bottom=H-M-footer,contentW=W-M*2,top=M+18;
+    const compact=options.compactReport===true,density=compact?(options.density??1):1;
+    const {width:W,height:H,footer}=paper,M=compact?43:paper.margin;
+    const bottom=H-M-footer,contentW=W-M*2,top=M+(compact?10:18);
     const pages=[];let canvas,ctx,y;
     const font=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px Arial, "Times New Roman", sans-serif';};
     function newPage(){
@@ -131,6 +132,7 @@
     }
     function free(height){if(y+height>bottom)newPage();}
     function paragraph(value,{size=19,bold=false,color='#243C4F',after=11,indent=0,heading=false}={}){
+      if(compact){size=Math.max(14,Math.round(size*density));after=Math.round(after*.47);}
       font(size,bold);
       const content=lines(ctx,value,contentW-indent),lh=Math.ceil(size*1.33);
       if(heading&&y+Math.min(content.length,2)*lh+after>bottom)newPage();
@@ -143,7 +145,12 @@
     function ratiosFor(rows,cols){
       const head=(rows[0]||[]).join(' ').toLowerCase();
       if(cols===2)return [.28,.72];
-      if(cols===3)return [.21,.40,.39];
+      if(cols===3){
+        if(/nhận định trọng tâm|phương án \/ đơn vị thực hiện/i.test(head))return [.19,.35,.46];
+        if(/cặp chuyến \/ nguy cơ/i.test(head))return [.17,.41,.42];
+        if(/mốc xác nhận/i.test(head))return [.20,.47,.33];
+        return [.21,.40,.39];
+      }
       if(cols===4){
         if(/đơn vị liên quan/.test(head)&&/nhận định/.test(head))return [.16,.29,.43,.12];
         if(/thời hạn/.test(head))return [.18,.49,.13,.20];
@@ -156,9 +163,12 @@
     function table(rows,hasHeader){
       if(!rows.length)return;
       const cols=Math.max(1,...rows.map(r=>r.length)),ratios=ratiosFor(rows,cols);
-      const widths=ratios.map(v=>v*contentW),pad=7,fs=16,lh=21,minHeight=36;
+      const widths=ratios.map(v=>v*contentW),pad=compact?4:7,
+        fs=compact?Math.max(14,Math.round(16*density)):16,
+        lh=compact?Math.max(17,Math.round(18*density)):21,
+        minHeight=compact?25:36;
       const wrapRow=(row,isHead)=>{
-        font(isHead?17:fs,isHead);
+        font(isHead?(compact?fs:17):fs,isHead);
         return Array.from({length:cols},(_,i)=>lines(ctx,String(row[i]??''),Math.max(24,widths[i]-pad*2)));
       };
       const prepared=rows.map((r,i)=>wrapRow(r,hasHeader&&i===0));
@@ -172,11 +182,11 @@
           ctx.strokeStyle='#B7C9D5';ctx.lineWidth=1;ctx.strokeRect(x,y,widths[i],rh);
           ctx.fillStyle=isHead?'#fff':/chờ xác nhận|chưa xác nhận/i.test(rows[0]?.[i]||'')?'#233B4C':'#243B4F';
           // Highlight only the lines containing unconfirmed data, not an entire table column.
-          font(isHead?17:fs,isHead);
+          font(isHead?(compact?fs:17):fs,isHead);
           part.forEach((line,j)=>{
             if(!isHead&&/chờ xác nhận|chưa xác nhận/i.test(line))ctx.fillStyle='#B91C1C';
             else ctx.fillStyle=isHead?'#fff':'#243B4F';
-            ctx.fillText(line,x+pad,y+pad+(isHead?17:fs)+j*lh);
+            ctx.fillText(line,x+pad,y+pad+fs+j*lh);
           });
           x+=widths[i];
         }
@@ -204,25 +214,25 @@
           if(at<totalLines){newPage();if(!isHead)repeatHeader();}
         }
       }
-      y+=13;
+      y+=compact?5:13;
     }
     newPage();
     for(const block of blocks){
       if(block.kind==='heading'){
-        free(46);
-        paragraph(block.text,{size:block.level<=2?25:block.level===3?21:19,
-          bold:true,color:'#145278',after:14,heading:true});
+        free(compact?25:46);
+        paragraph(block.text,{size:compact?(block.level<=2?21:block.level===3?18:16):(block.level<=2?25:block.level===3?21:19),
+          bold:true,color:'#145278',after:compact?8:14,heading:true});
       }else if(block.kind==='paragraph'){
-        paragraph(block.text,{size:19,color:block.pending?'#B91C1C':'#273E52'});
+        paragraph(block.text,{size:compact?16:19,color:block.pending?'#B91C1C':'#273E52'});
       }else if(block.kind==='table'){
         table(block.rows,block.header);
       }else if(block.kind==='image'){
         const image=await svgImage(block.svg,block.src);
         const naturalW=Math.max(1,image.naturalWidth||image.width||1);
         const naturalH=Math.max(1,image.naturalHeight||image.height||1);
-        const targetW=block.logo?150:contentW;
-        const targetH=Math.min(block.logo?190:480,Math.round(targetW*naturalH/naturalW));
-        free(targetH+18);ctx.drawImage(image,M,y,targetW,targetH);y+=targetH+16;
+        const targetW=block.logo?(compact?105:150):contentW;
+        const targetH=Math.min(block.logo?(compact?65:190):(compact?190:480),Math.round(targetW*naturalH/naturalW));
+        free(targetH+(compact?7:18));ctx.drawImage(image,M,y,targetW,targetH);y+=targetH+(compact?6:16);
       }
     }
     pages.forEach((p,i)=>{
@@ -232,41 +242,52 @@
     });
     return pages;
   }
-  async function exportPdf(blocks){
-    const canvases=await renderPdfPages(blocks);
+  async function exportPdf(blocks,options={}){
+    // Aim for two readable A4 portrait pages without clipping any confirmed data.
+    // Never force content into two pages at an unreadable font size.
+    let canvases=await renderPdfPages(blocks,{...options,density:1});
+    if(options.compactReport&&canvases.length>2){
+      for(const density of [.95,.9,.86]){
+        const attempt=await renderPdfPages(blocks,{...options,density});
+        canvases=attempt;
+        if(attempt.length<=2)break;
+      }
+    }
     const jpegs=canvases.map(canvas=>({
       bytes:toBytes(canvas.toDataURL('image/jpeg',.90)),
       width:canvas.width,height:canvas.height
     }));
     return pdfFromJpegs(jpegs,{orientation:'portrait'});
   }
-  function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false}={}){
+  function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false,compact=false}={}){
     const lines=String(v??'').split('\n');
     const run=lines.map((line,i)=>'<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/></w:rPr>'+(i?'<w:br/>':'')+'<w:t xml:space="preserve">'+xml(line)+'</w:t></w:r>').join('');
-    return '<w:p><w:pPr><w:spacing w:before="'+(breakBefore?180:50)+'" w:after="90"/></w:pPr>'+run+'</w:p>';
+    return '<w:p><w:pPr><w:spacing w:before="'+(compact?(breakBefore?75:14):(breakBefore?180:50))+'" w:after="'+(compact?25:90)+'"/></w:pPr>'+run+'</w:p>';
   }
-  function wordTable(rows,header){
+  function wordTable(rows,header,compact=false){
     if(!rows.length)return '';
     const cols=Math.max(1,...rows.map(x=>x.length));
     const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
-    const widths=(cols===2?[3900,10800]:cols===3?[2800,5900,6000]:cols===4?(control?[2500,4100,6350,1750]:[2800,3150,4200,4550]):cols===5?[3550,2750,2500,3000,2900]:Array(cols).fill(Math.floor(14700/cols)));
-    let table='<w:tbl><w:tblPr><w:tblW w:w="14700" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="5" w:color="B7CBD8"/><w:bottom w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideH w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideV w:val="single" w:sz="5" w:color="B7CBD8"/></w:tblBorders></w:tblPr><w:tblGrid>'+widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join('')+'</w:tblGrid>';
+    const widths=compact?(cols===2?[2900,7700]:cols===3?[2050,3750,4800]:cols===4?[1800,2600,4400,1800]:cols===5?[2350,1800,1800,2450,2200]:Array(cols).fill(Math.floor(10600/cols))):
+      (cols===2?[3900,10800]:cols===3?[2800,5900,6000]:cols===4?(control?[2500,4100,6350,1750]:[2800,3150,4200,4550]):cols===5?[3550,2750,2500,3000,2900]:Array(cols).fill(Math.floor(14700/cols)));
+    let table='<w:tbl><w:tblPr><w:tblW w:w="'+(compact?10600:14700)+'" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="5" w:color="B7CBD8"/><w:bottom w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideH w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideV w:val="single" w:sz="5" w:color="B7CBD8"/></w:tblBorders></w:tblPr><w:tblGrid>'+widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join('')+'</w:tblGrid>';
     rows.forEach((r,ri)=>{
       table+='<w:tr>'+(Array.from({length:cols},(_,i)=>{
         const content=String(r[i]??''),isHead=header&&ri===0;
-        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="90" w:type="dxa"/><w:left w:w="90" w:type="dxa"/><w:right w:w="90" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/></w:tcMar></w:tcPr>';
-        return '<w:tc>'+cellPr+paragraph(content,{size:17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B'})+'</w:tc>';
+        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="'+(compact?35:90)+'" w:type="dxa"/><w:left w:w="'+(compact?40:90)+'" w:type="dxa"/><w:right w:w="'+(compact?40:90)+'" w:type="dxa"/><w:bottom w:w="'+(compact?35:90)+'" w:type="dxa"/></w:tcMar></w:tcPr>';
+        return '<w:tc>'+cellPr+paragraph(content,{size:compact?15:17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B',compact})+'</w:tc>';
       })).join('')+'</w:tr>';
     });
     return table+'</w:tbl>';
   }
-  async function exportDocx(blocks){
+  async function exportDocx(blocks,options={}){
+    const compact=options.compactReport===true;
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất Word.');
     let body='',images=[],rels='';
     for(const b of blocks){
-      if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:b.level<=2?29:b.level===3?24:21,color:'175478',breakBefore:true});
-      else if(b.kind==='paragraph')body+=paragraph(b.text,{size:20,color:b.pending?'B91C1C':'233B4D'});
-      else if(b.kind==='table')body+=wordTable(b.rows,b.header);
+      if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:compact?(b.level<=2?23:b.level===3?19:17):(b.level<=2?29:b.level===3?24:21),color:'175478',breakBefore:true,compact});
+      else if(b.kind==='paragraph')body+=paragraph(b.text,{size:compact?16:20,color:b.pending?'B91C1C':'233B4D',compact});
+      else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact);
       else if(b.kind==='image'){
         const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');
         canvas.width=Math.max(100,img.width||1152);canvas.height=Math.max(80,img.height||250);
@@ -274,11 +295,11 @@
         const png=toBytes(canvas.toDataURL('image/png')),id=images.length+1,relId='rId'+id;
         images.push(['word/media/chart'+id+'.png',png]);
         rels+='<Relationship Id="'+relId+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/chart'+id+'.png"/>';
-        const width=b.logo?118:820,height=Math.round(width*canvas.height/canvas.width),cx=width*9525,cy=height*9525;
+        const width=b.logo?(compact?90:118):(compact?720:820),height=Math.min(compact&&!b.logo?165:9999,Math.round(width*canvas.height/canvas.width)),cx=width*9525,cy=height*9525;
         body+='<w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:docPr id="'+id+'" name="Radar '+id+'"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Radar '+id+'"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+relId+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
       }
     }
-    body+='<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="660" w:right="660" w:bottom="660" w:left="660" w:header="300" w:footer="300"/></w:sectPr>';
+    body+='<w:sectPr>'+(compact?'<w:pgSz w:w="11906" w:h="16838"/>':'<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>')+'<w:pgMar w:top="'+(compact?500:660)+'" w:right="'+(compact?500:660)+'" w:bottom="'+(compact?500:660)+'" w:left="'+(compact?500:660)+'" w:header="300" w:footer="300"/></w:sectPr>';
     const doc='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>'+body+'</w:body></w:document>';
     const files=[
       ['[Content_Types].xml','<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>'],
@@ -311,9 +332,11 @@
   }
   async function exportElement(el,format,filename,options={}){
     if(!el)throw Error('Không tìm thấy nội dung xem trước. Hãy chọn ngày và tải lịch bay.');
-    const blocks=blocksFromDOM(el,format==='pdf'?options:{});
+    const compactReport=el.classList?.contains('v322-two-page')===true;
+    const exportOptions={...options,compactReport};
+    const blocks=blocksFromDOM(el,format==='pdf'?exportOptions:{});
     if(!blocks.length)throw Error('Báo cáo không có nội dung hợp lệ để xuất.');
-    const blob=format==='docx'?await exportDocx(blocks):format==='pdf'?await exportPdf(blocks):null;
+    const blob=format==='docx'?await exportDocx(blocks,exportOptions):format==='pdf'?await exportPdf(blocks,exportOptions):null;
     if(!blob||blob.size<150)throw Error('Không tạo được file '+format.toUpperCase()+'.');
     download(blob,filename);
     return {bytes:blob.size,blocks:blocks.length,format};

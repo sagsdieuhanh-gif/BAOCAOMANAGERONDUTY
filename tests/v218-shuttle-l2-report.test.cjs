@@ -50,7 +50,7 @@ assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complet
 const report=fs.readFileSync('v19-report.js','utf8');
 const early=report.indexOf("    (data.dailyBrief?'<h3>PHƯƠNG ÁN PHỤC VỤ LẦN 2");
 const ten=report.indexOf("    '<h3>II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN");
-assert.ok(early===-1&&ten>=0&&report.includes('topicBlocks=(data.topics||[]).map'),'L2 retains one unified ten-topic executive analysis, formatted as readable per-issue blocks');
+assert.ok(early===-1&&ten>=0&&report.includes('topicsTable='),'L2 retains one unified ten-topic executive analysis, formatted as compact aligned table');
 assert.ok(report.includes("renderHtml:html")&&report.includes('v218ReportStatus'));
 const exporter=fs.readFileSync('report-export-v29.js','utf8');
 assert.ok(exporter.includes("(active.revision===2?'2':'1')"),'Official file must be labeled L1/L2');
