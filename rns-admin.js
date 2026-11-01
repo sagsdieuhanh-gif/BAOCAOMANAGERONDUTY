@@ -3,7 +3,7 @@
  const $=id=>document.getElementById(id);
  const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const roles={ADMIN:'ADMIN (RNS)',DH:'ĐIỀU HÀNH',KTS:'PVSĐ',PVHK:'PVHK',KHO:'KHO HÀNG',QA:'QA',IT:'IT',VIEWER:'CHỈ XEM'};
- let loading=null,accounts=[];
+ let loading=null,accounts=[],picked=null,accountBusy=false;
  async function invoke(action,payload={}){
    if(typeof unit==='undefined'||unit!=='ADMIN')throw Error('Chỉ ADMIN của Radar được quản lý tài khoản.');
    if(typeof sb==='undefined'||!sb)throw Error('Không có kết nối xác thực Supabase.');
@@ -29,7 +29,8 @@
      (x.radar_unit&&!x.radar_active?' · ĐÃ KHÓA':'')+'</td>'+
      '<td>'+(x.radar_unit==='ADMIN'?'—':
        '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
-       '" data-rns-name="'+esc(x.display_name||'')+'">CHỌN CẤP QUYỀN</button>')+'</td></tr>').join('');
+       '" data-rns-name="'+esc(x.display_name||'')+'">CẤP QUYỀN</button>'+
+       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA / RESET</button>':'') )+'</td></tr>').join('');
    div.innerHTML='<div class="rnsTableHead">'+visible.length+' / '+accounts.length+' tài khoản dùng chung RNS/Supabase</div>'+
      '<div class="tablewrap"><table class="rnsSharedTable"><thead><tr><th>EMAIL RNS</th><th>HỌ TÊN</th><th>QUYỀN RNS</th><th>QUYỀN RADAR</th><th>THAO TÁC</th></tr></thead><tbody>'+
      (rows||'<tr><td colspan="5">Không có tài khoản phù hợp.</td></tr>')+'</tbody></table></div>';
