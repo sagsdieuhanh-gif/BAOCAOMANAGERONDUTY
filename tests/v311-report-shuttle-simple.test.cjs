@@ -7,7 +7,7 @@ const model=globalThis.SagsShuttleModel,grid=globalThis.SagsShuttleGridV24._test
 const ws=fs.readFileSync('v300-workspace.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(ws.includes("function cargoEntryRow(x={},side='departure')"),'Must support multiple cargo booking rows by direction');
-assert.ok(ws.includes('data-v300-cargo-row')&&ws.includes('v320CargoBodydeparture')&&ws.includes('v320CargoBodyarrival'),'Both outgoing and incoming cargo tables exist');
+assert.ok(ws.includes('data-v300-cargo-row')&&ws.includes('v320CargoBody')&&ws.includes("table('departure'")&&ws.includes("table('arrival'"),'Both outgoing and incoming cargo tables exist');
 assert.ok(ws.includes("if(cmd==='add-cargo')")&&ws.includes('if(cargo.length)await write('),'Cargo entries must be batched');
 assert.ok(ws.includes("const primary={DH:['COORD']"),'Primary crew inputs shown first');
 assert.ok(ws.includes('v311-advanced')&&ws.includes('v311-source-grid'),'Source data must not be retyped');
