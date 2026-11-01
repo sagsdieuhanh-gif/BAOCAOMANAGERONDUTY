@@ -97,6 +97,12 @@
      const toolbar=app.querySelector(':scope > .panel.row.space');
      if(toolbar){$('v300DaySlot').appendChild(toolbar);}
      rootNode.addEventListener('click',handleClick);
+     rootNode.addEventListener('input',event=>{
+       if(event.target.closest('[data-v320-cargo-side]'))updateCargoTotals();
+     });
+     rootNode.addEventListener('change',event=>{
+       if(event.target.closest('[data-v320-cargo-side]'))updateCargoTotals();
+     });
      mounted=true;document.body.classList.add('v300-ready');
      $('day')?.addEventListener('change',()=>{draftReset();refresh()});
    }
@@ -348,13 +354,78 @@
      '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo hôm trước</button><span>Phải kiểm tra lại trước khi xác nhận ngày mới</span></div>'+
      '<p class="v300-hint">Ô trống = chưa xác nhận · 0 = xác nhận không có người · Không cộng trùng nhân sự kiêm nhiệm.</p>');
  }
- function cargoEntryRow(x={}){
-   const minute=x.ready_by_min;
-   const ready=minute==null?'':String(Math.floor((Number(minute)%1440)/60)).padStart(2,'0')+':'+String(Number(minute)%60).padStart(2,'0');
-   return '<tr data-v300-cargo-row><td><input data-v300-cargo="flight" aria-label="Chuyến bay đi" list="v300FlightOptions" maxlength="20" placeholder="Số chuyến" value="'+H(x.flight_no||'')+'"></td>'+
-     '<td><input data-v300-cargo="kg" aria-label="Booking KG" type="number" min="0" step="any" placeholder="KG" value="'+H(x.cargo_kg??'')+'"></td>'+
-     '<td><input data-v300-cargo="pcs" aria-label="PCS" type="number" min="0" step="1" placeholder="Không bắt buộc" value="'+H(x.cargo_pcs??'')+'"></td>'+
-     '<td><input data-v300-cargo="ready" aria-label="Giờ hàng sẵn sàng" type="time" value="'+H(ready)+'"></td></tr>';
+ function cargoEntryRow(x={},side='departure'){
+   const minute=x.ready_by_min,hasSaved=x.cargo_kg!=null&&x.flight_no;
+   const weight=hasSaved?Number(x.cargo_kg):null;
+   // Existing kg stay mathematically equivalent; large confirmed bookings show
+   // tonnes for ease of reading (e.g. 2500 kg → 2.5 tấn).
+   const unit=hasSaved&&weight>=1000?'TAN':hasSaved?'KG':side==='departure'?'TAN':'KG';
+   const amount=hasSaved?(unit==='TAN'?weight/1000:weight):'';
+   const ready=minute==null?'':String(Math.floor((Number(minute)%1440)/60)).padStart(2,'0')+
+      ':'+String(Number(minute)%60).padStart(2,'0');
+   const title=side==='departure'?'đi':'đến';
+   return '<tr data-v300-cargo-row data-v320-cargo-side="'+side+'">'+
+     '<td><input data-v300-cargo="flight" aria-label="Chuyến bay '+title+'" '+
+       'list="v320CargoFlights'+side+'" maxlength="20" placeholder="Số chuyến" value="'+H(x.flight_no||'')+'"></td>'+
+     '<td><input data-v300-cargo="kg" aria-label="Trọng lượng booking chuyến '+title+'" '+
+       'inputmode="decimal" type="number" min="0" step="any" placeholder="0" value="'+H(amount)+'"></td>'+
+     '<td><select data-v300-cargo="unit" aria-label="Đơn vị trọng lượng booking">'+
+       '<option value="KG" '+(unit==='KG'?'selected':'')+'>KG</option>'+
+       '<option value="TAN" '+(unit==='TAN'?'selected':'')+'>TẤN</option></select></td>'+
+     '<td><input data-v300-cargo="pcs" type="number" min="0" step="1" '+
+       'aria-label="Số kiện (tùy chọn)" placeholder="—" value="'+H(x.cargo_pcs??'')+'"></td>'+
+     '<td><input data-v300-cargo="ready" aria-label="Hàng sẵn sàng (tùy chọn)" '+
+       'type="time" value="'+H(ready)+'"></td></tr>';
+ }
+ function cargoUnitTables(){
+   const model=root.SagsCargoBookingV320;
+   const pairs=getFlights(),detail=state?.snap2?.payload?.source_detail||
+     state?.snap1?.payload?.source_detail||{};
+   const split=model?.split((state?.cargo||[]).filter(x=>x.flight_no),pairs,detail)||
+     {departure:[],arrival:[],unmatched:[]};
+   const flightList=(side)=>[...new Set([
+     ...pairs.map(x=>side==='departure'?x.departure:x.arrival),
+     ...(detail[side==='departure'?'departures':'arrivals']||[]).map(x=>x.no||x.flight_no)
+   ].filter(Boolean))].map(x=>'<option value="'+H(model.normalize(x))+'"></option>').join('');
+   const table=(side,label)=>'<section class="v320-cargo-panel" data-v320-booking-panel="'+side+'">'+
+     '<h3>'+label+'</h3><datalist id="v320CargoFlights'+side+'">'+flightList(side)+'</datalist>'+
+     '<div class="v300-table-wrap v320-cargo-scroll"><table class="v300-table v320-cargo-table">'+
+     '<thead><tr><th>Chuyến bay</th><th>Booking</th><th>Đơn vị</th><th>PCS</th><th>Sẵn sàng</th></tr></thead>'+
+     '<tbody id="v320CargoBody'+side+'">'+
+        split[side].map(x=>cargoEntryRow(x,side)).join('')+cargoEntryRow({},side)+
+     '</tbody><tfoot><tr><th>TỔNG</th><td colspan="4"><strong data-v320-cargo-total="'+side+'">'+
+       H(model.formattedTotal(model.total(split[side])))+'</strong></td></tr></tfoot></table></div>'+
+     '<button type="button" class="v311-add" data-v300-command="add-cargo" data-side="'+side+
+       '">+ THÊM CHUYẾN '+(side==='departure'?'ĐI':'ĐẾN')+'</button></section>';
+   const others=split.unmatched.length?
+     '<details class="v300-details v320-cargo-unmatched"><summary>'+
+       split.unmatched.length+' booking cũ không xác định được chiều chuyến từ lịch hiện tại</summary>'+
+       '<p class="v300-hint">Không tự coi các dòng này là chuyến đi hoặc đến; cần kiểm tra số hiệu trong lịch trước khi nhập lại.</p>'+
+       split.unmatched.map(x=>'<p>'+H(x.flight_no)+': '+
+         H(model.formattedTotal(Number(x.cargo_kg||0)))+'</p>').join('')+'</details>':'';
+   return wrapPanel('02 · BOOKING HÀNG HÓA – CHUYẾN ĐI VÀ CHUYẾN ĐẾN',
+     'Nhập số hiệu, trọng lượng và chọn KG/TẤN ngay tại từng dòng. Hai bảng cộng riêng, không gộp hàng đi với hàng đến.',
+     '<p class="v300-hint">Ví dụ: 2.5 TẤN = 2.500 KG; 500 KG = 0,5 TẤN. Tổng tự động quy đổi. Không nhập số 2.5 dưới đơn vị KG nếu thực tế là 2,5 tấn.</p>'+
+     '<div class="v320-cargo-layout">'+table('departure','CHUYẾN BAY ĐI')+
+       table('arrival','CHUYẾN BAY ĐẾN')+'</div>'+others+
+     '<p class="v300-hint">PCS và giờ hàng sẵn sàng là dữ liệu bổ sung; ô trống không mặc định bằng 0. Chỉ lưu booking đã được Kho Hàng xác nhận.</p>');
+ }
+ function updateCargoTotals(){
+   const model=root.SagsCargoBookingV320,page=$('v300Page');
+   if(!model||!page)return;
+   for(const side of ['departure','arrival']){
+     let kg=0,valid=true;
+     for(const row of page.querySelectorAll('[data-v320-cargo-side="'+side+'"]')){
+       const value=row.querySelector('[data-v300-cargo="kg"]')?.value||'';
+       if(!value.trim())continue;
+       const unit=row.querySelector('[data-v300-cargo="unit"]')?.value||'KG';
+       const n=model.toKg(value,unit);
+       if(n==null){valid=false;continue}
+       kg+=n;
+     }
+     const target=page.querySelector('[data-v320-cargo-total="'+side+'"]');
+     if(target)target.textContent=(valid?'':'KIỂM TRA GIÁ TRỊ · ')+model.formattedTotal(kg);
+   }
  }
 
  function issueFields(u){
@@ -368,15 +439,7 @@
        '<label>Trạng thái<select data-v300-issue="status"><option value="OUT_OF_SERVICE">Hỏng / ngưng sử dụng</option><option value="REPAIR">Đang sửa</option><option value="LIMITED">Hạn chế</option><option value="RETURNED">Đã phục hồi</option></select></label>'+
        '<label class="v300-wide">Ảnh hưởng phục vụ<input data-v300-issue="fault" maxlength="260" placeholder="Hỏng gì? Ảnh hưởng chuyến/bãi nào?"></label></div>'+devices);
    }
-   if(u==='KHO'){
-     const deps=dataRows().filter(x=>x.no&&!x.ferry),saved=(state?.cargo||[]).filter(x=>x.flight_no);
-     return wrapPanel('02 · Hàng đi đã được Kho xác nhận','Nhập nhiều chuyến trong một bảng rồi lưu một lần. Không suy đoán booking từ lịch bay.',
-       '<p class="v300-hint">Ưu tiên chuyến có hàng quay đầu ngắn. Phân biệt 100–200 kg, dưới 2,5 tấn và từ 2,5 tấn trở lên theo booking thực tế và thỏa thuận áp dụng.</p>'+
-       '<datalist id="v300FlightOptions">'+deps.map(x=>'<option value="'+H(x.no)+'"></option>').join('')+'</datalist>'+
-       '<div class="v300-table-wrap v311-cargo-scroll"><table class="v300-table"><thead><tr><th>Chuyến đi</th><th>Booking KG</th><th>PCS</th><th>Hàng sẵn sàng</th></tr></thead><tbody id="v311CargoBody">'+saved.map(cargoEntryRow).join('')+cargoEntryRow()+'</tbody></table></div>'+
-       '<button type="button" class="v311-add" data-v300-command="add-cargo">+ THÊM CHUYẾN CÓ HÀNG</button>'+
-       '<p class="v300-hint">Dòng trống không phải xác nhận chuyến không có hàng. KG phải là số từ 0 trở lên; chỉ nhập khi Kho có nguồn xác nhận.</p>');
-   }
+   if(u==='KHO')return cargoUnitTables();
    return '';
  }
 
@@ -386,7 +449,7 @@
      DH:'Nhập tổng nhân sự toàn Phòng ĐH theo ca; Điều phối là bộ phận riêng. Bổ sung các thay đổi AOC, yêu cầu hãng/charter và đề xuất điều hành.',
      KTS:'Nhập Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT và Xưởng SC theo ca; tách rõ SKO/TC đúng nhóm. Đồng thời ghi phương án phối hợp khi cần.',
      PVHK:'Nhập riêng Cán bộ Phòng, Đội PVHK đi và Đội PVHK đến cho từng ca. Đội đi/đến chỉ là các nhóm trong phòng, không tự gộp thành tổng biên chế.',
-     KHO:'Xác nhận booking hàng đi, số KG/PCS và giờ sẵn sàng; không tự kết luận chuyến chưa nhập là không có hàng.',
+     KHO:'Nhập booking CHUYẾN ĐI và CHUYẾN ĐẾN ở hai bảng riêng; chọn rõ KG/TẤN để tránh sai khối lượng. Các trường PCS và giờ sẵn sàng chỉ nhập khi có nguồn.',
      QA_IT:'Chỉ ghi vấn đề đã xác nhận về an toàn, FOD, thời tiết hoặc tồn tại ảnh hưởng ca.'
    };
    const names=noteFields[u]||[],hasNotes=names.some(([k])=>details[k]);
@@ -675,7 +738,11 @@
    const route=e.target.closest('[data-v300-route]');if(route){go(route.dataset.v300Route);return}
    const command=e.target.closest('[data-v300-command]');if(!command)return;
    const cmd=command.dataset.v300Command;
-   if(cmd==='add-cargo'){$('v311CargoBody')?.insertAdjacentHTML('beforeend',cargoEntryRow());return;}
+   if(cmd==='add-cargo'){
+     const side=command.dataset.side==='arrival'?'arrival':'departure';
+     $('v320CargoBody'+side)?.insertAdjacentHTML('beforeend',cargoEntryRow({},side));
+     updateCargoTotals();return;
+   }
    if(cmd==='refresh')refresh();
    if(cmd==='save')saveDepartment(command.dataset.unit);
    if(cmd==='copy-previous')copyPrevious(command.dataset.unit);
