@@ -78,5 +78,5 @@ assert.ok(files.html.indexOf('v217-second-ui.js')<files.html.indexOf('sags-auto.
 assert.ok(files.ui.includes('p_revision:2')&&files.ui.includes('DUYỆT VÀ LƯU LẦN 2'));
 assert.ok(files.report.includes("eq('revision',2)")&&files.report.includes('data.operational'));
 assert.ok(files.report.includes('const brief=isL2?data.dailyBrief?.entries||[]:[];')&&files.report.includes('SagsL2BriefV223?.make'));
-assert.ok(files.report.includes('Lần 1 được giữ làm mốc so sánh'));
+assert.ok(!files.report.includes('Lần 1 được giữ làm mốc so sánh')&&files.report.includes('firstPayload:s.data?.payload||null'), 'L1 source preserved in data while technical note hidden from TGĐ');
 console.log('PASS L2: paired ARRIVAL/DEPARTURE, stands, gate, booking vs pax, ferry, midnight and L1 preservation');
