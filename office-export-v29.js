@@ -145,7 +145,12 @@
     function ratiosFor(rows,cols){
       const head=(rows[0]||[]).join(' ').toLowerCase();
       if(cols===2)return [.28,.72];
-      if(cols===3)return [.21,.40,.39];
+      if(cols===3){
+        if(/nhận định trọng tâm|phương án \/ đơn vị thực hiện/i.test(head))return [.19,.35,.46];
+        if(/cặp chuyến \/ nguy cơ/i.test(head))return [.17,.41,.42];
+        if(/mốc xác nhận/i.test(head))return [.20,.47,.33];
+        return [.21,.40,.39];
+      }
       if(cols===4){
         if(/đơn vị liên quan/.test(head)&&/nhận định/.test(head))return [.16,.29,.43,.12];
         if(/thời hạn/.test(head))return [.18,.49,.13,.20];
