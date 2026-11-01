@@ -511,7 +511,7 @@
             (g[shift]==null?'CHỜ XÁC NHẬN':esc(g[shift])+(g.formatted?'':' người'))+'</span>').join('')+
         '</td>').join('')+'</tr>').join('')+
       '</tbody></table>'+
-    '<p class="v19-footnote">Nguồn: quân số xác nhận theo từng ca và tổ/đội. PVHK gồm Cán bộ Phòng, đội đi và đội đến. PVSĐ gồm Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT, Xưởng SC; SKO/TC thể hiện đúng từng bộ phận. Ô trống là chưa xác nhận, số 0 là giá trị đã xác nhận. SKYONE tổng của cấu trúc cũ không tự phân bổ sang các nhóm mới.</p>'+
+    '<p class="v19-footnote">Nguồn: quân số xác nhận theo từng ca và tổ/đội. PVHK gồm Cán bộ Phòng, đội đi và đội đến. PVSĐ gồm Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT, Xưởng SC; SKO/TC thể hiện đúng từng bộ phận. Ô trống là chưa xác nhận, số 0 là giá trị đã xác nhận. SKYONE tổng của cấu trúc cũ không tự phân bổ sang các nhóm mới; không cộng các nhóm vào tổng PVSĐ khi chưa xác nhận không trùng người.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
