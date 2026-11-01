@@ -14,8 +14,9 @@
    (f.std_min<f.sta_min?f.std_min+1440-f.sta_min:f.std_min-f.sta_min):null;
  const tight=f=>{
    if(!f.arrival||!f.departure)return false;
-   const g=ground(f),cr=carrier(f),norm=CARRIER_FAST.has(cr)?30:CARRIER_KOREAN.has(cr)?60:30;
-   return g!=null&&g>0&&g<=norm+5;
+   const g=ground(f),cr=carrier(f),norm=CARRIER_FAST.has(cr)?30:CARRIER_KOREAN.has(cr)?60:null;
+   // Other carriers follow confirmed schedule ground-time; never invent a 30/35-minute benchmark.
+   return norm!=null&&g!=null&&g>0&&g<=norm+5;
  };
  const name=f=>f.departure||f.arrival||'—';
  const area=b=>[31,32,33,34,35,36,37,51,52,53,54,55].includes(Number(b))?'K1':
