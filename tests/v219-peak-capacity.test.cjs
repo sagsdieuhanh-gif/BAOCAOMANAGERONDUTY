@@ -87,6 +87,6 @@ assert.equal(noCargo.find(x=>x.start===600).driver.scenarioMin,2);
 assert.equal(noCargo.find(x=>x.start===600).driver.scenarioMax,4);
 const html=fs.readFileSync('index.html','utf8'),report=fs.readFileSync('v19-report.js','utf8');
 assert.ok(html.includes('id="v219HourlyPeak"')&&html.includes('v219-peak-ui.js'));
-assert.ok(report.includes("SagsOpsForecastV219?.summarize")&&report.includes('PEAK HOURS'));
+assert.ok(report.includes("SagsOpsForecastV219?.summarize")&&report.includes('PHÂN BỔ LƯỢT BAY THEO GIỜ'));
 assert.ok(fs.existsSync('v219-contract-input.js'));
 console.log('PASS 24h four-series Peak Hours, verified/estimated gate collision, stand zones, and conditional GSE/staff deficits');
