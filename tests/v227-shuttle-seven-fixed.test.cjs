@@ -21,7 +21,7 @@ assert.equal(rows.find(x=>x.departure_min===1935).total,46,'08:15 total preserve
 const grid=g.makeGrid('CXR_NHA',rows,'DH');
 assert.ok(grid.includes('08:15')&&grid.includes('NGÀY HÔM SAU')&&!grid.includes('08:30'));
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes("APP_VERSION='V3.17'"));
+assert.ok(index.includes("APP_VERSION='V3.18'"));
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js','v24-shuttle-grid.js'])
  assert.ok(index.includes(file+'?v=3.11'));
 const migration=fs.readFileSync('server/v311-shuttle-0815-not-0830.sql','utf8');

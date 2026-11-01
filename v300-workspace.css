@@ -688,3 +688,18 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
 #v300Root .v317-pvsd-extra{margin-top:9px}
 .v19-report-sheet table.v317-pvsd-summary{width:100%;table-layout:auto;margin-top:4px}
 .v19-report-sheet table.v317-pvsd-summary td{font-size:12px;line-height:1.6;padding:9px 12px;overflow-wrap:anywhere}
+
+
+/* V3.18: one CA SÁNG and one CA TỐI cell for both PVHK and PVSĐ. */
+#v300Root .v318-shift-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;row-gap:7px}
+#v300Root .v318-shift-cell{min-width:0;border:1px solid #d7e6eb;border-radius:8px;padding:10px;background:#fff}
+#v300Root .v318-shift-cell>strong{display:block;color:#16546d;font-size:12px;margin-bottom:4px}
+#v300Root .v318-shift-cell>div{font-size:12px;line-height:1.7;overflow-wrap:anywhere}
+#v300Root .v318-shift-count{display:inline}
+#v300Root .v318-shift-summary>small{grid-column:1/-1}
+.v19-report-sheet table.v318-staff-by-shift{width:100%;table-layout:fixed}
+.v19-report-sheet table.v318-staff-by-shift th:first-child{width:17%}
+.v19-report-sheet table.v318-staff-by-shift th:nth-child(2),.v19-report-sheet table.v318-staff-by-shift th:nth-child(3){width:41.5%}
+.v19-report-sheet table.v318-staff-by-shift .v318-staff-shift-cell{font-size:11.5px;line-height:1.6;overflow-wrap:anywhere;white-space:normal}
+.v19-report-sheet table.v318-staff-by-shift .v318-staff-inline{display:inline}
+@media(max-width:460px){#v300Root .v318-shift-summary{column-gap:6px;padding:8px}#v300Root .v318-shift-cell{padding:7px}#v300Root .v318-shift-cell>div{font-size:11px}}

@@ -11,7 +11,7 @@ assert.ok(ws.includes('data-v300-cargo-row')&&ws.includes('id="v311CargoBody"'))
 assert.ok(ws.includes("if(cmd==='add-cargo')")&&ws.includes('if(cargo.length)await write('),'Cargo entries must be batched');
 assert.ok(ws.includes("const primary={DH:['COORD']"),'Primary crew inputs shown first');
 assert.ok(ws.includes('v311-advanced')&&ws.includes('v311-source-grid'),'Source data must not be retyped');
-assert.ok(index.includes('v300-workspace.js?v=3.17'));
+assert.ok(index.includes('v300-workspace.js?v=3.18'));
 assert.deepEqual(model.defaults.filter(x=>x.direction==='CXR_NHA').map(x=>x.departure_min),[990,1110,1560,1935]);
 const phantom={unit:'DH',direction:'CXR_NHA',departure_min:510,line_no:0,quantity:47};
 const valid={unit:'DH',direction:'CXR_NHA',departure_min:1935,line_no:0,quantity:47};
