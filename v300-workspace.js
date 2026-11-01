@@ -13,7 +13,7 @@
  const allowed=u=>['DH','ADMIN'].includes(role())||role()===u||(u==='QA_IT'&&['QA','IT'].includes(role()));
  const tagUnit={DH:'Phòng Điều hành',KTS:'Phục vụ sân đỗ',PVHK:'Phục vụ hành khách',KHO:'Kho hàng',QA_IT:'QA / IT'};
  const staffRoles={
-   DH:[['COORD','CO kiêm Loading']],
+   DH:[['COORD','Điều phối / CO (nhóm công việc)']],
    KTS:[['BAGGAGE','Bốc xếp tại tàu'],['GSE_DRIVER','Lái xe GSE'],['COBUS_DRIVER','Lái COBUS'],['SKYONE_BAGGAGE','Bốc xếp thuê ngoài'],['TERMINAL_BAGGAGE','Bốc xếp nhà ga']],
    PVHK:[['PVHK_DEPARTURE_TEAM','Đội làm thủ tục đi'],['PVHK_ARRIVAL_TEAM','Đội đến'],['GATE','Gate / reader'],['BUSGATE','Bus gate'],['AIRCRAFT_BOARDING','Tại tàu']],
    KHO:[['WAREHOUSE_CARGO','Nhân viên kho/hàng']],
@@ -280,6 +280,25 @@
    const table=items=>'<div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Nhóm nhân sự</th><th>Ca sáng</th><th>Ca đêm</th></tr></thead><tbody>'+rows(items)+'</tbody></table></div>';
    const main=roles.filter(x=>primary.includes(x[0])),other=roles.filter(x=>!primary.includes(x[0]));
    const hasSaved=roles.some(([code])=>['SÁNG','ĐÊM'].some(sh=>getStaff(u,code,sh)));
+   if(u==='DH'){
+     const plan=getUnitPlan('DH'),d=plan?.status==='CONFIRMED'?plan.details||{}:{};
+     const saved=(v)=>v==null||String(v).trim()===''?'CHỜ XÁC NHẬN':H(v)+' người';
+     const summary='<div class="v318-shift-summary v319-dh-total">'+
+       [['CA SÁNG','morning'],['CA TỐI','night']].map(([name,k])=>
+         '<label class="v318-shift-cell"><strong>'+name+' · NHÂN SỰ PHÒNG ĐH</strong>'+
+           '<input data-v319-dh-total="'+k+'" type="number" min="0" max="9999" inputmode="numeric" '+
+             'aria-label="Tổng nhân sự Phòng ĐH '+name+'" placeholder="Nhập tổng nhân sự phòng" '+
+             'value="'+H(d['pvb_'+k]??'')+'"><small>Đã lưu: '+saved(d['pvb_'+k])+'</small></label>'
+       ).join('')+'</div>';
+     return wrapPanel('01 · NHÂN SỰ PHÒNG ĐIỀU HÀNH',
+       'Nhập tổng quân số thực tế của cả Phòng ĐH theo từng ca. Điều phối chỉ là một bộ phận, không được coi là toàn phòng.',
+       summary+
+       '<details class="v300-details v319-dh-role"><summary>Phân bổ chi tiết (tùy chọn) · Điều phối/CO</summary>'+
+         table(roles)+'</details>'+
+       '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="DH">↶ Tham khảo hôm trước</button>'+
+         '<span>Chỉ ghi nhận khi đã đối chiếu ca thực tế</span></div>'+
+       '<p class="v300-hint">Quân số Phòng ĐH nhập riêng, không tự lấy từ số Điều phối; bỏ trống = chưa xác nhận, 0 = đã xác nhận không có.</p>');
+   }
    const inputs=['KTS','PVHK'].includes(u)?
      (u==='KTS'?pvsdSavedSummary():pvhkSavedSummary())+
      '<details class="v300-details v317-pvsd-edit v318-team-edit" '+(!hasSaved?'open':'')+'><summary>NHẬP / CHỈNH SỬA QUÂN SỐ CHI TIẾT</summary>'+
@@ -325,7 +344,7 @@
  function renderDepartment(u){
    const plan=getUnitPlan(u),details=plan?.details||{};
    const focus={
-     DH:'Chỉ thêm nội dung thay đổi từ AOC, yêu cầu riêng của hãng/charter và đề xuất cần chỉ đạo.',
+     DH:'Nhập tổng nhân sự toàn Phòng ĐH theo ca; Điều phối là bộ phận riêng. Bổ sung các thay đổi AOC, yêu cầu hãng/charter và đề xuất điều hành.',
      KTS:'Xác nhận người, GSE và phương án chuẩn bị trước khi tàu lăn; chú ý luồng đường công vụ K2/K3.',
      PVHK:'Bố trí người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo lịch chuyến; nhập quân số thực có hoặc thay đổi ảnh hưởng.',
      KHO:'Xác nhận booking hàng đi, số KG/PCS và giờ sẵn sàng; không tự kết luận chuyến chưa nhập là không có hàng.',
@@ -501,8 +520,18 @@
        start_min:morning?495:1095,end_min:morning?1095:1935,quantity:n,
        confirmed_by:user().id,confirmed_at:now});
    }
+   if(u==='DH'){
+     for(const el of page.querySelectorAll('[data-v319-dh-total]')){
+       const k=el.dataset.v319DhTotal,v=el.value.trim();
+       if(v==='')continue; // Preserve saved value when not edited; never infer from COORD.
+       const n=num(v);
+       if(!Number.isInteger(n)||n<0||n>9999)return status('Tổng nhân sự Phòng ĐH phải là số nguyên 0–9999.',true);
+       details['pvb_'+k]=String(n);
+       details['pvb_'+k+'_status']='PENDING';details['pvb_'+k+'_required']='';
+     }
+   }
    for(const el of page.querySelectorAll('[data-v300-note]'))details[el.dataset.v300Note]=el.value.trim();
-   if(items.length){
+   if(items.length&&u!=='DH'){
      const activeShifts=new Set(items.map(x=>x.shift));
      for(const sh of activeShifts){
        const k=sh==='SÁNG'?'morning':'night';
@@ -562,7 +591,7 @@
    const noException=!!page.querySelector('[data-v300-no-exception]')?.checked;
    if(noException)details.no_new_exceptions='YES';
    else details.no_new_exceptions='';
-   if(!noException&&!items.length&&!issue&&!cargo.length&&!gseChanges.length&&
+   if(!noException&&!items.length&&!(u==='DH'&&page.querySelector('[data-v319-dh-total]')?.value.trim())&&!issue&&!cargo.length&&!gseChanges.length&&
       !(noteFields[u]||[]).some(([key])=>details[key]))return status('Chưa có dữ liệu để xác nhận. Có thể quay lại khi có nguồn.',true);
    saving=true; const saveBtn=page.querySelector('[data-v300-command="save"]');
    if(saveBtn)saveBtn.disabled=true;status('Đang lưu và kiểm tra các nguồn đã cập nhật…');
