@@ -76,4 +76,4 @@ const ktUi=box.window.__v320Test.roleInputs('KTS');
 for(const code of ['KTS_RAMP_TEAM','KTS_HLSD_SKO','KTS_HLNG_SKO','KTS_PVTT_TC','KTS_PVTT_SKO','KTS_WORKSHOP_SC'])
  assert.ok(ktUi.includes(code+'|SÁNG')&&ktUi.includes(code+'|ĐÊM'));
 assert.ok(ktUi.includes('dữ liệu cũ'),'Keep legacy specialty counts editable');
-console.log('PASS V3.21: precise PVHK/PVSĐ staff groups by two shifts; SKYONE and TC independent; no write of examples');
+console.log('PASS V3.22: precise PVHK/PVSĐ staff groups by two shifts; SKYONE and TC independent; no write of examples');
