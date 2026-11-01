@@ -591,12 +591,28 @@
        ...(data.alerts?.length?[hd('THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU BỔ SUNG'),...data.alerts.map(a=>p(a.unit+' / '+a.type+': '+a.detail,{color:'B91C1C',size:18}))]:[]),
        hd('I. TÓM TẮT KHAI THÁC'),
        t(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],[['Sản lượng',data.summary],['Biến động so với ngày hôm trước',data.comparison],['Trọng điểm',data.keyPoints]],[2350,8150]),
-       hd('II. BẢNG KIỂM SOÁT'),
-       t(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ','Đơn vị'],data.topics.map(x=>[x.title,x.observation,x.action,x.owner]),[1900,3800,3600,1200]),
-       hd('III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)'),
-       t(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],data.peakRows.map(x=>[x.slot,x.flight,x.risk,x.action]),[1730,3150,2620,3000]),
-       hd('IV. PHỐI HỢP THỰC HIỆN'),
-       t(['Nội dung phối hợp','Yêu cầu, phương án','Đơn vị','Thời hạn xác nhận'],data.coord,[2650,3150,1650,3050]),
+       hd('II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ'),
+       ...data.topics.flatMap(x=>[
+         hd(x.title),
+         t(['Thành phần','Nội dung'],[
+           ['Nhận định',x.observation],['Phương án tổ chức phục vụ',x.action],
+           ['Đơn vị thực hiện',x.owner]
+         ],[2550,7950])
+       ]),
+       hd('III. KHUNG GIỜ CẦN ƯU TIÊN ĐIỀU PHỐI'),
+       ...data.peakRows.flatMap(x=>[
+         hd(x.slot),
+         t(['Thành phần','Nội dung'],[
+           ['Cặp chuyến',x.flight],['Nguy cơ',x.risk],['Phương án',x.action]
+         ],[2550,7950])
+       ]),
+       hd('IV. PHÂN CÔNG PHỐI HỢP VÀ MỐC KIỂM SOÁT'),
+       ...data.coord.flatMap(x=>[
+         hd(x[0]),
+         t(['Thành phần','Nội dung'],[
+           ['Yêu cầu phối hợp',x[1]],['Đơn vị',x[2]],['Mốc xác nhận',x[3]]
+         ],[2550,7950])
+       ]),
        hd('V. KIẾN NGHỊ BAN TGĐ'),
        p(data.recommendation),
        p('SAGS-CXR | Phòng Điều hành',{size:17,before:150})
