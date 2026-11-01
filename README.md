@@ -167,3 +167,10 @@
 - ĐH, PVHK, PVSĐ hiển thị **mỗi phòng một hàng, hai cột CA SÁNG | CA TỐI** trong báo cáo Lần 1/Lần 2. PVHK gộp Đội đến + Đội đi trong từng ô; PVSĐ gộp Tổng PVSĐ + PVHLNG + Bốc xếp PVSĐ + SKYONE trong từng ô. Không cộng trùng, không xóa dữ liệu.
 - Màn hình PVHK/PVSĐ cũng có hai ô theo ca và mục **Nhập / chỉnh sửa quân số chi tiết** thu gọn sau khi đã lưu.
 - Chi tiết tại [HDSD_MANAGER_V3.18.md](HDSD_MANAGER_V3.18.md).
+
+
+### V3.19 – Tổng nhân sự ĐH, biên tập báo cáo L1/L2 và hồ sơ tài khoản
+- Phòng ĐH nhập tổng quân số theo ca; Điều phối/CO là nhóm chức năng riêng.
+- Biên tập lại nhận định/phương án theo cặp chuyến, STA/STD, 30 phút cao điểm, bãi đỗ, GSE, booking đã xác nhận; tách rõ nguy cơ và trách nhiệm nghiệp vụ.
+- ADMIN có chức năng sửa thông tin, quyền Manager và reset mật khẩu tạm ngẫu nhiên dùng chung với RNS.
+- [HDSD_MANAGER_V3.19.md](HDSD_MANAGER_V3.19.md).
