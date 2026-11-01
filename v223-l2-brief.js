@@ -147,9 +147,9 @@
    const inbound=cargoSplit.arrival.filter(x=>x.flight_no&&quantity(x.cargo_kg)!=null);
    const cargoKnown=cargo.filter(x=>quantity(x.cargo_kg)!=null);
    const unfinished=cargo.filter(x=>x.ready_by_min==null);
-   const ferry=deps.filter(x=>x.ferry);
+   const ferry=deps.filter(x=>x.ferry&&!x.charter);
    const charter=deps.filter(x=>x.charter);
-   if(cargo.length||inbound.length||ferry.length||charter.length){
+   if(cargo.length||inbound.length||ferry.length){
      const loaded=cargoKnown.length?cargoKnown.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg))
        .slice(0,3).map(x=>x.flight_no+' ('+Number(x.cargo_kg).toLocaleString('vi-VN')+' kg)'):[];
      const parts=[];
@@ -165,13 +165,12 @@
      if(inbound.length)parts.push('Hàng đến: '+inbound.length+' chuyến, tổng '+inbound.reduce((n,x)=>n+Number(x.cargo_kg),0).toLocaleString('vi-VN')+' kg; ưu tiên tiếp nhận và vận chuyển khỏi tàu bay, không tính vào khối lượng xếp hàng đi.');
      if(ferry.length)parts.push('Có chuyến mang ký hiệu ferry: '+short(ferry.map(x=>x.no),5)+
        '; cần xác nhận phạm vi phục vụ thay vì áp dụng quy trình chuyến chở khách.');
-     if(charter.length)parts.push('Lịch bay có '+charter.length+' chuyến thuê chuyến không thường lệ (CHARTER, ký hiệu ##): '+
-       short(charter.map(x=>'##'+x.no),5)+'. CHARTER không đồng nghĩa FERRY; phải đối chiếu loại hình phục vụ thực tế.');
+     // Charter ## is informational only: no special action or alert solely on this flag.
      push('cargo','Hàng hóa và chuyến có tính chất đặc biệt',parts.join(' '),
        (cargo.length?'Đối với booking hàng đi, Kho Hàng chốt tiến độ bàn giao; PVSĐ bố trí tổ bốc xếp và xe tại bãi trước thời điểm phục vụ, ưu tiên chuyến quay đầu ngắn theo thỏa thuận hiện hành. ':'')+
        (inbound.length?'Đối với hàng đến, PVSĐ và Kho Hàng phối hợp tiếp nhận, dỡ và vận chuyển vào kho; không áp dụng phương án xếp hàng đi cho booking hàng đến. ':'')+
-       'Với FERRY, ĐH xác nhận phạm vi dịch vụ; với CHARTER (##), Phòng Điều hành chủ động trao đổi hãng về yêu cầu riêng, sau đó thông báo PVSĐ và Kho Hàng để chuẩn bị.',
-       'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length||charter.length?3:2);
+       (ferry.length?'Với chuyến FERRY đã được xác nhận độc lập, ĐH kiểm tra phạm vi dịch vụ.':''),
+       'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length?3:2);
    }
    const distinct=changes.filter(x=>/BÃI ĐỖ|STA|STD|GATE/i.test(x.type||'')).slice(0,4);
    if(distinct.length){
