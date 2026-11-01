@@ -29,6 +29,8 @@
    const staffNames={DH:'Phòng ĐH',PVHK:'PVHK',KTS:'PVSĐ'};
    const confirmedStaff=(c.unitPlans||[]).filter(x=>staffNames[x.unit]&&x.status==='CONFIRMED'&&x.details);
    const staffing=confirmedStaff.length?confirmedStaff.map(x=>{
+     if(['PVHK','KTS'].includes(x.unit)&&x.details?.personnel_structure==='V3.20')
+       return staffNames[x.unit]+': chi tiết quân số theo nhóm/đội trong bảng ca sáng và ca tối';
      const d=x.details,parts=['morning','night'].map((shift,i)=>{
        const n=quantity(d['pvb_'+shift]);
        return n==null?null:(i?'đêm ':'sáng ')+n+' người';
@@ -139,12 +141,15 @@
        'PVSĐ xác nhận loại xe thang, khả năng tiếp cận tàu và tổ bốc xếp phù hợp từng đăng bạ; PVHK rà soát nhân sự làm thủ tục ở quầy, boarding tại gate và đón, tiễn khách tại tàu bay theo booking, giờ bay và yêu cầu hãng. ĐH hạn chế điều cùng một bộ thiết bị sang hai chuyến thân rộng sát nhau khi chưa đủ thời gian quay vòng.',
        'PVSĐ · PVHK · ĐH',3);
    }
-   const cargo=(c.cargoPlans||[]).filter(x=>x.flight_no);
+   const cargoSplit=root.SagsCargoBookingV320?.split(c.cargoPlans||[],c.rows||[],
+     c.sourcePayload?.source_detail||{})||{departure:c.cargoPlans||[],arrival:[],unmatched:[]};
+   const cargo=cargoSplit.departure.filter(x=>x.flight_no);
+   const inbound=cargoSplit.arrival.filter(x=>x.flight_no&&quantity(x.cargo_kg)!=null);
    const cargoKnown=cargo.filter(x=>quantity(x.cargo_kg)!=null);
    const unfinished=cargo.filter(x=>x.ready_by_min==null);
    const ferry=deps.filter(x=>x.ferry);
    const charter=deps.filter(x=>x.charter);
-   if(cargo.length||ferry.length||charter.length){
+   if(cargo.length||inbound.length||ferry.length||charter.length){
      const loaded=cargoKnown.length?cargoKnown.slice().sort((a,b)=>Number(b.cargo_kg)-Number(a.cargo_kg))
        .slice(0,3).map(x=>x.flight_no+' ('+Number(x.cargo_kg).toLocaleString('vi-VN')+' kg)'):[];
      const parts=[];
@@ -157,12 +162,15 @@
        (kgLow.length?'; nhóm khác dưới 2,5 tấn: '+short(kgLow,4):'')+
        (kgHigh.length?'; từ 2,5 tấn: '+short(kgHigh,4):'')+
        '.');
+     if(inbound.length)parts.push('Hàng đến: '+inbound.length+' chuyến, tổng '+inbound.reduce((n,x)=>n+Number(x.cargo_kg),0).toLocaleString('vi-VN')+' kg; ưu tiên tiếp nhận và vận chuyển khỏi tàu bay, không tính vào khối lượng xếp hàng đi.');
      if(ferry.length)parts.push('Có chuyến mang ký hiệu ferry: '+short(ferry.map(x=>x.no),5)+
        '; cần xác nhận phạm vi phục vụ thay vì áp dụng quy trình chuyến chở khách.');
      if(charter.length)parts.push('Lịch bay có '+charter.length+' chuyến thuê chuyến không thường lệ (CHARTER, ký hiệu ##): '+
        short(charter.map(x=>'##'+x.no),5)+'. CHARTER không đồng nghĩa FERRY; phải đối chiếu loại hình phục vụ thực tế.');
      push('cargo','Hàng hóa và chuyến có tính chất đặc biệt',parts.join(' '),
-       'Sau khi Kho Hàng xác nhận có hàng đi và khối lượng booking, ưu tiên chuyến có hàng và thời gian quay đầu ngắn: PVSĐ chủ động đưa nhân lực, xe và trang thiết bị về khu vực phục vụ trước giờ khai thác. Với booking dưới 2,5 tấn, phương án phục vụ phải phù hợp thỏa thuận hiện hành với công ty và hãng, không tự áp dụng theo ngưỡng. Với FERRY, ĐH xác nhận phạm vi dịch vụ; với CHARTER (##), Phòng Điều hành chủ động trao đổi hãng hàng không về yêu cầu riêng rồi chuyển thông tin cho PVSĐ và Kho Hàng nếu liên quan để chuẩn bị.',
+       (cargo.length?'Đối với booking hàng đi, Kho Hàng chốt tiến độ bàn giao; PVSĐ bố trí tổ bốc xếp và xe tại bãi trước thời điểm phục vụ, ưu tiên chuyến quay đầu ngắn theo thỏa thuận hiện hành. ':'')+
+       (inbound.length?'Đối với hàng đến, PVSĐ và Kho Hàng phối hợp tiếp nhận, dỡ và vận chuyển vào kho; không áp dụng phương án xếp hàng đi cho booking hàng đến. ':'')+
+       'Với FERRY, ĐH xác nhận phạm vi dịch vụ; với CHARTER (##), Phòng Điều hành chủ động trao đổi hãng về yêu cầu riêng, sau đó thông báo PVSĐ và Kho Hàng để chuẩn bị.',
        'Kho Hàng · PVSĐ · ĐH',unfinished.length||ferry.length||charter.length?3:2);
    }
    const distinct=changes.filter(x=>/BÃI ĐỖ|STA|STD|GATE/i.test(x.type||'')).slice(0,4);

@@ -68,8 +68,8 @@ assert.ok(reportC[0].observation.includes('Lần 1'));
 assert.ok(reportC[0].observation.includes('4 → 3'));
 assert.ok(reportC[4].action.includes('định mức'));
 assert.ok(!reportC[4].action.includes('đủ nhân sự'));
-assert.ok(html.indexOf('v319-report-editorial.js?v=3.19')<html.indexOf('v19-report.js?v=3.19'));
-assert.ok(html.includes("APP_VERSION='V3.19'"));
+assert.ok(html.indexOf('v319-report-editorial.js?v=3.20')<html.indexOf('v19-report.js?v=3.20'));
+assert.ok(html.includes("APP_VERSION='V3.20'"));
 for(const id of ['rnsManagerEditPanel','rnsEditSave','rnsEditReset','rnsResetSecretPanel'])assert.ok(html.includes('id="'+id+'"'));
 assert.ok(admin.includes("invoke('update'")&&admin.includes("invoke('reset_password'"));
 assert.ok(admin.includes("closeReset();")&&admin.includes("selected")===false || admin.includes("picked=x.id"));
@@ -79,4 +79,4 @@ assert.ok(edge.includes('rns_must_change_password:true')&&edge.includes('getRand
 assert.ok(!edge.includes('password="123456"')&&!edge.includes('body.action==="reset"?"123456"'));
 assert.ok(edge.includes('if(body.action==="update"||body.action==="reset_password")'));
 assert.ok(!edge.includes('service_role key in browser'));
-console.log('PASS V3.19: whole DH staff, deterministic aviation briefing for L1/L2, admin edit/reset authorization boundaries');
+console.log('PASS V3.20: whole DH staff, deterministic aviation briefing for L1/L2, admin edit/reset authorization boundaries');

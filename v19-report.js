@@ -178,6 +178,26 @@
      ]},
      {label:'PVSĐ',groups:pvsdSummary}
    ];
+   const roster=window.SagsStaffRosterV320;
+   if(roster){
+     const fill=(unit)=>{
+       const sections=roster.TEAMS[unit]||[];
+       const morning=roster.groups(c.staff||[],unit,'SÁNG');
+       const evening=roster.groups(c.staff||[],unit,'ĐÊM');
+       return sections.map((section,i)=>({
+         name:section.label,formatted:true,
+         morning:roster.pretty(morning[i]),night:roster.pretty(evening[i])
+       }));
+     };
+     staffByShift[1].groups=fill('PVHK');
+     staffByShift[2].groups=fill('KTS');
+     const legacyMorning=roster.legacy(c.staff||[],'KTS','SÁNG');
+     const legacyNight=roster.legacy(c.staff||[],'KTS','ĐÊM');
+     if(legacyMorning!=null||legacyNight!=null)
+       staffByShift[2].groups.push({
+         name:'SKO chung (dữ liệu cũ, chưa phân nhóm)',morning:legacyMorning,night:legacyNight
+       });
+   }
    const staffSky=staff.filter(x=>x.unit==='KTS'&&x.role_code==='SKYONE_BAGGAGE');
    const staffInfo='Phòng KTSĐ: Bốc xếp công ty ('+uStaff('KTS','BAGGAGE')+'); Lái xe GSE ('+uStaff('KTS','GSE_DRIVER')+'). SKYONE thuê ngoài: '+
     (staffSky.length?staffSky.slice(0,6).map(x=>clock(x.start_min)+'–'+clock(x.end_min)+': '+x.quantity+' người').join('; '):'chưa có khung giờ xác nhận')+
@@ -487,11 +507,11 @@
     '<table class="v318-staff-by-shift"><thead><tr><th>Bộ phận</th><th>CA SÁNG</th><th>CA TỐI</th></tr></thead><tbody>'+
       (data.staffByShift||[]).map(x=>'<tr><th scope="row">'+esc(x.label)+'</th>'+
         ['morning','night'].map(shift=>'<td class="v318-staff-shift-cell">'+
-          x.groups.map(g=>'<span class="v318-staff-inline"><b>'+esc(g.name)+':</b> '+
-            (g[shift]==null?'CHỜ XÁC NHẬN':esc(g[shift])+' người')+'</span>').join(' · ')+
+          x.groups.map(g=>'<span class="v318-staff-inline v320-staff-line"><b>'+esc(g.name)+':</b> '+
+            (g[shift]==null?'CHỜ XÁC NHẬN':esc(g[shift])+(g.formatted?'':' người'))+'</span>').join('')+
         '</td>').join('')+'</tr>').join('')+
       '</tbody></table>'+
-    '<p class="v19-footnote">Nguồn: số người đã xác nhận từng vị trí theo ca; số 0 là dữ liệu đã xác nhận. PVHK: đội đến và đội đi nằm chung ô theo từng ca. PVSĐ: quân số tổng phòng, PVHLNG, Bốc xếp PVSĐ và SKYONE nằm chung ô theo từng ca; không cộng các nhóm vào tổng PVSĐ hoặc suy ra số người độc lập.</p>'+
+    '<p class="v19-footnote">Nguồn: quân số xác nhận theo từng ca và tổ/đội. PVHK gồm Cán bộ Phòng, đội đi và đội đến. PVSĐ gồm Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT, Xưởng SC; SKO/TC thể hiện đúng từng bộ phận. Ô trống là chưa xác nhận, số 0 là giá trị đã xác nhận. SKYONE tổng của cấu trúc cũ không tự phân bổ sang các nhóm mới.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+

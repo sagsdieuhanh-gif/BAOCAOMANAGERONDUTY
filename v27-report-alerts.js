@@ -40,11 +40,20 @@
        alerts.push({unit:u.name,type:'XE GIAO CA',detail:'Chưa nhập '+pending.length+'/'+target.length+' dòng chiều '+d.name+': '+times+(pending.length>5?', …':'')});
      }
    }
-   for(const group of requiredShifts){
+   const modernKts=staff.some(x=>x.unit==='KTS'&&['KTS_OFFICE','KTS_RAMP_TEAM','KTS_PVTT'].includes(x.role_code));
+   const modernPvhk=staff.some(x=>x.unit==='PVHK'&&x.role_code==='PVHK_OFFICE');
+   const rosterChecks=requiredShifts.map(g=>g.unit==='KTS'&&modernKts?
+     {...g,roles:[['KTS_OFFICE','Cán bộ Phòng'],['KTS_RAMP_TEAM','Đội PVSĐ'],
+       ['BAGGAGE','HLSĐ'],['TERMINAL_BAGGAGE','HLNG'],['KTS_PVTT','Đội PVTT'],
+       ['KTS_WORKSHOP_SC','Xưởng SC']]}:
+     g.unit==='PVHK'&&modernPvhk?{...g,roles:[['PVHK_OFFICE','Cán bộ Phòng'],
+       ['PVHK_DEPARTURE_TEAM','Đội PVHK đi'],['PVHK_ARRIVAL_TEAM','Đội PVHK đến']]}:g);
+   for(const group of rosterChecks){
      const missing=[];
      for(const sh of ['SÁNG','ĐÊM'])for(const [role,label] of group.roles){
+       if(group.unit==='PVHK'&&modernPvhk&&role==='PVHK_OFFICE'&&sh==='ĐÊM')continue;
        if(!staff.some(x=>x.unit===group.unit&&x.shift===sh&&x.role_code===role&&x.quantity!=null&&x.confirmed_at))
-         missing.push(label+' ca '+(sh==='SÁNG'?'sáng':'đêm'));
+         missing.push(label+' ca '+(sh==='SÁNG'?'sáng':'tối'));
      }
      if(missing.length)alerts.push({unit:group.name,type:'NHÂN SỰ PHỤC VỤ',detail:'Chưa xác nhận: '+missing.join('; ')});
    }
@@ -54,8 +63,8 @@
    if(expectCargo){
      if(!cargoPlans.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Chưa nhập kế hoạch cargo theo chuyến hoặc chưa xác nhận ngày không phát sinh hàng.'});
      else{
-       const miss=cargoPlans.filter(x=>x.cargo_kg==null||x.cargo_pcs==null||x.ready_by_min==null);
-       if(miss.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Thiếu KG / PCS / giờ kho sẵn sàng: '+miss.slice(0,5).map(x=>x.flight_no).join(', ')+(miss.length>5?', …':'')});
+       const miss=cargoPlans.filter(x=>x.cargo_kg==null); // PCS/ready-by are optional metadata, not booking incompleteness.
+       if(miss.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Chưa xác nhận trọng lượng booking KG: '+miss.slice(0,5).map(x=>x.flight_no).join(', ')+(miss.length>5?', …':'')});
      }
    }
    return alerts;
