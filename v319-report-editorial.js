@@ -81,7 +81,7 @@
      'ĐH · PVSĐ · PVHK · Kho Hàng');
    result[3]=record(
      (pairs.length?'Đã có vị trí đỗ cho '+(pairs.length-unknown.length)+'/'+pairs.length+
-       ' cặp: K1 '+zones.K1.length+', K2 '+zones.K2.length+', K3 '+zones.K3.length+'.':
+       ' hồ sơ/cặp: K1 '+zones.K1.length+', K2 '+zones.K2.length+', K3 '+zones.K3.length+'.':
        'Chưa có hồ sơ chuyến để phân tích khu vực bãi đỗ.')+
      (affected.length?' Các chuyến ở K2/K3: '+
        list(affected.map(x=>name(x)+' bãi '+x.bay),6)+'.':'')+
@@ -97,7 +97,7 @@
      return 'sáng '+a+', tối '+b;
    };
    result[4]=record(
-     'Quân số đã nhập theo ca: Phòng ĐH ('+showShift(dh)+'), PVHK ('+showShift(pv)+
+     'Các phòng đã cập nhật quân số thực tế theo ca: Phòng ĐH ('+showShift(dh)+'), PVHK ('+showShift(pv)+
        '), PVSĐ ('+showShift(kts)+'). '+
      (booking.length?'Các chuyến có booking cao: '+list(booking.slice(0,3).map(x=>x.no+' '+x.booking_sum+' khách'),3)+
        ' (booking, không phải PAX thực đi).':'Không suy diễn tải hành khách khi lịch không có booking xác nhận.'),
@@ -129,7 +129,7 @@
      turns.length?'Các cặp có thời gian đỗ theo lịch sát chuẩn phục vụ: '+
        list(turns.map(f=>name(f)+' '+ground(f)+' phút'),7)+'. Nếu STA thực tế thay đổi, nguy cơ ảnh hưởng STD cần được theo dõi.':
        'Không xác định cặp quay đầu sát chuẩn phục vụ từ những STA/STD đã nhập; vẫn theo dõi thay đổi giờ thực tế.',
-     turns.length?'ĐH theo dõi ETA/ATA và thay đổi STD/ETD; PVSĐ theo dõi mốc hoàn tất bốc dỡ, vệ sinh, cấp phương tiện và điều kiện giải phóng thiết bị; PVHK kiểm soát đóng quầy, gate/boarding và bàn giao khách tại tàu bay. Khi nguy cơ chậm giờ, thông báo các đơn vị và hãng theo kênh khai thác.':
+     turns.length?'ĐH theo dõi ETA/ATA và thay đổi STD/ETD; PVSĐ theo dõi mốc hoàn tất bốc dỡ, vệ sinh, cấp phương tiện và điều kiện giải phóng thiết bị; PVHK kiểm soát đóng quầy, gate/boarding và bàn giao khách tại tàu bay. Khi nguy cơ chậm giờ ảnh hưởng OTP, thông báo các đơn vị và hãng theo kênh khai thác.':
        'ĐH đối chiếu giờ đến thực tế với lịch; các đơn vị cập nhật tiến độ công đoạn để nhận diện sớm nguy cơ ảnh hưởng OTP.',
      'ĐH · PVSĐ · PVHK');
    const qa=unit('QA_IT');
