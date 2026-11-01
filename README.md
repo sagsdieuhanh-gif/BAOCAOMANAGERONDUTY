@@ -174,3 +174,9 @@
 - Biên tập lại nhận định/phương án theo cặp chuyến, STA/STD, 30 phút cao điểm, bãi đỗ, GSE, booking đã xác nhận; tách rõ nguy cơ và trách nhiệm nghiệp vụ.
 - ADMIN có chức năng sửa thông tin, quyền Manager và reset mật khẩu tạm ngẫu nhiên dùng chung với RNS.
 - [HDSD_MANAGER_V3.19.md](HDSD_MANAGER_V3.19.md).
+
+
+### V3.20 – Nhân sự PVHK/PVSĐ theo tổ/đội, booking Kho Hàng hai chiều
+- PVHK và PVSĐ có biểu mẫu ca sáng/ca tối theo nhóm thực tế; HLSĐ/HLNG tách SKO, PVTT tách TC và SKO. Báo cáo L1/L2 và PDF/Word dùng cùng nguồn.
+- Kho Hàng nhập booking ở hai bảng **đi/đến**, chọn KG/TẤN cho từng dòng, tự cộng riêng theo chiều; dữ liệu cũ không bị viết đè.
+- Chi tiết: [HDSD_MANAGER_V3.20.md](HDSD_MANAGER_V3.20.md).
