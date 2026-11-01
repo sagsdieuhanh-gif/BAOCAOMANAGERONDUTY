@@ -60,11 +60,11 @@ assert.ok(pdf.some(b=>b.text?.includes('I. TÓM TẮT KHAI THÁC')));
 assert.ok(pdf.some(b=>b.text?.includes('Báo cáo nhân sự')));
 assert.ok(!pdf.some(b=>/KHO HÀNG|TRANG THIẾT BỊ|THÔNG TIN CHƯA XÁC NHẬN/.test(b.text||'')),
  'PDF option must hide complete unconfirmed-alert block');
-assert.ok(files.office.includes("format==='pdf'?options:{}"),'Word should never use PDF filter');
+assert.ok(files.office.includes("format==='pdf'?exportOptions:{}"),'Word should never use PDF filter');
 assert.ok(files.native.includes("$('v315PdfHidePending')?.checked===true"));
 assert.ok(files.workspace.includes("$('v315WorkspaceHidePending')?.checked===true"));
 assert.ok(files.index.includes('id="v315PdfHidePending"'));
 assert.ok(files.index.includes("APP_VERSION='V3.22'"));
-assert.ok(files.index.includes('office-export-v29.js?v=3.15'));
+assert.ok(files.index.includes('office-export-v29.js?v=3.22'));
 assert.ok(files.index.includes('report-export-v29.js?v=3.15'));
 console.log('PASS V3.15: report shows only confirmed headcounts; PDF-only optional hide warnings leaves Word and preview untouched');
