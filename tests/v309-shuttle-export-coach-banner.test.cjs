@@ -49,5 +49,5 @@ assert.ok(paint.filter(p=>p.kind==='image'&&(p.image==='29'||p.image==='45')).ev
 const index=fs.readFileSync('index.html','utf8');
 for(const file of ['v21-shuttle-model.js','v21-shuttle-export.js','v24-shuttle-grid.js'])
  assert.ok(index.includes(file+'?v=3.11'),'Cache-bust changed '+file);
-assert.ok(index.includes("APP_VERSION='V3.21'"));
+assert.ok(index.includes("APP_VERSION='V3.22'"));
 console.log('PASS V3.11: eight fixed routes, compact top image bus advice, 45C+29C preference, partial/confirmed labels and next-day timing');
