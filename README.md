@@ -153,3 +153,10 @@
 - Sau khi **DUYỆT VÀ LƯU LẦN 2**, hệ thống tự làm mới báo cáo và workspace từ dữ liệu đã lưu; giữ nguyên Lần 1 đối chiếu.
 - Đầy đủ 10 mục, bố trí theo khu bãi thực tế, booking/PVHK, KG Kho hàng, quân số các phòng và ghi chú PVSĐ; không cắt câu, không chèn thông tin thiếu dạng chung chung, không suy đoán boarding hoặc đánh giá đủ/thiếu người.
 - Chi tiết: [HDSD_MANAGER_V3.16.md](HDSD_MANAGER_V3.16.md).
+
+
+### V3.17 – Quân số PVSĐ gọn trong một ô
+
+- Màn hình PVSĐ hiện **một ô tóm tắt** gồm PVSĐ, PVHLNG, BỐC XẾP PVSĐ, SKYONE theo sáng/đêm; mục nhập chi tiết mặc định đóng sau khi đã lưu, vẫn mở được để sửa các nhóm GSE/Cobus và các nhóm khác.
+- Báo cáo Lần 1/Lần 2 và bản Word/PDF hiện đúng **một ô PVSĐ**, không còn nhiều hàng cho từng nhóm; không cộng trùng quân số.
+- [HDSD_MANAGER_V3.17.md](HDSD_MANAGER_V3.17.md).

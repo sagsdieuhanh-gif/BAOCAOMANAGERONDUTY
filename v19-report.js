@@ -141,6 +141,26 @@
      }
      return output;
    })();
+   // One compact PVSĐ result cell, retaining four *separate* sourced counts.
+   // PVSĐ total comes from the confirmed departmental snapshot, never from
+   // adding PVHLNG, bốc xếp and SKYONE (those groups may overlap the total).
+   const pvsdPlan=(c.unitPlans||[]).find(x=>x.unit==='KTS'&&x.status==='CONFIRMED');
+   const pvsdCount=(value)=>{
+     if(value==null||String(value).trim()==='')return null;
+     const num=Number(value);
+     return Number.isInteger(num)&&num>=0?num:null;
+   };
+   const pvsdByRole=role=>staffDetails.find(x=>x.unit==='KTS'&&x.role===role);
+   const pvsdSummary=[
+     {name:'PVSĐ',morning:pvsdCount(pvsdPlan?.details?.pvb_morning),
+       night:pvsdCount(pvsdPlan?.details?.pvb_night)},
+     {name:'PVHLNG',morning:pvsdByRole('Hành lý nhà ga')?.morning??null,
+       night:pvsdByRole('Hành lý nhà ga')?.night??null},
+     {name:'BỐC XẾP PVSĐ',morning:pvsdByRole('Bốc xếp')?.morning??null,
+       night:pvsdByRole('Bốc xếp')?.night??null},
+     {name:'SKYONE',morning:pvsdByRole('SKYONE (thuê ngoài)')?.morning??null,
+       night:pvsdByRole('SKYONE (thuê ngoài)')?.night??null}
+   ];
    const staffSky=staff.filter(x=>x.unit==='KTS'&&x.role_code==='SKYONE_BAGGAGE');
    const staffInfo='Phòng KTSĐ: Bốc xếp công ty ('+uStaff('KTS','BAGGAGE')+'); Lái xe GSE ('+uStaff('KTS','GSE_DRIVER')+'). SKYONE thuê ngoài: '+
     (staffSky.length?staffSky.slice(0,6).map(x=>clock(x.start_min)+'–'+clock(x.end_min)+': '+x.quantity+' người').join('; '):'chưa có khung giờ xác nhận')+
@@ -415,7 +435,7 @@
        if(!ctrl.owner)topics[idx].owner=item.owner;
      }
    }
-   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
+   return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Đề nghị các phòng chủ động bố trí lực lượng, trang thiết bị theo lịch bay, đặc biệt trong giờ cao điểm và các chuyến quay đầu ngắn. Trường hợp phát sinh khó khăn vượt khả năng xử lý, Phòng ĐH tổng hợp, báo cáo Ban TGĐ để xem xét chỉ đạo.'};
  }
 
  function html(data){
@@ -443,11 +463,18 @@
     '<h3>II. BẢNG KIỂM SOÁT – 10 NỘI DUNG</h3><table>'+tr(['Nội dung','Nhận định / Rủi ro','Phương án phục vụ dự kiến','Đơn vị liên quan'],true)+data.topics.map((x,i)=>{const y=updateTopic(x,i);return tr([y.title,y.observation,y.action,y.owner])}).join('')+'</table>'+
     '<h4>CHI TIẾT QUÂN SỐ ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ</h4>'+
     '<table>'+tr(['Phòng / Bộ phận','Vị trí công việc','Ca sáng','Ca đêm'],true)+
-      (data.staffDetails?.length?data.staffDetails.map(x=>tr([
-        x.label,x.role,x.morning==null?'CHỜ XÁC NHẬN':x.morning+' người',
-        x.night==null?'CHỜ XÁC NHẬN':x.night+' người'
-      ])).join(''):tr(['ĐH / PVHK / PVSĐ','CHƯA CÓ QUÂN SỐ XÁC NHẬN','—','—']))+'</table>'+
-    '<p class="v19-footnote">Nguồn: số người đã xác nhận theo từng vị trí và từng ca của ngày khai thác; số 0 là dữ liệu đã xác nhận. Không cộng các nhóm PVSĐ thành tổng nhân sự độc lập khi chưa loại trừ nhân sự kiêm nhiệm.</p>'+
+      ((data.staffDetails||[]).filter(x=>x.unit!=='KTS').length?
+        data.staffDetails.filter(x=>x.unit!=='KTS').map(x=>tr([
+          x.label,x.role,x.morning==null?'CHỜ XÁC NHẬN':x.morning+' người',
+          x.night==null?'CHỜ XÁC NHẬN':x.night+' người'
+        ])).join(''):tr(['ĐH / PVHK','CHỜ XÁC NHẬN','—','—']))+'</table>'+
+    '<table class="v317-pvsd-summary"><tbody><tr><td>'+
+      '<strong>PVSĐ – PVHLNG – BỐC XẾP PVSĐ – SKYONE:</strong> '+
+      (data.pvsdSummary||[]).map(x=>esc(x.name)+': '+
+        'Sáng '+(x.morning==null?'CHỜ XÁC NHẬN':x.morning+' người')+
+        ' / Đêm '+(x.night==null?'CHỜ XÁC NHẬN':x.night+' người')
+      ).join(' · ')+'</td></tr></tbody></table>'+
+    '<p class="v19-footnote">Nguồn: quân số đã xác nhận theo ngày và ca; 0 là số liệu đã xác nhận. PVSĐ là tổng phòng đã lưu, các nhóm PVHLNG, Bốc xếp PVSĐ và SKYONE là số riêng để tham khảo, không cộng thêm vào tổng PVSĐ hoặc suy ra số người độc lập.</p>'+
     (!isL2||data.quickReports?.length?'<h3>THÔNG TIN CÁC PHÒNG GỬI BỔ SUNG</h3>':'')+
     (data.quickReports?.length?'<table>'+tr(['Đơn vị gửi','Nội dung chuyển ĐH'],true)+data.quickReports.map(x=>tr([({'DH':'Phòng ĐH','KTS':'PVSĐ','PVHK':'PVHK','KHO':'Kho Hàng','QA_IT':'QA/IT'}[x.unit]||x.unit),x.report_text])).join('')+'</table>':(isL2?'':'<p>Chưa có nội dung bổ sung từ các phòng.</p>'))+
     '<h3>III. CẢNH BÁO CAO ĐIỂM (Theo khung 30 phút)</h3><table>'+tr(['Khung giờ','Các cặp chuyến','Nguy cơ','Phương án xử lý'],true)+data.peakRows.map(x=>tr([x.slot,x.flight,x.risk,x.action])).join('')+'</table>'+
