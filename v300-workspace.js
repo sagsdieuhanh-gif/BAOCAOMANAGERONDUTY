@@ -74,7 +74,7 @@
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.16</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.17</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
