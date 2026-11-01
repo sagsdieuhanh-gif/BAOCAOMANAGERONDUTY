@@ -188,8 +188,35 @@
  <div class="rnsStatus" id="rnsSharedStatus" role="status"></div>
  <div id="rnsSharedList"></div>
 </div>
+<div class="panel" id="rnsManagerEditPanel">
+ <h2>4. CẬP NHẬT HỒ SƠ / ĐẶT LẠI MẬT KHẨU TÀI KHOẢN</h2>
+ <p class="small muted">ADMIN chọn một tài khoản đang có từ danh sách. Có thể chỉnh họ tên, email, đơn vị, trạng thái quyền Manager hoặc đặt lại mật khẩu tạm. Quyền RNS không thay đổi; mật khẩu cũ không thể xem lại.</p>
+ <div class="formrow">
+   <label>Tài khoản đã chọn<input id="rnsEditIdentity" readonly placeholder="Chọn từ danh sách bên trên"></label>
+   <label>Email đăng nhập<input id="rnsEditEmail" type="email" maxlength="254" autocomplete="off"></label>
+   <label>Họ tên nhân viên<input id="rnsEditName" maxlength="120" autocomplete="off"></label>
+   <label>Đơn vị / quyền Manager<select id="rnsEditUnit">
+     <option value="VIEWER">CHỈ XEM</option><option value="DH">PHÒNG ĐIỀU HÀNH</option>
+     <option value="KTS">PVSĐ</option><option value="PVHK">PVHK</option>
+     <option value="KHO">KHO HÀNG</option><option value="QA">QA</option><option value="IT">IT</option>
+   </select></label>
+ </div>
+ <label class="rnsSwitch"><input id="rnsEditActive" type="checkbox"> Cho phép đăng nhập và sử dụng Manager theo đơn vị đã cấp</label>
+ <div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap">
+   <button type="button" class="primary" id="rnsEditSave" disabled>LƯU CẬP NHẬT HỒ SƠ</button>
+   <button type="button" id="rnsEditReset" disabled>ĐẶT LẠI MẬT KHẨU TẠM</button>
+   <button type="button" id="rnsEditClear">BỎ CHỌN</button>
+ </div>
+ <div id="rnsEditStatus" class="rnsStatus" role="status" aria-live="polite"></div>
+ <div id="rnsResetSecretPanel" class="hidden rnsResetSecretPanel">
+   <strong>MẬT KHẨU TẠM MỚI · HIỂN THỊ MỘT LẦN</strong>
+   <label>Mật khẩu ngẫu nhiên mới<input id="rnsResetSecret" readonly autocomplete="off" type="text" spellcheck="false"></label>
+   <div class="row"><button type="button" id="rnsResetCopy">SAO CHÉP ĐỂ BÀN GIAO RIÊNG</button><button type="button" id="rnsResetDismiss">ĐÃ BÀN GIAO / ĐÓNG</button></div>
+   <p class="small muted">Mật khẩu tạm chỉ dùng để đăng nhập RNS và đổi sang mật khẩu riêng trước khi tiếp tục sử dụng Manager. Không gửi mật khẩu ở nhóm chat.</p>
+ </div>
+</div>
 <div class="panel" id="rnsExistingPanel">
-<h2>4. CẤP / CẬP NHẬT QUYỀN RADAR CHO TÀI KHOẢN ĐÃ CÓ</h2>
+<h2>5. CẤP / CẬP NHẬT QUYỀN RADAR CHO TÀI KHOẢN ĐÃ CÓ</h2>
 <p class="small muted">Chọn tài khoản từ danh sách RNS ở trên hoặc nhập email đã tồn tại. Thao tác này chỉ thay đổi quyền Radar; không đổi thông tin đăng nhập và quyền RNS.</p><div class="formrow"><label>Email tài khoản RNS<input id="memberEmail" type="email" autocomplete="off" placeholder="nhanvien@congty.com" /></label><label>Quyền sử dụng Radar<select id="memberUnit"><option value="VIEWER">CHỈ XEM</option><option value="DH">ĐIỀU HÀNH – lập và phát hành báo cáo</option><option value="KTS">PVSĐ – nhân sự, xe hỏng, SKYONE</option><option value="PVHK">PVHK – đội đến / đội đi</option><option value="KHO">KHO HÀNG – kế hoạch cargo</option><option value="QA">QA – chung cột QA / IT</option><option value="IT">IT – chung cột QA / IT</option></select></label><label>Họ tên (không bắt buộc)<input id="memberName" placeholder="Tên nhân viên" maxlength="120" /></label></div><div class="row" style="margin-top:12px"><button class="primary" id="saveMember">CẤP / CẬP NHẬT QUYỀN RADAR</button><button id="refreshMembers">↻ XEM TÀI KHOẢN ĐÃ CẤP</button></div><div id="memberMessage" class="small muted" style="margin-top:10px">Chỉ ADMIN được phân quyền. Quyền RNS không thay đổi.</div><div class="tablewrap" id="membersTable" style="margin-top:12px"></div></div></section>
 <div class="small muted" id="appNote">Bản tin sơ bộ vẫn xuất được khi còn dữ liệu chờ xác nhận; không được kết luận đủ nguồn lực khi chưa được đơn vị xác nhận.</div>
 </section></main>
