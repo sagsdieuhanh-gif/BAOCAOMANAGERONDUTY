@@ -74,13 +74,13 @@
        '<span class="v300-nav-icon">'+keyCode(ico)+'</span><span><strong>'+H(label)+'</strong><small>'+H(sub)+'</small></span></button>';
        const main=Object.fromEntries(NAV.map(x=>[x[0],x]));
        const departments=['DH','KTS','PVHK','KHO','QA_IT'].filter(canOpen).map(k=>button(main[k])).join('');
-       const other=['norms','admin'].filter(canOpen).map(k=>button(main[k])).join('');
        return ['overview','sources'].filter(canOpen).map(k=>button(main[k])).join('')+
        (departments?'<details class="v300-nav-folder" open><summary>◎ &nbsp; CÁC PHÒNG</summary><div>'+departments+'</div></details>':'')+
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
-       (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
+       (canOpen('admin')?button(main.admin):'')+
+       (canOpen('norms')?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+button(main.norms)+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.22</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.24</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -349,7 +349,8 @@
      '<details class="v300-details v317-pvsd-edit v318-team-edit" '+(!hasSaved?'open':'')+'><summary>NHẬP / CHỈNH SỬA QUÂN SỐ CHI TIẾT</summary>'+
      table(main)+(other.length?'<div class="v317-pvsd-extra">'+table(other)+'</div>':'')+'</details>':
      table(main)+(other.length?'<details class="v300-details v311-advanced"><summary>Nhóm nhân sự bổ sung ('+other.length+') · chỉ mở khi cần</summary>'+table(other)+'</details>':'');
-   return wrapPanel('01 · Quân số theo ca','Chỉ nhập số người thực sự có thể bố trí; không nhập lại các số liệu lịch bay.',
+   return wrapPanel(u==='KHO'?'02 · Nhân sự kho theo ca':'01 · Quân số theo ca',
+     'Chỉ nhập số người thực sự có thể bố trí; không nhập lại các số liệu lịch bay.',
      inputs+
      '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo hôm trước</button><span>Phải kiểm tra lại trước khi xác nhận ngày mới</span></div>'+
      '<p class="v300-hint">Ô trống = chưa xác nhận · 0 = xác nhận không có người · Không cộng trùng nhân sự kiêm nhiệm.</p>');
@@ -403,7 +404,7 @@
        '<p class="v300-hint">Không tự coi các dòng này là chuyến đi hoặc đến; cần kiểm tra số hiệu trong lịch trước khi nhập lại.</p>'+
        split.unmatched.map(x=>'<p>'+H(x.flight_no)+': '+
          H(model.formattedTotal(Number(x.cargo_kg||0)))+'</p>').join('')+'</details>':'';
-   return wrapPanel('02 · BOOKING HÀNG HÓA – CHUYẾN ĐI VÀ CHUYẾN ĐẾN',
+   return wrapPanel('01 · BOOKING HÀNG HÓA – CHUYẾN ĐI VÀ CHUYẾN ĐẾN',
      'Nhập số hiệu, trọng lượng và chọn KG/TẤN ngay tại từng dòng. Hai bảng cộng riêng, không gộp hàng đi với hàng đến.',
      '<p class="v300-hint">Ví dụ: 2.5 TẤN = 2.500 KG; 500 KG = 0,5 TẤN. Tổng tự động quy đổi. Không nhập số 2.5 dưới đơn vị KG nếu thực tế là 2,5 tấn.</p>'+
      '<div class="v320-cargo-layout">'+table('departure','CHUYẾN BAY ĐI')+
@@ -455,20 +456,25 @@
    const names=noteFields[u]||[],hasNotes=names.some(([k])=>details[k]);
    const fields=names.map(([k,label])=>'<label>'+H(label)+
      '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" placeholder="Chỉ ghi chuyến/khung giờ, nguy cơ cụ thể và phương án">'+H(details[k]||'')+'</textarea></label>').join('');
-   const comments=wrapPanel(u==='QA_IT'?'01 · Thông tin cần báo':'03 · Ngoại lệ / phương án bổ sung',
+   const comments=wrapPanel(u==='QA_IT'?'01 · Thông tin cần báo':
+     (u==='DH'||u==='PVHK'?'02 · Ngoại lệ / phương án bổ sung':'03 · Ngoại lệ / phương án bổ sung'),
      'Không cần viết lại số chuyến, giờ cao điểm và bãi đỗ: báo cáo đã tự tổng hợp từ nguồn.',
      '<details class="v300-details v311-advanced" '+(hasNotes||u==='QA_IT'?'open':'')+'><summary>Ghi chú để đưa vào báo cáo ('+(hasNotes?'đang có nội dung':'tùy chọn')+')</summary><div class="v300-fields-grid">'+fields+'</div></details>');
    const flights=getFlights(),dep=dataRows(),bays=flights.filter(x=>x.bay!=null).length;
-   const auto=wrapPanel('Dữ liệu tự lấy từ lịch bay · không phải nhập',
-     'Lịch Lần 1/Lần 2 cung cấp STA, STD, số chuyến, đăng bạ, vị trí đỗ và phân tích cao điểm.',
+   const auto='<details class="v300-card v324-auto-summary"><summary>'+
+     '<span><strong>DỮ LIỆU LỊCH BAY · TỰ ĐỘNG</strong><small>Không phải nhập lại thông tin chuyến bay</small></span>'+
+     '<span class="v324-auto-pills"><b>'+H(flights.length||'—')+' cặp</b><b>'+H(bays)+'/'+H(flights.length)+' bãi</b>'+
+     '<b>'+H(dep.filter(x=>x.charter).length)+' charter</b></span></summary>'+
+     '<div class="v324-auto-body"><p>Lịch Lần 1/Lần 2 cung cấp STA, STD, số chuyến, đăng bạ, vị trí đỗ và phân tích cao điểm.</p>'+
      '<div class="v311-source-grid"><div><small>CẶP CHUYẾN</small><strong>'+H(flights.length||'Chưa có lịch')+'</strong></div>'+
      '<div><small>BÃI CÓ NGUỒN</small><strong>'+H(bays)+'/'+H(flights.length)+'</strong></div>'+
-     '<div><small>CHARTER (##)</small><strong>'+H(dep.filter(x=>x.charter).length)+'</strong></div></div>');
-   $('v300Page').innerHTML='<div class="v300-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
-     '<div class="v311-entry-guide"><b>Phòng cần nhập:</b> '+H(focus[u])+'</div>'+auto+
-     roleInputs(u)+issueFields(u)+comments+
-     '<div class="v300-savebar v311-savebar"><div><strong>Xác nhận dữ liệu cho ngày '+H(date())+'</strong>'+
-     '<small>Thông tin bỏ trống vẫn là CHỜ XÁC NHẬN, không được mặc định đủ.</small>'+
+     '<div><small>CHARTER (##)</small><strong>'+H(dep.filter(x=>x.charter).length)+'</strong></div></div></div></details>';
+   const workflow=u==='KHO'?issueFields(u)+roleInputs(u):roleInputs(u)+issueFields(u);
+   $('v300Page').innerHTML='<div class="v300-dept-head v324-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
+     '<details class="v324-entry-help"><summary>Hướng dẫn nhập của phòng</summary><p>'+H(focus[u])+'</p></details>'+
+     auto+workflow+comments+
+     '<div class="v300-savebar v311-savebar v324-savebar"><div><strong>Xác nhận dữ liệu cho ngày '+H(date())+'</strong>'+
+     '<small>Ô trống là CHỜ XÁC NHẬN, không được mặc định đủ nhân sự hoặc thiết bị.</small>'+
      '<label class="v300-check"><input type="checkbox" data-v300-no-exception '+(details.no_new_exceptions==='YES'?'checked':'')+'> Đã kiểm tra: không có ngoại lệ nào khác cần bổ sung</label></div>'+
      '<button type="button" class="v300-primary" data-v300-command="save" data-unit="'+u+'">LƯU & XÁC NHẬN PHÒNG</button></div>';
  }
@@ -539,11 +545,36 @@
    node.prepend(banner);
    node.dataset.v300Prepared='1';
  }
+ function prepareAdmin(node){
+   if(node.dataset.v324AdminPrepared)return;
+   const header=node.querySelector('.rnsAdminHeader');
+   const shared=node.querySelector('#rnsSharedPanel'),edit=node.querySelector('#rnsManagerEditPanel');
+   const existing=node.querySelector('#rnsExistingPanel');
+   const create=node.querySelector('#rnsCreatePanel'),invite=node.querySelector('#rnsInvitePanel');
+   if(!header||!shared||!edit||!existing||!create||!invite)return;
+   header.querySelector('h2').textContent='QUẢN LÝ TÀI KHOẢN · ADMIN';
+   const intro=header.querySelector('p');
+   if(intro)intro.textContent='Tìm nhân viên, chỉnh hồ sơ, phân quyền hoặc đặt lại mật khẩu ngay tại đây. Dùng chung tài khoản đăng nhập RNS / Manager.';
+   const steps=header.querySelector('.rnsAdminSteps');
+   if(steps)steps.innerHTML='<span><b>1</b> Tìm tài khoản</span><span><b>2</b> Sửa / Reset mật khẩu</span><span><b>3</b> Tạo hoặc cấp quyền</span>';
+   shared.querySelector('h2').textContent='01 · TÌM & QUẢN LÝ TÀI KHOẢN';
+   const tip=shared.querySelector('p');if(tip)tip.textContent='Gõ email hoặc họ tên, sau đó chọn SỬA HỒ SƠ hoặc ĐẶT LẠI MẬT KHẨU tại dòng nhân viên.';
+   edit.querySelector('h2').textContent='02 · HỒ SƠ / ĐẶT LẠI MẬT KHẨU';
+   existing.querySelector('h2').textContent='03 · CẤP / CẬP NHẬT QUYỀN MANAGER';
+   create.querySelector('h2').textContent='04 · TẠO TÀI KHOẢN MỚI';
+   invite.querySelector('h2').textContent='GỬI LỜI MỜI EMAIL (TÙY CHỌN)';
+   [header,shared,edit,existing,create].forEach(el=>node.appendChild(el));
+   const optional=document.createElement('details');optional.className='v324-admin-optional';
+   const summary=document.createElement('summary');summary.textContent='Gửi thư mời qua email · chỉ mở khi cần';
+   optional.appendChild(summary);optional.appendChild(invite);node.appendChild(optional);
+   node.dataset.v324AdminPrepared='1';
+ }
  function attachLegacy(k){
    const target={sources:'tab-sources',norms:'tab-norms',shuttle:'tab-shuttle-report',admin:'tab-admin'}[k];
    const node=$(target);
    if(!node){$('v300Page').innerHTML=wrapPanel('Chưa sẵn sàng','','Không tìm thấy công cụ đã lưu.');return}
    if(k==='sources')prepareSource(node);
+   if(k==='admin')prepareAdmin(node);
    $('v300Page').replaceChildren(node);
    node.classList.remove('hidden');
    node.classList.add('v300-embedded');
