@@ -35,10 +35,10 @@
    const peak=(ctx.peaks||[]).slice().sort((a,b)=>b.items.length-a.items.length||a.minute-b.minute)[0];
    const near=rs.filter(nearTurn).sort((a,b)=>duration(a)-duration(b));
    const wide=rs.filter(x=>/A\s?330|B\s?777/i.test(x.aircraft_type||''));
-   const charter=deps.filter(x=>x.charter||String(x.no||'').startsWith('##'));
-   const ferry=deps.filter(x=>x.ferry&&!x.charter&&!String(x.no||'').startsWith('##'));
-   const conflicting=deps.filter(x=>x.ferry&&(x.charter||String(x.no||'').startsWith('##')));
-   const charterOnly=charter.filter(x=>!x.ferry);
+   // ## is a charter identification marker. It does not alter the ordinary
+   // service flow and must never trigger a FERRY/CHARTER conflict warning.
+   const charter=deps.filter(x=>x.charter||String(x.raw_no||x.no||'').startsWith('##'));
+   const ferry=deps.filter(x=>x.ferry&&!x.charter&&!String(x.raw_no||x.no||'').startsWith('##'));
    const saved=(c.unitPlans||[]).filter(x=>x.status==='CONFIRMED');
    const dept=u=>saved.find(x=>x.unit===u)?.details||{};
    const dh=dept('DH'),pv=dept('PVHK'),kts=dept('KTS'),qa=dept('QA_IT');
@@ -108,16 +108,13 @@
    facts[2]=a(
      (wide.length?'Tàu thân rộng: '+unique(wide.map(x=>flight(x)+
        (x.bay!=null?' bãi '+x.bay:'')),5)+'.':'Theo lịch chưa ghi nhận lượt A330/B777.')+
-       (charterOnly.length?' Charter: '+unique(charterOnly.map(x=>x.no),5)+'.':'')+
-       (ferry.length?' Ferry: '+unique(ferry.map(x=>x.no),5)+'.':'')+
-       (conflicting.length?' Chuyến '+unique(conflicting.map(x=>x.no),5)+
-         ' có dấu hiệu charter và ferry chưa thống nhất; cần xác nhận loại hình.':''),
+       (charter.length?' Charter (##): '+unique(charter.map(x=>x.no),5)+
+         ' – phục vụ bình thường theo lịch.':'')+
+       (ferry.length?' Ferry theo dữ liệu nghiệp vụ riêng: '+unique(ferry.map(x=>x.no),5)+'.':''),
      (wide.length?'PVSĐ kiểm tra cấu hình xe thang/GSE theo loại tàu, đối chiếu thiết bị khả dụng trước thời điểm phục vụ; PVHK bố trí nhân lực theo tải khách và mốc boarding được xác nhận.':
        'Phục vụ theo loại tàu và yêu cầu hãng đã có trong lịch.')+
-       (charterOnly.length?' ĐH xác nhận yêu cầu đặc thù charter với hãng và chuyển PVSĐ, Kho Hàng khi có phát sinh.':'')+
-       (ferry.length?' Với ferry, ĐH xác nhận phạm vi phục vụ, không mặc định như chuyến chở khách.':'')+
-       (conflicting.length?' ĐH làm rõ loại hình chuyến '+unique(conflicting.map(x=>x.no),5)+
-         ' với hãng trước khi ban hành phương án phục vụ.':''),
+       (ferry.length?' Với chuyến xác nhận là ferry theo nguồn nghiệp vụ riêng, ĐH đối chiếu phạm vi dịch vụ thực tế.':''),
+
      'ĐH; PVSĐ; PVHK; Kho Hàng khi có liên quan');
    facts[3]=a(
      missing.length===full?
