@@ -43,5 +43,5 @@ assert.ok(grid.vehicleGuide().includes('shuttle-29.webp')&&grid.vehicleGuide().i
 const ui=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(ui.includes('show();\n   const req=++sequence;'),'Show timetable before any Supabase query');
 const index=fs.readFileSync('index.html','utf8');
-assert.match(index,/const APP_VERSION='V3\.18'/);
+assert.match(index,/const APP_VERSION='V3\.19'/);
 console.log('PASS V3.10: visible 02:00 → 08:15 → 10:00 → 11:00 → 16:30; compact one-row-per-time table, 29/45-seat suggestions and reliable first paint');
