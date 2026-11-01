@@ -53,7 +53,10 @@ assert.ok(reportA[6].observation.includes('3.000 kg'));
 assert.ok(reportA[7].action.includes('ETA/ATA')&&reportA[7].action.includes('OTP'));
 assert.ok(!reportA[4].observation.includes('Điều phối:'));
 assert.ok(!reportA.some(x=>/Theo những thông tin đã được cập nhật|Đề nghị các đơn vị chủ động/i.test(x.observation)));
-const reportB=fresh();refine({...base,rows:[pairs[1]],cargoPlans:[],equipmentIssues:[],
+const reportB=fresh();
+reportB[3].observation='ĐH đã xác nhận bãi theo AOC';
+reportB[3].action='Phương án riêng đã duyệt';
+refine({...base,rows:[pairs[1]],cargoPlans:[],equipmentIssues:[],
  controls:[{topic:4,observation:'ĐH đã xác nhận bãi theo AOC',action:'Phương án riêng đã duyệt'}]},
  reportB,{peaks:[],tight:[],wide:[pairs[1]]});
 assert.equal(reportB[3].observation,'ĐH đã xác nhận bãi theo AOC');
