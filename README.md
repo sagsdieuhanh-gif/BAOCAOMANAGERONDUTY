@@ -160,3 +160,10 @@
 - Màn hình PVSĐ hiện **một ô tóm tắt** gồm PVSĐ, PVHLNG, BỐC XẾP PVSĐ, SKYONE theo sáng/đêm; mục nhập chi tiết mặc định đóng sau khi đã lưu, vẫn mở được để sửa các nhóm GSE/Cobus và các nhóm khác.
 - Báo cáo Lần 1/Lần 2 và bản Word/PDF hiện đúng **một ô PVSĐ**, không còn nhiều hàng cho từng nhóm; không cộng trùng quân số.
 - [HDSD_MANAGER_V3.17.md](HDSD_MANAGER_V3.17.md).
+
+
+### V3.18 – Bảng quân số tách 2 ô ca sáng/ca tối
+
+- ĐH, PVHK, PVSĐ hiển thị **mỗi phòng một hàng, hai cột CA SÁNG | CA TỐI** trong báo cáo Lần 1/Lần 2. PVHK gộp Đội đến + Đội đi trong từng ô; PVSĐ gộp Tổng PVSĐ + PVHLNG + Bốc xếp PVSĐ + SKYONE trong từng ô. Không cộng trùng, không xóa dữ liệu.
+- Màn hình PVHK/PVSĐ cũng có hai ô theo ca và mục **Nhập / chỉnh sửa quân số chi tiết** thu gọn sau khi đã lưu.
+- Chi tiết tại [HDSD_MANAGER_V3.18.md](HDSD_MANAGER_V3.18.md).
