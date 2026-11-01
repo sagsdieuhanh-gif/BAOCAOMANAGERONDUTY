@@ -80,7 +80,7 @@
        ['analysis','report','shuttle'].filter(canOpen).map(k=>button(main[k])).join('')+
        (other?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+other+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.20</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.21</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -558,12 +558,17 @@
    }
    if(k==='admin')root.RnsRadarAdmin?.loadShared?.();
  }
+ function readableRisk(text){
+   const points=String(text??'').split(/;\s+|(?<=[.!?])\s+(?=[A-ZÀ-ỸĐ])/u).map(x=>x.trim()).filter(Boolean);
+   return points.map(x=>'<div class="v321-action-row">'+H(x)+'</div>').join('');
+ }
  function renderAnalysis(){
   const list=highlights();
   const html=list.filter(x=>x.type!=='pending').map((x,i)=>
    '<article class="v300-risk"><div class="v300-risk-number">'+String(i+1).padStart(2,'0')+'</div><div>'+
    '<div class="v300-risk-title"><h3>'+H(x.title)+'</h3><span>'+H(x.unit)+'</span></div>'+
-   '<p>'+H(x.desc)+'</p><div class="v300-action-note"><b>Phương án dự báo</b> · '+H(x.action)+'</div></div></article>').join('');
+   '<div class="v321-risk-description"><b>NHẬN ĐỊNH</b>'+readableRisk(x.desc)+'</div>'+
+   '<div class="v300-action-note v321-risk-action"><b>PHƯƠNG ÁN</b>'+readableRisk(x.action)+'</div></div></article>').join('');
   $('v300Page').innerHTML=wrapPanel('Nguy cơ cần chuẩn bị trước ca',
    'Chỉ hiển thị các điểm có thể ảnh hưởng khai thác theo lịch D+1; ưu tiên cao điểm và điều chuyển nguồn lực.',
    html||'<p class="v300-empty">Chưa xác định nguy cơ đủ căn cứ từ lịch đã có.</p>')+

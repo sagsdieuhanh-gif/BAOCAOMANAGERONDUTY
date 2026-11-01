@@ -180,3 +180,12 @@
 - PVHK và PVSĐ có biểu mẫu ca sáng/ca tối theo nhóm thực tế; HLSĐ/HLNG tách SKO, PVTT tách TC và SKO. Báo cáo L1/L2 và PDF/Word dùng cùng nguồn.
 - Kho Hàng nhập booking ở hai bảng **đi/đến**, chọn KG/TẤN cho từng dòng, tự cộng riêng theo chiều; dữ liệu cũ không bị viết đè.
 - Chi tiết: [HDSD_MANAGER_V3.20.md](HDSD_MANAGER_V3.20.md).
+
+
+### V3.21 – Báo cáo Ban TGĐ: rõ việc, rõ nguy cơ, rõ trách nhiệm
+
+- Kiểm tra 6 bản báo cáo Lần 1/Lần 2 của **31/10, 01/11, 02/11/2026** theo dữ liệu Supabase đã lưu.
+- Thay bảng 10 nội dung 4 cột đặc chữ bằng các khối 2 cột: **Nhận định → Phương án → Đơn vị thực hiện**; dàn hàng thẳng, có khoảng cách, hỗ trợ màn hình nhỏ và bản xuất Word/PDF. Chỉnh cả phần cao điểm, phối hợp và các thẻ nhận định trên workspace.
+- **Không hiển thị** đoạn chú thích “Nguồn: quân số xác nhận…” và dòng nguồn tên file “Nguồn Lần 2: Book4.xlsx…” trong báo cáo trình Ban TGĐ. Dữ liệu nguồn vẫn được giữ để kiểm tra khi cần.
+- Bộ lời nhận định/phương án mới dùng bãi, cặp chuyến, giờ khai thác, booking và GSE đã xác nhận; nhận diện cờ charter/ferry mâu thuẫn để yêu cầu xác minh thay vì khẳng định hai loại hình; không thay lời ĐH đã duyệt.
+- [HDSD_MANAGER_V3.21.md](HDSD_MANAGER_V3.21.md).
