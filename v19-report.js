@@ -178,7 +178,7 @@
      ]},
      {label:'PVSĐ',groups:pvsdSummary}
    ];
-   const roster=root.SagsStaffRosterV320;
+   const roster=window.SagsStaffRosterV320;
    if(roster){
      const fill=(unit)=>{
        const sections=roster.TEAMS[unit]||[];
