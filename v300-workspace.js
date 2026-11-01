@@ -14,14 +14,20 @@
  const tagUnit={DH:'Phòng Điều hành',KTS:'Phục vụ sân đỗ',PVHK:'Phục vụ hành khách',KHO:'Kho hàng',QA_IT:'QA / IT'};
  const staffRoles={
    DH:[['COORD','Điều phối / CO (nhóm công việc)']],
-   KTS:[['BAGGAGE','Bốc xếp tại tàu'],['GSE_DRIVER','Lái xe GSE'],['COBUS_DRIVER','Lái COBUS'],['SKYONE_BAGGAGE','Bốc xếp thuê ngoài'],['TERMINAL_BAGGAGE','Bốc xếp nhà ga']],
-   PVHK:[['PVHK_DEPARTURE_TEAM','Đội làm thủ tục đi'],['PVHK_ARRIVAL_TEAM','Đội đến'],['GATE','Gate / reader'],['BUSGATE','Bus gate'],['AIRCRAFT_BOARDING','Tại tàu']],
+   KTS:[['KTS_OFFICE','Cán bộ Phòng'],['KTS_RAMP_TEAM','Đội PVSĐ'],['BAGGAGE','HLSĐ – nhân sự chính'],['KTS_HLSD_SKO','HLSĐ – SKO'],
+     ['TERMINAL_BAGGAGE','HLNG – nhân sự chính'],['KTS_HLNG_SKO','HLNG – SKO'],['KTS_PVTT','Đội PVTT – nhân sự chính'],
+     ['KTS_PVTT_TC','Đội PVTT – tăng cường (TC)'],['KTS_PVTT_SKO','Đội PVTT – SKO'],
+     ['KTS_WORKSHOP_SC','Xưởng SC'],['GSE_DRIVER','Lái xe GSE (dữ liệu cũ)'],
+     ['COBUS_DRIVER','Lái COBUS (dữ liệu cũ)'],['SKYONE_BAGGAGE','SKYONE chưa phân nhóm (dữ liệu cũ)']],
+   PVHK:[['PVHK_OFFICE','Cán bộ Phòng'],['PVHK_DEPARTURE_TEAM','Đội PVHK đi'],['PVHK_ARRIVAL_TEAM','Đội PVHK đến'],
+     ['GATE','Gate / reader (dữ liệu cũ)'],['BUSGATE','Bus gate (dữ liệu cũ)'],
+     ['AIRCRAFT_BOARDING','Tại tàu (dữ liệu cũ)']],
    KHO:[['WAREHOUSE_CARGO','Nhân viên kho/hàng']],
    QA_IT:[]
  };
  const noteFields={
    DH:[['stand_notes','Điều chỉnh vị trí đỗ/AOC'],['peak_priority','Ưu tiên điều hành hoặc yêu cầu hãng'],['escalation','Vấn đề cần xin chỉ đạo']],
-   KTS:[['rolling_support','Phương án điều chuyển/chuẩn bị trước'],['gse_risk','Hạn chế thiết bị/luồng công vụ']],
+   KTS:[['rolling_support','Phương án tăng cường PVHL sân đỗ / hỗ trợ Kho Hàng / PVTT'],['gse_risk','Hạn chế thiết bị/luồng công vụ']],
    PVHK:[['peak_staff','Phương án quầy/gate/boarding khi dồn chuyến'],['special_pax','Khách đặc biệt hoặc yêu cầu hãng']],
    KHO:[['handover_priority','Ưu tiên bàn giao hàng'],['cargo_bottleneck','Nguy cơ chậm bàn giao hàng']],
    QA_IT:[['weather_fod','Thời tiết/FOD/an toàn đã xác nhận'],['open_capa','Tồn tại ảnh hưởng ngày mai']]
@@ -271,9 +277,42 @@
  }
  function pvsdSavedSummary(){return savedTeamSummary('KTS');}
  function pvhkSavedSummary(){return savedTeamSummary('PVHK');}
+ function structuredStaffInputs(u){
+   const schema=root.SagsStaffRosterV320?.TEAMS?.[u];
+   if(!schema)return '';
+   const defined=new Set(schema.flatMap(group=>group.parts.map(part=>part[0])));
+   const extra=(staffRoles[u]||[]).filter(([code])=>!defined.has(code));
+   const heading=u==='PVHK'?'PVHK – QUÂN SỐ THEO ĐỘI':'PVSĐ – QUÂN SỐ THEO BỘ PHẬN';
+   const shiftColumn=(shift,label)=>'<section class="v320-shift-card" aria-label="'+label+'">'+
+     '<h3>'+label+'</h3><div class="v320-shift-rows">'+schema.map(group=>
+       '<div class="v320-staff-group"><strong>'+H(group.label)+'</strong><div class="v320-staff-parts">'+
+       group.parts.map(([code,type])=>
+         '<label><span>'+H(type==='Chính'?'Số người':type)+'</span>'+
+         '<input type="number" min="0" max="9999" inputmode="numeric" '+
+           'aria-label="'+H(group.label+' '+(type==='Chính'?'nhân sự chính':type)+' '+label)+'" '+
+           'data-v300-staff="'+H(code)+'|'+shift+'" '+
+           'value="'+H(getStaff(u,code,shift)?.quantity??'')+'" placeholder="—"></label>'
+       ).join('')+'</div></div>').join('')+'</div></section>';
+   const extraHtml=extra.length?'<details class="v300-details v320-legacy-staff">'+
+     '<summary>Các nhóm nhập theo cấu trúc cũ / bổ sung ('+extra.length+') – mở khi cần</summary>'+
+     '<p class="v300-hint">Dữ liệu SKYONE tổng của bản trước không tự chia vào HLSĐ, HLNG hoặc PVTT. Chỉ nhập vào ô SKO mới khi đã xác nhận đúng bộ phận.</p>'+
+     '<div class="v300-table-wrap"><table class="v300-table"><thead><tr><th>Nhóm cũ</th><th>Ca sáng</th><th>Ca tối</th></tr></thead><tbody>'+
+     extra.map(([code,txt])=>'<tr><th>'+H(txt)+'</th>'+
+       ['SÁNG','ĐÊM'].map(shift=>'<td><input type="number" min="0" max="9999" '+
+         'aria-label="'+H(txt+' '+shift)+'" data-v300-staff="'+H(code)+'|'+shift+'" '+
+         'value="'+H(getStaff(u,code,shift)?.quantity??'')+'" placeholder="—"></td>').join('')+'</tr>').join('')+
+     '</tbody></table></div></details>':'';
+   return wrapPanel('01 · '+heading,
+     'Nhập trực tiếp theo nhóm, tách CA SÁNG / CA TỐI; ô trống = chưa xác nhận, 0 = đã xác nhận bằng 0.',
+     '<div class="v320-roster-grid">'+shiftColumn('SÁNG','CA SÁNG')+shiftColumn('ĐÊM','CA TỐI')+'</div>'+
+     '<p class="v300-hint">SKO = SKYONE, TC = nhân sự tăng cường. Nhập riêng cho từng bộ phận; không cộng trùng hoặc suy đoán số người từ nhóm khác.</p>'+
+     extraHtml+
+     '<div class="v300-secondary-row"><button type="button" data-v300-command="copy-previous" data-unit="'+u+'">↶ Tham khảo hôm trước</button><span>Chỉ sao chép vào ô đang trống; kiểm tra lại trước khi lưu</span></div>');
+ }
  function roleInputs(u){
    const roles=staffRoles[u]||[];
    if(!roles.length)return '';
+   if(['PVHK','KTS'].includes(u)&&root.SagsStaffRosterV320)return structuredStaffInputs(u);
    const primary={DH:['COORD'],KTS:['BAGGAGE','GSE_DRIVER'],PVHK:['PVHK_ARRIVAL_TEAM','PVHK_DEPARTURE_TEAM'],KHO:['WAREHOUSE_CARGO']}[u]||[];
    const rows=items=>items.map(([code,label])=>'<tr><th scope="row">'+H(label)+'</th>'+
      ['SÁNG','ĐÊM'].map(shift=>'<td><input type="number" min="0" max="9999" inputmode="numeric" aria-label="'+H(label)+' ca '+shift+'" data-v300-staff="'+H(code)+'|'+shift+'" value="'+H(getStaff(u,code,shift)?.quantity??'')+'" placeholder="—"></td>').join('')+'</tr>').join('');
@@ -345,8 +384,8 @@
    const plan=getUnitPlan(u),details=plan?.details||{};
    const focus={
      DH:'Nhập tổng nhân sự toàn Phòng ĐH theo ca; Điều phối là bộ phận riêng. Bổ sung các thay đổi AOC, yêu cầu hãng/charter và đề xuất điều hành.',
-     KTS:'Xác nhận người, GSE và phương án chuẩn bị trước khi tàu lăn; chú ý luồng đường công vụ K2/K3.',
-     PVHK:'Bố trí người làm thủ tục tại quầy check-in, phục vụ gate/boarding và đón, tiễn khách tại tàu bay theo lịch chuyến; nhập quân số thực có hoặc thay đổi ảnh hưởng.',
+     KTS:'Nhập Cán bộ Phòng, Đội PVSĐ, HLSĐ, HLNG, PVTT và Xưởng SC theo ca; tách rõ SKO/TC đúng nhóm. Đồng thời ghi phương án phối hợp khi cần.',
+     PVHK:'Nhập riêng Cán bộ Phòng, Đội PVHK đi và Đội PVHK đến cho từng ca. Đội đi/đến chỉ là các nhóm trong phòng, không tự gộp thành tổng biên chế.',
      KHO:'Xác nhận booking hàng đi, số KG/PCS và giờ sẵn sàng; không tự kết luận chuyến chưa nhập là không có hàng.',
      QA_IT:'Chỉ ghi vấn đề đã xác nhận về an toàn, FOD, thời tiết hoặc tồn tại ảnh hưởng ca.'
    };
@@ -531,7 +570,8 @@
      }
    }
    for(const el of page.querySelectorAll('[data-v300-note]'))details[el.dataset.v300Note]=el.value.trim();
-   if(items.length&&u!=='DH'){
+   if(items.length&&['KTS','PVHK'].includes(u))details.personnel_structure='V3.20';
+   if(items.length&&!['DH','KTS','PVHK'].includes(u)){
      const activeShifts=new Set(items.map(x=>x.shift));
      for(const sh of activeShifts){
        const k=sh==='SÁNG'?'morning':'night';
