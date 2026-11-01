@@ -61,7 +61,7 @@ assert.ok(fs.readFileSync('v19-report.js','utf8').includes("sb.from('ops_staff_c
 assert.ok(fs.readFileSync('v19-report.js','utf8').includes("staff:staffToday.data||[]"),
  'Confirmed staff must use current date query data');
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(index.includes("APP_VERSION='V3.21'"));
-assert.ok(index.includes('v19-report.js?v=3.21'));
+assert.ok(index.includes("APP_VERSION='V3.22'"));
+assert.ok(index.includes('v19-report.js?v=3.22'));
 assert.ok(index.includes('v212-personnel.js?v=3.15'));
 console.log('PASS V3.14: confirmed staffing is visible in L1/L2 by department and shift, readiness distinct, no duplicates');
