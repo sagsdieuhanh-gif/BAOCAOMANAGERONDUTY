@@ -69,4 +69,4 @@ assert.ok(missing.includes('CHỜ XÁC NHẬN'),'Never infer missing arrival tea
 const css=fs.readFileSync('v300-workspace.css','utf8');
 assert.ok(css.includes('.v318-shift-summary')&&css.includes('grid-template-columns:repeat(2'));
 assert.ok(css.includes('table.v318-staff-by-shift'),'A4 report layout must keep morning/evening columns');
-console.log('PASS V3.21: DH/PVHK/PVSD each one row; separate AM/PM cells, zeros/missing preserved and editability intact');
+console.log('PASS V3.22: DH/PVHK/PVSD each one row; separate AM/PM cells, zeros/missing preserved and editability intact');
