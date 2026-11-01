@@ -42,6 +42,7 @@ jobs:
           node tests/v319-headcount-editorial-accounts.test.cjs
           node tests/v320-real-pvhk-pvsd-roster.test.cjs
           node tests/v320-cargo-direction-units.test.cjs
+          node tests/v321-executive-report-three-days.test.cjs
           node tests/v29-office-export.test.cjs
           node tests/v212-personnel-human-report.test.cjs
           node tests/v213-shuttle-reasons.test.cjs
