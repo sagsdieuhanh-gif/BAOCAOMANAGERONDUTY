@@ -13,7 +13,7 @@ const report=fs.readFileSync('v19-report.js','utf8');
 const office=fs.readFileSync('office-export-v29.js','utf8');
 const shuttle=fs.readFileSync('v21-shuttle-export.js','utf8');
 assert.ok(report.includes('v216-report-logo')&&report.includes('logo-sags.png'));
-assert.ok(office.includes("if(tag==='IMG')")&&office.includes('const width=b.logo?118:820'));
+assert.ok(office.includes("if(tag==='IMG')")&&office.includes('const width=b.logo?(compact?90:118):(compact?720:820)'));
 assert.ok(shuttle.includes("const LOGO_PATH='./assets/logo-sags.png'"));
 assert.ok(shuttle.includes('img.toBlob')&&shuttle.includes('exportCanvasPdf'));
 const grid=fs.readFileSync('v24-shuttle-grid.js','utf8');
