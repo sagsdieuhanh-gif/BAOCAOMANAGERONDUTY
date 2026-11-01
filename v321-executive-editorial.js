@@ -130,25 +130,23 @@
        missing.length?'Sau khi AOC xác nhận bãi, PVSĐ hoàn thiện tuyến di chuyển GSE và nhân lực; ĐH thông báo PVHK các vị trí phục vụ liên quan.':
        'PVSĐ bố trí tuyến xe và phương tiện theo bãi đã công bố; ĐH theo dõi điều chỉnh vị trí khi có thay đổi.',
      'PVSĐ chủ trì; ĐH và PVHK phối hợp');
-   const dhStaff=has(dh.pvb_morning)||has(dh.pvb_night);
+   // V3.23: phần nhận định chỉ nêu tình hình chung. Các bảng bên dưới
+   // vẫn giữ nguyên chi tiết nhân sự từng bộ phận, từng ca và booking khách.
+   const dhComplete=has(dh.pvb_morning)&&has(dh.pvb_night);
    const pvCoverage=coverage('PVHK'),ktCoverage=coverage('KTS');
+   const fullRoster=(u,cov,d)=>roleSummary(u)?
+     Boolean(cov&&cov.expected>0&&cov.count.every(x=>x===cov.expected)):
+     has(d.pvb_morning)&&has(d.pvb_night);
+   const pvComplete=fullRoster('PVHK',pvCoverage,pv);
+   const ktComplete=fullRoster('KTS',ktCoverage,kts);
    const staffingFlag=['pvb_morning_status','pvb_night_status'].some(k=>kts[k]==='LIMITED');
-   const pvFact=roleSummary('PVHK')?
-     'PVHK đã nhập '+(pvCoverage?.count[0]||0)+'/'+(pvCoverage?.expected||0)+' nhóm ca sáng, '+
-       (pvCoverage?.count[1]||0)+'/'+(pvCoverage?.expected||0)+' nhóm ca tối':
-       (has(pv.pvb_morning)||has(pv.pvb_night)?staffUnit('PVHK',pv):'PVHK chưa có xác nhận quân số theo ca');
-   const ktFact=roleSummary('KTS')?
-     'PVSĐ đã nhập '+(ktCoverage?.count[0]||0)+'/'+(ktCoverage?.expected||0)+' nhóm ca sáng, '+
-       (ktCoverage?.count[1]||0)+'/'+(ktCoverage?.expected||0)+' nhóm ca tối':
-       (has(kts.pvb_morning)||has(kts.pvb_night)?staffUnit('PVSĐ',kts):'PVSĐ chưa có xác nhận quân số theo ca');
-   const peakPax=deps.filter(x=>x.booking_sum!=null&&Number.isFinite(Number(x.booking_sum))&&Number(x.booking_sum)>0&&!x.ferry)
-     .sort((a,b)=>Number(b.booking_sum)-Number(a.booking_sum)).slice(0,3);
+   const staffObservation=staffingFlag?
+     'PVSĐ ghi nhận hạn chế bố trí nhân sự theo ca. Cần rà soát và có phương án tăng cường tại các khung giờ cao điểm, đặc biệt những chuyến có lượng khách lớn.':
+     dhComplete&&pvComplete&&ktComplete?
+       'Các bộ phận đã cập nhật đầy đủ thông tin bố trí nhân sự theo ca. Cần tập trung rà soát khả năng đáp ứng tại các khung giờ cao điểm, đặc biệt những chuyến có lượng khách lớn, để chủ động điều phối và tăng cường khi cần thiết.':
+       'Thông tin bố trí nhân sự theo ca chưa được cập nhật đầy đủ. Các bộ phận cần hoàn thiện số liệu và rà soát khả năng đáp ứng tại các khung giờ cao điểm, đặc biệt những chuyến có lượng khách lớn.';
    facts[4]=a(
-     (dhStaff?staffUnit('ĐH',dh):'ĐH chưa có xác nhận tổng nhân sự theo ca')+
-       '. '+pvFact+'. '+ktFact+'.'+
-       (staffingFlag?' PVSĐ đã tự đánh dấu hạn chế bố trí lực lượng theo ca; cần đối chiếu phương án tăng cường.':'')+
-       (peakPax.length?' Booking khách đáng chú ý: '+
-         unique(peakPax.map(x=>x.no+' '+x.booking_sum+' khách'),3)+'.':''),
+     staffObservation,
      'PVHK phân bổ nhân sự đội đi/đến theo lịch check-in, gate và tàu bay; PVSĐ bố trí tổ HLSĐ, HLNG, PVTT theo các cụm chuyến. ĐH phối hợp điều chỉnh phân công khi thời gian phục vụ chồng lấn; không đánh giá đủ/thiếu nhân sự chỉ từ quân số tổng.',
      'ĐH phối hợp; PVHK và PVSĐ bố trí lực lượng');
    facts[5]=a(hasGse?
