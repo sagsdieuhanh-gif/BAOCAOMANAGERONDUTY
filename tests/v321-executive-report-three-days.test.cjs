@@ -25,6 +25,10 @@ function data(day,revision){
   arrival_count:day==='2026-11-01'?40:cfg.arr,
   departure_count:day==='2026-11-01'?37:cfg.dep
  };
+ if(day==='2026-11-01'){
+   const outgoing=['TW034','VJ1774','VJ1782','VJ5200','VJ5352','VJ730','VJ770','VJ834','VU1270'];
+   outgoing.forEach((no,i)=>{rows[i].departure=no;rows[i].airline=no.slice(0,2);});
+ }
  const charter=day==='2026-10-31'?[{no:'QQE530',charter:true,ferry:true}]:[];
  const cargo=day==='2026-11-01'?
   [['TW034',1500],['VJ1774',1500],['VJ1782',1500],['VJ5200',3000],
