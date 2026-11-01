@@ -54,8 +54,8 @@
    if(expectCargo){
      if(!cargoPlans.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Chưa nhập kế hoạch cargo theo chuyến hoặc chưa xác nhận ngày không phát sinh hàng.'});
      else{
-       const miss=cargoPlans.filter(x=>x.cargo_kg==null||x.cargo_pcs==null||x.ready_by_min==null);
-       if(miss.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Thiếu KG / PCS / giờ kho sẵn sàng: '+miss.slice(0,5).map(x=>x.flight_no).join(', ')+(miss.length>5?', …':'')});
+       const miss=cargoPlans.filter(x=>x.cargo_kg==null); // PCS/ready-by are optional metadata, not booking incompleteness.
+       if(miss.length)alerts.push({unit:'KHO HÀNG',type:'CARGO',detail:'Chưa xác nhận trọng lượng booking KG: '+miss.slice(0,5).map(x=>x.flight_no).join(', ')+(miss.length>5?', …':'')});
      }
    }
    return alerts;
