@@ -32,10 +32,11 @@
  function pretty(group){
   const known=group.members.some(x=>x.count!=null);
   if(!known)return null;
-  return group.members.map((m,i)=>m.count==null?
-   (m.type==='Chính'?'Chính: chưa xác nhận':m.type+': chưa xác nhận'):
-   String(m.count)+(m.type==='Chính'?'':' '+m.type))
-   .join(' + ');
+  const main=group.members.find(m=>m.type==='Chính');
+  const tokens=[main?.count!=null?String(main.count):'nhân sự chính chưa xác nhận'];
+  for(const extra of group.members.filter(m=>m.type!=='Chính'&&m.count!=null))
+   tokens.push(String(extra.count)+' '+extra.type);
+  return tokens.join(' + ');
  }
  function legacy(rows,unit,shift){
   if(unit!=='KTS')return null;
