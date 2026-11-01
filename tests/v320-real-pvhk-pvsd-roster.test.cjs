@@ -27,7 +27,7 @@ assert.equal(schema.legacy(legacy,'KTS','SÁNG'),25);
 assert.deepEqual(schema.groups(legacy,'KTS','SÁNG').map(x=>schema.pretty(x)),fmt('KTS','SÁNG'),'Do not reallocate legacy SKYONE');
 const plans=['DH','PVHK','KTS'].map((unit,i)=>({
  unit,status:'CONFIRMED',details:{pvb_morning:[20,47,61][i],pvb_night:[18,48,55][i],
- ...(unit!=='DH'?{personnel_structure:'V3.20'}:{})}
+ ...(unit!=='DH'?{personnel_structure:'V3.21'}:{})}
 }));
 const c={date:'2026-11-02',author:'ĐH',arrivals:1,departures:1,domestic:2,international:0,
  rows:[{arrival:'VJ101',departure:'VJ102',sta_min:600,std_min:635,airline:'VJ',aircraft_type:'A321'}],
@@ -54,7 +54,7 @@ for(const rev of [1,2]){
 const source=fs.readFileSync('v300-workspace.js','utf8');
 assert.ok(source.includes('function structuredStaffInputs(u)'));
 assert.ok(source.includes('return structuredStaffInputs(u)'));
-assert.ok(source.includes("personnel_structure='V3.20'"));
+assert.ok(source.includes("personnel_structure='V3.21'"));
 assert.ok(source.includes("if(items.length&&!['DH','KTS','PVHK'].includes(u))"),'Do not use simplistic headcount sum');
 const patched=source.replace(' root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:',
  ' root.__v320Test={setState:v=>{state=v},roleInputs};\n root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:');
@@ -76,4 +76,4 @@ const ktUi=box.window.__v320Test.roleInputs('KTS');
 for(const code of ['KTS_RAMP_TEAM','KTS_HLSD_SKO','KTS_HLNG_SKO','KTS_PVTT_TC','KTS_PVTT_SKO','KTS_WORKSHOP_SC'])
  assert.ok(ktUi.includes(code+'|SÁNG')&&ktUi.includes(code+'|ĐÊM'));
 assert.ok(ktUi.includes('dữ liệu cũ'),'Keep legacy specialty counts editable');
-console.log('PASS V3.20: precise PVHK/PVSĐ staff groups by two shifts; SKYONE and TC independent; no write of examples');
+console.log('PASS V3.21: precise PVHK/PVSĐ staff groups by two shifts; SKYONE and TC independent; no write of examples');
