@@ -794,3 +794,19 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  .v19-report-sheet table.v321-detail-table td{padding:6px 9px!important}
  .v19-report-sheet .v321-content-line{margin-bottom:4px}
 }
+
+
+/* V3.21 – workspace risk cards also show aligned review and response rows. */
+#v300Root .v300-risk{grid-template-columns:32px minmax(0,1fr);gap:14px;padding:18px 0}
+#v300Root .v300-risk>div:last-child{min-width:0}
+#v300Root .v300-risk-title{padding:0 0 9px;margin-bottom:9px;border-bottom:1px solid #e3edf2}
+#v300Root .v300-risk-title h3{line-height:1.45}
+#v300Root .v321-risk-description,
+#v300Root .v321-risk-action{margin-top:9px;padding:12px 13px;border-radius:9px;background:#f7fafc;border:1px solid #e3edf1;line-height:1.55;color:#2b4354}
+#v300Root .v321-risk-action{background:#eef8f7;border-color:#d7eae6}
+#v300Root .v321-risk-description>b,
+#v300Root .v321-risk-action>b{display:block;font-size:11px;letter-spacing:.045em;color:#1c556a;margin-bottom:7px}
+#v300Root .v321-action-row{display:block;position:relative;margin:0 0 7px;padding-left:13px;font-size:12px;line-height:1.65;overflow-wrap:anywhere}
+#v300Root .v321-action-row:last-child{margin-bottom:0}
+#v300Root .v321-action-row:before{content:"";position:absolute;left:1px;top:.7em;width:5px;height:5px;border-radius:50%;background:#497c89}
+@media(max-width:600px){#v300Root .v300-risk{gap:9px}#v300Root .v321-risk-description,#v300Root .v321-risk-action{padding:10px}}
