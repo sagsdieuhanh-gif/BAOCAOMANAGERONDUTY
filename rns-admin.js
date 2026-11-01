@@ -24,7 +24,8 @@
    const rows=visible.map(x=>'<tr><td><strong>'+esc(x.email)+'</strong>'+
      '<small>'+(x.email_confirmed?'Đã xác minh email':'Chờ kích hoạt email')+'</small></td>'+
      '<td>'+esc(x.display_name||'—')+'</td>'+
-     '<td>'+esc(x.rns_role?.toUpperCase()||'CHƯA CẤP')+'</td>'+
+     '<td>'+esc(x.rns_role?.toUpperCase()||'CHƯA CẤP')+
+     (x.rns_active===true?'': ' · KHÔNG HOẠT ĐỘNG')+'</td>'+
      '<td>'+esc(x.radar_unit?roles[x.radar_unit]||x.radar_unit:'CHƯA CẤP')+
      (x.radar_unit&&!x.radar_active?' · ĐÃ KHÓA':'')+'</td>'+
      '<td>'+(x.radar_unit==='ADMIN'?'—':
