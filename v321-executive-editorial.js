@@ -216,5 +216,72 @@
    }
    return topics;
  }
- root.SagsExecutiveEditorialV321={refine,_test:{nearTurn,duration,zone}};
+ function support(c,peakRows,coord,ctx={}){
+   if(!c||!Array.isArray(peakRows)||!Array.isArray(coord))return;
+   const rs=c.rows||[],peaks=(ctx.peaks||[]).filter(x=>x.items?.length>=2),
+     z2=rs.filter(x=>['K2','K3'].includes(zone(x.bay))),
+     wb=rs.filter(x=>/A\s?330|B\s?777/i.test(x.aircraft_type||'')),
+     source=c.sourcePayload?.source_detail||{},plans=c.cargoPlans||[],
+     cargo=root.SagsCargoBookingV320?.split(plans,rs,source)?.departure||[],
+     outgoing=cargo.filter(x=>has(x.flight_no)&&has(x.cargo_kg)&&Number(x.cargo_kg)>0),
+     kts=(c.unitPlans||[]).find(x=>x.unit==='KTS'&&x.status==='CONFIRMED')?.details||{};
+   const actions=[];
+   if(peaks.length){
+     peakRows.splice(0,peakRows.length,...peaks.map(p=>{
+       const items=p.items||[],flights=unique(items.map(x=>
+         (x.arrival||'—')+' → '+(x.departure||'—')),6);
+       const onRoad=items.filter(x=>['K2','K3'].includes(zone(x.bay))).length;
+       const time=hh(p.minute)+'–'+hh(p.minute+30);
+       const near=items.filter(nearTurn);
+       return {slot:time,flight:flights+(items.length>6?' và '+(items.length-6)+' cặp khác':''),
+         risk:items.length+' cặp phục vụ chồng lấn'+
+           (onRoad?'; '+onRoad+' tại K2/K3 cần tính thời gian qua đường công vụ':'')+
+           (near.length?'; '+near.length+' cặp có ground time sát chuẩn phục vụ':'')+'.',
+         action:'ĐH theo dõi ETA/ATA, STD/ETD trong khung '+time+
+           '; PVSĐ xác nhận tổ phục vụ và thiết bị tại từng bãi trước STA; PVHK bố trí người theo các mốc check-in/boarding. Không điều chuyển phương tiện khi công đoạn trước chưa hoàn tất.'
+       };
+     }));
+     const p=peaks[0],t=hh(p.minute)+'–'+hh(p.minute+30);
+     actions.push(['Cụm chuyến '+t,
+       'Chốt tổ/đội và thiết bị theo từng cặp phục vụ trong khung '+t+
+         '; PVHK ưu tiên vị trí quầy, gate có giờ chồng lấn. ĐH theo dõi thời gian thực tế để điều chỉnh khi cần.',
+       'PVSĐ, PVHK thực hiện; ĐH điều phối','Trước '+hh(p.minute)]);
+   }else{
+     peakRows.splice(0,peakRows.length,{
+       slot:'Theo lịch đã nhập',flight:'Không có khung từ hai cặp phục vụ đồng thời',
+       risk:'Chưa xác định cụm chồng lấn cần ưu tiên riêng.',
+       action:'ĐH theo dõi cập nhật STA/STD; PVSĐ bố trí thiết bị theo thứ tự phục vụ thực tế.'
+     });
+   }
+   if(z2.length){
+     const locations=[...new Set(z2.map(x=>x.bay).filter(x=>x!=null))].slice(0,8);
+     actions.push(['Bãi K2/K3 – đường công vụ',
+       'Bố trí xe thang, xe phục vụ và nhân lực trước giờ tàu vào tại các bãi '+
+         locations.join(', ')+'. PVSĐ liên hệ ATC nắm thứ tự tàu lăn và xin phép phương tiện qua đường công vụ đúng quy trình.',
+       'PVSĐ chủ trì; ĐH cập nhật thay đổi bãi','Trước STA các chuyến liên quan']);
+   }
+   if(wb.length){
+     actions.push(['Tàu thân rộng '+unique(wb.map(flight),4),
+       'PVSĐ đối chiếu chủng loại xe thang/GSE phù hợp tàu và tình trạng khả dụng; PVHK căn cứ tải khách/boarding đã xác nhận để sắp xếp nhân sự.',
+       'PVSĐ, PVHK; ĐH giám sát','Trước giờ tiếp nhận tàu']);
+   }
+   if(outgoing.length){
+     const kg=outgoing.reduce((sum,x)=>sum+Number(x.cargo_kg),0);
+     actions.push(['Hàng đi '+nf(kg)+' kg',
+       'Kho Hàng chốt danh sách và thời điểm bàn giao booking; PVSĐ chuẩn bị xe và lực lượng xếp hàng theo từng chuyến, ưu tiên các chuyến quay đầu sát chuẩn khi có booking.',
+       'Kho Hàng chủ trì; PVSĐ phục vụ','Trước thời điểm xếp hàng theo kế hoạch']);
+   }
+   if(has(kts.gse_risk)){
+     actions.push(['Hạn chế GSE do PVSĐ báo',
+       'Xác minh khả năng sử dụng và phương án dự phòng của những xe có ghi chú kỹ thuật; thông báo ngay các chuyến có nguy cơ thiếu thiết bị khi dồn giờ.',
+       'PVSĐ kiểm tra; ĐH theo dõi','Trước khi phân công xe cho chuyến liên quan']);
+   }
+   if(!actions.length){
+     actions.push(['Điều phối theo lịch đã tiếp nhận',
+       'ĐH theo dõi thay đổi giờ bay; PVHK và PVSĐ triển khai theo lịch đến/đi đã được cập nhật.',
+       'ĐH; PVHK; PVSĐ','Khi có thay đổi lịch']);
+   }
+   coord.splice(0,coord.length,...actions);
+ }
+ root.SagsExecutiveEditorialV321={refine,support,_test:{nearTurn,duration,zone}};
 })(typeof window!=='undefined'?window:globalThis);
