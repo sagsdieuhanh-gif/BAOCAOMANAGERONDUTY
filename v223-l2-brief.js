@@ -29,6 +29,8 @@
    const staffNames={DH:'Phòng ĐH',PVHK:'PVHK',KTS:'PVSĐ'};
    const confirmedStaff=(c.unitPlans||[]).filter(x=>staffNames[x.unit]&&x.status==='CONFIRMED'&&x.details);
    const staffing=confirmedStaff.length?confirmedStaff.map(x=>{
+     if(['PVHK','KTS'].includes(x.unit)&&x.details?.personnel_structure==='V3.20')
+       return staffNames[x.unit]+': chi tiết quân số theo nhóm/đội trong bảng ca sáng và ca tối';
      const d=x.details,parts=['morning','night'].map((shift,i)=>{
        const n=quantity(d['pvb_'+shift]);
        return n==null?null:(i?'đêm ':'sáng ')+n+' người';
