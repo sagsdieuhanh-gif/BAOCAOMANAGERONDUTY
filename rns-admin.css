@@ -26,3 +26,15 @@
 #tab-admin .rnsAdminSteps span{font-size:11px}
 }
 @media(max-width:560px){#rnsInvitePanel .formrow{grid-template-columns:1fr}#rnsInvitePanel .row{flex-wrap:wrap}}
+
+
+/* V3.19 account profile and one-time reset controls */
+#rnsManagerEditPanel .formrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+#rnsManagerEditPanel .formrow label{min-width:0}
+#rnsManagerEditPanel .formrow input,#rnsManagerEditPanel .formrow select{width:100%;margin-top:5px}
+#rnsManagerEditPanel .rnsSwitch{display:flex;align-items:center;gap:9px;margin-top:12px}
+#rnsManagerEditPanel .rnsSwitch input{width:18px;height:18px;flex:0 0 auto}
+#rnsManagerEditPanel .rnsResetSecretPanel{border:1px solid #b4dbd7;padding:14px;border-radius:10px;background:#f1faf8;margin-top:14px}
+#rnsManagerEditPanel .rnsResetSecretPanel input{display:block;width:100%;margin:6px 0 10px;max-width:440px}
+#rnsManagerEditPanel button:disabled{opacity:.5;cursor:not-allowed}
+#rnsSharedList button[data-rns-edit]{margin-left:5px}
