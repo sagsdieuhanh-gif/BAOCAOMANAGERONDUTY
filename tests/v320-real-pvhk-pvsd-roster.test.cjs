@@ -27,7 +27,7 @@ assert.equal(schema.legacy(legacy,'KTS','SÁNG'),25);
 assert.deepEqual(schema.groups(legacy,'KTS','SÁNG').map(x=>schema.pretty(x)),fmt('KTS','SÁNG'),'Do not reallocate legacy SKYONE');
 const plans=['DH','PVHK','KTS'].map((unit,i)=>({
  unit,status:'CONFIRMED',details:{pvb_morning:[20,47,61][i],pvb_night:[18,48,55][i],
- ...(unit!=='DH'?{personnel_structure:'V3.21'}:{})}
+ ...(unit!=='DH'?{personnel_structure:'V3.20'}:{})}
 }));
 const c={date:'2026-11-02',author:'ĐH',arrivals:1,departures:1,domestic:2,international:0,
  rows:[{arrival:'VJ101',departure:'VJ102',sta_min:600,std_min:635,airline:'VJ',aircraft_type:'A321'}],
@@ -54,7 +54,7 @@ for(const rev of [1,2]){
 const source=fs.readFileSync('v300-workspace.js','utf8');
 assert.ok(source.includes('function structuredStaffInputs(u)'));
 assert.ok(source.includes('return structuredStaffInputs(u)'));
-assert.ok(source.includes("personnel_structure='V3.21'"));
+assert.ok(source.includes("personnel_structure='V3.20'"));
 assert.ok(source.includes("if(items.length&&!['DH','KTS','PVHK'].includes(u))"),'Do not use simplistic headcount sum');
 const patched=source.replace(' root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:',
  ' root.__v320Test={setState:v=>{state=v},roleInputs};\n root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:');
