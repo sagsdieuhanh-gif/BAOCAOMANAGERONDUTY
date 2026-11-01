@@ -7,7 +7,7 @@ const html=fs.readFileSync('index.html','utf8');
 const admin=fs.readFileSync('rns-admin.js','utf8');
 const edge=fs.readFileSync('supabase/functions/sagscxr-radar-register/index.ts','utf8');
 assert.ok(src.includes('data-v319-dh-total'),'DH must input its own total rather than COORD');
-assert.ok(src.includes("if(items.length&&u!=='DH')"),'COORD role cannot overwrite DH total');
+assert.ok(src.includes("if(items.length&&!['DH','KTS','PVHK'].includes(u))"),'COORD role cannot overwrite DH total');
 assert.ok(src.includes("if(u==='DH')"),'DH specialized editor must exist');
 assert.ok(src.includes('Điều phối chỉ là một bộ phận'),'Explain difference to entering staff');
 assert.ok(reportSrc.includes("{name:'Nhân sự',morning:pvsdCount"),'Report must show total departmental staff');
