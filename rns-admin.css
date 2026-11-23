@@ -62,3 +62,8 @@
 .sharedAccessActions button:disabled{opacity:.45;cursor:wait}
 #sharedAccessFeedback{color:#0e8065;font-size:12px;min-height:17px}
 @media(max-width:650px){.sharedAccessCard{padding:16px}.sharedAccessActions button{flex:1}.rnsAccessButton,.rnsDeleteButton{font-size:10px}}
+
+.rnsPermissionChecks{border:1px solid #cde5eb;border-radius:12px;background:#f2fbfc;padding:13px 14px;margin:12px 0}
+.rnsPermissionChecks label{display:flex;align-items:center;gap:9px;font-weight:850;font-size:12px;color:#20556b;margin:8px 0;line-height:1.4;cursor:pointer}
+.rnsPermissionChecks input[type="checkbox"]{width:18px;height:18px;min-height:18px;min-width:18px;accent-color:#0a8ba6;flex:0 0 18px}
+.rnsPermissionChecks p{color:#6a8c9d;font-size:11px;margin:9px 0 0;line-height:1.55}
