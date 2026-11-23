@@ -554,11 +554,11 @@
    if(!header||!shared||!edit||!existing||!create||!invite)return;
    header.querySelector('h2').textContent='QUẢN LÝ TÀI KHOẢN · ADMIN';
    const intro=header.querySelector('p');
-   if(intro)intro.textContent='Tìm nhân viên, chỉnh hồ sơ, phân quyền hoặc đặt lại mật khẩu ngay tại đây. Dùng chung tài khoản đăng nhập RNS / Manager.';
+   if(intro)intro.textContent='Tìm nhân viên, phân quyền RNS và Báo cáo độc lập, xóa tài khoản có kiểm tra dữ liệu hoặc đặt lại mật khẩu. Tài khoản đăng nhập dùng chung.';
    const steps=header.querySelector('.rnsAdminSteps');
    if(steps)steps.innerHTML='<span><b>1</b> Tìm tài khoản</span><span><b>2</b> Sửa / Reset mật khẩu</span><span><b>3</b> Tạo hoặc cấp quyền</span>';
    shared.querySelector('h2').textContent='01 · TÌM & QUẢN LÝ TÀI KHOẢN';
-   const tip=shared.querySelector('p');if(tip)tip.textContent='Gõ email hoặc họ tên, sau đó chọn SỬA HỒ SƠ hoặc ĐẶT LẠI MẬT KHẨU tại dòng nhân viên.';
+   const tip=shared.querySelector('p');if(tip)tip.textContent='Gõ email hoặc họ tên, chọn PHÂN QUYỀN 2 ỨNG DỤNG / XÓA TÀI KHOẢN / SỬA HỒ SƠ. Tài khoản có lịch sử chỉ có thể thu hồi quyền, không xóa lịch sử.';
    edit.querySelector('h2').textContent='02 · HỒ SƠ / ĐẶT LẠI MẬT KHẨU';
    existing.querySelector('h2').textContent='03 · CẤP / CẬP NHẬT QUYỀN MANAGER';
    create.querySelector('h2').textContent='04 · TẠO TÀI KHOẢN MỚI';
