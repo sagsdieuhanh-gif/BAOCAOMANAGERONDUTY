@@ -1,3 +1,12 @@
+## V3.26 — Tài khoản dùng chung, phân quyền RNS / Báo cáo độc lập
+
+- Supabase Authentication dùng chung email và mật khẩu, nhưng **quyền truy cập ứng dụng được cấp riêng** bằng `sags_docs_members` (RNS) và `ops_members` (Báo cáo khai thác ngày).
+- Trong **ADMIN → Quản lý tài khoản**, tạo hoặc mời nhân viên mới phải tích chọn RNS, Báo cáo hoặc cả hai. **Không có mặc định được vào cả hai.**
+- Dòng tài khoản có nút **PHÂN QUYỀN 2 ỨNG DỤNG** để bật/tắt từng quyền và chọn vai trò tương ứng. Tùy chọn **THU HỒI CẢ HAI QUYỀN** giữ nguyên tài khoản/mật khẩu và dữ liệu.
+- Nút **XÓA TÀI KHOẢN** yêu cầu gõ đúng email và xác nhận hai lần. Backend bảo vệ ADMIN và dùng kiểm tra khóa ngoại để không xóa người có dữ liệu nghiệp vụ liên quan. Với tài khoản có lịch sử, hãy thu hồi hai quyền thay vì xóa.
+- Người thao tác phải đồng thời là ADMIN của cả RNS và Báo cáo khi sửa hai quyền hoặc xóa tài khoản chung.
+- **HDSD:** [HDSD_MANAGER_V3.26.md](HDSD_MANAGER_V3.26.md). SQL bảo vệ dữ liệu: `server/v326-shared-account-delete-check.sql`.
+
 # BAOCAOMANAGERONDUTY — SAGS CXR · V3.10
 
 Ứng dụng báo cáo **dự báo điều hành khai thác D+1**. Mục tiêu: từ lịch bay ngày hôm trước, dự báo các khung chồng lấn, hạn chế bãi/đường công vụ, nguồn lực và hàng hóa; đưa ra phương án phòng ngừa **ngắn gọn, có căn cứ**, đúng trách nhiệm từng đơn vị.
