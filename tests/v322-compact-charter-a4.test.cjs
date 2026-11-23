@@ -18,7 +18,7 @@ assert.ok(office.includes('renderPdfPages(blocks,{...options,density:1})'));
 assert.ok(office.includes('if(attempt.length<=2)break'),'A4 compact attempt should target two pages');
 assert.ok(office.includes("compact?'<w:pgSz w:w=\"11906\" w:h=\"16838\"/>'"),'Compact DOCX A4 portrait');
 assert.ok(office.includes("const compactReport=el.classList?.contains('v322-two-page')"));
-for(const x of ["APP_VERSION='V3.26'","v19-report.js?v=3.22","office-export-v29.js?v=3.22","v217-second-forecast.js?v=3.22","v300-workspace.css?v=3.22"])
+for(const x of ["APP_VERSION='V3.26'","v19-report.js?v=3.22","office-export-v29.js?v=3.22","v217-second-forecast.js?v=3.22","v300-workspace.css?v=3.24"])
  assert.ok(index.includes(x),'Uncached release asset missing '+x);
 // Approximate print pagination with deterministic canvas text measurement.
 // Tests that a representative 10-topic report can be laid out in <=2 A4 sheets,
