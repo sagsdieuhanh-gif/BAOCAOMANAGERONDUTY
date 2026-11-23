@@ -9,7 +9,8 @@ assert.ok(html.includes('v24-shuttle-grid.js?v=3.11'), 'New grid code must bypas
 assert.ok(html.includes('v300-workspace.js?v=3.26'), 'New workspace code must bypass cached old UI');
 assert.ok(ws.includes("['shuttle','Xe giao ca','bus-front','Nhập số người và xuất bảng xe'"),'Shuttle navigation must be obvious');
 assert.ok(ws.includes("['analysis','report','shuttle'].filter(canOpen)"),'XE GIAO CA belongs to the main left rail');
-assert.ok(ws.includes("const other=['norms','admin'].filter(canOpen)"),'XE GIAO CA must not hide in tools folder');
+assert.ok(ws.includes("v300-nav-folder v300-nav-tools")&&ws.includes("button(main.norms)"),'Auxiliary tools stay separate from XE GIAO CA');
+assert.ok(ws.includes("['analysis','report','shuttle'].filter(canOpen)"),'XE GIAO CA stays directly in main navigation');
 assert.ok(ws.includes("shuttle:'tab-shuttle-report'"),'Shuttle page must reuse confirmed export data');
 assert.ok(ws.includes("root.SagsShuttleGridV24?.refresh?.()"),'Entering shuttle must load confirmed entry grid');
 assert.ok(ws.includes("root.SagsShuttleExport?.renderPreview?.()"),'Entering shuttle must update PNG/PDF preview');
