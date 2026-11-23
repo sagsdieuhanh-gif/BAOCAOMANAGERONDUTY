@@ -28,8 +28,8 @@
      (x.rns_active===true?'': ' · KHÔNG HOẠT ĐỘNG')+'</td>'+
      '<td>'+esc(x.radar_unit?roles[x.radar_unit]||x.radar_unit:'CHƯA CẤP')+
      (x.radar_unit&&!x.radar_active?' · ĐÃ KHÓA':'')+'</td>'+
-     '<td>'+(x.radar_unit==='ADMIN'?'—':
-       '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
+     '<td>'+((x.radar_unit==='ADMIN'||x.rns_role==='admin')?'—':
+       '<button type="button" class="rnsPick rnsAccessButton" data-shared-access="'+esc(x.id)+'">PHÂN QUYỀN 2 ỨNG DỤNG</button>'+        '<button type="button" class="rnsPick rnsDeleteButton" data-shared-delete="'+esc(x.id)+'">XÓA TÀI KHOẢN</button>'+        '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
        '" data-rns-name="'+esc(x.display_name||'')+'">CẤP QUYỀN</button>'+
        (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA HỒ SƠ</button>':'')+
        (x.id&&x.radar_unit&&x.radar_active===true?
@@ -229,6 +229,99 @@
    }catch{$('rnsResetSecret').select();mark('rnsEditStatus','Đã chọn mật khẩu tạm để sao chép.');}
  }
 
+
+ let sharedTarget=null,sharedBusy=false;
+ function ensureSharedDialog(){
+   if($('sharedAccessOverlay'))return;
+   const wrapper=document.createElement('div');
+   wrapper.id='sharedAccessOverlay';wrapper.className='sharedAccessOverlay hidden';
+   wrapper.innerHTML='<div class="sharedAccessCard" role="dialog" aria-modal="true" aria-labelledby="sharedAccessTitle">'+
+     '<div class="sharedAccessTop"><div><b id="sharedAccessTitle">PHÂN QUYỀN ỨNG DỤNG</b><small id="sharedAccessEmail"></small></div><button type="button" id="sharedAccessClose">ĐÓNG ×</button></div>'+
+     '<p>Hai quyền dưới đây độc lập. Bỏ chọn ứng dụng nào sẽ ngừng quyền truy cập ứng dụng đó, không xóa tài khoản đăng nhập.</p>'+
+     '<label class="sharedAccessLine"><input type="checkbox" id="sharedManagerCheck"><span>CHO PHÉP VÀO BÁO CÁO KHAI THÁC NGÀY</span></label>'+
+     '<label for="sharedManagerRole">Quyền/phòng nghiệp vụ trong Báo cáo</label>'+
+     '<select id="sharedManagerRole"><option value="DH">ĐIỀU HÀNH</option><option value="KTS">PVSĐ</option><option value="PVHK">PVHK</option><option value="KHO">KHO HÀNG</option><option value="QA">QA</option><option value="IT">IT</option><option value="VIEWER">CHỈ XEM</option></select>'+
+     '<label class="sharedAccessLine"><input type="checkbox" id="sharedRnsCheck"><span>CHO PHÉP VÀO RNS (VĂN BẢN / READ & SIGN)</span></label>'+
+     '<label for="sharedRnsRole">Vai trò trong RNS</label><select id="sharedRnsRole"><option value="viewer">VIEWER</option><option value="editor">EDITOR</option></select>'+
+     '<p class="sharedAccessNotice">Cấp quyền RNS yêu cầu ADMIN đồng thời có quyền quản trị RNS. Tài khoản ADMIN được bảo vệ, không thể sửa hoặc xóa ở đây.</p>'+
+     '<div class="sharedAccessActions"><button type="button" id="sharedAccessSave">LƯU PHÂN QUYỀN</button>'+
+     '<button type="button" id="sharedAccessRevoke">THU HỒI CẢ HAI QUYỀN</button></div>'+
+     '<p id="sharedAccessFeedback" role="status" aria-live="polite"></p>'+
+     '</div>';
+   document.body.appendChild(wrapper);
+   $('sharedAccessClose').onclick=closeSharedAccess;
+   $('sharedAccessSave').onclick=saveSharedAccess;
+   $('sharedAccessRevoke').onclick=()=>{if(!sharedTarget)return;$('sharedManagerCheck').checked=false;$('sharedRnsCheck').checked=false;saveSharedAccess();};
+   wrapper.onclick=e=>{if(e.target===wrapper&&!sharedBusy)closeSharedAccess();};
+   ['sharedManagerCheck','sharedRnsCheck'].forEach(id=>$(id).onchange=updateAccessControls);
+ }
+ function updateAccessControls(){
+   $('sharedManagerRole').disabled=!$('sharedManagerCheck').checked;
+   $('sharedRnsRole').disabled=!$('sharedRnsCheck').checked;
+ }
+ function closeSharedAccess(){
+   if(sharedBusy)return;
+   sharedTarget=null;
+   $('sharedAccessOverlay')?.classList.add('hidden');
+ }
+ function openSharedAccess(id){
+   const x=accounts.find(a=>a.id===id);
+   if(!x||x.radar_unit==='ADMIN'||x.rns_role==='admin')return;
+   ensureSharedDialog();sharedTarget=id;
+   $('sharedAccessEmail').textContent=x.email;
+   $('sharedManagerCheck').checked=x.radar_active===true;
+   $('sharedManagerRole').value=x.radar_unit&&x.radar_unit!=='ADMIN'?x.radar_unit:'VIEWER';
+   $('sharedRnsCheck').checked=x.rns_active===true;
+   $('sharedRnsRole').value=['viewer','editor'].includes(x.rns_role)?x.rns_role:'viewer';
+   $('sharedAccessFeedback').textContent='';
+   updateAccessControls();$('sharedAccessOverlay').classList.remove('hidden');
+ }
+ async function saveSharedAccess(){
+   if(!sharedTarget||sharedBusy)return;
+   const x=accounts.find(a=>a.id===sharedTarget);if(!x)return;
+   const managerActive=$('sharedManagerCheck').checked,rnsActive=$('sharedRnsCheck').checked;
+   const managerUnit=$('sharedManagerRole').value,rnsRole=$('sharedRnsRole').value;
+   const summary='BÁO CÁO KHAI THÁC: '+(managerActive?roles[managerUnit]||managerUnit:'KHÔNG CHO PHÉP')+
+     '\\nRNS: '+(rnsActive?rnsRole.toUpperCase():'KHÔNG CHO PHÉP');
+   if(!confirm('XÁC NHẬN PHÂN QUYỀN\\n\\n'+x.email+'\\n\\n'+summary+'\\n\\nKhông thay đổi mật khẩu hoặc tài khoản đăng nhập.'))return;
+   sharedBusy=true;$('sharedAccessSave').disabled=true;$('sharedAccessRevoke').disabled=true;
+   $('sharedAccessFeedback').textContent='Đang ghi quyền trên Supabase...';
+   try{
+     const result=await invoke('set_app_access',{user_id:x.id,confirm:true,
+       manager_active:managerActive,manager_unit:managerUnit,rns_active:rnsActive,rns_role:rnsRole});
+     await loadShared();
+     $('sharedAccessFeedback').textContent=result.message||'Đã cập nhật quyền hai ứng dụng.';
+     mark('rnsSharedStatus','ĐÃ LƯU: '+x.email+' · Báo cáo '+(managerActive?'ĐƯỢC PHÉP':'KHÓA')+' · RNS '+(rnsActive?'ĐƯỢC PHÉP':'KHÓA'));
+   }catch(e){$('sharedAccessFeedback').textContent='Không lưu được: '+e.message;}
+   finally{sharedBusy=false;$('sharedAccessSave').disabled=false;$('sharedAccessRevoke').disabled=false;}
+ }
+ async function deleteSharedAccount(id){
+   const x=accounts.find(a=>a.id===id);
+   if(!x||x.radar_unit==='ADMIN'||x.rns_role==='admin'||accountBusy)return;
+   const typed=prompt('XÓA TÀI KHOẢN DÙNG CHUNG CẢ HAI DỰ ÁN\\n\\n'+x.email+
+     '\\n\\nNếu tài khoản có lịch sử READ & SIGN hoặc Báo cáo, hệ thống sẽ từ chối xóa để bảo toàn dữ liệu.\\n\\nNHẬP CHÍNH XÁC EMAIL TRÊN ĐỂ XÁC NHẬN:');
+   if(typed===null)return;
+   if(typed.trim().toLowerCase()!==x.email.toLowerCase())return alert('Email xác nhận không trùng. Chưa xóa tài khoản.');
+   if(!confirm('XÁC NHẬN LẦN CUỐI: XÓA VĨNH VIỄN '+x.email+
+     '?\\n\\nNếu thành công, tài khoản sẽ mất đăng nhập RNS và Báo cáo. KHÔNG THỂ HOÀN TÁC.'))return;
+   accountBusy=true;
+   mark('rnsSharedStatus','Đang kiểm tra lịch sử trước khi xóa tài khoản...');
+   try{
+     const result=await invoke('delete_account',{user_id:x.id,confirm:true,confirm_email:x.email});
+     await loadShared();
+     mark('rnsSharedStatus',result.message||'Đã xóa tài khoản '+x.email);
+   }catch(e){
+     mark('rnsSharedStatus','KHÔNG XÓA: '+e.message,true);
+     if(/tham chiếu nghiệp vụ|không thể xóa vĩnh viễn/i.test(e.message)&&confirm(
+       'Tài khoản có dữ liệu lịch sử cần giữ lại. THU HỒI QUYỀN vào cả RNS và Báo cáo thay vì xóa?')){
+       try{
+         await invoke('set_app_access',{user_id:x.id,confirm:true,manager_active:false,
+           manager_unit:x.radar_unit||'VIEWER',rns_active:false,rns_role:x.rns_role||'viewer'});
+         await loadShared();mark('rnsSharedStatus','Đã thu hồi quyền cả hai ứng dụng của '+x.email+'; vẫn giữ hồ sơ và lịch sử.');
+       }catch(err){mark('rnsSharedStatus','Không thu hồi được: '+err.message,true);}
+     }
+   }finally{accountBusy=false;}
+ }
  function init(){
    if(!$('rnsInvitePanel'))return;
    $('rnsInviteButton').onclick=invite;
@@ -244,6 +337,10 @@
    deselect();
    $('rnsLookup').oninput=filter;
    $('rnsSharedList').onclick=e=>{
+     const del=e.target.closest('[data-shared-delete]');
+     if(del){deleteSharedAccount(del.dataset.sharedDelete);return;}
+     const access=e.target.closest('[data-shared-access]');
+     if(access){openSharedAccess(access.dataset.sharedAccess);return;}
      const reset=e.target.closest('[data-rns-reset]');
      if(reset){selectAccount(reset.dataset.rnsReset);resetAccount();return;}
      const edit=e.target.closest('[data-rns-edit]');
