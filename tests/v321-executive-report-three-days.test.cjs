@@ -97,7 +97,7 @@ for(const day of Object.keys(schedule))for(const rev of [1,2]){
    assert.ok(!r.topics[2].action.includes('ĐH làm rõ loại hình chuyến QQE530'));
  }
  if(day==='2026-11-02'){
-   assert.ok(r.topics[4].observation.includes('3/3 nhóm'));
+   assert.ok(r.topics[4].observation.includes('bố trí nhân sự theo ca'));
    assert.ok(r.topics[5].observation.includes('xe 30703')||r.topics[5].observation.includes('Xe XINFA'));
    assert.ok(!r.topics[5].observation.includes('đã được thay thế'),'Never invent device repair');
  }
