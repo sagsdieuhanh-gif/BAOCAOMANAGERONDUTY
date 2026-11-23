@@ -90,7 +90,7 @@ for(const day of Object.keys(schedule))for(const rev of [1,2]){
    }
  }
  if(day==='2026-10-31'){
-   assert.ok(r.topics[4].observation.includes('đánh dấu hạn chế'));
+   assert.ok(r.topics[4].observation.includes('ghi nhận hạn chế bố trí nhân sự theo ca'));
    assert.ok(r.topics[2].observation.includes('QQE530'));
    assert.ok(r.topics[2].observation.includes('Charter (##)')&&r.topics[2].observation.includes('phục vụ bình thường'));
    assert.ok(!r.topics[2].observation.includes('cần xác nhận loại hình'));
