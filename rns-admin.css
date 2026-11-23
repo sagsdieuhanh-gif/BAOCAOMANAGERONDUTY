@@ -38,3 +38,27 @@
 #rnsManagerEditPanel .rnsResetSecretPanel input{display:block;width:100%;margin:6px 0 10px;max-width:440px}
 #rnsManagerEditPanel button:disabled{opacity:.5;cursor:not-allowed}
 #rnsSharedList button[data-rns-edit]{margin-left:5px}
+
+/* Shared Supabase user: per-application grants and guarded deletion */
+.rnsAccessButton{border-color:#a6d6e1!important;background:#e9f8fb!important;color:#086f89!important}
+.rnsDeleteButton{border-color:#efc8cc!important;background:#fff1f2!important;color:#ad3c48!important}
+.sharedAccessOverlay{position:fixed;inset:0;z-index:9999;background:rgba(13,38,53,.64);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.sharedAccessOverlay.hidden{display:none!important}
+.sharedAccessCard{width:min(100%,560px);max-height:94dvh;overflow:auto;border:1px solid #d0e5ea;background:#fff;color:#235163;border-radius:17px;padding:21px;box-shadow:0 22px 60px #09293a50}
+.sharedAccessTop{display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #e2eef1;padding-bottom:14px}
+.sharedAccessTop b{font-size:18px;letter-spacing:-.035em;color:#1e5268}
+.sharedAccessTop small{display:block;color:#7795a4;font-size:11px;overflow-wrap:anywhere}
+.sharedAccessTop button{padding:7px 10px;background:#f2f8fa;border:1px solid #d4e8ee;border-radius:8px;cursor:pointer}
+.sharedAccessCard>p{font-size:12px;color:#6a8796;line-height:1.6}
+.sharedAccessLine{display:flex;gap:9px;align-items:center;padding:12px;background:#eff9fa;border:1px solid #d6eef2;border-radius:10px;margin:15px 0 8px;font-size:12px;font-weight:830}
+.sharedAccessLine input{width:17px;height:17px;accent-color:#108ca2;flex:0 0 auto}
+.sharedAccessCard>label:not(.sharedAccessLine){display:block;font-weight:760;font-size:11px;margin-bottom:6px;color:#54798a}
+.sharedAccessCard select{display:block;width:100%;min-height:41px;border:1px solid #d1e3e9;background:#fff;color:#235163;border-radius:9px;padding:10px}
+.sharedAccessCard select:disabled{opacity:.5}
+.sharedAccessNotice{background:#fff9ed;border:1px solid #efdebd;border-radius:9px;padding:12px}
+.sharedAccessActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.sharedAccessActions button{background:#087f9a;color:white;border:1px solid #087f9a;border-radius:9px;padding:10px 12px;font-size:11px;font-weight:850;cursor:pointer}
+.sharedAccessActions button+button{background:#fff5f5;color:#a44d54;border-color:#f0cfd2}
+.sharedAccessActions button:disabled{opacity:.45;cursor:wait}
+#sharedAccessFeedback{color:#0e8065;font-size:12px;min-height:17px}
+@media(max-width:650px){.sharedAccessCard{padding:16px}.sharedAccessActions button{flex:1}.rnsAccessButton,.rnsDeleteButton{font-size:10px}}
