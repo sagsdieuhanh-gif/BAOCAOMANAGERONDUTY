@@ -1,4 +1,5 @@
 'use strict';
+/* V3.28: Pair only with positive ground time. Keep source next-day (+) times unchanged. */
 (function(global){
   const norm=v=>String(v==null?'':v).trim().toUpperCase().replace(/\u00a0/g,' ').replace(/\s+/g,'');
   const reg=v=>norm(v).replace(/[^A-Z0-9]/g,'');
@@ -81,7 +82,7 @@
     const orderedA=arrs.map((a,i)=>i).sort((x,y)=>arrs[x].t-arrs[y].t);
     for(const i of orderedA){
       const a=arrs[i];if(!a.reg)continue;
-      const c=deps.map((d,j)=>({d,j})).filter(x=>!usedD.has(x.j)&&x.d.reg&&a.reg===x.d.reg&&x.d.t>=a.t&&x.d.t-a.t<=900).sort((x,y)=>(x.d.t-a.t)-(y.d.t-a.t));
+      const c=deps.map((d,j)=>({d,j})).filter(x=>!usedD.has(x.j)&&x.d.reg&&a.reg===x.d.reg&&x.d.t>a.t&&x.d.t-a.t<=900).sort((x,y)=>(x.d.t-a.t)-(y.d.t-a.t));
       if(c.length)link(i,c[0].j,'REG');
     }
     // Phase 2: for missing registration only, require unique airline + reversed route + realistic chronological order.
@@ -94,7 +95,7 @@
         if(usedD.has(j)||deps[j].reg)continue;
         const d=deps[j],back=d.route.split('-');
         if(a.airline!==d.airline||!a.airline||back.length!==2||back[0]!=='CXR'||back[1]!==fromTo[0])continue;
-        if(d.t<a.t||d.t-a.t>600)continue;
+        if(d.t<=a.t||d.t-a.t>600)continue;
         if(a.type&&d.type&&a.type!==d.type)continue;
         candidates.push([i,j]);
       }
