@@ -100,9 +100,12 @@
      rootNode.addEventListener('click',handleClick);
      rootNode.addEventListener('input',event=>{
        if(event.target.closest('[data-v320-cargo-side]'))updateCargoTotals();
+       if(event.target.closest('#v300Page'))updateUnitPreview();
      });
      rootNode.addEventListener('change',event=>{
        if(event.target.closest('[data-v320-cargo-side]'))updateCargoTotals();
+       if(event.target.matches('[data-v329-issue-picker]'))loadIssueEditor(event.target.value);
+       if(event.target.closest('#v300Page'))updateUnitPreview();
      });
      mounted=true;document.body.classList.add('v300-ready');
      $('day')?.addEventListener('change',()=>{draftReset();refresh()});
@@ -528,6 +531,20 @@
    if(u==='KHO')return cargoUnitTables();
    return '';
  }
+ function loadIssueEditor(id){
+   const page=$('v300Page');if(!page||view!=='KTS')return;
+   const old=(state?.issues||[]).find(x=>x.equipment_id===id&&x.service_date===date());
+   for(const el of page.querySelectorAll('[data-v300-issue]')){
+     const key=el.dataset.v300Issue;
+     el.value=old?(old[key==='id'?'equipment_id':key]??''):(key==='status'?'OUT_OF_SERVICE':'');
+   }
+   updateUnitPreview();
+ }
+ function clearIssueEditor(){
+   const select=$('v300Page')?.querySelector('[data-v329-issue-picker]');
+   if(select)select.value='';
+   loadIssueEditor('');
+ }
  function updateUnitPreview(){
    const bridge=root.SagsUnitReportV329,area=$('v329UnitPreview'),page=$('v300Page');
    if(!bridge||!area||!page||!tagUnit[view])return;
@@ -939,7 +956,25 @@
    if(cmd==='add-cargo'){
      const side=command.dataset.side==='arrival'?'arrival':'departure';
      $('v320CargoBody'+side)?.insertAdjacentHTML('beforeend',cargoEntryRow({},side));
-     updateCargoTotals();return;
+     updateCargoTotals();updateUnitPreview();return;
+   }
+   if(cmd==='clear-note'){
+     const key=command.dataset.noteKey;
+     const input=[...($('v300Page')?.querySelectorAll('[data-v300-note]')||[])]
+       .find(el=>el.dataset.v300Note===key);
+     if(input){
+       if(input.value.trim()&&!confirm('Bỏ nội dung ô này khỏi bản đang nhập? Dữ liệu đã lưu chỉ đổi sau khi xác nhận.'))return;
+       input.value='';updateUnitPreview();
+       status('Đã xóa nội dung trên biểu mẫu. Bấm LƯU & XÁC NHẬN PHÒNG để cập nhật báo cáo.');
+     }
+     return;
+   }
+   if(cmd==='clear-issue'){
+     const editor=$('v300Page');
+     const had=[...(editor?.querySelectorAll('[data-v300-issue]')||[])]
+       .some(el=>el.dataset.v300Issue!=='status'&&String(el.value||'').trim());
+     if(had&&!confirm('Xóa nội dung GSE đang nhập? Dữ liệu đã lưu sẽ không bị xóa.'))return;
+     clearIssueEditor();status('Đã bỏ nội dung thiết bị đang nhập; bản đã lưu không thay đổi.');return;
    }
    if(cmd==='delete-cargo'){deleteCargoRow(command);return;}
    if(cmd==='refresh')refresh();
