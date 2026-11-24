@@ -1,3 +1,14 @@
+## V3.28 — Sửa lỗi tự lưu Excel `INVALID_FLIGHT_ROW` (HDSD)
+
+- **Lịch bay → Nhập Excel:** chọn file **LICH BAY SAGS** có sheet `LB`. Hệ thống đọc và kiểm tra các cặp chuyến trước khi tự lưu.
+- **Giờ chuyến ngày hôm sau:** ký hiệu `+` được hiểu là ngày tiếp theo (ví dụ `07:00+` = phút 1860 tính từ 00:00 ngày khai thác). Mốc giờ hợp lệ theo bộ đọc Excel đến `23:59+`; dữ liệu được giữ nguyên khi lưu.
+- **Ghép chuyến:** chỉ ghép đến–đi khi STD **sau** STA. Nếu hai chuyến có cùng giờ (hoặc không đủ căn cứ), ứng dụng không tự ghép và hiển thị trong các chuyến chưa ghép cần đối chiếu.
+- **Nếu nguồn có dòng không hợp lệ:** ứng dụng hiển thị số dòng sheet `LB`, số hiệu chuyến và lý do (ví dụ `STD không sau STA`), không tự sửa giờ hoặc số hiệu. Sửa/kiểm tra file nguồn rồi chọn lại chính file đó để nhập.
+- **Không ghi dữ liệu nửa chừng:** bản nhập dùng hàm `ops_import_sags_schedule` trong một giao dịch. Nếu kiểm tra thất bại, giao dịch bị hủy, không ghi một phần lịch.
+- **Quy tắc máy chủ:** `ops_flights_valid_times` và hàm nhập lịch đã đồng bộ mức tối đa 2880 phút với cách đọc thời gian ngày hôm sau. Các quy tắc phân quyền, kiểm tra số lượng, trùng chuyến và nguồn bản Lần 1/Lần 2 giữ nguyên.
+
+**Ghi chú kiểm thử:** đã kiểm thử mô phỏng 4 trường hợp: giờ bình thường, qua nửa đêm, giờ ngày hôm sau vượt 30:00, cặp có STA = STD. Chưa dùng lại file cụ thể từng báo lỗi vì file đó chưa được cung cấp trong cuộc trò chuyện.
+
 ## V3.27 — Xóa booking hàng hóa nhập sai (HDSD)
 
 Trong **Kho hàng → 01 · Booking hàng hóa**, mỗi dòng ở bảng **Chuyến bay đi** và **Chuyến bay đến** có nút **XÓA**.
