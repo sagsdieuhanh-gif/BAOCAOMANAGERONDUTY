@@ -1,3 +1,26 @@
+## V3.30 — Báo cáo điều hành dễ đọc hơn (HDSD)
+
+Bản V3.30 chỉ thay đổi **cách trình bày báo cáo**; không làm thay đổi dữ liệu nguồn, nghiệp vụ nhập/xác nhận, quyền truy cập, cách tính sản lượng, cao điểm, GSE hay booking.
+
+### Xem báo cáo
+1. Vào **BÁO CÁO** và chọn **TẠO / CẬP NHẬT BẢN XEM TRƯỚC**.
+2. Phần **I. Tóm tắt khai thác** giữ số liệu, biến động và trọng điểm; biểu đồ theo giờ được mở rộng để dễ đọc.
+3. Phần **II. Nhận định và phương án tổ chức phục vụ** vẫn có đủ **10 mục** như trước, nhưng mỗi mục có một tiêu đề riêng, bên dưới chia thành:
+   - **NHẬN ĐỊNH TRỌNG TÂM**: dữ liệu và nguy cơ có căn cứ.
+   - **PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ**: việc cần phối hợp/chuẩn bị.
+   - **ĐƠN VỊ THỰC HIỆN**: đầu mối theo đúng dữ liệu báo cáo.
+4. Nội dung bổ sung từ các đơn vị đã xác nhận được tách thành **đoạn riêng**. Không gộp hết vào một dòng và không cắt bỏ thông tin đã cung cấp.
+5. Phần **quân số theo ca**, **thông tin các phòng**, **khung giờ ưu tiên**, **phân công phối hợp** và **kiến nghị Ban TGĐ** vẫn ở cùng thứ tự nghiệp vụ như trước.
+
+### Xuất Word và PDF
+
+- Dùng nút **XUẤT WORD** hoặc **XUẤT PDF** như cũ.
+- Phiên bản mới không cố nén báo cáo vào đúng hai trang; có thể phát sinh thêm trang khi dữ liệu dài để giữ cỡ chữ dễ đọc.
+- Word/PDF dùng cùng trình tự nội dung và đầy đủ dữ liệu của bản xem trước. Các điều khiển ẩn thông tin chưa xác nhận khi xuất PDF giữ nguyên.
+- Trên điện thoại, mục **Nhận định** và **Phương án** tự xếp dọc, tránh bảng ba cột chữ nhỏ.
+
+**Kiểm tra nguồn:** Chỉ phản ánh dữ liệu đã có. Bản này không tự kết luận đủ nhân sự, đủ thiết bị, có booking hoặc đã khắc phục sự việc nếu chưa có xác nhận.
+
 ## V3.29 — Nhập dữ liệu theo cấu trúc báo cáo TGĐ (HDSD)
 
 **Mục tiêu:** mỗi thông tin được đơn vị xác nhận phải đi vào đúng nội dung của báo cáo, không cần nhập lại dữ liệu có từ Excel lịch bay. Các chức năng nhập lịch Lần 1/Lần 2, booking, quân số, phân quyền, xác nhận và xuất Word/PDF giữ nguyên.
