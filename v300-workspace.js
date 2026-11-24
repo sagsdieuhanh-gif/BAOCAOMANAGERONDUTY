@@ -502,18 +502,32 @@
  function issueFields(u){
    if(u==='KTS'){
      const groups=(state?.gse||[]).filter(x=>['STAIRS','BELT','TRACTOR','COBUS_LARGE','PUSHBACK','GPU','ASU'].includes(x.code));
-     const devices=groups.length?'<details class="v300-details v311-advanced"><summary>Điều chỉnh số thiết bị khả dụng (chỉ khi thay đổi)</summary>'+
+     const devices=groups.length?'<details class="v300-details v311-advanced"><summary>Điều chỉnh số GSE khả dụng (chỉ khi có thay đổi)</summary>'+
        '<div class="v300-device-grid">'+groups.map(x=>'<label>'+H(x.code)+' · tối đa '+H(x.catalog_total)+
        '<input data-v300-gse="'+H(x.code)+'" type="number" min="0" max="'+H(x.catalog_total)+'" placeholder="Chờ xác nhận" value="'+H(x.ready_count??'')+'"></label>').join('')+'</div></details>':'';
-     return wrapPanel('02 · Thiết bị hạn chế / thay đổi','Chỉ nhập xe mới hỏng, hạn chế, phục hồi hoặc điều chỉnh số khả dụng. Không nhập lại danh mục.',
-       '<div class="v300-fields-grid"><label>Mã xe (nếu có thay đổi)<input data-v300-issue="id" maxlength="55" placeholder="Mã xe"></label>'+
-       '<label>Trạng thái<select data-v300-issue="status"><option value="OUT_OF_SERVICE">Hỏng / ngưng sử dụng</option><option value="REPAIR">Đang sửa</option><option value="LIMITED">Hạn chế</option><option value="RETURNED">Đã phục hồi</option></select></label>'+
-       '<label class="v300-wide">Ảnh hưởng phục vụ<input data-v300-issue="fault" maxlength="260" placeholder="Hỏng gì? Ảnh hưởng chuyến/bãi nào?"></label></div>'+devices);
+     const saved=(state?.issues||[]).filter(x=>x.equipment_id&&x.service_date===date());
+     const picker=saved.length?'<label class="v329-wide">Chỉnh sửa thiết bị đã báo (nếu cần)<select data-v329-issue-picker>'+
+       '<option value="">+ Nhập thiết bị mới</option>'+
+       saved.map(x=>'<option value="'+H(x.equipment_id)+'">'+H(x.equipment_id)+' · '+H(x.issue_status)+'</option>').join('')+
+       '</select></label>':'';
+     return wrapPanel('02 · GSE / THIẾT BỊ HẠN CHẾ',
+       'Mỗi thiết bị cần mô tả riêng tình trạng, ảnh hưởng và phương án đã xác nhận. Để sửa thiết bị cũ, chọn trong danh sách rồi cập nhật.',
+       '<div class="v300-fields-grid v329-gse-fields">'+picker+
+       '<label>Mã thiết bị<input data-v300-issue="id" maxlength="55" placeholder="Ví dụ: 430"></label>'+
+       '<label>Trạng thái<select data-v300-issue="status"><option value="OUT_OF_SERVICE">Hỏng / ngưng sử dụng</option>'+
+         '<option value="REPAIR">Đang sửa</option><option value="LIMITED">Hạn chế</option>'+
+         '<option value="RETURNED">Đã phục hồi</option></select></label>'+
+       '<label class="v300-wide">Nội dung hư hỏng / hạn chế<textarea data-v300-issue="fault" rows="2" maxlength="260" placeholder="Tình trạng kỹ thuật đã xác nhận"></textarea></label>'+
+       '<label class="v300-wide">Ảnh hưởng chuyến bay / công đoạn<textarea data-v300-issue="impact" rows="2" maxlength="300" placeholder="Chỉ ghi nếu có ảnh hưởng xác định"></textarea></label>'+
+       '<label class="v300-wide">Phương án thay thế / xử lý<textarea data-v300-issue="workaround" rows="2" maxlength="350" placeholder="Thiết bị thay thế hoặc biện pháp đã xác nhận"></textarea></label>'+
+       '<label class="v300-wide">Thời điểm dự kiến khắc phục (nếu đã xác nhận)<input data-v300-issue="expected_return" maxlength="100" placeholder="Không suy đoán giờ khắc phục"></label>'+
+       '</div><div class="v300-secondary-row"><button type="button" data-v300-command="clear-issue">XÓA NỘI DUNG ĐANG NHẬP</button>'+
+       '<span>Chỉ xóa khỏi biểu mẫu; nội dung đã lưu không bị xóa cho tới khi có thao tác cập nhật hợp lệ.</span></div>'+devices+
+       (saved.length?'<p class="v300-hint">Đã có '+saved.length+' thiết bị được ghi nhận cho ngày này. Chọn một thiết bị để xem và sửa dữ liệu cũ.</p>':''));
    }
    if(u==='KHO')return cargoUnitTables();
    return '';
  }
-
  function renderDepartment(u){
    const plan=getUnitPlan(u),details=plan?.details||{};
    const focus={
