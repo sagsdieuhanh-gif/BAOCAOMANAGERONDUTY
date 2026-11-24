@@ -505,13 +505,26 @@
    // Executive summary table: same operational facts/actions as V3.21, but
    // restores the compact report structure rather than 10 oversized cards.
    const compact=(x)=>String(x??'').trim().replace(/\s+/g,' ');
-   const topicsTable='<table class="v322-topic-table"><thead>'+tr([
-     'Nội dung','Nhận định trọng tâm','Phương án / Đơn vị thực hiện'
-   ],true)+'</thead><tbody>'+(data.topics||[]).map(x=>
-     '<tr><th scope="row">'+esc(x.title)+'</th><td>'+esc(compact(x.observation))+
-     '</td><td>'+esc(compact(x.action))+
-     (x.owner?'<div class="v322-owner">Thực hiện: '+esc(x.owner)+'</div>':'')+
-     '</td></tr>').join('')+'</tbody></table>';
+   // V3.30: keep every sourced sentence, but separate automatic analysis from
+   // confirmed unit additions instead of squeezing all 10 topics into three tiny columns.
+   const topicParagraphs=value=>String(value??'').split(/\n+/)
+     .map(x=>x.trim()).filter(Boolean).map((x,i)=>
+       '<p class="v330-topic-text'+(i?' v330-topic-evidence':'')+'">'+esc(x)+'</p>').join('')||
+       '<p class="v330-topic-text">CHỜ XÁC NHẬN</p>';
+   const topicsTable='<div class="v330-topic-list">'+(data.topics||[]).map((x,i)=>{
+     const title=String(x.title||''),match=title.match(/^\s*\d+\.\s*(.*)$/);
+     const name=match?match[1]:title;
+     return '<section class="v330-topic-block" data-v330-topic="'+(i+1)+'">'+
+       '<h4 class="v330-topic-title"><span class="v330-topic-number">'+String(i+1).padStart(2,'0')+
+         '</span> '+esc(name)+'</h4>'+
+       '<div class="v330-topic-columns">'+
+         '<div class="v330-topic-column v330-observation">'+
+           '<p class="v330-topic-label">NHẬN ĐỊNH TRỌNG TÂM</p>'+topicParagraphs(x.observation)+'</div>'+
+         '<div class="v330-topic-column v330-action">'+
+           '<p class="v330-topic-label">PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ</p>'+topicParagraphs(x.action)+'</div>'+
+       '</div>'+(x.owner?'<p class="v330-topic-owner">Đơn vị thực hiện: '+esc(x.owner)+'</p>':'')+
+       '</section>';
+   }).join('')+'</div>';
    const peakTable='<table class="v322-peak-table">'+tr([
      'Khung giờ','Cặp chuyến / Nguy cơ','Phương án'
    ],true)+(data.peakRows||[]).map(x=>tr([x.slot,
@@ -521,7 +534,7 @@
    ],true)+(data.coord||[]).map(x=>tr([x[0],compact(x[1]),compact(x[2])+
      (x[3]?' · '+compact(x[3]):'')])).join('')+'</table>';
 
-   return '<div class="v19-report-sheet v211-compact v322-two-page"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
+   return '<div class="v19-report-sheet v211-compact v322-two-page v330-readable"><div class="v216-report-brand"><img class="v216-report-logo" src="./assets/logo-sags.png" alt="Logo SAGS"><div><strong>CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</strong><h2>BÁO CÁO DỰ BÁO ĐIỀU HÀNH KHAI THÁC HẰNG NGÀY</h2></div></div>'+
     '<div class="v218-revision-banner"><strong>'+(data.c.revision===2?'BÁO CÁO LẦN 2 · KẾ HOẠCH CẬP NHẬT':'BÁO CÁO LẦN 1 · KẾ HOẠCH SƠ BỘ')+'</strong></div>'+'<p>Ngày khai thác: <b>'+esc(dateVN(data.c.date))+'</b><br>Người lập báo cáo: <b>'+esc(data.c.author)+'</b></p>'+
     '<div class="v27-inline-report-warning">'+(data.alerts?.length?'<h3>THÔNG TIN CHƯA XÁC NHẬN – YÊU CẦU CÁC ĐƠN VỊ BỔ SUNG</h3><ul>'+data.alerts.map(a=>'<li><strong>'+esc(a.unit)+' – '+esc(a.type)+':</strong> '+esc(a.detail)+'</li>').join('')+'</ul>':'')+'</div><h3>I. TÓM TẮT KHAI THÁC</h3><table>'+tr(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],true)+tr(['Sản lượng',data.summary])+tr([(isL2?'Đối chiếu Lần 1 / Lần 2':'Biến động so với ngày hôm trước'),data.comparison])+tr(['Trọng điểm',data.keyPoints])+'</table>'+
     (data.operational?'<h3>PHÂN BỔ LƯỢT BAY THEO GIỜ (STA / STD)</h3>'+
