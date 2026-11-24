@@ -80,7 +80,7 @@
        (canOpen('admin')?button(main.admin):'')+
        (canOpen('norms')?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+button(main.norms)+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.26</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.27</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -365,7 +365,8 @@
    const ready=minute==null?'':String(Math.floor((Number(minute)%1440)/60)).padStart(2,'0')+
       ':'+String(Number(minute)%60).padStart(2,'0');
    const title=side==='departure'?'đi':'đến';
-   return '<tr data-v300-cargo-row data-v320-cargo-side="'+side+'">'+
+   return '<tr data-v300-cargo-row data-v320-cargo-side="'+side+'"'+
+     (x.id?' data-v300-cargo-id="'+H(x.id)+'"':'')+'>'+
      '<td><input data-v300-cargo="flight" aria-label="Chuyến bay '+title+'" '+
        'list="v320CargoFlights'+side+'" maxlength="20" placeholder="Số chuyến" value="'+H(x.flight_no||'')+'"></td>'+
      '<td><input data-v300-cargo="kg" aria-label="Trọng lượng booking chuyến '+title+'" '+
@@ -376,7 +377,9 @@
      '<td><input data-v300-cargo="pcs" type="number" min="0" step="1" '+
        'aria-label="Số kiện (tùy chọn)" placeholder="—" value="'+H(x.cargo_pcs??'')+'"></td>'+
      '<td><input data-v300-cargo="ready" aria-label="Hàng sẵn sàng (tùy chọn)" '+
-       'type="time" value="'+H(ready)+'"></td></tr>';
+       'type="time" value="'+H(ready)+'"></td>'+
+     '<td class="v327-delete-cell"><button type="button" class="v327-delete-booking" data-v300-command="delete-cargo" '+
+       'aria-label="Xóa booking chuyến '+H(x.flight_no||'đang nhập')+'">XÓA</button></td></tr>';
  }
  function cargoUnitTables(){
    const model=root.SagsCargoBookingV320;
@@ -391,25 +394,91 @@
    const table=(side,label)=>'<section class="v320-cargo-panel" data-v320-booking-panel="'+side+'">'+
      '<h3>'+label+'</h3><datalist id="v320CargoFlights'+side+'">'+flightList(side)+'</datalist>'+
      '<div class="v300-table-wrap v320-cargo-scroll"><table class="v300-table v320-cargo-table">'+
-     '<thead><tr><th>Chuyến bay</th><th>Booking</th><th>Đơn vị</th><th>PCS</th><th>Sẵn sàng</th></tr></thead>'+
+     '<thead><tr><th>Chuyến bay</th><th>Booking</th><th>Đơn vị</th><th>PCS</th><th>Sẵn sàng</th><th>Thao tác</th></tr></thead>'+
      '<tbody id="v320CargoBody'+side+'">'+
         split[side].map(x=>cargoEntryRow(x,side)).join('')+cargoEntryRow({},side)+
-     '</tbody><tfoot><tr><th>TỔNG</th><td colspan="4"><strong data-v320-cargo-total="'+side+'">'+
+     '</tbody><tfoot><tr><th>TỔNG</th><td colspan="5"><strong data-v320-cargo-total="'+side+'">'+
        H(model.formattedTotal(model.total(split[side])))+'</strong></td></tr></tfoot></table></div>'+
      '<button type="button" class="v311-add" data-v300-command="add-cargo" data-side="'+side+
        '">+ THÊM CHUYẾN '+(side==='departure'?'ĐI':'ĐẾN')+'</button></section>';
    const others=split.unmatched.length?
-     '<details class="v300-details v320-cargo-unmatched"><summary>'+
-       split.unmatched.length+' booking cũ không xác định được chiều chuyến từ lịch hiện tại</summary>'+
-       '<p class="v300-hint">Không tự coi các dòng này là chuyến đi hoặc đến; cần kiểm tra số hiệu trong lịch trước khi nhập lại.</p>'+
-       split.unmatched.map(x=>'<p>'+H(x.flight_no)+': '+
-         H(model.formattedTotal(Number(x.cargo_kg||0)))+'</p>').join('')+'</details>':'';
+     '<details class="v300-details v320-cargo-unmatched" data-v327-unmatched><summary>'+
+       split.unmatched.length+' booking chưa khớp chuyến đi/đến trong lịch hiện tại</summary>'+
+       '<p class="v300-hint">Không tự coi các dòng này là chuyến đi hoặc đến. Có thể xóa riêng booking nhập sai mà không ảnh hưởng chuyến khác.</p>'+
+       split.unmatched.map(x=>'<div class="v327-orphan-row" data-v327-orphan-row><span>'+
+         H(x.flight_no)+': '+H(model.formattedTotal(Number(x.cargo_kg||0)))+'</span>'+
+         '<button type="button" class="v327-delete-booking" data-v300-command="delete-cargo" '+
+           'data-v300-cargo-id="'+H(x.id)+'">XÓA BOOKING</button></div>').join('')+'</details>':'';
    return wrapPanel('01 · BOOKING HÀNG HÓA – CHUYẾN ĐI VÀ CHUYẾN ĐẾN',
      'Nhập số hiệu, trọng lượng và chọn KG/TẤN ngay tại từng dòng. Hai bảng cộng riêng, không gộp hàng đi với hàng đến.',
      '<p class="v300-hint">Ví dụ: 2.5 TẤN = 2.500 KG; 500 KG = 0,5 TẤN. Tổng tự động quy đổi. Không nhập số 2.5 dưới đơn vị KG nếu thực tế là 2,5 tấn.</p>'+
      '<div class="v320-cargo-layout">'+table('departure','CHUYẾN BAY ĐI')+
        table('arrival','CHUYẾN BAY ĐẾN')+'</div>'+others+
-     '<p class="v300-hint">PCS và giờ hàng sẵn sàng là dữ liệu bổ sung; ô trống không mặc định bằng 0. Chỉ lưu booking đã được Kho Hàng xác nhận.</p>');
+     '<p class="v300-hint">Nhấn XÓA ở dòng vừa nhập để bỏ dòng chưa lưu. Với booking đã lưu, hệ thống yêu cầu xác nhận trước khi xóa đúng booking đó. PCS/giờ sẵn sàng để trống không mặc định bằng 0.</p>');
+ }
+ function ensureCargoBlankRow(side){
+   const body=$('v320CargoBody'+side);
+   if(body&&!body.querySelector('[data-v300-cargo-row]'))
+     body.insertAdjacentHTML('beforeend',cargoEntryRow({},side));
+ }
+ async function deleteCargoRow(button){
+   // Never delete another unit's data or a booking for another selected day.
+   if(!allowed('KHO')||view!=='KHO'||saving||loading||!state)return;
+   const row=button.closest('[data-v300-cargo-row]');
+   const id=row?.dataset.v300CargoId||button.dataset.v300CargoId||'';
+   const side=row?.dataset.v320CargoSide;
+   const day=date();
+   if(!id){
+     if(!row)return;
+     const filled=[...row.querySelectorAll('input')].some(x=>String(x.value||'').trim());
+     if(filled&&!confirm('Bỏ dòng booking đang nhập (chưa lưu)?'))return;
+     row.remove();
+     ensureCargoBlankRow(side);
+     updateCargoTotals();
+     status('Đã bỏ dòng booking chưa lưu; các dòng khác được giữ nguyên.');
+     return;
+   }
+   const saved=(state.cargo||[]).find(x=>x.id===id&&x.service_date===day);
+   if(!saved)return status('Booking đã thay đổi. Vui lòng đồng bộ lại dữ liệu trước khi xóa.',true);
+   if(!confirm('XÓA BOOKING ĐÃ LƯU?\\nChuyến: '+saved.flight_no+
+       '\\nNgày khai thác: '+day+
+       '\\nTrọng lượng: '+Number(saved.cargo_kg||0).toLocaleString('vi-VN')+
+       ' kg\\n\\nChỉ xóa booking của chuyến này; các booking khác giữ nguyên.'))return;
+   const saveBtn=$('v300Page')?.querySelector('[data-v300-command="save"]');
+   saving=true;button.disabled=true;if(saveBtn)saveBtn.disabled=true;
+   status('Đang xóa booking '+saved.flight_no+'…');
+   try{
+     let query=db().from('ops_warehouse_cargo_plan').delete()
+       .eq('id',saved.id).eq('service_date',day).eq('flight_no',saved.flight_no);
+     // Protect against deleting a newer update from another employee.
+     if(saved.updated_at)query=query.eq('updated_at',saved.updated_at);
+     const {data,error}=await query.select('id');
+     if(error)throw error;
+     if(!Array.isArray(data)||data.length!==1)
+       throw Error('Không có bản ghi nào bị xóa (có thể booking đã được người khác cập nhật). Hãy đồng bộ lại để kiểm tra.');
+     state.cargo=state.cargo.filter(x=>x.id!==saved.id);
+     // Do not rerender: other unsaved booking/staff edits must survive.
+     if(date()===day&&view==='KHO'){
+       const node=button.closest('[data-v300-cargo-row]')||button.closest('[data-v327-orphan-row]');
+       const unmatched=node?.closest('[data-v327-unmatched]');
+       node?.remove();
+       if(side)ensureCargoBlankRow(side);
+       if(unmatched){
+         const left=unmatched.querySelectorAll('[data-v327-orphan-row]').length;
+         if(!left)unmatched.remove();
+         else unmatched.querySelector('summary').textContent=
+           left+' booking chưa khớp chuyến đi/đến trong lịch hiện tại';
+       }
+       updateCargoTotals();
+     }
+     status('Đã xóa booking '+saved.flight_no+' ngày '+day+'. Các booking khác không thay đổi.');
+   }catch(e){
+     status('Chưa xóa được booking '+saved.flight_no+': '+e.message,true);
+   }finally{
+     saving=false;
+     if(button.isConnected)button.disabled=false;
+     if(saveBtn?.isConnected)saveBtn.disabled=false;
+   }
  }
  function updateCargoTotals(){
    const model=root.SagsCargoBookingV320,page=$('v300Page');
@@ -791,6 +860,7 @@
      $('v320CargoBody'+side)?.insertAdjacentHTML('beforeend',cargoEntryRow({},side));
      updateCargoTotals();return;
    }
+   if(cmd==='delete-cargo'){deleteCargoRow(command);return;}
    if(cmd==='refresh')refresh();
    if(cmd==='save')saveDepartment(command.dataset.unit);
    if(cmd==='copy-previous')copyPrevious(command.dataset.unit);
