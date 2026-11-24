@@ -25,12 +25,13 @@
    KHO:[['WAREHOUSE_CARGO','Nhân viên kho/hàng']],
    QA_IT:[]
  };
- const noteFields={
-   DH:[['stand_notes','Điều chỉnh vị trí đỗ/AOC'],['peak_priority','Ưu tiên điều hành hoặc yêu cầu hãng'],['escalation','Vấn đề cần xin chỉ đạo']],
-   KTS:[['rolling_support','Phương án tăng cường PVHL sân đỗ / hỗ trợ Kho Hàng / PVTT'],['gse_risk','Hạn chế thiết bị/luồng công vụ']],
-   PVHK:[['peak_staff','Phương án quầy/gate/boarding khi dồn chuyến'],['special_pax','Khách đặc biệt hoặc yêu cầu hãng']],
-   KHO:[['handover_priority','Ưu tiên bàn giao hàng'],['cargo_bottleneck','Nguy cơ chậm bàn giao hàng']],
-   QA_IT:[['weather_fod','Thời tiết/FOD/an toàn đã xác nhận'],['open_capa','Tồn tại ảnh hưởng ngày mai']]
+ // V3.29: one field registry drives inputs, previews and the final report.
+ const noteFields=root.SagsUnitReportV329?.FIELDS||{
+   DH:[['stand_notes','Thay đổi bãi/AOC'],['peak_priority','Ưu tiên điều hành'],['escalation','Kiến nghị']],
+   KTS:[['rolling_support','Phối hợp tăng cường'],['gse_risk','GSE hạn chế']],
+   PVHK:[['peak_staff','Bố trí quầy/gate'],['special_pax','Khách đặc biệt']],
+   KHO:[['handover_priority','Ưu tiên bàn giao'],['cargo_bottleneck','Nguy cơ chậm']],
+   QA_IT:[['weather_fod','An toàn đã xác nhận'],['open_capa','Tồn tại']]
  };
  const NAV=[
   ['overview','Tổng quan','layout-dashboard','Xem các điểm cần chuẩn bị'],
