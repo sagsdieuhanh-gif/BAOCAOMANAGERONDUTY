@@ -602,9 +602,12 @@
        hd('I. TÓM TẮT KHAI THÁC'),
        t(['Chỉ tiêu','Dự báo / Biến động so với ngày trước'],[['Sản lượng',data.summary],['Biến động so với ngày hôm trước',data.comparison],['Trọng điểm',data.keyPoints]],[2350,8150]),
        hd('II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ'),
-       t(['Nội dung','Nhận định trọng tâm','Phương án / Đơn vị thực hiện'],
-         data.topics.map(x=>[x.title,x.observation,x.action+(x.owner?'\nThực hiện: '+x.owner:'')]),
-         [2000,3750,4750]),
+       ...data.topics.flatMap(x=>[
+         p(x.title,{bold:true,size:21,before:100,color:'15435F'}),
+         t(['NHẬN ĐỊNH TRỌNG TÂM','PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ'],
+           [[x.observation,x.action]],[5250,5250]),
+         ...(x.owner?[p('Đơn vị thực hiện: '+x.owner,{size:17,color:'326277'})]:[])
+       ]),
        hd('III. KHUNG GIỜ CẦN ƯU TIÊN ĐIỀU PHỐI'),
        t(['Khung giờ','Cặp chuyến / Nguy cơ','Phương án'],
          data.peakRows.map(x=>[x.slot,x.flight+' — '+x.risk,x.action]),
