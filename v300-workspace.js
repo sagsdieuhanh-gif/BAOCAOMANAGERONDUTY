@@ -537,13 +537,33 @@
      KHO:'Nhập booking CHUYẾN ĐI và CHUYẾN ĐẾN ở hai bảng riêng; chọn rõ KG/TẤN để tránh sai khối lượng. Các trường PCS và giờ sẵn sàng chỉ nhập khi có nguồn.',
      QA_IT:'Chỉ ghi vấn đề đã xác nhận về an toàn, FOD, thời tiết hoặc tồn tại ảnh hưởng ca.'
    };
-   const names=noteFields[u]||[],hasNotes=names.some(([k])=>details[k]);
-   const fields=names.map(([k,label])=>'<label>'+H(label)+
-     '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" placeholder="Chỉ ghi chuyến/khung giờ, nguy cơ cụ thể và phương án">'+H(details[k]||'')+'</textarea></label>').join('');
-   const comments=wrapPanel(u==='QA_IT'?'01 · Thông tin cần báo':
-     (u==='DH'||u==='PVHK'?'02 · Ngoại lệ / phương án bổ sung':'03 · Ngoại lệ / phương án bổ sung'),
-     'Không cần viết lại số chuyến, giờ cao điểm và bãi đỗ: báo cáo đã tự tổng hợp từ nguồn.',
-     '<details class="v300-details v311-advanced" '+(hasNotes||u==='QA_IT'?'open':'')+'><summary>Ghi chú để đưa vào báo cáo ('+(hasNotes?'đang có nội dung':'tùy chọn')+')</summary><div class="v300-fields-grid">'+fields+'</div></details>');
+   const names=noteFields[u]||[],hasNotes=names.some(([k])=>
+     details[k]!=null&&String(details[k]).trim()!==''&&details[k]!=='PENDING');
+   const topicNames=root.SagsUnitReportV329?.TITLES||[];
+   const fields=names.map(([k,label,topic,column])=>{
+     const value=details[k]??'',statusField=k==='a330_ready'||k==='b777_ready';
+     const input=statusField?
+       '<select data-v300-note="'+H(k)+'"><option value="">CHỜ XÁC NHẬN</option>'+
+       [['READY','Sẵn sàng'],['LIMITED','Còn hạn chế']].map(([code,text])=>
+         '<option value="'+code+'" '+(value===code?'selected':'')+'>'+text+'</option>').join('')+'</select>':
+       '<textarea data-v300-note="'+H(k)+'" rows="2" maxlength="350" '+
+         'placeholder="Chỉ ghi dữ kiện và phương án đã được xác nhận">'+H(value)+'</textarea>';
+     const destination=topic?'Mục '+String(topic).padStart(2,'0')+' · '+H(topicNames[topic-1]||'Nhận định')+
+       (column==='observation'?' / Nhận định':' / Phương án'):'Báo cáo đơn vị';
+     return '<div class="v329-note-row"><div class="v329-note-title"><strong>'+H(label)+'</strong>'+
+       '<button type="button" data-v300-command="clear-note" data-note-key="'+H(k)+
+       '" title="Bỏ nội dung đang nhập, chỉ lưu khi xác nhận">XÓA NỘI DUNG</button></div>'+
+       input+'<small>→ '+destination+'</small></div>';
+   }).join('');
+   const sectionTitle=u==='QA_IT'?'01 · AN TOÀN / TỒN TẠI ĐƯỢC XÁC NHẬN':
+     (u==='DH'||u==='PVHK'?'02 · PHƯƠNG ÁN VÀ THÔNG TIN BỔ SUNG':
+       '03 · ẢNH HƯỞNG VÀ PHƯƠNG ÁN PHỐI HỢP');
+   const comments=wrapPanel(sectionTitle,
+     'Chỉ nhập thông tin đơn vị đã xác nhận. Mỗi trường có vị trí xuất vào đúng mục báo cáo; ô trống không tự suy ra không phát sinh.',
+     '<details class="v300-details v311-advanced v329-note-details" '+(hasNotes||u==='QA_IT'?'open':'')+
+     '><summary>Thông tin bổ sung ('+(hasNotes?'đang có nội dung':'chưa nhập')+')</summary>'+
+     '<div class="v329-notes-grid">'+fields+'</div>'+
+     '<p class="v300-hint">Nội dung đã lưu chỉ thay đổi sau khi bấm LƯU & XÁC NHẬN PHÒNG. Dòng trống = chưa cung cấp, không phải 0.</p></details>');
    const flights=getFlights(),dep=dataRows(),bays=flights.filter(x=>x.bay!=null).length;
    const auto='<details class="v300-card v324-auto-summary"><summary>'+
      '<span><strong>DỮ LIỆU LỊCH BAY · TỰ ĐỘNG</strong><small>Không phải nhập lại thông tin chuyến bay</small></span>'+
