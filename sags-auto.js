@@ -5,6 +5,34 @@
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const tell=(s,fail=false)=>{const el=$('exMessage');el.textContent=s;el.style.color=fail?'#b92835':'#64798b';};
+  // V3.28: mirror atomic-import checks; never edit source flight values.
+  function validateFlightRows(sags){
+    const bad=[],flights=sags?.payload?.flights||[];
+    const rows=new Map([
+      ...(sags.arrivals||[]).map(x=>['A:'+x.no,x.sheetRow]),
+      ...(sags.departures||[]).map(x=>['D:'+x.no,x.sheetRow])
+    ]);
+    const legal=new Set(['REG','ROUTE_UNIQUE','ARRIVAL_ONLY','DEPARTURE_ONLY']);
+    for(const f of flights){
+      const reasons=[],names=[f.arrival||'—',f.departure||'—'].join(' / ');
+      const rowLabels=[f.arrival&&rows.get('A:'+f.arrival),
+        f.departure&&rows.get('D:'+f.departure)].filter(Boolean);
+      const where='dòng '+[...new Set(rowLabels)].join(', ')+': '+names;
+      const validTime=x=>Number.isInteger(x)&&x>=0&&x<=2880;
+      if(!f.arrival&&!f.departure)reasons.push('thiếu cả chuyến đến và đi');
+      if(f.arrival&&(!/^[A-Z0-9]{2,20}$/.test(f.arrival)||!validTime(f.sta_min)))
+        reasons.push('số hiệu hoặc giờ STA không hợp lệ');
+      if(f.departure&&(!/^[A-Z0-9]{2,20}$/.test(f.departure)||!validTime(f.std_min)))
+        reasons.push('số hiệu hoặc giờ STD không hợp lệ');
+      if(f.bay!=null&&(!Number.isInteger(f.bay)||f.bay<1||f.bay>99))
+        reasons.push('bãi đỗ ngoài 1–99');
+      if(!legal.has(f.match_method))reasons.push('thiếu phương thức ghép chuyến');
+      if(f.arrival&&f.departure&&validTime(f.sta_min)&&validTime(f.std_min)&&f.std_min<=f.sta_min)
+        reasons.push('STD không sau STA');
+      if(reasons.length)bad.push(where+' ('+reasons.join(', ')+')');
+    }
+    return bad;
+  }
   let delegated=false,busy=false;
   async function xlsx(){
     if(window.XLSX)return;
@@ -26,6 +54,10 @@
     const raw=window.XLSX.utils.sheet_to_json(book.Sheets.LB,{header:1,raw:true,defval:'',blankrows:true});
     if(!lib.detect(raw).isSags)return false;
     const sags=lib.parse(raw),meta=sags.meta,stats=sags.stats;
+    const invalid=validateFlightRows(sags);
+    if(invalid.length)throw Error('Sheet LB có '+invalid.length+' hồ sơ chuyến không hợp lệ: '+
+      invalid.slice(0,4).join('; ')+(invalid.length>4?'; và '+(invalid.length-4)+' hồ sơ khác':'')+
+      '. Kiểm tra số hiệu và giờ trong file Excel; không tự sửa dữ liệu nguồn.');
     $('day').value=meta.service_date;
     $('forecastRevision').value='1';
     $('forecastSourceName').value=file.name;
@@ -78,7 +110,15 @@
         delegated=true;input.dispatchEvent(new Event('change',{bubbles:true}));
         tell('Không phải mẫu sheet LB: chuyển sang chế độ ghép cột và so sánh trước khi lưu.');
       }
-    }catch(e){tell('Không tự lưu được: '+e.message+'. Cơ sở dữ liệu không bị ghi nửa chừng.',true);}
+    }catch(e){
+      const message=String(e?.message||e);
+      const detail=message.includes('INVALID_FLIGHT_ROW')?
+        'Máy chủ không chấp nhận một hồ sơ chuyến bay. Kiểm tra số hiệu và giờ STA/STD, nhất là dấu ngày hôm sau (+).':
+        message;
+      tell('Không tự lưu được: '+detail+' Cơ sở dữ liệu không bị ghi nửa chừng.',true);
+      // Allow choosing the same corrected file again.
+      input.value='';
+    }
     finally{busy=false;}
   },true);
 })();
