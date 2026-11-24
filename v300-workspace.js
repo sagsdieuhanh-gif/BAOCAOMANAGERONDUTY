@@ -81,7 +81,7 @@
        (canOpen('admin')?button(main.admin):'')+
        (canOpen('norms')?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+button(main.norms)+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.28</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.29</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -438,7 +438,7 @@
      if(filled&&!confirm('Bỏ dòng booking đang nhập (chưa lưu)?'))return;
      row.remove();
      ensureCargoBlankRow(side);
-     updateCargoTotals();
+     updateCargoTotals();updateUnitPreview();
      status('Đã bỏ dòng booking chưa lưu; các dòng khác được giữ nguyên.');
      return;
    }
@@ -473,7 +473,7 @@
          else unmatched.querySelector('summary').textContent=
            left+' booking chưa khớp chuyến đi/đến trong lịch hiện tại';
        }
-       updateCargoTotals();
+       updateCargoTotals();updateUnitPreview();
      }
      status('Đã xóa booking '+saved.flight_no+' ngày '+day+'. Các booking khác không thay đổi.');
    }catch(e){
@@ -536,7 +536,7 @@
    const old=(state?.issues||[]).find(x=>x.equipment_id===id&&x.service_date===date());
    for(const el of page.querySelectorAll('[data-v300-issue]')){
      const key=el.dataset.v300Issue;
-     el.value=old?(old[key==='id'?'equipment_id':key]??''):(key==='status'?'OUT_OF_SERVICE':'');
+     el.value=old?(old[key==='id'?'equipment_id':key==='status'?'issue_status':key]??''):(key==='status'?'OUT_OF_SERVICE':'');
    }
    updateUnitPreview();
  }
