@@ -1,3 +1,28 @@
+## V3.29 — Nhập dữ liệu theo cấu trúc báo cáo TGĐ (HDSD)
+
+**Mục tiêu:** mỗi thông tin được đơn vị xác nhận phải đi vào đúng nội dung của báo cáo, không cần nhập lại dữ liệu có từ Excel lịch bay. Các chức năng nhập lịch Lần 1/Lần 2, booking, quân số, phân quyền, xác nhận và xuất Word/PDF giữ nguyên.
+
+### 1. Các phòng nhập như sau
+
+- **Phòng Điều hành:** nhập tổng quân số **ca sáng/ca tối**; Điều phối chỉ là nhóm bổ sung, không coi là toàn phòng. Mục nội dung bổ sung gồm AOC/bãi đỗ (Mục 04), ưu tiên cao điểm/yêu cầu hãng (Mục 02), kiến nghị hoặc vấn đề cần phối hợp (Mục 10).
+- **PVHK:** nhập nhân sự 3 nhóm (Cán bộ Phòng, Đội khách đi, Đội khách đến) theo ca; nhập phương án quầy/gate/boarding (Mục 05), khách đặc biệt (Mục 03), bố trí chuyến thân rộng/khách đông (Mục 03), nguy cơ hành lý (Mục 07).
+- **PVSĐ:** nhập nhân sự 6 nhóm theo ca, tách đúng chính/SKO/TC. Mục GSE: nhập mã xe, trạng thái, hư hỏng/hạn chế, **ảnh hưởng**, **phương án thay thế**, thời gian dự kiến (nếu được xác nhận). Khi muốn sửa xe cũ phải chọn mã ở “Chỉnh sửa thiết bị đã báo”, không ghi đè tùy tiện bằng cách nhập trùng mã. Các ghi chú điều phối, nhân lực, tàu thân rộng, GSE được ánh xạ lần lượt vào Mục 02, 05, 03, 06.
+- **Kho hàng:** nhập booking **chuyến đi và chuyến đến** riêng từng bảng; có thể chọn sửa/xóa booking từng chuyến theo V3.27. Nhập ưu tiên bàn giao, nguy cơ chậm và hàng đặc biệt ở Mục 07; phần nhân sự Kho nằm trong khối **tùy chọn** và nếu được xác nhận sẽ được phản ánh ở Mục 07, không tự cộng vào bảng quân số ĐH/PVHK/PVSĐ.
+- **QA/IT:** ghi thông tin an toàn, FOD, thời tiết đã xác nhận (Mục 09), ảnh hưởng và biện pháp phòng ngừa (Mục 09), tồn tại và kết quả theo dõi (Mục 10).
+
+### 2. Xem trước / chỉnh sửa / xóa nội dung
+
+- Mỗi ô ghi chú hiển thị **Mục báo cáo nhận thông tin**. Khi gõ hoặc xóa, khu vực **XEM TRƯỚC THÔNG TIN VÀO BÁO CÁO** cập nhật ngay mà **chưa ghi vào Supabase**.
+- **XÓA NỘI DUNG** trên từng ghi chú chỉ làm trống nội dung đang nhập; để thay đổi bản đã lưu phải bấm **LƯU & XÁC NHẬN PHÒNG**. Với GSE dùng **XÓA NỘI DUNG ĐANG NHẬP** để bỏ bản nháp, không xóa thiết bị đã lưu.
+- GSE đã báo: chọn mã xe có sẵn để điền lại toàn bộ trường, chỉnh sửa và xác nhận; hệ thống không tự xóa các giá trị chưa nhập của thiết bị khác.
+- Khi lưu, dữ liệu đơn vị chỉ được tổng hợp khi trạng thái hồ sơ đơn vị là **CONFIRMED**. Các trường trống tiếp tục là **CHỜ XÁC NHẬN**, không có suy diễn “không phát sinh” hoặc “đủ nhân sự”.
+- Mỗi ghi chú đã xác nhận được ánh xạ đến **nhận định hoặc phương án** ở 10 mục báo cáo *sau* các lớp tổng hợp tự động. Nội dung do Điều hành phê duyệt/nhập thủ công được giữ, không bị thay thế; thông tin đơn vị là bằng chứng bổ sung có nguồn.
+- Bảng quân số ĐH/PVHK/PVSĐ vẫn theo chuẩn hiện tại và không được cộng trùng SKO/TC; các dòng booking hàng đi/đến vẫn tính riêng. Word/PDF sử dụng chung bản xem trước báo cáo đã tổng hợp.
+
+### 3. Giới hạn
+
+Đây là giao diện nhập và cầu nối báo cáo; **không** tạo nguồn booking, khối lượng, nhân lực, tình trạng GSE hoặc sự kiện mới nếu chưa có dữ liệu thực tế. Mọi dữ liệu đã lưu trước V3.29 giữ nguyên, không có migration hay ghi đè dữ liệu lịch sử.
+
 ## V3.28 — Sửa lỗi tự lưu Excel `INVALID_FLIGHT_ROW` (HDSD)
 
 - **Lịch bay → Nhập Excel:** chọn file **LICH BAY SAGS** có sheet `LB`. Hệ thống đọc và kiểm tra các cặp chuyến trước khi tự lưu.
