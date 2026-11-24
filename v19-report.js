@@ -483,6 +483,9 @@
    window.SagsExecutiveEditorialV321?.support(c,peakRows,coord,{
      peaks:p,tight:short,wide:w,changes:l2Changes,operational,staffByShift
    });
+   // V3.29: Restore every confirmed unit input *after* automatic editorial passes.
+   // Keep executive/manual remarks intact, add only sourced departmental evidence.
+   window.SagsUnitReportV329?.apply(c,topics);
    return {c,alerts,summary,comparison,keyPoints,topics,peakRows,coord,staffDetails,pvsdSummary,staffByShift,quickReports:c.quickReports||[],l2Details,l2Changes,operational,dailyBrief,minimumAssessment,recommendation:c.note.executive_recommendation||'Chưa có kiến nghị riêng được các phòng gửi để trình Ban TGĐ.'};
  }
 
