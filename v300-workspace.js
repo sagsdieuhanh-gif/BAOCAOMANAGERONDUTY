@@ -528,6 +528,40 @@
    if(u==='KHO')return cargoUnitTables();
    return '';
  }
+ function updateUnitPreview(){
+   const bridge=root.SagsUnitReportV329,area=$('v329UnitPreview'),page=$('v300Page');
+   if(!bridge||!area||!page||!tagUnit[view])return;
+   const details={...(getUnitPlan(view)?.details||{})};
+   for(const el of page.querySelectorAll('[data-v300-note]'))
+     details[el.dataset.v300Note]=el.value.trim();
+   const issue={};
+   for(const el of page.querySelectorAll('[data-v300-issue]'))
+     issue[el.dataset.v300Issue]=el.value.trim();
+   const staff=[...page.querySelectorAll('[data-v300-staff]')].filter(x=>x.value.trim()!=='')
+     .map(el=>({role:el.dataset.v300Staff.split('|')[0],
+       shift:el.dataset.v300Staff.split('|')[1],value:el.value.trim()}))
+     .filter(el=>view!=='KHO'||el.role==='WAREHOUSE_CARGO');
+   if(view==='DH'){
+     for(const el of page.querySelectorAll('[data-v319-dh-total]'))
+       if(el.value.trim()!=='')staff.push({role:'DH_TOTAL',shift:el.dataset.v319DhTotal,value:el.value.trim()});
+   }
+   const cargo=[...page.querySelectorAll('[data-v300-cargo-row]')].map(row=>({
+     side:row.dataset.v320CargoSide,
+     flight:row.querySelector('[data-v300-cargo="flight"]')?.value.trim()||'',
+     kg:row.querySelector('[data-v300-cargo="kg"]')?.value.trim()||''
+   }));
+   const items=bridge.preview(view,details,{issue,staff,cargo});
+   if(!items.length){
+     area.innerHTML='<div class="v329-preview-empty">Chưa có nội dung đơn vị để chuyển vào báo cáo. Các ô trống vẫn được hiểu là CHỜ XÁC NHẬN.</div>';
+     return;
+   }
+   const topics=bridge.TITLES||[];
+   area.innerHTML='<div class="v329-preview-list">'+items.map(item=>
+     '<div class="v329-preview-item"><small>MỤC '+String(item.topic).padStart(2,'0')+
+       ' · '+H(topics[item.topic-1]||'Báo cáo')+'</small>'+
+       '<p><b>'+H(item.prefix)+':</b> '+H(item.value)+'</p></div>'
+   ).join('')+'</div>';
+ }
  function renderDepartment(u){
    const plan=getUnitPlan(u),details=plan?.details||{};
    const focus={
@@ -573,14 +607,22 @@
      '<div class="v311-source-grid"><div><small>CẶP CHUYẾN</small><strong>'+H(flights.length||'Chưa có lịch')+'</strong></div>'+
      '<div><small>BÃI CÓ NGUỒN</small><strong>'+H(bays)+'/'+H(flights.length)+'</strong></div>'+
      '<div><small>CHARTER (##)</small><strong>'+H(dep.filter(x=>x.charter).length)+'</strong></div></div></div></details>';
-   const workflow=u==='KHO'?issueFields(u)+roleInputs(u):roleInputs(u)+issueFields(u);
+   const khoStaff='<details class="v329-optional-staff"><summary>Nhân sự Kho hàng theo ca (bổ sung khi có nguồn)</summary>'+
+     roleInputs('KHO')+'</details>';
+   const workflow=u==='KHO'?issueFields(u)+khoStaff:roleInputs(u)+issueFields(u);
+   const previewBox='<section class="v300-card v329-preview-panel">'+
+     '<div class="v300-card-head"><div><h2>XEM TRƯỚC THÔNG TIN VÀO BÁO CÁO</h2>'+
+     '<p>Dữ liệu đang nhập sẽ được đưa vào các mục tương ứng sau khi LƯU & XÁC NHẬN PHÒNG.</p></div></div>'+
+     '<div id="v329UnitPreview" aria-live="polite"></div>'+
+     '<p class="v300-hint">Các chỉ tiêu lịch bay/giờ cao điểm lấy tự động từ nguồn; nội dung chưa lưu chưa xuất ra báo cáo.</p></section>';
    $('v300Page').innerHTML='<div class="v300-dept-head v324-dept-head"><div><strong>'+H(tagUnit[u])+'</strong><small>Ngày '+H(date())+' · theo đúng phân quyền</small></div>'+smallState(plan?.status)+'</div>'+
      '<details class="v324-entry-help"><summary>Hướng dẫn nhập của phòng</summary><p>'+H(focus[u])+'</p></details>'+
-     auto+workflow+comments+
+     auto+workflow+comments+previewBox+
      '<div class="v300-savebar v311-savebar v324-savebar"><div><strong>Xác nhận dữ liệu cho ngày '+H(date())+'</strong>'+
      '<small>Ô trống là CHỜ XÁC NHẬN, không được mặc định đủ nhân sự hoặc thiết bị.</small>'+
      '<label class="v300-check"><input type="checkbox" data-v300-no-exception '+(details.no_new_exceptions==='YES'?'checked':'')+'> Đã kiểm tra: không có ngoại lệ nào khác cần bổ sung</label></div>'+
      '<button type="button" class="v300-primary" data-v300-command="save" data-unit="'+u+'">LƯU & XÁC NHẬN PHÒNG</button></div>';
+   updateUnitPreview();
  }
 
  async function getNewData(){
