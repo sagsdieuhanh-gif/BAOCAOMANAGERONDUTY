@@ -1,3 +1,17 @@
+## V3.27 — Xóa booking hàng hóa nhập sai (HDSD)
+
+Trong **Kho hàng → 01 · Booking hàng hóa**, mỗi dòng ở bảng **Chuyến bay đi** và **Chuyến bay đến** có nút **XÓA**.
+
+- **Dòng đang nhập, chưa bấm LƯU & XÁC NHẬN PHÒNG:** chọn **XÓA** để bỏ riêng dòng. Nếu dòng đã có dữ liệu, ứng dụng hỏi xác nhận. Chưa có thay đổi nào ở Supabase.
+- **Booking đã lưu:** chọn **XÓA**, kiểm tra **số hiệu chuyến, ngày khai thác, trọng lượng** trên hộp thoại rồi xác nhận. Ứng dụng xóa *một bản ghi* đúng mã booking/ngày/chuyến trong `ops_warehouse_cargo_plan`; không xóa lịch bay, các booking khác hoặc dữ liệu nhân sự.
+- **Booking không khớp lịch hiện tại:** mở khối “booking chưa khớp chuyến đi/đến”, dùng **XÓA BOOKING** tại dòng cần loại bỏ. Không tự gán sang hàng đi/đến.
+- **Khi xóa thành công:** số tổng booking hiển thị được tính lại. Các ô đang nhập dở trên cùng trang không bị làm mới.
+- **Khi xóa thất bại hoặc bản ghi đã được đồng nghiệp cập nhật:** không tự xóa khỏi màn hình; dùng nút **Đồng bộ** để kiểm tra trước khi thao tác lại.
+- **Phân quyền:** chỉ người có quyền nhập Kho hàng (Kho hàng, Điều hành, ADMIN) được xóa theo chính sách RLS hiện hành.
+- **Trường hợp chỉ muốn sửa khối lượng/PCS/giờ sẵn sàng:** chỉnh ngay trên dòng và bấm **LƯU & XÁC NHẬN PHÒNG**, không cần xóa rồi nhập lại.
+
+**Lưu ý:** Nút xóa trong V3.27 áp dụng cho booking hàng hóa; không dùng nó để xóa dữ liệu lịch bay hoặc các loại bản ghi nghiệp vụ khác.
+
 ## V3.26 — Tài khoản dùng chung, phân quyền RNS / Báo cáo độc lập
 
 - Supabase Authentication dùng chung email và mật khẩu, nhưng **quyền truy cập ứng dụng được cấp riêng** bằng `sags_docs_members` (RNS) và `ops_members` (Báo cáo khai thác ngày).
