@@ -854,6 +854,9 @@
        if(id.length<2||(!fault&&statusValue!=='RETURNED'))
          return status('Thiết bị cần mã và nội dung hạn chế; phục hồi cần mã thiết bị.',true);
        const previous=state.issues.find(x=>x.equipment_id===id&&x.service_date===day);
+       const chosen=page.querySelector('[data-v329-issue-picker]')?.value||'';
+       if(previous&&chosen!==id)
+         return status('GSE '+id+' đã có dữ liệu lưu. Hãy chọn mã này ở mục Chỉnh sửa thiết bị đã báo để tránh ghi đè nhầm nội dung cũ.',true);
        issue={service_date:day,equipment_id:id,equipment_group:previous?.equipment_group||'OTHERS',
          issue_status:statusValue,fault:fault||previous?.fault||'Thiết bị đã phục hồi',
          impact,workaround,expected_return:expected,
