@@ -1,3 +1,15 @@
+## V3.31 — Xuất biểu đồ Peak Hours sắc nét (HDSD)
+
+Khi xem hoặc xuất **Báo cáo điều hành D+1 → PHÂN BỔ LƯỢT BAY THEO GIỜ (STA / STD) → PEAK HOURS · 24 GIỜ**:
+
+- **Trên màn hình:** biểu đồ vẫn hiển thị theo đúng nguồn và 4 nhóm màu hiện tại, không thay đổi số liệu/trục giờ.
+- **XUẤT WORD:** dùng SVG gốc với tỷ lệ hình `1120 × 405` để tạo ảnh PNG `3360 × 1215` (3 lần độ phân giải). Không ép chiều cao biểu đồ vào khung 165 px như trước; cột, chữ, các nhãn trục và chú giải giữ đúng tỷ lệ.
+- **XUẤT PDF:** trang báo cáo dùng kết xuất 3x A4 (1785 × 2526 px) thay cho 2x; biểu đồ được giữ đúng tỷ lệ và mã hóa ảnh chất lượng cao hơn. PDF có thể nặng hơn bản cũ, và số trang tùy nội dung thực tế.
+- **Cách dùng:** mở **BÁO CÁO → TẠO / CẬP NHẬT BẢN XEM TRƯỚC → XUẤT WORD hoặc XUẤT PDF**, sau đó mở file và phóng to biểu đồ để kiểm tra.
+- Không thay đổi cách tính Peak Hours, số chuyến, thứ tự màu, bố cục 10 nội dung báo cáo, các nguồn xác nhận hay quyền truy cập. Các hình ảnh không phải SVG tiếp tục sử dụng luồng xuất cũ.
+
+**Lưu ý kiểm thử:** kiểm tra cú pháp và xác minh SVG Peak Hours được nhận đúng tỷ lệ/kích thước bằng bài thử tự động. Chưa kiểm chứng trực quan trên Word/PDF thực tế ở từng thiết bị.
+
 ## V3.30 — Báo cáo điều hành dễ đọc hơn (HDSD)
 
 Bản V3.30 chỉ thay đổi **cách trình bày báo cáo**; không làm thay đổi dữ liệu nguồn, nghiệp vụ nhập/xác nhận, quyền truy cập, cách tính sản lượng, cao điểm, GSE hay booking.
