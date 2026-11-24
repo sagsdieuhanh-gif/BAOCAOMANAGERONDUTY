@@ -767,16 +767,20 @@
    }
    let issue=null,cargo=[],gseChanges=[];
    if(u==='KTS'){
-     const id=page.querySelector('[data-v300-issue="id"]')?.value.trim()||'';
-     const fault=page.querySelector('[data-v300-issue="fault"]')?.value.trim()||'';
-     const statusValue=page.querySelector('[data-v300-issue="status"]')?.value||'OUT_OF_SERVICE';
+     const field=k=>page.querySelector('[data-v300-issue="'+k+'"]')?.value.trim()||'';
+     const id=field('id'),fault=field('fault'),impact=field('impact'),
+       workaround=field('workaround'),expected=field('expected_return');
+     const statusValue=field('status')||'OUT_OF_SERVICE';
      if(id){
-       if(id.length<2||(!fault&&statusValue!=='RETURNED'))return status('Thiết bị cần mã và lý do hạn chế; phục hồi cần mã thiết bị.',true);
-       const previous=state.issues.find(x=>x.equipment_id===id);
+       if(id.length<2||(!fault&&statusValue!=='RETURNED'))
+         return status('Thiết bị cần mã và nội dung hạn chế; phục hồi cần mã thiết bị.',true);
+       const previous=state.issues.find(x=>x.equipment_id===id&&x.service_date===day);
        issue={service_date:day,equipment_id:id,equipment_group:previous?.equipment_group||'OTHERS',
          issue_status:statusValue,fault:fault||previous?.fault||'Thiết bị đã phục hồi',
-         impact:previous?.impact||'',workaround:previous?.workaround||'',
-         expected_return:previous?.expected_return||null,updated_by:user().id,updated_at:now};
+         impact,workaround,expected_return:expected,
+         updated_by:user().id,updated_at:now};
+     }else if(fault||impact||workaround||expected){
+       return status('GSE: cần nhập mã thiết bị trước khi xác nhận nội dung.',true);
      }
      for(const el of page.querySelectorAll('[data-v300-gse]')){
        const original=state.gse.find(x=>x.code===el.dataset.v300Gse),newValue=el.value.trim();
