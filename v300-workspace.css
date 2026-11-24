@@ -892,3 +892,17 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  #v300Root .v320-roster-grid{gap:10px}
  #v300Root #tab-admin .rnsResetQuick{margin:5px 0 0}
 }
+
+
+/* V3.27 – booking row deletion: explicit, accessible, no destructive bulk action. */
+#v300Root .v320-cargo-panel .v320-cargo-table{min-width:680px}
+#v300Root .v320-cargo-panel .v320-cargo-table th:last-child,
+#v300Root .v320-cargo-panel .v320-cargo-table td.v327-delete-cell{width:94px;text-align:center}
+#v300Root button.v327-delete-booking{font-size:11px;line-height:1.2;font-weight:800;color:#a62f38;background:#fff3f3;border:1px solid #efc5c7;border-radius:7px;padding:9px 10px;min-height:38px;white-space:nowrap}
+#v300Root button.v327-delete-booking:hover{color:#83252b;background:#ffe5e6;border-color:#dfa0a4}
+#v300Root button.v327-delete-booking:focus-visible{outline:2px solid #a62f38;outline-offset:2px}
+#v300Root button.v327-delete-booking:disabled{opacity:.48;cursor:wait}
+#v300Root .v327-orphan-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #e2e9ee}
+#v300Root .v327-orphan-row:last-child{border:0}
+#v300Root .v327-orphan-row>span{overflow-wrap:anywhere;font-size:13px}
+@media(max-width:700px){#v300Root .v327-orphan-row{align-items:flex-start;flex-direction:column;gap:6px}}
