@@ -118,7 +118,8 @@
   // sheet; the table heading is repeated and no confirmed text is discarded.
   async function renderPdfPages(blocks,options={}){
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất PDF.');
-    const compact=options.compactReport===true,density=compact?(options.density??1):1;
+    const compact=options.compactReport===true,readable=options.readableReport===true,
+      density=compact&&!readable?(options.density??1):1;
     const {width:W,height:H,footer}=paper,M=compact?43:paper.margin;
     const bottom=H-M-footer,contentW=W-M*2,top=M+(compact?10:18);
     const pages=[];let canvas,ctx,y;
@@ -163,10 +164,10 @@
     function table(rows,hasHeader){
       if(!rows.length)return;
       const cols=Math.max(1,...rows.map(r=>r.length)),ratios=ratiosFor(rows,cols);
-      const widths=ratios.map(v=>v*contentW),pad=compact?4:7,
-        fs=compact?Math.max(14,Math.round(16*density)):16,
-        lh=compact?Math.max(17,Math.round(18*density)):21,
-        minHeight=compact?25:36;
+      const widths=ratios.map(v=>v*contentW),pad=compact?(readable?7:4):7,
+        fs=compact?Math.max(readable?19:14,Math.round((readable?19:16)*density)):16,
+        lh=compact?Math.max(readable?24:17,Math.round((readable?24:18)*density)):21,
+        minHeight=compact?(readable?32:25):36;
       const wrapRow=(row,isHead)=>{
         font(isHead?(compact?fs:17):fs,isHead);
         return Array.from({length:cols},(_,i)=>lines(ctx,String(row[i]??''),Math.max(24,widths[i]-pad*2)));
@@ -220,10 +221,10 @@
     for(const block of blocks){
       if(block.kind==='heading'){
         free(compact?25:46);
-        paragraph(block.text,{size:compact?(block.level<=2?21:block.level===3?18:16):(block.level<=2?25:block.level===3?21:19),
-          bold:true,color:'#145278',after:compact?8:14,heading:true});
+        paragraph(block.text,{size:compact?(readable?(block.level<=2?25:block.level===3?23:21):(block.level<=2?21:block.level===3?18:16)):(block.level<=2?25:block.level===3?21:19),
+          bold:true,color:'#145278',after:compact?(readable?12:8):14,heading:true});
       }else if(block.kind==='paragraph'){
-        paragraph(block.text,{size:compact?16:19,color:block.pending?'#B91C1C':'#273E52'});
+        paragraph(block.text,{size:compact?(readable?19:16):19,color:block.pending?'#B91C1C':'#273E52'});
       }else if(block.kind==='table'){
         table(block.rows,block.header);
       }else if(block.kind==='image'){
@@ -231,7 +232,7 @@
         const naturalW=Math.max(1,image.naturalWidth||image.width||1);
         const naturalH=Math.max(1,image.naturalHeight||image.height||1);
         const targetW=block.logo?(compact?105:150):contentW;
-        const targetH=Math.min(block.logo?(compact?65:190):(compact?190:480),Math.round(targetW*naturalH/naturalW));
+        const targetH=Math.min(block.logo?(compact?65:190):(compact?(readable?245:190):480),Math.round(targetW*naturalH/naturalW));
         free(targetH+(compact?7:18));ctx.drawImage(image,M,y,targetW,targetH);y+=targetH+(compact?6:16);
       }
     }
@@ -246,7 +247,7 @@
     // Aim for two readable A4 portrait pages without clipping any confirmed data.
     // Never force content into two pages at an unreadable font size.
     let canvases=await renderPdfPages(blocks,{...options,density:1});
-    if(options.compactReport&&canvases.length>2){
+    if(options.compactReport&&!options.readableReport&&canvases.length>2){
       for(const density of [.95,.9,.86]){
         const attempt=await renderPdfPages(blocks,{...options,density});
         canvases=attempt;
@@ -264,7 +265,7 @@
     const run=lines.map((line,i)=>'<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/></w:rPr>'+(i?'<w:br/>':'')+'<w:t xml:space="preserve">'+xml(line)+'</w:t></w:r>').join('');
     return '<w:p><w:pPr><w:spacing w:before="'+(compact?(breakBefore?75:14):(breakBefore?180:50))+'" w:after="'+(compact?25:90)+'"/></w:pPr>'+run+'</w:p>';
   }
-  function wordTable(rows,header,compact=false){
+  function wordTable(rows,header,compact=false,readable=false){
     if(!rows.length)return '';
     const cols=Math.max(1,...rows.map(x=>x.length));
     const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
@@ -274,20 +275,20 @@
     rows.forEach((r,ri)=>{
       table+='<w:tr>'+(Array.from({length:cols},(_,i)=>{
         const content=String(r[i]??''),isHead=header&&ri===0;
-        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="'+(compact?35:90)+'" w:type="dxa"/><w:left w:w="'+(compact?40:90)+'" w:type="dxa"/><w:right w:w="'+(compact?40:90)+'" w:type="dxa"/><w:bottom w:w="'+(compact?35:90)+'" w:type="dxa"/></w:tcMar></w:tcPr>';
-        return '<w:tc>'+cellPr+paragraph(content,{size:compact?15:17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B',compact})+'</w:tc>';
+        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/><w:left w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:right w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:bottom w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/></w:tcMar></w:tcPr>';
+        return '<w:tc>'+cellPr+paragraph(content,{size:compact?(readable?18:15):17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B',compact})+'</w:tc>';
       })).join('')+'</w:tr>';
     });
     return table+'</w:tbl>';
   }
   async function exportDocx(blocks,options={}){
-    const compact=options.compactReport===true;
+    const compact=options.compactReport===true,readable=options.readableReport===true;
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất Word.');
     let body='',images=[],rels='';
     for(const b of blocks){
-      if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:compact?(b.level<=2?23:b.level===3?19:17):(b.level<=2?29:b.level===3?24:21),color:'175478',breakBefore:true,compact});
-      else if(b.kind==='paragraph')body+=paragraph(b.text,{size:compact?16:20,color:b.pending?'B91C1C':'233B4D',compact});
-      else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact);
+      if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:compact?(readable?(b.level<=2?26:b.level===3?23:20):(b.level<=2?23:b.level===3?19:17)):(b.level<=2?29:b.level===3?24:21),color:'175478',breakBefore:true,compact});
+      else if(b.kind==='paragraph')body+=paragraph(b.text,{size:compact?(readable?19:16):20,color:b.pending?'B91C1C':'233B4D',compact});
+      else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact,readable);
       else if(b.kind==='image'){
         const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');
         canvas.width=Math.max(100,img.width||1152);canvas.height=Math.max(80,img.height||250);
@@ -333,7 +334,8 @@
   async function exportElement(el,format,filename,options={}){
     if(!el)throw Error('Không tìm thấy nội dung xem trước. Hãy chọn ngày và tải lịch bay.');
     const compactReport=el.classList?.contains('v322-two-page')===true;
-    const exportOptions={...options,compactReport};
+    const readableReport=el.classList?.contains('v330-readable')===true;
+    const exportOptions={...options,compactReport,readableReport};
     const blocks=blocksFromDOM(el,format==='pdf'?exportOptions:{});
     if(!blocks.length)throw Error('Báo cáo không có nội dung hợp lệ để xuất.');
     const blob=format==='docx'?await exportDocx(blocks,exportOptions):format==='pdf'?await exportPdf(blocks,exportOptions):null;
