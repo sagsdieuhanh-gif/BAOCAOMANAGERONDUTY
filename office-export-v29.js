@@ -107,10 +107,31 @@
     parts.push(bytes(trailer));
     return new Blob(parts,{type:'application/pdf'});
   }
+  // V3.31: SVG charts often have only viewBox (no intrinsic pixel width/height).
+  // Without explicit dimensions an <img> defaults to roughly 300x150, making
+  // Peak Hours blurry and stretched when inserted into DOCX/PDF.
+  function svgViewBox(svg){
+    const match=String(svg||'').match(/\bviewBox\s*=\s*["']([^"']+)["']/i);
+    if(!match)return null;
+    const values=match[1].trim().split(/[\s,]+/).map(Number);
+    if(values.length!==4||!values.every(Number.isFinite))return null;
+    const width=values[2],height=values[3];
+    return width>0&&height>0&&width<=6000&&height<=6000?{width,height}:null;
+  }
+  function sizeSvgForExport(svg){
+    const size=svgViewBox(svg);
+    if(!size)return svg;
+    return svg.replace(/<svg\b([^>]*)>/i,(tag,attrs)=>{
+      const additions=(!/\bwidth\s*=/i.test(attrs)?' width="'+size.width+'"':'')+
+        (!/\bheight\s*=/i.test(attrs)?' height="'+size.height+'"':'');
+      return tag.slice(0,-1)+additions+'>';
+    });
+  }
   async function svgImage(svg,src){
-    const url=src||'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    const svgText=svg?sizeSvgForExport(svg):'';
+    const url=src||'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgText);
     const image=new Image();
-    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Không tạo được hình Radar; kiểm tra dữ liệu biểu đồ.'));image.src=url;});
+    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('Không tạo được biểu đồ khi xuất Word/PDF.'));image.src=url;});
     return image;
   }
   // Lay out report content in portrait pages without shrinking the whole
@@ -119,14 +140,17 @@
   async function renderPdfPages(blocks,options={}){
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất PDF.');
     const compact=options.compactReport===true,readable=options.readableReport===true,
-      density=compact&&!readable?(options.density??1):1;
+      density=compact&&!readable?(options.density??1):1,
+      outputScale=readable?1.5:1; // 3x A4 raster for clear charts and labels
     const {width:W,height:H,footer}=paper,M=compact?43:paper.margin;
     const bottom=H-M-footer,contentW=W-M*2,top=M+(compact?10:18);
     const pages=[];let canvas,ctx,y;
     const font=(n,bold=false)=>{ctx.font=(bold?'700 ':'400 ')+n+'px Arial, "Times New Roman", sans-serif';};
     function newPage(){
-      canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+      canvas=document.createElement('canvas');
+      canvas.width=Math.round(W*outputScale);canvas.height=Math.round(H*outputScale);
       ctx=canvas.getContext('2d');if(!ctx)throw Error('Thiết bị không hỗ trợ tạo PDF.');
+      ctx.setTransform(outputScale,0,0,outputScale,0,0);
       ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
       ctx.fillStyle='#17536F';ctx.fillRect(M,29,contentW,4);
       y=top;pages.push(canvas);
@@ -229,10 +253,13 @@
         table(block.rows,block.header);
       }else if(block.kind==='image'){
         const image=await svgImage(block.svg,block.src);
-        const naturalW=Math.max(1,image.naturalWidth||image.width||1);
-        const naturalH=Math.max(1,image.naturalHeight||image.height||1);
+        const svgSize=block.svg?svgViewBox(block.svg):null;
+        const naturalW=Math.max(1,svgSize?.width||image.naturalWidth||image.width||1);
+        const naturalH=Math.max(1,svgSize?.height||image.naturalHeight||image.height||1);
         const targetW=block.logo?(compact?105:150):contentW;
-        const targetH=Math.min(block.logo?(compact?65:190):(compact?(readable?245:190):480),Math.round(targetW*naturalH/naturalW));
+        // Do not squash a 1120x405 Peak Hours chart into a 245px-high strip.
+        const targetH=Math.min(block.logo?(compact?65:190):(block.svg?480:(compact?(readable?245:190):480)),
+          Math.round(targetW*naturalH/naturalW));
         free(targetH+(compact?7:18));ctx.drawImage(image,M,y,targetW,targetH);y+=targetH+(compact?6:16);
       }
     }
@@ -255,7 +282,7 @@
       }
     }
     const jpegs=canvases.map(canvas=>({
-      bytes:toBytes(canvas.toDataURL('image/jpeg',.90)),
+      bytes:toBytes(canvas.toDataURL('image/jpeg',options.readableReport?.97:.90)),
       width:canvas.width,height:canvas.height
     }));
     return pdfFromJpegs(jpegs,{orientation:'portrait'});
@@ -291,12 +318,21 @@
       else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact,readable);
       else if(b.kind==='image'){
         const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');
-        canvas.width=Math.max(100,img.width||1152);canvas.height=Math.max(80,img.height||250);
+        const svgSize=b.svg?svgViewBox(b.svg):null;
+        const baseW=Math.max(1,svgSize?.width||img.naturalWidth||img.width||1152);
+        const baseH=Math.max(1,svgSize?.height||img.naturalHeight||img.height||250);
+        // Draw vector source at 3x native size before PNG encoding (e.g. 3360x1215).
+        const scale=b.svg?3:1;
+        canvas.width=Math.max(100,Math.min(4500,Math.round(baseW*scale)));
+        canvas.height=Math.max(80,Math.min(4500,Math.round(baseH*scale)));
         canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
         const png=toBytes(canvas.toDataURL('image/png')),id=images.length+1,relId='rId'+id;
         images.push(['word/media/chart'+id+'.png',png]);
         rels+='<Relationship Id="'+relId+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/chart'+id+'.png"/>';
-        const width=b.logo?(compact?90:118):(compact?720:820),height=Math.min(compact&&!b.logo?165:9999,Math.round(width*canvas.height/canvas.width)),cx=width*9525,cy=height*9525;
+        const width=b.logo?(compact?90:118):(compact?720:820);
+        const proportionalH=Math.round(width*baseH/baseW);
+        const height=b.svg?proportionalH:Math.min(compact&&!b.logo?165:9999,proportionalH);
+        const cx=width*9525,cy=height*9525;
         body+='<w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:docPr id="'+id+'" name="Radar '+id+'"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="Radar '+id+'"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+relId+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
       }
     }
