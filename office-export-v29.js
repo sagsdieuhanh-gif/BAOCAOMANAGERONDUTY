@@ -40,11 +40,12 @@
       // Without this case the old DOM walker dropped every box/column border.
       if(el.classList?.contains('v330-topic-block')){
         const read=selector=>[...el.querySelectorAll(selector)].map(inner).filter(Boolean).join('\n');
+        const readOne=selector=>{const node=el.querySelector(selector);return node?inner(node):'';};
         result.push({kind:'topic-frame',
-          title:inner(el.querySelector('.v330-topic-title')),
+          title:readOne('.v330-topic-title'),
           observation:read('.v330-observation .v330-topic-text'),
           action:read('.v330-action .v330-topic-text'),
-          owner:inner(el.querySelector('.v330-topic-owner'))
+          owner:readOne('.v330-topic-owner')
         });
         return;
       }
