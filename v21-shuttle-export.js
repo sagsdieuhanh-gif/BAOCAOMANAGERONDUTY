@@ -138,7 +138,7 @@
        const plan=model().suggestVehicles(total);
        if(plan){
          // The vehicle is a capacity suggestion, not proof that a coach is available.
-         const label='GỢI Ý XE: '+plan.short;
+         const label='GỢI Ý XE: '+plan.label;
          t(label,x+col-16,y+127,12,C.blue,true,'right',col-210);
        }
      }
