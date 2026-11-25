@@ -253,6 +253,102 @@
       }
       y+=compact?5:13;
     }
+    function topicFrame(b){
+      // V3.32: raster A4 renders the same bordered 2-column frame as Word/web.
+      // Overflow is paginated by line (never crop or silently truncate text).
+      const col=contentW/2,pad=12,border='#9DB4C1';
+      const titleFS=readable?21:18,bodyFS=readable?19:17,labelFS=readable?16:14,
+        ownerFS=readable?17:15;
+      const titleLH=Math.ceil(titleFS*1.28),bodyLH=Math.ceil(bodyFS*1.34),
+        ownerLH=Math.ceil(ownerFS*1.32),labelH=36;
+      font(titleFS,true);
+      const titleLines=lines(ctx,String(b.title||''),contentW-pad*2);
+      font(bodyFS);
+      const left=lines(ctx,String(b.observation||'CHỜ XÁC NHẬN'),col-pad*2);
+      const right=lines(ctx,String(b.action||'CHỜ XÁC NHẬN'),col-pad*2);
+      const total=Math.max(1,left.length,right.length);
+      font(ownerFS,true);
+      const ownerLines=b.owner?lines(ctx,String(b.owner),contentW-pad*2):[];
+      const ownerHeight=ownerLines.length?ownerLines.length*ownerLH+pad*2:0;
+      const headerHeight=Math.max(43,titleLines.length*titleLH+pad*2);
+      const headRoom=headerHeight+labelH+pad*2+bodyLH;
+      const stroke=(x,yy,w,h,color=border)=>{
+        ctx.strokeStyle=color;ctx.lineWidth=1.25;ctx.strokeRect(x,yy,w,h);
+      };
+      const fill=(x,yy,w,h,color)=>{
+        ctx.fillStyle=color;ctx.fillRect(x,yy,w,h);
+      };
+      const drawHeader=(continued=false)=>{
+        fill(M,y,contentW,headerHeight,'#194D6C');
+        stroke(M,y,contentW,headerHeight,'#194D6C');
+        font(titleFS,true);ctx.fillStyle='#fff';
+        titleLines.forEach((line,i)=>ctx.fillText(line,M+pad,y+pad+titleFS+i*titleLH));
+        if(continued){
+          // A repeated section title identifies fragments after an A4 page break.
+          ctx.fillStyle='#DBEBF3';
+        }
+        y+=headerHeight;
+        fill(M,y,col,labelH,'#E8F1F5');
+        fill(M+col,y,col,labelH,'#E8F1F5');
+        stroke(M,y,col,labelH);stroke(M+col,y,col,labelH);
+        font(labelFS,true);ctx.fillStyle='#194D6C';
+        ctx.fillText('NHẬN ĐỊNH TRỌNG TÂM',M+pad,y+labelH/2+labelFS/3);
+        ctx.fillText('PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ',M+col+pad,y+labelH/2+labelFS/3);
+        y+=labelH;
+      };
+      const drawBody=(offset,count)=>{
+        const h=Math.max(bodyLH+2*pad,count*bodyLH+2*pad);
+        fill(M,y,contentW,h,'#FFFFFF');
+        stroke(M,y,col,h);stroke(M+col,y,col,h);
+        font(bodyFS);
+        for(const [idx,arr] of [[0,left],[1,right]]){
+          const x=M+col*idx+pad;
+          arr.slice(offset,offset+count).forEach((line,k)=>{
+            ctx.fillStyle=/chờ xác nhận|chưa xác nhận/i.test(line)?'#B91C1C':'#253E50';
+            ctx.fillText(line,x,y+pad+bodyFS+k*bodyLH);
+          });
+        }
+        y+=h;
+      };
+      const drawOwner=()=>{
+        if(!ownerLines.length)return;
+        fill(M,y,contentW,ownerHeight,'#F4F8FA');
+        stroke(M,y,contentW,ownerHeight);
+        font(ownerFS,true);ctx.fillStyle='#365D72';
+        ownerLines.forEach((line,i)=>ctx.fillText(line,M+pad,y+pad+ownerFS+i*ownerLH));
+        y+=ownerHeight;
+      };
+      let offset=0;
+      while(offset<total){
+        // A complete topic is kept together whenever it fits on the page.
+        const fullHeight=headerHeight+labelH+total*bodyLH+pad*2+ownerHeight+12;
+        if(offset===0&&y+fullHeight>bottom&&fullHeight<bottom-top)newPage();
+        if(y+headRoom>bottom)newPage();
+        const available=bottom-y-headerHeight-labelH-pad*2;
+        let fit=Math.max(1,Math.floor(available/bodyLH));
+        let count=Math.min(total-offset,fit);
+        const remain=total-offset;
+        // Reserve the owner row on the last fragment if it fits in this sheet.
+        if(ownerHeight&&count===remain){
+          const withOwner=Math.floor((available-ownerHeight)/bodyLH);
+          if(withOwner>=remain)count=remain;
+          else if(withOwner>=1&&remain>1)count=Math.min(remain-1,withOwner);
+          else if(fullHeight<bottom-top&&offset===0){newPage();continue;}
+        }
+        drawHeader(offset>0);
+        drawBody(offset,count);
+        offset+=count;
+        if(offset===total){
+          if(ownerHeight&&y+ownerHeight>bottom){
+            // Do not draw outside A4. Repeat this topic heading on continuation.
+            newPage();drawHeader(true);
+          }
+          drawOwner();
+        }
+        if(offset<total)newPage();
+      }
+      y+=readable?13:7;
+    }
     newPage();
     for(const block of blocks){
       if(block.kind==='heading'){
@@ -263,6 +359,8 @@
         paragraph(block.text,{size:compact?(readable?19:16):19,color:block.pending?'#B91C1C':'#273E52'});
       }else if(block.kind==='table'){
         table(block.rows,block.header);
+      }else if(block.kind==='topic-frame'){
+        topicFrame(block);
       }else if(block.kind==='image'){
         const image=await svgImage(block.svg,block.src);
         const svgSize=block.svg?svgViewBox(block.svg):null;
