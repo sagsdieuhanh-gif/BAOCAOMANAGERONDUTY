@@ -36,6 +36,18 @@
       const tag=el.tagName;
       // PDF-only presentation filter. Never hide warnings from the on-screen report or DOCX.
       if(options.hidePendingWarnings&&el.classList?.contains('v27-inline-report-warning'))return;
+      // V3.32: preserve the full frame semantics of topics 01–10 in Word/PDF.
+      // Without this case the old DOM walker dropped every box/column border.
+      if(el.classList?.contains('v330-topic-block')){
+        const read=selector=>[...el.querySelectorAll(selector)].map(inner).filter(Boolean).join('\n');
+        result.push({kind:'topic-frame',
+          title:inner(el.querySelector('.v330-topic-title')),
+          observation:read('.v330-observation .v330-topic-text'),
+          action:read('.v330-action .v330-topic-text'),
+          owner:inner(el.querySelector('.v330-topic-owner'))
+        });
+        return;
+      }
       if(el.classList?.contains('r28-chart')){
         const svg=el.querySelector('svg');if(svg)result.push({kind:'image',svg:svg.outerHTML});return;
       }
@@ -308,6 +320,41 @@
     });
     return table+'</w:tbl>';
   }
+  function wordTopicFrame(b,compact=false,readable=false){
+    // Four rows: merged section title, two labelled columns, content, merged owner.
+    // Grid and cell borders are native Word table borders, not CSS-only decorations.
+    const width=compact?10600:14700,half=Math.floor(width/2);
+    const stroke='<w:top w:val="single" w:sz="8" w:color="92AAB9"/>'+
+      '<w:bottom w:val="single" w:sz="8" w:color="92AAB9"/>'+
+      '<w:insideH w:val="single" w:sz="8" w:color="92AAB9"/>'+
+      '<w:insideV w:val="single" w:sz="8" w:color="92AAB9"/>';
+    function cell(value,{merge=false,kind='body'}={}){
+      const fill=kind==='title'?'194D6C':kind==='label'?'E8F1F5':kind==='owner'?'F3F8FA':'FFFFFF';
+      const ink=kind==='title'?'FFFFFF':kind==='label'?'194D6C':kind==='owner'?'385C70':'243B4F';
+      const fs=kind==='title'?22:kind==='label'?17:kind==='owner'?17:(readable?20:18);
+      const sp=kind==='body'?110:80;
+      return '<w:tc><w:tcPr><w:tcW w:w="'+(merge?width:half)+'" w:type="dxa"/>'+
+        (merge?'<w:gridSpan w:val="2"/>':'')+'<w:shd w:fill="'+fill+'"/>'+
+        '<w:tcBorders><w:top w:val="single" w:sz="8" w:color="92AAB9"/>'+
+          '<w:bottom w:val="single" w:sz="8" w:color="92AAB9"/>'+
+          '<w:left w:val="single" w:sz="8" w:color="92AAB9"/>'+
+          '<w:right w:val="single" w:sz="8" w:color="92AAB9"/></w:tcBorders>'+
+        '<w:tcMar><w:top w:w="'+sp+'" w:type="dxa"/>'+
+          '<w:bottom w:w="'+sp+'" w:type="dxa"/>'+
+          '<w:left w:w="125" w:type="dxa"/><w:right w:w="125" w:type="dxa"/></w:tcMar></w:tcPr>'+
+        paragraph(value,{bold:kind!=='body',size:fs,color:ink,compact})+'</w:tc>';
+    }
+    const row=(cells,keep=true)=>'<w:tr>'+(keep?'<w:trPr><w:cantSplit/></w:trPr>':'')+cells.join('')+'</w:tr>';
+    return '<w:tbl><w:tblPr><w:tblW w:w="'+width+'" w:type="dxa"/>'+
+      '<w:tblBorders>'+stroke+'</w:tblBorders></w:tblPr>'+
+      '<w:tblGrid><w:gridCol w:w="'+half+'"/><w:gridCol w:w="'+(width-half)+'"/></w:tblGrid>'+
+      row([cell(b.title||'',{merge:true,kind:'title'})])+
+      row([cell('NHẬN ĐỊNH TRỌNG TÂM',{kind:'label'}),
+           cell('PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ',{kind:'label'})])+
+      row([cell(b.observation||'CHỜ XÁC NHẬN'),cell(b.action||'CHỜ XÁC NHẬN')],false)+
+      (b.owner?row([cell(b.owner,{merge:true,kind:'owner'})]):'')+
+      '</w:tbl>'+paragraph('',{size:7,compact});
+  }
   async function exportDocx(blocks,options={}){
     const compact=options.compactReport===true,readable=options.readableReport===true;
     if(!blocks.length)throw Error('Báo cáo đang trống, chưa thể xuất Word.');
@@ -316,6 +363,7 @@
       if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:compact?(readable?(b.level<=2?26:b.level===3?23:20):(b.level<=2?23:b.level===3?19:17)):(b.level<=2?29:b.level===3?24:21),color:'175478',breakBefore:true,compact});
       else if(b.kind==='paragraph')body+=paragraph(b.text,{size:compact?(readable?19:16):20,color:b.pending?'B91C1C':'233B4D',compact});
       else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact,readable);
+      else if(b.kind==='topic-frame')body+=wordTopicFrame(b,compact,readable);
       else if(b.kind==='image'){
         const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');
         const svgSize=b.svg?svgViewBox(b.svg):null;
