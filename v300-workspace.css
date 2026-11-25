@@ -1077,3 +1077,86 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
  .v19-report-sheet.v322-two-page.v330-readable table{font-size:9.5pt}
  .v19-report-sheet.v330-readable .v330-topic-block{break-inside:auto;page-break-inside:auto}
 }
+
+
+/* V3.32 · 10 framed executive topics follow the same visible grid system as tables III–IV. */
+.v19-report-sheet.v330-readable .v330-topic-list{gap:12px}
+.v19-report-sheet.v330-readable .v330-topic-block{
+  border:1.5px solid #94adbd;
+  border-radius:3px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:none
+}
+.v19-report-sheet.v330-readable .v330-topic-title{
+  background:#194d6c;
+  color:#fff;
+  padding:10px 13px;
+  border-bottom:1px solid #94adbd;
+  font-size:14px!important
+}
+.v19-report-sheet.v330-readable .v330-topic-number{
+  border-radius:2px;
+  background:#fff;
+  color:#194d6c;
+  border:1px solid #bfd0dc;
+  min-width:33px;
+  font-weight:850
+}
+.v19-report-sheet.v330-readable .v330-topic-columns{
+  border-bottom:1px solid #94adbd;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)
+}
+.v19-report-sheet.v330-readable .v330-topic-column{padding:0;min-width:0}
+.v19-report-sheet.v330-readable .v330-topic-column+.v330-topic-column{
+  border-left:1px solid #94adbd
+}
+.v19-report-sheet.v330-readable .v330-topic-label{
+  background:#e8f1f5;
+  color:#194d6c;
+  font-size:11px!important;
+  font-weight:850;
+  margin:0!important;
+  padding:9px 12px;
+  border-bottom:1px solid #b2c5d0
+}
+.v19-report-sheet.v330-readable .v330-topic-text{
+  padding:0 12px;
+  margin:10px 0!important;
+  line-height:1.54
+}
+.v19-report-sheet.v330-readable .v330-topic-evidence{
+  margin:9px 12px!important;
+  padding:9px 10px!important;
+  background:#f4f9fa;
+  border-left:3px solid #76a7b1;
+  border-radius:0
+}
+.v19-report-sheet.v330-readable .v330-topic-owner{
+  margin:0!important;
+  border:0;
+  background:#f1f6f9;
+  padding:8px 12px;
+  font-size:12px!important;
+  color:#365b70
+}
+@media(max-width:760px){
+ .v19-report-sheet.v330-readable .v330-topic-columns{grid-template-columns:minmax(0,1fr)}
+ .v19-report-sheet.v330-readable .v330-topic-column+.v330-topic-column{
+   border-left:0;border-top:1px solid #94adbd
+ }
+ .v19-report-sheet.v330-readable .v330-topic-title{padding:10px 12px}
+}
+@media print{
+ .v19-report-sheet.v330-readable .v330-topic-block{
+   border:1px solid #7c92a1;
+   border-radius:0;box-shadow:none
+ }
+ .v19-report-sheet.v330-readable .v330-topic-title{
+   print-color-adjust:exact;-webkit-print-color-adjust:exact;
+   background:#194d6c!important;color:#fff!important
+ }
+ .v19-report-sheet.v330-readable .v330-topic-label{
+   print-color-adjust:exact;-webkit-print-color-adjust:exact
+ }
+}
