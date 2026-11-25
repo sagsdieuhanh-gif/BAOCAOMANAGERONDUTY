@@ -57,19 +57,7 @@
    }).catch(e=>{logoPromise=null;throw e});
    return logoPromise;
  }
- let vehiclePromise=null;
- function loadVehicleIcons(){
-   if(vehiclePromise)return vehiclePromise;
-   const get=src=>new Promise(resolve=>{
-     const image=new Image();
-     image.onload=()=>resolve(image.naturalWidth?image:null);
-     image.onerror=()=>resolve(null);
-     image.src=src;
-   });
-   vehiclePromise=Promise.all([get('./assets/shuttle-29.webp'),get('./assets/shuttle-45.webp')]).then(([small,big])=>({small,big}));
-   return vehiclePromise;
- }
- function draw(input,logo,vehicles={}){
+ function draw(input,logo){
    if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
    const rows=input.rows||[];
    const go=rows.filter(x=>x.direction==='NHA_CXR');
@@ -187,8 +175,8 @@
    buttons.forEach(b=>b.disabled=true);
    if(status)status.textContent='Đang tạo '+type.toUpperCase()+'…';
    try{
-     const [data,logo,vehicles]=await Promise.all([fetchData(),loadLogo(),loadVehicleIcons()]);
-     const img=draw(data,logo,vehicles),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
+     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
+     const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){
        const blob=await new Promise((resolve,reject)=>{if(typeof img.toBlob!=='function')return reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.'));img.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png');});
        const url=URL.createObjectURL(blob);try{download(url,base+'.png');}finally{setTimeout(()=>URL.revokeObjectURL(url),15000);}
@@ -230,8 +218,8 @@
    const el=$('v21ShuttlePreview');if(!el)return;
    el.innerHTML='<p class="v21-report-loading">Đang tạo ảnh xem trước từ dữ liệu đã xác nhận…</p>';
    try{
-     const [data,logo,vehicles]=await Promise.all([fetchData(),loadLogo(),loadVehicleIcons()]);
-     const canvas=draw(data,logo,vehicles);
+     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
+     const canvas=draw(data,logo);
      const image=document.createElement('img');
      image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVHK, PVSĐ, QA & IT.';
      const blob=await new Promise((resolve,reject)=>{if(typeof canvas.toBlob!=='function')return reject(Error('Thiết bị không hỗ trợ ảnh PNG.'));canvas.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh xem trước.')),'image/png');});
