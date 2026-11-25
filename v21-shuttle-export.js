@@ -71,131 +71,97 @@
  }
  function draw(input,logo,vehicles={}){
    if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
-   const rows=input.rows||[],a=rows.filter(x=>x.direction==='NHA_CXR'),b=rows.filter(x=>x.direction==='CXR_NHA');
-   const max=Math.max(a.length,b.length);
+   const rows=input.rows||[];
+   const go=rows.filter(x=>x.direction==='NHA_CXR');
+   const back=rows.filter(x=>x.direction==='CXR_NHA');
+   const max=Math.max(go.length,back.length);
    if(max>65)throw Error('Quá nhiều mốc xe cho một ảnh, vui lòng kiểm tra các giờ bổ sung.');
-   const W=1420,outer=34,col=660,gap=30,cardH=158,step=169,startY=294;
-   const footY=startY+step*max+12,H=footY+190;
-   const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-   const c=canvas.getContext('2d');if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
-   const C={navy:'#173C56',blue:'#136D90',ink:'#203D53',muted:'#637D8D',line:'#D9E5EB',
-     soft:'#F0F6F9',green:'#18715B',red:'#A93740',orange:'#B16D26',pale:'#FFF5E6',white:'#FFFFFF'};
+   // V3.33: one glance / one row. No duplicated top suggestions, five-metric
+   // footer, 3-line legend, seat-surplus details or paragraph-long annotations.
+   const W=1300,outer=28,gap=20,col=(W-outer*2-gap)/2;
+   const top=194,cardH=135,step=145;
+   const bottom=top+max*step,H=bottom+61;
+   const canvas=document.createElement('canvas');
+   canvas.width=W;canvas.height=H;
+   const c=canvas.getContext('2d');
+   if(!c)throw Error('Thiết bị không hỗ trợ xuất ảnh.');
+   const C={navy:'#143C55',blue:'#15698B',ink:'#213C50',muted:'#658192',
+     line:'#CBDDE7',soft:'#EEF5F8',green:'#147458',red:'#A7333F',
+     orange:'#AD6622',pale:'#FFF6E8',white:'#FFFFFF'};
    const shape=(x,y,w,h,r,fill,stroke)=>{
-     c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);
-     c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-     c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
-     if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=1;c.stroke();}
+     c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);
+     c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);
+     c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);
+     c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);
+     c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+     if(fill){c.fillStyle=fill;c.fill();}
+     if(stroke){c.lineWidth=1.3;c.strokeStyle=stroke;c.stroke();}
    };
-   const t=(v,x,y,size=16,color=C.ink,bold=false,align='left',maxWidth)=>{
-     c.fillStyle=color;c.font=(bold?'700 ':'400 ')+size+'px Arial, sans-serif';c.textAlign=align;c.textBaseline='middle';
-     if(maxWidth)c.fillText(String(v??''),x,y,maxWidth);else c.fillText(String(v??''),x,y);
+   const t=(value,x,y,size=16,color=C.ink,bold=false,align='left',maxWidth)=>{
+     c.font=(bold?'700 ':'400 ')+size+'px Arial, sans-serif';
+     c.fillStyle=color;c.textAlign=align;c.textBaseline='middle';
+     if(maxWidth)c.fillText(String(value??''),x,y,maxWidth);
+     else c.fillText(String(value??''),x,y);
      c.textAlign='left';
    };
-   const line=(x,y,w,color=C.line)=>{c.beginPath();c.strokeStyle=color;c.lineWidth=1;c.moveTo(x,y);c.lineTo(w,y);c.stroke();};
+   const rule=(x,y,x2)=>{c.beginPath();c.strokeStyle=C.line;c.lineWidth=1;c.moveTo(x,y);c.lineTo(x2,y);c.stroke();};
    const day=input.date?input.date.slice(8,10)+'/'+input.date.slice(5,7)+'/'+input.date.slice(0,4):'—';
-   c.fillStyle='#F4F8FA';c.fillRect(0,0,W,H);
-   shape(18,18,W-36,H-36,18,C.white,'#D9E4EB');
-   shape(18,18,W-36,7,4,C.blue);
-   const ratio=Math.min(90/logo.naturalWidth,87/logo.naturalHeight);
-   c.drawImage(logo,54+(90-logo.naturalWidth*ratio)/2,41+(87-logo.naturalHeight*ratio)/2,logo.naturalWidth*ratio,logo.naturalHeight*ratio);
-   t('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH',166,52,17,C.blue,true);
-   t('BẢNG TỔNG HỢP XE GIAO CA',166,89,32,C.navy,true);
-   t('04 đơn vị: ĐH · PVHK · PVSĐ · QA & IT',166,125,16,C.muted);
-   shape(1139,44,232,95,11,C.soft);
-   t('NGÀY KHAI THÁC',1255,70,14,C.muted,true,'center');
-   t(day,1255,110,26,C.navy,true,'center');
-   line(48,157,1374);
-   // Show only REAL headcounts from this service day: never put a generic
-   // 20-person/29-seat example above a 40+ person departure in the export.
-   // Largest occupied slots appear first in the compact preview strip;
-   // each departure's own card below also contains its individual proposal.
-   const highlights=rows.filter(r=>r.confirmed>0&&Number.isSafeInteger(Number(r.total)))
-     .sort((x,y)=>y.total-x.total||model().compareSlots(x,y)).slice(0,4);
-   shape(outer,164,W-outer*2,57,11,'#E6F7F1','#9ED8CB');
-   t('GỢI Ý XE',outer+14,181,16,C.green,true);
-   t('THEO GIỜ',outer+14,204,15,C.navy,true);
-   if(!highlights.length){
-     t('Chưa nhập số người — hình xe chỉ hiện sau khi có quân số từng giờ.',
-       outer+230,193,16,C.muted,true);
-   }
-   highlights.forEach((v,i)=>{
-     const px=outer+213+i*278,plan=model().suggestVehicles(v.total);
-     if(!plan)return;
-     shape(px,169,267,47,8,C.white,'#D0E8E4');
-     const hour=model().clock(v.departure_min);
-     t(hour+' · '+v.total+' NGƯỜI',px+9,181,12,C.navy,true);
-     plan.units.forEach((entry,j)=>{
-       const bus=entry.seats===45?vehicles.big:vehicles.small;
-       const x=px+116+j*57;
-       if(bus?.naturalWidth)c.drawImage(bus,x+10,174,32,20);
-       if(entry.quantity>1)t('×'+entry.quantity,x+48,180,10,C.navy,true,'right');
-     });
-     t((v.confirmed===UNITS.length?'':'TẠM TÍNH · ')+plan.label,
-       px+9,203,12,v.confirmed===UNITS.length?C.green:C.orange,true,'left',248);
-   });
-   function heading(x,title,sub,count){
-     shape(x,228,col,51,10,C.soft);
-     shape(x,228,5,51,2,C.blue);
-     t(title,x+17,246,21,C.navy,true);
-     t(sub+' · '+count+' mốc',x+17,268,14,C.muted);
-   }
-   heading(outer,'NHA TRANG → CAM RANH','XE ĐI LÀM',a.length);
-   heading(outer+col+gap,'CAM RANH → NHA TRANG','XE VỀ',b.length);
+   c.fillStyle='#F1F6F9';c.fillRect(0,0,W,H);
+   shape(13,13,W-26,H-26,13,C.white,C.line);
+   shape(13,13,W-26,6,3,C.blue);
+   const logoRatio=Math.min(74/logo.naturalWidth,74/logo.naturalHeight);
+   c.drawImage(logo,outer+(74-logo.naturalWidth*logoRatio)/2,27+(74-logo.naturalHeight*logoRatio)/2,
+     logo.naturalWidth*logoRatio,logo.naturalHeight*logoRatio);
+   t('XE GIAO CA · SAGS CXR',outer+96,53,31,C.navy,true);
+   t('Lịch xe và quân số các đơn vị',outer+96,92,16,C.muted);
+   shape(W-outer-245,28,245,73,9,C.soft,C.line);
+   t('NGÀY KHAI THÁC',W-outer-122,49,13,C.muted,true,'center');
+   t(day,W-outer-122,78,25,C.navy,true,'center');
+   rule(outer,116,W-outer);
+   const header=(x,title,sub,count)=>{
+     shape(x,130,col,49,7,C.soft,C.line);
+     shape(x,130,5,49,2,C.blue);
+     t(title,x+18,147,19,C.navy,true);
+     t(sub+' · '+count+' mốc',x+18,167,13,C.muted);
+   };
+   header(outer,'NHA TRANG → CAM RANH','XE ĐI LÀM',go.length);
+   header(outer+col+gap,'CAM RANH → NHA TRANG','XE VỀ',back.length);
    function card(v,x,y){
-     const special=v.is_custom||v.line_no>0,complete=v.confirmed===UNITS.length;
-     const total=Number(v.total)||0;
-     shape(x,y,col,cardH,11,special?C.pale:C.white,special?'#D6AC73':C.line);
-     shape(x,y,5,cardH,2,special?C.orange:complete?C.green:C.blue);
-     t(model().clock(v.departure_min),x+18,y+30,29,C.navy,true);
-     if(model().isNextDay(v.departure_min))
-       t('NGÀY HÔM SAU',x+18,y+57,12,C.orange,true);
-     if(special){shape(x+151,y+14,96,28,10,'#FCE4C0');t(v.line_no>0?'BỔ SUNG':'GIỜ THÊM',x+199,y+29,12,C.orange,true,'center');}
-     const plan=v.confirmed>0?model().suggestVehicles(total):null;
-     if(plan?.units.length){
-       const start=x+col-(plan.units.length>1?285:260);
-       plan.units.forEach((entry,i)=>{
-         const image=entry.seats===45?vehicles.big:vehicles.small;
-         const ix=start+i*93;
-         if(image?.naturalWidth)c.drawImage(image,ix,y+13,70,43);
-         if(entry.quantity>1)t('×'+entry.quantity,ix+71,y+23,13,C.navy,true,'right');
-       });
-     }
-     t(String(total),x+col-26,y+35,53,complete?C.navy:C.orange,true,'right');
-     t(complete?'TỔNG SỐ NGƯỜI':'NGƯỜI · TẠM TÍNH',x+col-26,y+67,12,complete?C.green:C.orange,true,'right');
-     line(x+18,y+74,x+col-18,'#E0E9EE');
-     const bandW=(col-40)/4;
+     const total=Number(v.total)||0,any=v.confirmed>0,complete=v.confirmed===UNITS.length;
+     const extra=!!(v.is_custom||Number(v.line_no||0)>0);
+     shape(x,y,col,cardH,8,extra?C.pale:C.white,extra?'#D8B17D':C.line);
+     shape(x,y,5,cardH,2,extra?C.orange:complete?C.green:C.blue);
+     // Biggest visual anchors: bus time and confirmed/partial headcount.
+     t(model().clock(v.departure_min),x+18,y+31,31,C.navy,true);
+     if(extra)t('GIỜ BỔ SUNG',x+181,y+29,12,C.orange,true);
+     t(any?String(total):'—',x+col-18,y+30,40,complete?C.navy:any?C.orange:C.muted,true,'right');
+     t(any?'NGƯỜI':'CHƯA NHẬP',x+col-18,y+59,12,any?C.muted:C.red,true,'right');
+     rule(x+16,y+67,x+col-16);
+     // Four unit figures are operational inputs, not four separate paragraphs.
+     const band=(col-32)/4;
      for(let i=0;i<4;i++){
-       const unit=v.units[i],ux=x+20+i*bandW;
-       if(i){c.beginPath();c.strokeStyle='#E5EDF1';c.lineWidth=1;c.moveTo(ux-9,y+81);c.lineTo(ux-9,y+117);c.stroke();}
-       t(UNIT_LABELS[i],ux,y+87,12,C.muted,true);
-       t(unit?String(unit.quantity):'—',ux,y+110,24,unit?C.ink:'#AAB8C1',!!unit);
+       const unit=v.units[i],ux=x+16+i*band;
+       t(UNIT_LABELS[i],ux,y+82,12,C.muted,true);
+       t(unit?String(unit.quantity):'—',ux,y+108,24,unit?C.ink:C.muted,!!unit);
      }
-     if(v.missing?.length){
-       t('CHƯA XÁC NHẬN: '+v.missing.join(', '),x+19,y+131,12,C.red,true,'left',col-220);
-     }else t('Đã đủ 4 đơn vị xác nhận',x+19,y+131,12,C.green,true);
-     if(plan){
-       t((complete?'GỢI Ý: ':'TẠM TÍNH: ')+plan.label,
-         x+col-16,y+128,13,complete?C.blue:C.orange,true,'right',270);
-       if(plan.count)t(plan.details,x+col-16,y+146,12,C.muted,false,'right',230);
-     }
-     if(special){
-       t('LÝ DO THÊM XE: '+(v.note||'Chưa ghi lý do'),x+19,y+148,12,C.orange,true,'left',col-40);
+     const status=complete?'ĐỦ 4/4 ĐƠN VỊ':any?'TẠM TÍNH '+v.confirmed+'/4':'CHỜ 4 ĐƠN VỊ';
+     t(status,x+16,y+127,12,complete?C.green:any?C.orange:C.red,true);
+     if(any){
+       const plan=model().suggestVehicles(total);
+       if(plan){
+         // The vehicle is a capacity suggestion, not proof that a coach is available.
+         const label='GỢI Ý XE: '+plan.short;
+         t(label,x+col-16,y+127,12,C.blue,true,'right',col-210);
+       }
      }
    }
-   a.forEach((v,i)=>card(v,outer,startY+i*step));
-   b.forEach((v,i)=>card(v,outer+col+gap,startY+i*step));
-   const confirmed=rows.filter(x=>x.confirmed===4).length,custom=rows.filter(x=>x.is_custom||x.line_no>0).length;
-   const overload=rows.filter(x=>x.confirmed===4&&x.total>45).length;
-   shape(outer,footY,W-outer*2,84,11,C.soft);
-   const stats=[['TỔNG MỐC XE',rows.length],['ĐỦ 4/4 ĐƠN VỊ',confirmed],['CHỜ XÁC NHẬN',rows.length-confirmed],['XE THÊM',custom],['TRÊN 45 NGƯỜI',overload]];
-   stats.forEach(([label,n],i)=>{
-     const x=outer+25+i*260;
-     t(label,x,footY+24,13,C.muted,true);
-     t(n,x,footY+58,29,i===4&&n?C.orange:C.navy,true);
-   });
-   t('TẠM TÍNH: dựa trên số người đã nhập. ĐỦ DỮ LIỆU: đã có 4/4 phòng xác nhận.',outer+10,footY+109,15,C.ink);
-   t('Giờ xe bổ sung có nền vàng. Xe ngày hôm sau có nhãn riêng. ĐH quyết định điều xe.',outer+10,footY+136,14,C.muted);
-   t('Hình ảnh và gợi ý chỉ là phương án sức chứa, không xác nhận xe khả dụng.',outer+10,footY+162,13,C.blue,true);
+   go.forEach((v,i)=>card(v,outer,top+i*step));
+   back.forEach((v,i)=>card(v,outer+col+gap,top+i*step));
+   const confirmed=rows.filter(x=>x.confirmed===UNITS.length).length;
+   rule(outer,bottom+4,W-outer);
+   t(rows.length+' MỐC XE  ·  '+confirmed+' ĐỦ XÁC NHẬN  ·  '+(rows.length-confirmed)+' CHỜ XÁC NHẬN',
+     outer,bottom+29,14,C.muted,true);
+   t('Gợi ý xe theo sức chứa; chưa xác nhận xe khả dụng.',W-outer,bottom+29,13,C.muted,false,'right');
    return canvas;
  }
  function download(url,filename){
