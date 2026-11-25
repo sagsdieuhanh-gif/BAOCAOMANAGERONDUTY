@@ -1,3 +1,29 @@
+## V3.33 — Ảnh xe giao ca tối giản, dễ đọc (HDSD)
+
+Bản cập nhật V3.33 chỉ tinh gọn **ảnh/PDF tổng hợp XE GIAO CA** và phần xem trước ảnh tương ứng. Không thay đổi giờ xe, số lượng nhân sự, dữ liệu nguồn, cách tính gợi ý sức chứa, phân quyền hoặc thông tin được lưu.
+
+### Nội dung ảnh mới
+
+- Tiêu đề ngắn **XE GIAO CA · SAGS CXR** và **ngày khai thác**.
+- **Hai cột tuyến xe:** NHA TRANG → CAM RANH (xe đi làm) và CAM RANH → NHA TRANG (xe về).
+- **Mỗi mốc xe:** giờ chạy (lớn, nổi bật), **tổng số người đã nhập**, quân số từng đơn vị **ĐH / PVHK / PVSĐ / QA & IT**, trạng thái **ĐỦ 4/4 ĐƠN VỊ / TẠM TÍNH x/4 / CHỜ 4 ĐƠN VỊ**, gợi ý xe theo sức chứa ngắn gọn khi có quân số. Giờ bổ sung có nhãn riêng.
+- Không đưa số **0 người** nếu chưa có đơn vị nào nhập; khi không có nguồn phải hiện **— / CHƯA NHẬP**. Với mốc chưa đủ 4 đơn vị, tổng số người và gợi ý xe vẫn ghi **TẠM TÍNH**, không tự kết luận số xe cần điều.
+- Dòng cuối chỉ còn số mốc, số đủ xác nhận, số chưa xác nhận và một câu lưu ý: **gợi ý xe không xác nhận xe khả dụng**.
+
+### Đã bỏ khỏi ảnh
+
+- Dải **GỢI Ý XE THEO GIỜ** lặp ở đầu ảnh.
+- Chi tiết **số ghế dư**, thống kê **trên 45 người**, bảng 5 chỉ số và 3 dòng chú thích dài ở cuối.
+- Hình xe trang trí không còn sử dụng để tránh tải tài nguyên thừa. Số lượng/loại xe vẫn xuất ở dạng chữ dễ đối chiếu.
+
+### Cách xuất
+
+Vào **XE GIAO CA** trong MANAGER ON DUTY, nhập/xác nhận quân số theo từng mốc như trước, sau đó dùng chức năng **XEM TRƯỚC / XUẤT ẢNH PNG / XUẤT PDF** hiện có. Cả xem trước, PNG và PDF sử dụng **cùng bản vẽ**, không có mẫu khác nhau.
+
+Giữ nguyên các mốc xe: **NHA→CXR 07:00, 17:30, 19:30; CXR→NHA 16:30, 18:30, 02:00, 08:15**. Mốc 08:15 hiển thị đúng **08:15**, không có dấu cộng.
+
+**Kiểm thử:** mô phỏng 7 mốc, đủ/thiếu xác nhận, quân số bằng 0, phân bổ 4 đơn vị, gợi ý xe và giờ chuẩn. Chưa xác minh trực quan trên thiết bị người dùng hoặc file PDF thực tế.
+
 ## V3.32 — Đưa 10 mục nhận định vào khung như các bảng phía dưới (HDSD)
 
 Từ **BÁO CÁO → TẠO / CẬP NHẬT BẢN XEM TRƯỚC**, phần **II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ** hiển thị **10 khung có viền** cho các nội dung 01–10.
