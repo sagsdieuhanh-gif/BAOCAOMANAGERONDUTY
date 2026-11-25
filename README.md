@@ -1,3 +1,15 @@
+## V3.32 — Đưa 10 mục nhận định vào khung như các bảng phía dưới (HDSD)
+
+Từ **BÁO CÁO → TẠO / CẬP NHẬT BẢN XEM TRƯỚC**, phần **II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ** hiển thị **10 khung có viền** cho các nội dung 01–10.
+
+- **Mỗi khung:** hàng đầu có số mục và tên nội dung; dưới đó là 2 ô **NHẬN ĐỊNH TRỌNG TÂM** và **PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ** với đường kẻ phân cách; cuối cùng là hàng **ĐƠN VỊ THỰC HIỆN** nếu có dữ liệu.
+- **Bản xem trước:** dùng màu tiêu đề, đường viền và cấu trúc ô đồng nhất với bảng ở các mục III–IV. Điện thoại tự xếp hai nội dung theo chiều dọc nhưng vẫn giữ đủ khung.
+- **XUẤT WORD:** 10 khung là các **bảng Word có đường viền thật**, tiêu đề và dòng đơn vị thực hiện là các ô gộp; không bị mất khung khi xuất.
+- **XUẤT PDF:** giữ đường kẻ từng ô, hàng tiêu đề, hàng đơn vị thực hiện; nếu nội dung dài, ngắt trang và nhắc lại tiêu đề/nhãn cột để bảo toàn toàn bộ chữ.
+- Không thay đổi bất kỳ dữ liệu, nhận định, phương án, số liệu sản lượng, biểu đồ Peak Hours, phân quyền hay tính toán nào. Không ghi/sửa dữ liệu ở Supabase.
+
+**Kiểm tra:** đã kiểm tra mô phỏng đủ 10 khung, trường hợp thiếu đơn vị thực hiện và một mục dài phải sang trang, không cắt nội dung. Chưa kiểm thử trực quan file PDF/Word xuất từ trình duyệt thực tế.
+
 ## V3.31 — Xuất biểu đồ Peak Hours sắc nét (HDSD)
 
 Khi xem hoặc xuất **Báo cáo điều hành D+1 → PHÂN BỔ LƯỢT BAY THEO GIỜ (STA / STD) → PEAK HOURS · 24 GIỜ**:
