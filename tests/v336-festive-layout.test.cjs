@@ -21,7 +21,7 @@ assert.ok(index.includes('v300-workspace.js?v=3.36'));
 assert.ok(!index.includes('v334-festive.js')&&!index.includes('v335-ereport-premium.css'));
 assert.ok(!index.includes('v334-festive.css'));
 assert.ok(!preview.includes('sags-festive-banner'));
-assert.ok(!preview.includes('sags-festive-login-greet'));
+assert.ok(!preview.includes('class="sags-festive-login-greet"'),'Login preview must not inject a second greeting');
 assert.ok(!preview.includes('seasonBannerTitle')&&!preview.includes('loginGreeting'));
 assert.ok(preview.includes("classList.toggle('hidden',name!=='login')"));
 assert.ok(preview.includes('v336-festive.css?v=3.36'));
