@@ -326,3 +326,7 @@ ADMIN mở QUẢN LÝ TÀI KHOẢN, chọn RESET MK 123456 ngay trên hàng củ
 
 ## V3.41 – Khôi phục đăng nhập
 Sửa kiểm thử lệch phiên bản để GitHub Pages đóng gói thư viện Supabase đầy đủ. Sau cập nhật, tải lại trang nếu trình duyệt còn lưu bản cũ. Chức năng reset của V3.40 giữ nguyên.
+
+
+## V3.42 – Đổi mật khẩu tạm ngay trong Manager
+Đăng nhập email/mật khẩu tạm → nhập mật khẩu mới (8–128 ký tự, khác mật khẩu tạm) và nhập lại → LƯU MẬT KHẨU MỚI. Hệ thống xác thực lại bằng mật khẩu mới rồi vào màn hình làm việc nếu có quyền Manager. Không cần mở RNS. Có thể chọn QUAY LẠI ĐĂNG NHẬP để hủy; cờ yêu cầu đổi mật khẩu chỉ được xóa khi máy chủ xác nhận đổi thành công.

@@ -1,3 +1,7 @@
+## V3.42 – Đổi mật khẩu ngay trên Manager
+
+Sau khi ADMIN reset hoặc tạo tài khoản, người dùng đăng nhập bằng mật khẩu tạm và đổi mật khẩu trực tiếp tại Manager. Dùng lại Edge Function sagscxr-rns-password xác thực phiên và xử lý cờ bắt buộc đổi mật khẩu. Sau khi lưu, đăng nhập bằng mật khẩu mới; phân quyền độc lập giữ nguyên. Không yêu cầu quyền RNS.
+
 ## V3.41 – Khắc phục tải thư viện đăng nhập
 
 Đồng bộ phiên bản ứng dụng, sidebar bên trái, tài nguyên cache và kiểm thử phát hành. Giữ chức năng RESET MK 123456 của V3.40. Thư viện Supabase UMD được đóng gói cục bộ trong GitHub Pages; không dùng CDN ngoài.

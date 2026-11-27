@@ -99,7 +99,7 @@
      return mark('rnsCreateStatus','Hãy kiểm tra địa chỉ email và đánh dấu xác nhận trước khi tạo.',true);
    if(!confirm('TẠO TÀI KHOẢN DÙNG CHUNG?\n\nEmail: '+email+'\nHọ tên: '+displayName+
      '\nManager: '+(managerAccess?roles[target]||target:'KHÔNG CẤP')+'\nRNS: '+(rnsAccess?rnsRole.toUpperCase():'KHÔNG CẤP')+
-     '\n\nMật khẩu tạm sẽ chỉ được hiển thị 1 lần; nhân viên phải đổi khi đăng nhập RNS lần đầu.'))return;
+     '\n\nMật khẩu tạm sẽ chỉ được hiển thị 1 lần; nhân viên phải đổi khi đăng nhập Manager hoặc RNS lần đầu.'))return;
    const button=$('rnsCreateButton');
    button.disabled=true;
    dismissSecret();
@@ -192,7 +192,7 @@
    if(!id||accountBusy)return;
    const u=accounts.find(a=>a.id===id);
    if(!u)return;
-   if(!confirm('RESET MẬT KHẨU VỀ 123456 cho '+u.email+'?\n\nMật khẩu cũ sẽ hết hiệu lực. Người dùng phải đổi mật khẩu ngay tại RNS. Quyền của cả hai ứng dụng giữ nguyên.'))return;
+   if(!confirm('RESET MẬT KHẨU VỀ 123456 cho '+u.email+'?\n\nMật khẩu cũ sẽ hết hiệu lực. Người dùng phải đổi mật khẩu ngay tại Manager. Quyền của cả hai ứng dụng giữ nguyên.'))return;
    const email=prompt('Nhập chính xác email tài khoản cần reset để xác nhận:', '');
    if(email===null)return;
    if(email.trim().toLowerCase()!==u.email.toLowerCase())return mark('rnsSharedStatus','Email xác nhận không khớp. Chưa reset.',true);
@@ -203,7 +203,7 @@
    try{
      const changed=await invoke('reset_password',{user_id:id,confirm:true,confirm_email:email.trim().toLowerCase()});
      if(changed.temporary_password!=='123456'||changed.must_change_password!==true)throw Error('Máy chủ chưa xác nhận reset 123456. Kiểm tra lại trước khi thao tác tiếp.');
-     const msg='Đã reset mật khẩu '+u.email+' về 123456. Phải đổi mật khẩu tại RNS; quyền giữ nguyên.';
+     const msg='Đã reset mật khẩu '+u.email+' về 123456. Phải đổi mật khẩu tại Manager; quyền giữ nguyên.';
      mark('rnsSharedStatus',msg);mark('rnsEditStatus',msg);
      if(typeof me!=='undefined'&&me?.id===id){
        alert(msg+' Bạn cần đăng nhập lại.');
