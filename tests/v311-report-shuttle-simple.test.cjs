@@ -21,7 +21,7 @@ assert.ok(!live.includes('GỢI Ý XE')&&!live.includes('v306-vehicle-showcase')
 assert.equal((live.match(/<th scope="col">/g)||[]).length,6);
 assert.ok(exp.normalize([phantom,valid],[]).every(r=>r.departure_min!==510));
 const exportText=fs.readFileSync('v21-shuttle-export.js','utf8');
-assert.ok(exportText.includes('70,43')&&exportText.includes('32,20'),'Pictograms must be compact in card and header');
+assert.ok(!exportText.includes('loadVehicleIcons')&&exportText.includes('cardH=135'),'Compact export omits decorative vehicle pictograms, retains legible cards');
 const migration=fs.readFileSync('server/v311-shuttle-0815-not-0830.sql','utf8');
 assert.ok(migration.includes('actual.quantity=phantom.quantity'),'Only exact duplicate rows may be deleted');
-console.log('PASS V3.11: report input streamlined, cargo batch, no bus advice, next-day 08:15 and smaller export icons');
+console.log('PASS V3.11: report input streamlined, cargo batch, no bus advice, next-day 08:15 and simplified icon-free export');
