@@ -1,3 +1,24 @@
+## V3.37 — Audit toàn dự án, sửa giao diện và kiểm thử bằng Chromium thật (HDSD)
+
+Bản V3.37 tiếp tục dùng 6 ảnh gốc E-Report Premium V1.4, **không thay đổi nghiệp vụ dữ liệu**, và thay thế các tài nguyên giao diện V3.36 bằng `v337-festive.css`, `v337-festive.js`. Chỉ khi toàn bộ kiểm thử và deploy đều đạt mới dùng bản phát hành mới.
+
+### Các lỗi sửa cụ thể
+1. **Trùng/khó đọc nội dung biểu mẫu:** V3.36 áp đặt `--v300-ink` trắng và `--v300-line` tối cho toàn bộ `#v300Root`, nhưng nhiều trang nghiệp vụ sử dụng card nền trắng. V3.37 giữ token chữ tối/đường viền sáng mặc định ở phần nhập liệu, chỉ dùng token chữ sáng ở **Tổng quan**. Dữ liệu ĐH, PVHK, PVSĐ, Kho, báo cáo và các ô nhập không bị chuyển thành trắng trên trắng.
+2. **Header tài khoản tràn màn hình:** Trên desktop vừa, tablet và điện thoại, tên nhân viên + phiên bản + nút đăng xuất + hai nút lễ hội làm rộng thanh header. V3.37 cho header tự xuống dòng, rút gọn chữ, giới hạn kích thước logo và hiển thị điều khiển theo độ rộng máy; không tự ép khung nghiệp vụ phóng to.
+3. **Xem mẫu ảnh xe không theo chế độ:** Khi người dùng chọn **GIAO DIỆN THƯỜNG**, chức năng **XEM MẪU ẢNH XE** trước đây vẫn ép chế độ Giáng sinh từ khung thời gian. V3.37 lấy `currentSeason()` thay vì `windowSeason()`, nên mẫu ảnh phản ánh chính xác chế độ đang bật. **XUẤT PNG/PDF** giữ dữ liệu thật và trạng thái đã xác nhận.
+4. **Trùng lớp cũ/mới:** `index.html` chỉ nạp **một** CSS và **một** JavaScript lễ hội V3.37. Không nạp V3.34/V3.35/V3.36 trong trang chính. Card đăng nhập dùng ảnh thật của E-Report, không chồng banner/lời chúc; Tổng quan có một hero, các form vẫn nguyên bố cục.
+
+### Xem và sử dụng
+- **Ứng dụng chính:** `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/`.
+- **Bản xem trước V3.37 (không cần đăng nhập):** `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/festive-preview-v337.html`. Chọn **ĐĂNG NHẬP / TRANG CHỦ / ẢNH XE GIAO CA** và **GIÁNG SINH / TẾT DƯƠNG LỊCH / GIAO DIỆN THƯỜNG**; số liệu ảnh xe chỉ là minh họa, không phải nguồn nghiệp vụ.
+- **Chế độ lễ hội tự động:** 27/11–26/12/2026: Giáng sinh. 27/12/2026–03/01/2027: Tết Dương lịch. Ngoài khoảng đó giao diện về bình thường.
+- Các nút **XUẤT PNG, PDF, Word** và dữ liệu đã lưu không bị thay đổi; người dùng vẫn nhận ảnh xe theo chế độ đang bật. Hệ thống không tự gửi Zalo.
+
+### Bảo đảm phát hành
+- CI GitHub Actions tiếp tục kiểm tra cú pháp và **38 bài regression nghiệp vụ/giao diện**. Bổ sung bài kiểm tra static V3.37 và test mở **Chromium thật** ở 4 kích thước: 1440×900, 768×1024, 390×844 và 320×640.
+- Test browser kiểm tra giao diện đăng nhập, header không chồng, card nằm trong bề ngang màn hình, hình/logo tải được, các tab Trang chủ/Ảnh xe, chuyển đổi giao diện thường/Tết Dương lịch, không tràn ngang và không lỗi JavaScript. Ảnh chụp QA được lưu vào artifact GitHub Actions `ui-regression-v337`.
+- Trong browser QA, truy cập Supabase bị chặn; test không đăng nhập hoặc truy cập dữ liệu sản xuất. Vì không có tài khoản nghiệp vụ kiểm thử, **không coi đây là kiểm chứng end-to-end trên dữ liệu thật**. Mọi cập nhật dữ liệu vẫn phải được đánh giá khi sử dụng thực tế.
+
 ## V3.36 — Sửa lỗi chồng lấn giao diện cũ/mới, đồng bộ E-Report Premium và triển khai Pages (HDSD)
 
 **Nguồn chuẩn:** E-REPORT-SAGS V1.4 Premium và sáu ảnh gốc lưu tại `assets/holiday/`, `assets/branding/`. V3.36 thay hoàn toàn lớp CSS/JS lễ hội V3.35 trong `index.html` bằng một lớp `v336-festive.css` + `v336-festive.js`; không chạy đồng thời controller V3.34/3.35.
