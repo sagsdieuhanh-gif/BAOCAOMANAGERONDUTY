@@ -297,3 +297,27 @@ html:not([data-sags-season]) :is(.sags-festive-login-greet,.sags-festive-banner)
 .sags-festive-preview-scroll{padding:14px;overflow:auto;background:#e7edf2}
 .sags-festive-preview-image{display:block;width:100%;height:auto;max-width:1300px;margin:auto}
 @media(max-width:767px){.sags-festive-preview-wrap{padding:8px}}
+
+/* Authentic E-REPORT premium banner identity. */
+html[data-sags-season] .sags-festive-banner-logo{
+ display:block;width:40px;height:34px;object-fit:contain;flex:0 0 auto;
+ padding:3px;border-radius:7px;background:#fff;
+}
+html[data-sags-season] .sags-festive-identity{
+ display:flex;align-items:center;justify-content:center;gap:10px;margin:0 auto 15px;
+ color:#fff;letter-spacing:.02em;
+}
+html[data-sags-season] .sags-festive-identity img{
+ display:block;width:48px;height:48px;object-fit:contain;background:#fff;
+ padding:4px;border-radius:8px;
+}
+html[data-sags-season] .sags-festive-identity b{
+ display:block;font-size:17px;text-align:left;color:#fff8e8;
+}
+html[data-sags-season] .sags-festive-identity small{
+ display:block;font-size:9px;text-align:left;color:#efd4a7;
+}
+@media(max-width:767px){
+ html[data-sags-season] .sags-festive-identity{display:none}
+ html[data-sags-season] .sags-festive-banner-logo{width:28px;height:27px}
+}
