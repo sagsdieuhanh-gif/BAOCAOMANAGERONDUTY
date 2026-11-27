@@ -346,3 +346,13 @@ html[data-sags-season] body.v300-ready .sags-festive-login-greet,
 html[data-sags-season] body:has(#authpanel.hidden) .sags-festive-login-greet {
  display:none!important
 }
+
+/* Logo and emblem now use the very same branding art as E-REPORT V1.4. */
+.sags-premium-emblem{display:none}
+html[data-sags-season] #v300Root .v300-emblem {
+ font-size:0!important;background:#fff!important;border-radius:10px!important;
+ width:46px;height:46px;padding:4px;
+}
+html[data-sags-season] #v300Root .sags-premium-emblem{
+ display:block;width:100%;height:100%;object-fit:contain;
+}
