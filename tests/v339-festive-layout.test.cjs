@@ -30,6 +30,9 @@ assert.ok(/body:has\(#authpanel:not\(\.hidden\)\):not\(\.v300-ready\)>header/.te
 assert.ok(css.includes('.sags-premium-login-brand{display:none}'));
 assert.ok(css.includes('--v300-ink:#162b40'),'Operational inputs keep dark-on-white text');
 assert.ok(css.includes('body.v300-ready>main.layout'),'Workspace outer layout has viewport-width override');
+assert.ok(css.includes('body.v300-ready>main.layout[hidden]'),'Fullscreen CSS respects the preview hidden attribute');
+assert.ok(css.includes("url('./assets/branding/apron-night-v6494.webp') center center/cover"),'Login artwork no longer contains old SAGS vehicle lettering');
+assert.ok(css.includes("url('./assets/holiday/banner.webp') right top/46% auto"),'Login retains E-Report Christmas greeting without a second HTML banner');
 assert.ok(css.includes('max-width:none!important'),'Old fixed 1680px cap removed');
 assert.ok(css.includes("url('./assets/holiday/banner.webp') right center"),'Home uses E-Report banner without old SAGS vehicle lettering');
 assert.ok(index.includes('./vendor/supabase.js?v=3.39'),'Login uses local pinned Supabase bundle, not external CDN');
