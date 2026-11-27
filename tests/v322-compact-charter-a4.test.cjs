@@ -4,11 +4,11 @@ const src=fs.readFileSync('v19-report.js','utf8'),editor=fs.readFileSync('v321-e
 const parser=fs.readFileSync('v217-second-forecast.js','utf8');
 const office=fs.readFileSync('office-export-v29.js','utf8');
 const index=fs.readFileSync('index.html','utf8');
-assert.ok(src.includes('v322-topic-table')&&src.includes('v322-peak-table')&&src.includes('v322-coord-table'));
+assert.ok(src.includes('v330-topic-block')&&src.includes('v322-peak-table')&&src.includes('v322-coord-table'),'Ten topics retain clear bordered cards and lower report tables');
 assert.ok(src.includes('v322-two-page'));
 assert.ok(!src.includes('v321-report-block'),'Ten tall cards must be replaced by compact table');
 assert.ok(src.includes('topicsTable=')&&src.includes('data.topics||[]'));
-assert.ok(src.includes("x.action+(x.owner?'\\nThực hiện: '+x.owner:'')"),'Word keeps action and responsible team');
+assert.ok(src.includes('v330-topic-owner')&&src.includes('v330-action'),'Topic action and responsible unit are shown in separate bounded cells');
 assert.ok(!editor.includes('const conflicting=deps'),'No Charter/Ferry conflict because of ##');
 assert.ok(editor.includes('Charter (##)')&&editor.includes('phục vụ bình thường'));
 assert.ok(!editor.includes('cần xác nhận loại hình'));
@@ -27,7 +27,7 @@ const draws=[];
 function canvas(){
  const ctx={
    font:'16px Arial',fillStyle:'#000',strokeStyle:'#000',lineWidth:1,
-   fillRect(){},strokeRect(){},drawImage(){},
+   fillRect(){},strokeRect(){},drawImage(){},setTransform(){},
    measureText(s){let sz=Number(this.font.match(/(\d+(?:\.\d+)?)px/)?.[1]||16);return {width:String(s).length*sz*.49}},
    fillText(s){draws.push(String(s))}
  };
