@@ -68,7 +68,8 @@ const dir=path.join(root,'tests','ui-artifacts');fs.mkdirSync(dir,{recursive:tru
        uiScripts:!!window.SagsFestiveThemeV337,logoLoaded:document.querySelector('#authpanel .sags-premium-login-brand img')?.naturalWidth>0,
        hasAuthInputs:!!document.getElementById('email')&&!!document.getElementById('password'),
        sdkLoaded:!!window.supabase?.createClient,
-       loginStatus:(document.getElementById('authErr')?.textContent||'').trim()
+       loginStatus:(document.getElementById('authErr')?.textContent||'').trim(),
+       loginBackdrop:getComputedStyle(document.querySelector('main.layout')).backgroundImage
      };
    });
    const problems=[];
@@ -78,6 +79,8 @@ const dir=path.join(root,'tests','ui-artifacts');fs.mkdirSync(dir,{recursive:tru
    if(real.loginBrand!==1||!real.logoLoaded)problems.push('Original SAGS login brand not loaded');
    if(!real.uiScripts||!real.hasAuthInputs)problems.push('Login core scripts or controls missing');
    if(!real.sdkLoaded)problems.push('Locally bundled Supabase auth library not loaded');
+   if(!real.loginBackdrop.includes('banner.webp')||!real.loginBackdrop.includes('apron-night-v6494.webp'))
+     problems.push('Login still uses old SAGS-labelled vehicle picture: '+real.loginBackdrop);
    if(/Không (kết nối|tải) được thư viện/.test(real.loginStatus))
     problems.push('Auth library load error visible: '+real.loginStatus);
    if(real.card.width<220||real.card.x<0||real.card.right>width+3)
@@ -151,9 +154,12 @@ const dir=path.join(root,'tests','ui-artifacts');fs.mkdirSync(dir,{recursive:tru
      hero:getComputedStyle(document.querySelector('#v300Root .sags-premium-hero')).display,
      loginShown:getComputedStyle(document.querySelector('body>header')).display==='none',
      cardColor:getComputedStyle(document.querySelector('#v300Root .v300-main')).color,
+     loginLayerHidden:getComputedStyle(document.querySelector('main.layout')).display==='none',
+     oldAuthHidden:getComputedStyle(document.getElementById('authpanel')).display==='none',
      overflow:document.documentElement.scrollWidth-window.innerWidth
    }));
-   if(!home.visible||home.hero==='none'||home.loginShown)problems.push('Home tab/hero/header wrong '+JSON.stringify(home));
+   if(!home.visible||home.hero==='none'||home.loginShown||!home.loginLayerHidden||!home.oldAuthHidden)
+     problems.push('Home tab/hero/header/login layer collision '+JSON.stringify(home));
    if(home.overflow>3)problems.push('Home horizontal overflow '+home.overflow);
    await page.screenshot({path:path.join(dir,label+'-home.png'),fullPage:true});
    await page.getByRole('button',{name:'ẢNH XE GIAO CA'}).click();
