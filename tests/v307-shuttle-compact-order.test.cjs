@@ -53,3 +53,10 @@ assert.ok(!partial.includes('v343-remove-shuttle'));
 const remaining=sample.filter(x=>x.departure_min!==660);
 assert.ok(!grid.assemble(remaining,[]).some(x=>x.departure_min===660));
 assert.ok(!exp.normalize(remaining,[]).some(x=>x.departure_min===660),'Deleted extra slot must disappear from image/PDF data');
+
+assert.equal(grid.hasDeleteData([{direction:dir,departure_min:660,line_no:0,quantity:0}],dir,660,0),true,'Confirmed zero also requires typed confirmation');
+assert.equal(grid.hasDeleteData([],dir,660,0),false);
+assert.equal(grid.hasDeleteData([{direction:dir,departure_min:660,line_no:2,quantity:5}],dir,660,0),true,'Parent deletion checks all children');
+assert.equal(grid.hasDeleteData([{direction:dir,departure_min:660,line_no:2,quantity:5}],dir,660,1),false);
+assert.equal(grid.validDeleteConfirmation(' xóa '),true);assert.equal(grid.validDeleteConfirmation(null),false);assert.equal(grid.validDeleteConfirmation('XOA'),false);
+assert.ok(ui.includes('p_confirmation:confirmation'));

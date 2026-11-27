@@ -334,3 +334,7 @@ Sửa kiểm thử lệch phiên bản để GitHub Pages đóng gói thư việ
 
 ## V3.43 – Xóa xe giao ca bổ sung
 ADMIN/ĐH chọn ngày khai thác, vào XE GIAO CA, bấm XÓA XE ngay dưới mốc bổ sung (không có nút ở giờ cố định). Lưu số liệu chưa lưu trước khi thao tác. Xác nhận xóa; hệ thống ghi nhật ký và loại mốc xe, số người liên quan khỏi dữ liệu xuất PNG/PDF. Không thể hoàn tác trực tiếp. Không xóa xe thực tế trong lần phát hành này.
+
+
+## V3.44 – Xác nhận xóa xe bổ sung có số liệu
+Bấm XÓA XE. Nếu đã có số liệu, hệ thống liệt kê đơn vị và số người, yêu cầu gõ XÓA. Nhập sai hoặc hủy không xóa. Số 0 đã xác nhận cũng là dữ liệu. Xe chưa có số liệu dùng xác nhận thông thường. Nếu có số liệu mới phát sinh, máy chủ từ chối xóa thiếu xác nhận và yêu cầu thao tác lại.

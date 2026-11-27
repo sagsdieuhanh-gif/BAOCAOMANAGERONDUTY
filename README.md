@@ -1,3 +1,7 @@
+## V3.44 – Xác nhận xóa xe đã có dữ liệu
+
+Khi ADMIN/ĐH xóa xe bổ sung đã có số liệu của bất kỳ đơn vị nào (kể cả số 0), phải nhập XÓA. Xe chưa có số liệu chỉ cần xác nhận thông thường. Máy chủ kiểm tra lại và từ chối nếu thiếu xác nhận; giữ nhật ký xóa và bảy giờ cố định. Bản này không tự xóa dữ liệu.
+
 ## V3.43 – Xóa xe giao ca bổ sung ngay trên bảng
 
 ADMIN và ĐH có nút XÓA XE ngay cạnh giờ bổ sung, xác nhận trước khi xóa dữ liệu của các đơn vị. RPC hiện hữu ghi nhật ký và bảo vệ bảy giờ cố định. Sau xóa, bảng, xem trước, PNG/PDF đều đọc lại dữ liệu đã lưu. Không thay đổi giao diện lễ hoặc định mức xe.

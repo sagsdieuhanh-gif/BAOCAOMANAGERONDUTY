@@ -325,6 +325,10 @@
    await refresh();
    message(wrap,'ĐÃ LƯU: '+work.upserts.length+' ô số người, '+work.deletes.length+' ô bỏ xác nhận, '+work.reasons.length+' lý do xe bổ sung (cả hai chiều xe).');
  }
+ function hasDeleteData(values,dir,minute,line){
+   return values.some(x=>x.direction===dir&&Number(x.departure_min)===Number(minute)&&(Number(line)===0||Number(x.line_no||0)===Number(line)));
+ }
+ function validDeleteConfirmation(value){return typeof value==='string'&&value.trim().normalize('NFC').toUpperCase()==='XÓA';}
  let busy=false;
  async function onClick(e){
    const b=e.target.closest('button');if(!b||busy)return;
@@ -344,13 +348,26 @@
        if(!assemble(rows,lines).some(x=>partKey(x)===b.dataset.v27Delete))throw Error('Xe bổ sung không còn tồn tại. Vui lòng tải lại.');
        const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
        if(!['ADMIN','DH'].includes(own))throw Error('Chỉ ĐH hoặc ADMIN được xóa xe đã thêm.');
-       const affected=rows.filter(x=>x.direction===dir&&x.departure_min===Number(min)&&(isMain||x.line_no===Number(line)));
-       const impacted=[...new Set(affected.map(x=>x.unit))];
-       if(!confirm('XÁC NHẬN XÓA '+label+'?\\nSẽ xóa số người đã nhập của '+impacted.length+' đơn vị ('+impacted.join(', ')+') và các dòng xe bổ sung liên quan. Hệ thống lưu nhật ký để truy xuất.\\nKhông thể hoàn tác trên màn hình.'))return;
+       const date=activeDate;
+       const affected=rows.filter(x=>x.direction===dir&&Number(x.departure_min)===Number(min)&&(isMain||Number(x.line_no||0)===Number(line)));
+       let confirmation=null;
+       if(hasDeleteData(rows,dir,min,line)){
+         const detail=affected.map(x=>x.unit+': '+x.quantity+' người').join(', ');
+         const typed=prompt('XÓA '+label+'?\nĐã có dữ liệu: '+detail+'.\nSẽ xóa cả số liệu liên quan khỏi bảng và ảnh. Không thể hoàn tác trực tiếp.\nNhập XÓA để xác nhận:','');
+         if(!validDeleteConfirmation(typed)){
+           message(wrap,'Đã hủy xóa: chưa nhập đúng XÓA.',true);return;
+         }
+         confirmation='XÓA';
+       }else if(!confirm('XÁC NHẬN XÓA '+label+'?\nChưa có số người xác nhận. Mốc xe sẽ biến mất khỏi bảng và ảnh xuất.'))return;
+       if(date!==$('day')?.value)throw Error('Ngày xe đã thay đổi. Vui lòng tải lại trước khi xóa.');
        const {error}=await sb.rpc('ops_remove_shuttle_addition',{
-         p_date:$('day').value,p_direction:dir,p_minute:Number(min),p_line:Number(line)
+         p_date:date,p_direction:dir,p_minute:Number(min),p_line:Number(line),p_confirmation:confirmation
        });
        if(error){
+         if(/SHUTTLE_DELETE_CONFIRMATION_REQUIRED/.test(error.message||'')){
+           await refresh();
+           throw Error('Xe đã có dữ liệu mới. Hãy bấm XÓA XE và nhập XÓA để xác nhận.');
+         }
          if(/ONLY_DH_ADMIN/.test(error.message||''))throw Error('Chỉ ĐH hoặc ADMIN được xóa các giờ xe bổ sung.');
          throw Error(error.message);
        }
@@ -423,5 +440,5 @@
  function setUnit(role){
    viewRole=role;mount();show();refresh();
  }
- root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,proposal,vehicleGuide,vehicleSuggestions,collectChanges,pendingDraft,makeGrid}};
+ root.SagsShuttleGridV24={setUnit,refresh,show,_test:{assemble,fieldOf,editable,classify,proposal,vehicleGuide,vehicleSuggestions,collectChanges,pendingDraft,makeGrid,hasDeleteData,validDeleteConfirmation}};
 })(typeof window!=='undefined'?window:globalThis);
