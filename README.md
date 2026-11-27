@@ -1,3 +1,26 @@
+## V3.36 — Sửa lỗi chồng lấn giao diện cũ/mới, đồng bộ E-Report Premium và triển khai Pages (HDSD)
+
+**Nguồn chuẩn:** E-REPORT-SAGS V1.4 Premium và sáu ảnh gốc lưu tại `assets/holiday/`, `assets/branding/`. V3.36 thay hoàn toàn lớp CSS/JS lễ hội V3.35 trong `index.html` bằng một lớp `v336-festive.css` + `v336-festive.js`; không chạy đồng thời controller V3.34/3.35.
+
+### Các lỗi được xử lý
+
+- **Lỗi chữ/ảnh trùng khi đăng nhập:** hình nền `assets/holiday/apron.webp` **đã chứa** lời chúc Merry Christmas & Happy New Year 2027; từ V3.36 không chèn thêm `sags-festive-login-greet` hay `sags-festive-banner`. Tắt header ứng dụng khi màn hình đăng nhập đang hiển thị, chỉ còn **một khối đăng nhập bên trái** và **ảnh nền E-Report bên phải**. Biểu tượng SAGS trong card login là ảnh thực, không chứa lời chúc lặp.
+- **Lỗi header nhiều tầng:** Sau đăng nhập, header hiện đúng một lần; không có banner lễ hội rời kéo dãn đầu trang. Trang **TỔNG QUAN** có một khối `sags-premium-hero` duy nhất với hình `apron-detail.webp`. Khi chuyển sang các module nghiệp vụ, phần trang trí được ẩn và các bảng/biểu mẫu gốc giữ độ tương phản.
+- **Lỗi chồng mode:** CSS hoạt động theo `html[data-sags-season]` và trạng thái `#authpanel.hidden` / `body.v300-ready`; chỉ một controller xử lý ngày mùa lễ hội, logo, nút bật/tắt. Tắt lễ hội sẽ loại bỏ CSS mùa lễ hội và ẩn logo phụ, trả lại trang nhập liệu gốc. Giảm chuyển động tuyết khi người dùng bật Reduce Motion.
+- **Lỗi preview:** Bản cũ có toolbar, dải ghi chú màu kem, header, banner và chữ chúc phủ ảnh. Bản V3.36 **bỏ dải ghi chú và banner**, dùng toolbar xem trước duy nhất, ẩn header ở trang đăng nhập, bỏ chữ chúc HTML phủ lên nội dung đã có sẵn trong ảnh. Khi chọn TRANG CHỦ/ẢNH XE, điều kiện `hidden` được cập nhật đúng theo tab nên CSS login không lọt sang workspace.
+- **Ảnh xe giao ca:** Bộ xuất PNG/PDF đọc controller V336, giữ hình sân đỗ E-Report, thẻ navy-champagne và dữ liệu theo 7 giờ xe; chuyển về ảnh V3.33 khi tắt lễ hội, không thay đổi quân số/giờ/nhóm đơn vị.
+- **Lỗi pipeline Pages:** cập nhật `.github/workflows/pages.yml` để chép đủ `assets/holiday/*`, `assets/branding/*` và **hai trang xem trước** vào artifact deploy. Kiểm thử CI phiên bản cũ được cập nhật để tránh khóa cứng mã `V3.26`.
+
+### Cách xem trước
+
+Mở trang **`https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/festive-preview-v336.html`**. Dùng thanh trên chọn **ĐĂNG NHẬP / TRANG CHỦ / ẢNH XE GIAO CA** và **GIÁNG SINH / TẾT DƯƠNG LỊCH / GIAO DIỆN THƯỜNG**. Trang xem trước **không kết nối Supabase, không yêu cầu đăng nhập và dùng dữ liệu minh họa**.
+
+Ứng dụng chính: **`https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/`**. Khi hiển thị **V3.36**, sử dụng nút **GIAO DIỆN THƯỜNG/BẬT GIAO DIỆN LỄ HỘI**; ảnh xuất xe giao ca dùng đúng chế độ đang bật.
+
+**Thời gian mặc định như E-Report:** Giáng sinh 27/11–26/12/2026; Năm mới 27/12/2026–03/01/2027; sau đó tự tắt.
+
+**Bảo toàn:** Không sửa Supabase, không gửi Zalo, không thay đổi nghiệp vụ tính xe, 7 mốc giờ, biểu mẫu hay số liệu báo cáo. Không tự kết luận dữ liệu chưa xác nhận.
+
 ## V3.35 — Đồng bộ giao diện lễ hội với E-Report Premium V1.4 (HDSD)
 
 V3.35 **thay thế giao diện Giáng sinh V3.34**, khắc phục tình trạng khác hẳn E-Report. **Nguồn tham chiếu trực tiếp:** repository `sagsdieuhanh-gif/E-REPORT-SAGS`, giao diện **V1.4 — CHRISTMAS & NEW YEAR PREMIUM** ngày 27/11/2026.
