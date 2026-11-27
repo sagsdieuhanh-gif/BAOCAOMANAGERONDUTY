@@ -1,5 +1,5 @@
 'use strict';
-/* V3.34: match E-REPORT-SAGS V1.2 seasonal window, palette and opt-out.
+/* V3.35: match E-REPORT-SAGS V1.4 PREMIUM seasonal window, palette and opt-out.
    This file only adds presentation; it never reads/writes operational records. */
 (function(root){
   const key='sags:mod:festive:2026';
@@ -29,18 +29,30 @@
       banner=el('div','sags-festive-banner');
       banner.id='sagsFestiveBannerV334';
       banner.setAttribute('aria-label','Lời chúc Giáng sinh và năm mới từ SAGS CXR');
-      banner.appendChild(el('span','sags-festive-spark','✦'));
+      const brandImg=el('img','sags-festive-banner-logo');
+      brandImg.src='./assets/branding/logo.png';
+      brandImg.alt='';brandImg.loading='lazy';
+      banner.appendChild(brandImg);
       banner.appendChild(el('strong','',title));
       banner.appendChild(el('span','',subtitle));
-      banner.appendChild(el('span','sags-festive-spark','✧'));
       header.insertAdjacentElement('afterend',banner);
     }
     if(banner)banner.hidden=!active();
+    const premiumGreeting=document.getElementById('sagsPremiumGreeting');
+    if(premiumGreeting)premiumGreeting.textContent=title;
     const login=document.getElementById('authpanel');
     if(login&&!document.getElementById('sagsFestiveLoginGreetV334')){
       const greet=el('div','sags-festive-login-greet');
       greet.id='sagsFestiveLoginGreetV334';
       greet.setAttribute('aria-hidden','true');
+      const identity=el('div','sags-festive-identity');
+      const logo=el('img','');
+      logo.src='./assets/branding/logo.png';logo.alt='';
+      const label=el('div','');
+      label.appendChild(el('b','','SAGS – CXR'));
+      label.appendChild(el('small','','SAI GON CAM RANH GROUND SERVICES'));
+      identity.append(logo,label);
+      greet.appendChild(identity);
       greet.appendChild(el('strong','',title));
       greet.appendChild(el('span','',subtitle));
       login.parentElement?.appendChild(greet);
