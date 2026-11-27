@@ -340,3 +340,9 @@ html[data-sags-season] .sags-festive-identity small{
   visibility:hidden!important;
  }
 }
+
+/* Prevent the login-only greeting from spilling onto the authenticated workspace. */
+html[data-sags-season] body.v300-ready .sags-festive-login-greet,
+html[data-sags-season] body:has(#authpanel.hidden) .sags-festive-login-greet {
+ display:none!important
+}
