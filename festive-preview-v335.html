@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,noarchive">
-<title>XEM TRƯỚC EREPORT PREMIUM · MANAGER ON DUTY V3.35</title>
+<title>XEM TRƯỚC EREPORT PREMIUM · MANAGER ON DUTY V3.36</title>
 <link rel="stylesheet" href="./v300-workspace.css?v=3.35">
-<link rel="stylesheet" href="./v335-ereport-premium.css?v=3.35">
+<link rel="stylesheet" href="./v336-festive.css?v=3.36">
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#061427;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:#203748}
@@ -40,7 +40,7 @@ body>header{
 #authpanel label{display:block;margin-top:14px;font-weight:700}
 #authpanel input{display:block;width:100%;margin:5px 0;border:1px solid #cbd9e4;border-radius:7px;padding:10px}
 #authpanel button{padding:11px 15px;margin-top:13px;cursor:not-allowed;border-radius:8px}
-.sags-festive-login-greet{pointer-events:none}
+.sags-premium-login-brand{display:flex}
 body.v300-ready #v300Root{display:block}
 #v300Root .v300-shell{min-height:calc(100vh - 165px)}
 #v300Root .v300-main{padding:25px clamp(14px,3vw,40px)}
@@ -66,6 +66,26 @@ body.v300-ready #v300Root{display:block}
  border:1px solid #c39a61;box-shadow:0 14px 45px #0009;border-radius:12px;
 }
 .preview-badge{display:inline-block;background:#fff0cb;color:#713d22;font-size:11px;font-weight:850;padding:5px 9px;border-radius:6px;margin-bottom:8px}
+.preview-toolbar-note{font-size:11px;opacity:.82}
+.preview-inline-note{font-size:10px;color:#d4c5a7;white-space:nowrap}
+body.preview-bus>header{display:none!important}
+html:not([data-sags-season]) body.preview-login main.layout{
+ display:flex;justify-content:center;align-items:center;min-height:calc(100svh - 75px);
+ padding:20px;background:#f2f5f8
+}
+html:not([data-sags-season]) body.preview-login #authpanel{
+ width:min(100%,438px);max-width:438px;background:#fff;border:1px solid #d5e0e8;
+ padding:26px;border-radius:16px;box-shadow:0 12px 35px #1234
+}
+html:not([data-sags-season]) .sags-premium-login-brand{
+ display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:16px
+}
+html:not([data-sags-season]) .sags-premium-login-brand img{width:40px;height:40px;object-fit:contain}
+html:not([data-sags-season]) .sags-premium-login-brand b{font-size:14px;color:#193c55}
+html:not([data-sags-season]) body.preview-login #authpanel h2{font-size:21px;color:#18374d;text-align:center}
+html:not([data-sags-season]) body.preview-login #authpanel label{color:#233e54}
+html:not([data-sags-season]) body.preview-login #authpanel #signin{background:#173d54;color:#fff}
+
 @media(max-width:768px){
  .preview-toolbar{position:relative;padding:11px}
  .preview-toolbar nav button{font-size:11px;padding:8px}
@@ -82,7 +102,7 @@ body.v300-ready #v300Root{display:block}
 </head>
 <body class="preview-login">
 <div class="preview-toolbar">
- <div><b>XEM TRƯỚC · E-REPORT PREMIUM V1.4 → MANAGER V3.35</b></div>
+ <div><b>XEM TRƯỚC · E-REPORT PREMIUM V1.4 → MANAGER V3.36</b><small class="preview-inline-note"> · KHÔNG ĐĂNG NHẬP / KHÔNG DỮ LIỆU THẬT</small></div>
  <nav aria-label="Chọn màn hình và mùa lễ hội">
   <button id="tabLogin" aria-pressed="true">ĐĂNG NHẬP</button>
   <button id="tabHome" aria-pressed="false">TRANG CHỦ</button>
@@ -92,25 +112,22 @@ body.v300-ready #v300Root{display:block}
   <button id="holidayNormal" aria-pressed="false">GIAO DIỆN THƯỜNG</button>
  </nav>
 </div>
-<p class="preview-explain">ĐÂY LÀ BẢN XEM TRƯỚC ĐỘC LẬP · KHÔNG ĐĂNG NHẬP · KHÔNG KẾT NỐI SUPABASE · SỐ LIỆU MINH HỌA</p>
+
 <header>
  <div class="v23-site-brand"><img src="./assets/branding/logo.png" alt="SAGS"><div><h1>MANAGER ON DUTY · SAGS CXR</h1><div class="v220-company-name">CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH</div></div></div>
- <div id="accountVersionRow"><span>CHẾ ĐỘ XEM TRƯỚC</span><b>V3.35</b></div>
+ <div id="accountVersionRow"><span>CHẾ ĐỘ XEM TRƯỚC</span><b>V3.36</b></div>
 </header>
-<div class="sags-festive-banner"><img class="sags-festive-banner-logo" src="./assets/branding/logo.png" alt=""><strong id="seasonBannerTitle">Merry Christmas</strong><span id="seasonBannerSub">& Happy New Year 2027</span></div>
+
 <main class="layout">
  <section id="authpanel" class="panel loginbox">
-  <h2>MANAGER ON DUTY · SAGS CXR</h2>
-  <p class="muted">Đăng nhập tài khoản SAGS. Đây là bản xem trước, biểu mẫu không xử lý tài khoản.</p>
+  <div class="sags-premium-login-brand"><img src="./assets/branding/logo.png" alt="Logo SAGS"><b>MANAGER ON DUTY · SAGS CXR</b></div>
+  <h2>Đăng nhập tài khoản SAGS</h2>
+  <p class="muted">Đây là bản xem trước giao diện, không tiếp nhận thông tin đăng nhập.</p>
   <label>Email<input type="email" placeholder="Email công ty" disabled></label>
   <label>Mật khẩu<input type="password" placeholder="Mật khẩu" disabled></label>
   <button id="signin" disabled>ĐĂNG NHẬP</button>
  </section>
- <div class="sags-festive-login-greet">
-  <div class="sags-festive-identity"><img src="./assets/branding/logo.png" alt=""><div><b>SAGS – CXR</b><small>SAI GON CAM RANH GROUND SERVICES</small></div></div>
-  <strong id="loginGreeting">Merry Christmas</strong>
-  <span id="loginGreetingSub">& Happy New Year 2027</span>
- </div>
+
 </main>
 <section id="v300Root" hidden>
  <div class="v300-shell">
@@ -124,7 +141,7 @@ body.v300-ready #v300Root{display:block}
      <button type="button" class="on"><span class="v300-nav-icon">▰</span><span><strong>Xe giao ca</strong><small>Ảnh và số người theo giờ</small></span></button>
      <button type="button"><span class="v300-nav-icon">▤</span><span><strong>Báo cáo điều hành</strong><small>Xuất Word và PDF</small></span></button>
    </nav>
-   <div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b>V3.35</b></div>
+   <div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b>V3.36</b></div>
   </aside>
   <div class="v300-main">
     <div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span><h1>Tổng quan ngày khai thác</h1><p>Thông tin phục vụ quyết định khai thác trong ngày tiếp theo.</p></div></div>
@@ -180,10 +197,13 @@ body.v300-ready #v300Root{display:block}
     $('tabLogin').setAttribute('aria-pressed',String(name==='login'));
     $('tabHome').setAttribute('aria-pressed',String(name==='home'));
     $('tabBus').setAttribute('aria-pressed',String(name==='bus'));
+    $('authpanel').classList.toggle('hidden',name!=='login');
     $('authpanel').parentElement.hidden=name!=='login';
     $('v300Root').hidden=name!=='home';
     $('previewShuttle').hidden=name!=='bus';
     document.body.classList.toggle('v300-ready',name==='home');
+    document.body.classList.toggle('preview-login',name==='login');
+    document.body.classList.toggle('preview-bus',name==='bus');
     if(name==='bus')renderShuttle();
   }
   function setSeason(kind){
@@ -198,10 +218,6 @@ body.v300-ready #v300Root{display:block}
     $('holidayNormal').setAttribute('aria-pressed',String(kind==='normal'));
     const title=kind==='newyear'?'Happy New Year 2027':'Merry Christmas';
     const sub=kind==='newyear'?'Chúc năm mới bình an · thành công':'& Happy New Year 2027';
-    $('seasonBannerTitle').textContent=title;
-    $('seasonBannerSub').textContent=sub;
-    $('loginGreeting').textContent=title;
-    $('loginGreetingSub').textContent=sub;
     $('heroGreeting').textContent=title;
     if(activeTab==='bus')renderShuttle();
   }
