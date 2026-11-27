@@ -113,6 +113,11 @@ html[data-sags-season-window] body>header .sags-festive-preview-button {
   display:block;max-width:100%;height:auto;margin:auto;
 }
 .sags-festive-preview-scroll{padding:13px;background:#e9f0f5;overflow:auto}
+@media(min-width:901px){
+ html[data-sags-season] body:not(.v300-ready) #authpanel.loginbox{
+   margin:50px 5% 20px auto!important;
+ }
+}
 @media(max-width:760px){
   html[data-sags-season] .sags-festive-banner{padding:7px 9px;gap:6px;font-size:10px}
   html[data-sags-season] .sags-festive-banner strong{font-size:16px}
