@@ -25,17 +25,17 @@ assert.ok(css.includes('@media(max-width:720px)'),'Phone layouts required');
 assert.ok(html.includes('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH'),'Full company title in header');
 assert.ok(logo.includes('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH'),'Management report branding');
 assert.ok(radar.includes('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH'),'Radar export branding');
-assert.ok(shuttle.includes('CÔNG TY CỔ PHẦN PHỤC VỤ MẶT ĐẤT SÀI GÒN CAM RANH'),'Shuttle PNG/PDF branding');
+assert.ok(shuttle.includes('XE GIAO CA · SAGS CXR')&&shuttle.includes('loadLogo()'),'Shuttle PNG/PDF use SAGS CXR title and original logo');
 for(const file of ['assets/logo-sags.png','assets/shuttle-29.webp','assets/shuttle-45.webp']){
  assert.ok(fs.statSync(file).size>1500,'Missing genuine image asset '+file);
 }
 for(const file of ['assets/shuttle-29.webp','assets/shuttle-45.webp']){
  const b=fs.readFileSync(file);assert.equal(b.subarray(0,4).toString(),'RIFF');assert.equal(b.subarray(8,12).toString(),'WEBP');
 }
-assert.ok(shuttle.includes("loadVehicleIcons()"),'Real vehicle photo needs to load for every export');
-assert.ok(shuttle.includes('draw(data,logo,vehicles)'),'PNG/PDF and preview must share the same image with vehicles');
+assert.ok(!shuttle.includes('loadVehicleIcons()'),'Compact shuttle export avoids old decorative vehicle photos');
+assert.ok(shuttle.includes('draw(data,logo,undefined,art)'),'PNG/PDF and preview share the same compact canvas with optional EREPORT art');
 assert.ok(grid.includes("shuttle-'+item.seats+'.webp")&&grid.includes('plan.units'),'Input suggestions must show vehicle images matching actual model output');
 assert.ok(shuttle.includes('GỢI Ý XE')&&shuttle.includes('model().suggestVehicles(total)'),'Shuttle export must render a real-count bus suggestion');
 for(const p of ['report-export-v29.js','office-export-v29.js'])assert.ok(fs.existsSync(p),'Keep full Word/PDF export mechanism '+p);
 assert.ok(html.includes('v21ShuttleExportStatus')&&html.includes('v19ReportPreview'),'Keep original export buttons');
-console.log('PASS V2.20: four unique workflow groups, admin role, mobile UI, full report/shuttle exports, verified bus assets and branding');
+console.log('PASS V2.20: four unique workflow groups, admin role, mobile UI, full report/shuttle exports, existing bus asset compatibility and SAGS branding');
