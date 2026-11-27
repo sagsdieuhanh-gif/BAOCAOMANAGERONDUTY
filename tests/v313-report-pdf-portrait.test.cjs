@@ -9,7 +9,7 @@ function canvas(){
   const item={width:0,height:0,drawn:[],toDataURL(){return 'data:image/jpeg;base64,/9j/2Q==';}};
   const ctx={
     font:'16px Arial',fillStyle:'#000',strokeStyle:'#000',lineWidth:1,
-    fillRect(){},strokeRect(){},drawImage(){},
+    fillRect(){},strokeRect(){},drawImage(){},setTransform(){},
     measureText(s){return {width:String(s).length*9};},
     fillText(str,x,y){item.drawn.push({text:String(str),x,y});}
   };
