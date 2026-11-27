@@ -81,11 +81,14 @@
        (canOpen('admin')?button(main.admin):'')+
        (canOpen('norms')?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+button(main.norms)+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.34</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.35</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
-      '<div id="v300Busy" class="v300-loading" hidden>Đang đối chiếu nguồn dữ liệu đã xác nhận…</div>'+
+      '<section class="sags-premium-hero" aria-label="Giao diện lễ hội Premium tương tự E-Report">'+
+ '<div><small>SAGS CXR · GROUND SERVICES</small><h2>MANAGER ON DUTY · <span id="sagsPremiumGreeting">Merry Christmas</span></h2>'+
+ '<p>Chủ động dự báo · Phối hợp khai thác · An toàn phục vụ</p></div></section>'+
+ '<div id="v300Busy" class="v300-loading" hidden>Đang đối chiếu nguồn dữ liệu đã xác nhận…</div>'+
       '<div id="v300Page"></div><div id="v300LegacyDock" hidden></div><div class="v300-foot"><span id="v300Status" role="status" aria-live="polite"></span>'+
       '<span>Chưa đủ căn cứ = CHỜ XÁC NHẬN · Không tự kết luận đủ</span></div></div></div>';
  }
@@ -95,6 +98,7 @@
      const app=$('app');if(!app)return false;
      const rootNode=document.createElement('div');rootNode.id='v300Root';
      rootNode.innerHTML=layout();app.prepend(rootNode);
+     root.SagsFestiveThemeV334?.refresh?.();
      const toolbar=app.querySelector(':scope > .panel.row.space');
      if(toolbar){$('v300DaySlot').appendChild(toolbar);}
      rootNode.addEventListener('click',handleClick);
