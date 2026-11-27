@@ -91,3 +91,7 @@
 .v24-table .v24-time b{font-weight:900}
 .v24-table tr.v28-extra-slot .v24-total{background:#fff0d8!important}
 @media(max-width:780px){.v24-table{min-width:760px!important}.v24-table .v24-total b{font-size:27px!important}}
+
+/* V3.43 — direct extra-shuttle removal; fixed slots never have this button. */
+.v24-time .v343-remove-shuttle{display:block;margin:5px auto 0;padding:5px 7px;min-height:28px;max-width:100%;font-size:12px!important;font-weight:750;line-height:1.15;color:#a61d2d!important;background:#fff2f2!important;border:1px solid #d79a9f!important;border-radius:6px;white-space:normal;cursor:pointer}
+.v24-time .v343-remove-shuttle:focus-visible{outline:2px solid #a61d2d;outline-offset:2px}

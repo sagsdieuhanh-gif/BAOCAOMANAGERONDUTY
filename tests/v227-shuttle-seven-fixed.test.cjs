@@ -22,8 +22,8 @@ const grid=g.makeGrid('CXR_NHA',rows,'DH');
 assert.ok(grid.includes('08:15')&&grid.includes('NGÀY HÔM SAU')&&!grid.includes('08:30'));
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes("APP_VERSION='V3."));
-for(const file of ['v21-shuttle-model.js','v24-shuttle-grid.js'])
- assert.ok(index.includes(file+'?v=3.11'),'Core shuttle model/grid retain the original data contract');
+assert.ok(index.includes('v21-shuttle-model.js?v=3.11'),'Shuttle model retains original data contract');
+assert.match(index,/v24-shuttle-grid\.js\?v=3\.\d+/,'Grid must use a versioned asset');
 assert.ok(index.includes('v21-shuttle-export.js?v=3.39'),'Updated seasonal/compact image exporter must bypass old browser cache');
 const migration=fs.readFileSync('server/v311-shuttle-0815-not-0830.sql','utf8');
 assert.ok(migration.includes('(990,1110,1560,1935)')&&migration.includes('departure_min=1935'));

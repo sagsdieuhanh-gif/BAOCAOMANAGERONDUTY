@@ -330,3 +330,7 @@ Sửa kiểm thử lệch phiên bản để GitHub Pages đóng gói thư việ
 
 ## V3.42 – Đổi mật khẩu tạm ngay trong Manager
 Đăng nhập email/mật khẩu tạm → nhập mật khẩu mới (8–128 ký tự, khác mật khẩu tạm) và nhập lại → LƯU MẬT KHẨU MỚI. Hệ thống xác thực lại bằng mật khẩu mới rồi vào màn hình làm việc nếu có quyền Manager. Không cần mở RNS. Có thể chọn QUAY LẠI ĐĂNG NHẬP để hủy; cờ yêu cầu đổi mật khẩu chỉ được xóa khi máy chủ xác nhận đổi thành công.
+
+
+## V3.43 – Xóa xe giao ca bổ sung
+ADMIN/ĐH chọn ngày khai thác, vào XE GIAO CA, bấm XÓA XE ngay dưới mốc bổ sung (không có nút ở giờ cố định). Lưu số liệu chưa lưu trước khi thao tác. Xác nhận xóa; hệ thống ghi nhật ký và loại mốc xe, số người liên quan khỏi dữ liệu xuất PNG/PDF. Không thể hoàn tác trực tiếp. Không xóa xe thực tế trong lần phát hành này.

@@ -141,7 +141,8 @@
      return '<tr class="v24-time-row'+(child?' v24-child':'')+(custom?' v28-extra-slot':'')+'" data-v24-key="'+key+'">'+
        '<td class="v24-time"><b>'+clock(x.departure_min)+'</b>'+
        (model().isNextDay(x.departure_min)?'<small class="v308-next-day">NGÀY HÔM SAU</small>':'')+
-       (custom?'<span class="v307-added-badge">'+(child?'XE '+(x.line_no+1):'GIỜ THÊM')+'</span>':'')+'</td>'+
+       (custom?'<span class="v307-added-badge">'+(child?'XE '+(x.line_no+1):'GIỜ THÊM')+'</span>':'')+
+       (custom&&['ADMIN','DH'].includes(who)?'<button type="button" class="v343-remove-shuttle" data-v27-delete="'+key+'" title="Xóa xe bổ sung khỏi bảng và ảnh xuất">XÓA XE</button>':'')+'</td>'+
        cells+
        '<td class="v24-total"><b>'+(x.confirmed===V.length?'':'~')+x.total+'</b>'+
          (x.confirmed<V.length?'<small>Đủ '+x.confirmed+'/4</small>':'')+'</td>'+
@@ -335,9 +336,12 @@
      if(b.hasAttribute('data-v24-save-all')){
        await saveAll(wrap,own);
      }else if(b.dataset.v27Delete){
+       if(activeDate!==$('day')?.value)throw Error('Ngày xe đã thay đổi. Vui lòng tải lại trước khi xóa.');
        if(pendingDraft(wrap,own))throw Error('Bạn còn số liệu chưa lưu. Hãy bấm LƯU TẤT CẢ THAY ĐỔI trước khi xóa giờ xe.');
        const [dir,min,line]=b.dataset.v27Delete.split('|');
        const isMain=Number(line)===0;
+       if(isMain&&model().isDefault(dir,Number(min)))throw Error('Không được xóa mốc xe cố định.');
+       if(!assemble(rows,lines).some(x=>partKey(x)===b.dataset.v27Delete))throw Error('Xe bổ sung không còn tồn tại. Vui lòng tải lại.');
        const label=(isMain?'mốc giờ tự thêm ':'dòng bổ sung ')+clock(Number(min))+(isMain?'':' số '+line);
        if(!['ADMIN','DH'].includes(own))throw Error('Chỉ ĐH hoặc ADMIN được xóa xe đã thêm.');
        const affected=rows.filter(x=>x.direction===dir&&x.departure_min===Number(min)&&(isMain||x.line_no===Number(line)));
@@ -351,7 +355,7 @@
          throw Error(error.message);
        }
        await refresh();
-       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã xóa '+label+'.');
+       message(e.currentTarget.querySelector('.v24-wrap')||wrap,'Đã xóa '+label+' khỏi bảng và ảnh xuất PNG/PDF.');
      }else if(b.dataset.v24Custom){
        if(pendingDraft(wrap,own))throw Error('Bạn còn số liệu chưa lưu. Hãy bấm LƯU TẤT CẢ THAY ĐỔI trước khi thêm giờ xe.');
        const direction=b.dataset.v24Custom;

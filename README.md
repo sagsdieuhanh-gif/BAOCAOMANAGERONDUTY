@@ -1,3 +1,7 @@
+## V3.43 – Xóa xe giao ca bổ sung ngay trên bảng
+
+ADMIN và ĐH có nút XÓA XE ngay cạnh giờ bổ sung, xác nhận trước khi xóa dữ liệu của các đơn vị. RPC hiện hữu ghi nhật ký và bảo vệ bảy giờ cố định. Sau xóa, bảng, xem trước, PNG/PDF đều đọc lại dữ liệu đã lưu. Không thay đổi giao diện lễ hoặc định mức xe.
+
 ## V3.42 – Đổi mật khẩu ngay trên Manager
 
 Sau khi ADMIN reset hoặc tạo tài khoản, người dùng đăng nhập bằng mật khẩu tạm và đổi mật khẩu trực tiếp tại Manager. Dùng lại Edge Function sagscxr-rns-password xác thực phiên và xử lý cờ bắt buộc đổi mật khẩu. Sau khi lưu, đăng nhập bằng mật khẩu mới; phân quyền độc lập giữ nguyên. Không yêu cầu quyền RNS.

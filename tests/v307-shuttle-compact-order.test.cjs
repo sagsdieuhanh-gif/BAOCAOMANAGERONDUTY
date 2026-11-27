@@ -45,3 +45,11 @@ assert.ok(ui.includes('show();\n   const req=++sequence;'),'Show timetable befor
 const index=fs.readFileSync('index.html','utf8');
 assert.match(index,/const APP_VERSION='V3\.\d+'/);
 console.log('PASS V3.10: visible 02:00 → 08:15 → 10:00 → 11:00 → 16:30; compact one-row-per-time table, 29/45-seat suggestions and reliable first paint');
+
+const direct=grid.makeGrid(dir,rows,'ADMIN');
+assert.ok(direct.includes('class="v343-remove-shuttle" data-v27-delete="CXR_NHA|660|0"'));
+assert.ok(!direct.includes('class="v343-remove-shuttle" data-v27-delete="CXR_NHA|990|0"'));
+assert.ok(!partial.includes('v343-remove-shuttle'));
+const remaining=sample.filter(x=>x.departure_min!==660);
+assert.ok(!grid.assemble(remaining,[]).some(x=>x.departure_min===660));
+assert.ok(!exp.normalize(remaining,[]).some(x=>x.departure_min===660),'Deleted extra slot must disappear from image/PDF data');
