@@ -22,7 +22,7 @@ jobs:
         run: |
           for f in ./*.js; do node --check "$f"; done
           fail=0
-          for test in tests/manager-root.test.cjs tests/v301-unified-sidebar.test.cjs tests/v338-festive-layout.test.cjs tests/v303-direct-register.test.cjs tests/v304-shuttle-input.test.cjs tests/v305-shuttle-chronology.test.cjs tests/v306-shuttle-vehicle-recommendations.test.cjs tests/v307-shuttle-compact-order.test.cjs tests/v308-shuttle-eight-staff-vehicles.test.cjs tests/v309-shuttle-export-coach-banner.test.cjs tests/v310-shuttle-capacity-match.test.cjs tests/v311-report-shuttle-simple.test.cjs tests/v312-pvhk-report-language.test.cjs tests/v313-report-pdf-portrait.test.cjs tests/v314-report-staff-visibility.test.cjs tests/v315-staff-count-only-report.test.cjs tests/v316-l2-report-complete.test.cjs tests/v317-compact-pvsd-staff.test.cjs tests/v318-shift-staff-cells.test.cjs tests/v319-headcount-editorial-accounts.test.cjs tests/v320-real-pvhk-pvsd-roster.test.cjs tests/v320-cargo-direction-units.test.cjs tests/v321-executive-report-three-days.test.cjs tests/v322-compact-charter-a4.test.cjs tests/v29-office-export.test.cjs tests/v212-personnel-human-report.test.cjs tests/v213-shuttle-reasons.test.cjs tests/v216-shuttle-export.test.cjs tests/v217-second-forecast.test.cjs tests/v218-shuttle-l2-report.test.cjs tests/v219-peak-capacity.test.cjs tests/v220-friendly-ui.test.cjs tests/v221-shuttle-planner.test.cjs tests/v222-shuttle-layout.test.cjs tests/v223-daily-brief.test.cjs tests/v224-staff-ui.test.cjs tests/v225-role-permissions.test.cjs tests/v227-shuttle-seven-fixed.test.cjs; do
+          for test in tests/manager-root.test.cjs tests/v301-unified-sidebar.test.cjs tests/v339-festive-layout.test.cjs tests/v303-direct-register.test.cjs tests/v304-shuttle-input.test.cjs tests/v305-shuttle-chronology.test.cjs tests/v306-shuttle-vehicle-recommendations.test.cjs tests/v307-shuttle-compact-order.test.cjs tests/v308-shuttle-eight-staff-vehicles.test.cjs tests/v309-shuttle-export-coach-banner.test.cjs tests/v310-shuttle-capacity-match.test.cjs tests/v311-report-shuttle-simple.test.cjs tests/v312-pvhk-report-language.test.cjs tests/v313-report-pdf-portrait.test.cjs tests/v314-report-staff-visibility.test.cjs tests/v315-staff-count-only-report.test.cjs tests/v316-l2-report-complete.test.cjs tests/v317-compact-pvsd-staff.test.cjs tests/v318-shift-staff-cells.test.cjs tests/v319-headcount-editorial-accounts.test.cjs tests/v320-real-pvhk-pvsd-roster.test.cjs tests/v320-cargo-direction-units.test.cjs tests/v321-executive-report-three-days.test.cjs tests/v322-compact-charter-a4.test.cjs tests/v29-office-export.test.cjs tests/v212-personnel-human-report.test.cjs tests/v213-shuttle-reasons.test.cjs tests/v216-shuttle-export.test.cjs tests/v217-second-forecast.test.cjs tests/v218-shuttle-l2-report.test.cjs tests/v219-peak-capacity.test.cjs tests/v220-friendly-ui.test.cjs tests/v221-shuttle-planner.test.cjs tests/v222-shuttle-layout.test.cjs tests/v223-daily-brief.test.cjs tests/v224-staff-ui.test.cjs tests/v225-role-permissions.test.cjs tests/v227-shuttle-seven-fixed.test.cjs; do
             echo "::group::$test"
             if node "$test"; then echo "PASS: $test"; else echo "::error title=Regression failed::$test"; fail=$((fail+1)); fi
             echo "::endgroup::"
@@ -30,29 +30,34 @@ jobs:
           if [ "$fail" -ne 0 ]; then echo "::error title=Regression suite::$fail tests failed"; exit 1; fi
       - name: Browser smoke test — Chrome desktop/tablet/mobile (isolated, no live DB)
         run: |
-          npm install --no-save --ignore-scripts --no-audit --no-fund playwright-core@1.55.0
-          node tests/v338-browser-ui.test.cjs
+          npm install --no-save --ignore-scripts --no-audit --no-fund --package-lock=false playwright-core@1.55.0 @supabase/supabase-js@2.50.0
+          mkdir -p vendor
+          cp node_modules/@supabase/supabase-js/dist/umd/supabase.js vendor/supabase.js
+          test -s vendor/supabase.js
+          node tests/v339-browser-ui.test.cjs
       - name: Save browser QA screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ui-regression-v338
+          name: ui-regression-v339
           path: tests/ui-artifacts/
           if-no-files-found: ignore
           retention-days: 7
       - name: Stage Manager On Duty
         run: |
-          mkdir -p _site/assets/holiday _site/assets/branding
-          cp index.html festive-preview-v335.html festive-preview-v336.html festive-preview-v337.html festive-preview-v338.html ./*.js ./*.css _site/
+          mkdir -p _site/assets/holiday _site/assets/branding _site/vendor
+          cp index.html festive-preview-v335.html festive-preview-v336.html festive-preview-v337.html festive-preview-v338.html festive-preview-v339.html ./*.js ./*.css _site/
           cp assets/logo-sags.png assets/shuttle-29.webp assets/shuttle-45.webp _site/assets/
           cp assets/holiday/*.webp _site/assets/holiday/
           cp assets/branding/logo.png assets/branding/apron-night-v6494.webp _site/assets/branding/
+          cp vendor/supabase.js _site/vendor/
           # These resources are required by the E-Report Premium festive mode.
           test -s _site/assets/holiday/apron.webp
           test -s _site/assets/holiday/apron-detail.webp
           test -s _site/assets/holiday/mobile.webp
           test -s _site/assets/holiday/banner.webp
           test -s _site/assets/branding/logo.png
+          test -s _site/vendor/supabase.js
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
