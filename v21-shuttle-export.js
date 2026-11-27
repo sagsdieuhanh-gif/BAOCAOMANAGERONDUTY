@@ -83,7 +83,7 @@
    // V3.33: one glance / one row. No duplicated top suggestions, five-metric
    // footer, 3-line legend, seat-surplus details or paragraph-long annotations.
    const W=1300,outer=28,gap=20,col=(W-outer*2-gap)/2;
-   const top=194,cardH=135,step=145;
+   const top=194,cardH=155,step=165; // V3.38: reserve a distinct bottom status/suggestion row
    const bottom=top+max*step,H=bottom+61;
    const canvas=document.createElement('canvas');
    canvas.width=W;canvas.height=H;
@@ -176,14 +176,14 @@
          unit?C.ink:C.muted,!!unit);
      }
      const status=complete?'ĐỦ 4/4 ĐƠN VỊ':any?'TẠM TÍNH '+v.confirmed+'/4':'CHỜ 4 ĐƠN VỊ';
-     t(status,x+16,y+127,12,festive?(complete?'#8CD9B5':any?'#f5ce8a':'#f5b4b4'):
+     t(status,x+16,y+141,12,festive?(complete?'#8CD9B5':any?'#f5ce8a':'#f5b4b4'):
        complete?C.green:any?C.orange:C.red,true);
      if(any){
        const plan=model().suggestVehicles(total);
        if(plan){
          // The vehicle is a capacity suggestion, not proof that a coach is available.
          const label='GỢI Ý XE: '+plan.label;
-         t(label,x+col-16,y+127,12,festive?'#f5d49d':C.blue,true,'right',col-210);
+         t(label,x+col-16,y+141,12,festive?'#f5d49d':C.blue,true,'right',col-210);
        }
      }
    }
