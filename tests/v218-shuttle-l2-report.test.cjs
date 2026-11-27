@@ -46,11 +46,12 @@ const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes('v218ReportStatus')&&/V3\.\d{2}/.test(index));
 assert.ok(index.includes('v21-shuttle-model.js?v=3.11'));
 const output=fs.readFileSync('v21-shuttle-export.js','utf8');
-assert.ok(output.includes("'TỔNG SỐ NGƯỜI'")&&output.includes('53,complete?C.navy'));
+assert.ok(output.includes("'NGƯỜI':'CHƯA NHẬP'")&&output.includes("v.confirmed===UNITS.length"),
+ 'Compact shuttle export distinguishes total entered people from absent confirmation');
 const report=fs.readFileSync('v19-report.js','utf8');
 const early=report.indexOf("    (data.dailyBrief?'<h3>PHƯƠNG ÁN PHỤC VỤ LẦN 2");
 const ten=report.indexOf("    '<h3>II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN");
-assert.ok(early===-1&&ten>=0&&report.includes('topicsTable='),'L2 retains one unified ten-topic executive analysis, formatted as compact aligned table');
+assert.ok(early===-1&&ten>=0&&report.includes('topicsTable=')&&report.includes('v330-topic-block'),'L2 retains a unified ten-topic executive analysis in readable framed sections');
 assert.ok(report.includes("renderHtml:html")&&report.includes('v218ReportStatus'));
 const exporter=fs.readFileSync('report-export-v29.js','utf8');
 assert.ok(exporter.includes("(active.revision===2?'2':'1')"),'Official file must be labeled L1/L2');
