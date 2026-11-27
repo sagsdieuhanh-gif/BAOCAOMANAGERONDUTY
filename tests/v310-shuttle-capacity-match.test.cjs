@@ -42,19 +42,20 @@ const canvas=exporter.draw({date:'2026-10-31',rows:exportRows},
  {naturalWidth:100,naturalHeight:50,name:'logo'},
  {small:{naturalWidth:90,naturalHeight:50,name:'29'},big:{naturalWidth:90,naturalHeight:50,name:'45'}});
 assert.ok(canvas.width>1000);
-const top=drawn.filter(v=>v.y>=169&&v.y<=216);
-assert.ok(top.some(v=>v.kind==='text'&&v.txt==='17:30 · 42 NGƯỜI'),
- 'Export banner must reference actual 17:30 departure with 42 people');
-assert.ok(top.some(v=>v.kind==='text'&&v.txt==='16:30 · 50 NGƯỜI'),
- 'Export banner must reference actual 16:30 departure with 50 people');
-assert.ok(top.some(v=>v.kind==='text'&&v.txt.includes('45 CHỖ')),
- 'Banner must recommend 45-seat vehicle for the 42-person run');
-assert.ok(top.some(v=>v.kind==='text'&&v.txt.includes('45C + 29C')),
- 'Banner must recommend 45+29 for the 50-person run');
-assert.ok(top.some(v=>v.kind==='image'&&v.bus==='45'),'Actual top banner must draw a 45-seat vehicle');
-assert.ok(top.some(v=>v.kind==='image'&&v.bus==='29'),'Actual 50-person run must include 29-seat vehicle');
-assert.ok(!top.some(v=>v.kind==='text'&&v.txt.includes('20 NGƯỜI')),
- 'Never show unrelated hardcoded passenger examples in operational report');
+const texts=drawn.filter(v=>v.kind==='text').map(v=>v.txt);
+assert.ok(texts.includes('17:30')&&texts.includes('16:30'),
+ 'Export must show the actual 17:30 and 16:30 clocks');
+assert.ok(texts.includes('42')&&texts.includes('50'),
+ 'Export card totals must derive from actual data, not examples');
+assert.ok(texts.includes('GỢI Ý XE: '+model.suggestVehicles(42).label),
+ '42 staff must get exactly one 45-seat coach in its own card');
+assert.ok(texts.includes('GỢI Ý XE: '+model.suggestVehicles(50).label),
+ '50 staff must get one 45C + one 29C in its own card');
+assert.ok(!texts.includes('GỢI Ý XE THEO GIỜ'),
+ 'Do not reintroduce redundant top banner after compact V3.33 UI');
+assert.ok(!texts.includes('20 NGƯỜI'),'Never show canned passenger examples in operational report');
+assert.ok(!drawn.some(v=>v.kind==='image'&&(v.bus==='29'||v.bus==='45')),
+ 'Compact report deliberately omits decorative vehicle images');
 const source=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(!source.includes("vehicleGuide()+makeGrid("),'Do not show unrelated example vehicles above live input');
-console.log('PASS V3.11: capacity never under headcount, 30-45=45C, 46-74=45C+29C, image banner uses real departure totals');
+console.log('PASS V3.36: capacity never under headcount; compact per-time suggestions use real confirmed totals');
