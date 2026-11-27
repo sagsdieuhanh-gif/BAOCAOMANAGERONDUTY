@@ -12,12 +12,15 @@
    buttons.forEach(b=>{b.disabled=true;b.dataset.originalText=b.textContent;b.textContent='ĐANG XUẤT '+format.toUpperCase()+'…'});
    try{
      if(!root.SagsOfficeExportV29)throw Error('Chưa nạp thư viện xuất file nội bộ.');
-     const active=await base.source();
-     await base.preview();
-     const node=$('v19ReportPreview')?.querySelector('.v19-report-sheet');
-     if(!node)throw Error('Không tạo được bản xem trước V2.18. Vui lòng kiểm tra đã duyệt lịch bay Lần 2 và nguồn dữ liệu.');
      const date=$('day')?.value||'UNKNOWN';
-     const filename='SAGS_CXR_DU_BAO_LAN_'+(active.revision===2?'2':'1')+'_'+date.replaceAll('-','')+'.'+format;
+     let node=$('v19ReportPreview')?.querySelector('.v19-report-sheet');
+     // Export the actual displayed snapshot; refresh only if no valid preview for this date.
+     if(!node||node.dataset.reportDate!==date){
+       await base.preview();
+       node=$('v19ReportPreview')?.querySelector('.v19-report-sheet');
+     }
+     if(!node||node.dataset.reportDate!==date)throw Error('Chưa có bản xem trước cho ngày đã chọn.');
+     const filename='SAGS_CXR_DU_BAO_LAN_'+(node.dataset.reportRevision==='2'?'2':'1')+'_'+date.replaceAll('-','')+'.'+format;
      const hidePendingWarnings=format==='pdf'&&$('v315PdfHidePending')?.checked===true;
      const result=await root.SagsOfficeExportV29.exportElement(
        node,format,filename,{hidePendingWarnings});

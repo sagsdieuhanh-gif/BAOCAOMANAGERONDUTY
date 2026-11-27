@@ -63,7 +63,7 @@
       if(tag==='IMG'){const src=el.currentSrc||el.getAttribute('src');if(src)result.push({kind:'image',src,logo:el.classList?.contains('v216-report-logo')});return;}
       if(tag==='TABLE'){
         const rows=[...el.querySelectorAll('tr')].map(r=>[...r.children].filter(x=>x.tagName==='TH'||x.tagName==='TD').map(tableCellText)).filter(x=>x.length);
-        if(rows.length)result.push({kind:'table',rows,header:!!el.querySelector('th')});return;
+        if(rows.length)result.push({kind:'table',rows,header:!!el.querySelector('th'),staff:el.classList?.contains('v318-staff-by-shift')===true});return;
       }
       if(['H1','H2','H3','H4'].includes(tag)){const t=inner(el);if(t)result.push({kind:'heading',level:Number(tag.slice(1)),text:t});return}
       if(tag==='P'){const t=inner(el);if(t)result.push({kind:'paragraph',text:t,pending:/chờ xác nhận|chưa xác nhận/i.test(t)});return}
@@ -202,9 +202,9 @@
       if(cols===5)return [.23,.18,.19,.22,.18];
       return Array(cols).fill(1/cols);
     }
-    function table(rows,hasHeader){
+    function table(rows,hasHeader,staffTable=false){
       if(!rows.length)return;
-      const cols=Math.max(1,...rows.map(r=>r.length)),ratios=ratiosFor(rows,cols);
+      const cols=Math.max(1,...rows.map(r=>r.length)),ratios=staffTable&&cols===3?[.17,.415,.415]:ratiosFor(rows,cols);
       const widths=ratios.map(v=>v*contentW),pad=compact?(readable?7:4):7,
         fs=compact?Math.max(readable?19:14,Math.round((readable?19:16)*density)):16,
         lh=compact?Math.max(readable?24:17,Math.round((readable?24:18)*density)):21,
@@ -216,19 +216,20 @@
       const prepared=rows.map((r,i)=>wrapRow(r,hasHeader&&i===0));
       const heightOf=row=>Math.max(minHeight,Math.max(...row.map(x=>x.length))*lh+2*pad);
       const header=hasHeader?prepared[0]:null,headerHeight=header?heightOf(header):0;
-      const draw=(preparedRow,from,count,isHead)=>{
+      const draw=(preparedRow,from,count,isHead,rowIndex=0)=>{
         const rh=Math.max(minHeight,count*lh+2*pad);let x=M;
         for(let i=0;i<cols;i++){
           const part=preparedRow[i].slice(from,from+count);
-          ctx.fillStyle=isHead?'#194D6C':'#fff';ctx.fillRect(x,y,widths[i],rh);
-          ctx.strokeStyle='#B7C9D5';ctx.lineWidth=1;ctx.strokeRect(x,y,widths[i],rh);
+          ctx.fillStyle=staffTable?(isHead||i===0?'#E9F1F5':rowIndex%2===0?'#F8FBFD':'#FFFFFF'):(isHead?'#194D6C':'#fff');ctx.fillRect(x,y,widths[i],rh);
+          ctx.strokeStyle=staffTable?'#788E9D':'#B7C9D5';ctx.lineWidth=1;ctx.strokeRect(x,y,widths[i],rh);
           ctx.fillStyle=isHead?'#fff':/chờ xác nhận|chưa xác nhận/i.test(rows[0]?.[i]||'')?'#233B4C':'#243B4F';
           // Highlight only the lines containing unconfirmed data, not an entire table column.
-          font(isHead?(compact?fs:17):fs,isHead);
+          const centered=staffTable&&(isHead||i===0);
+          font(isHead?(compact?fs:17):fs,isHead||centered);
           part.forEach((line,j)=>{
             if(!isHead&&/chờ xác nhận|chưa xác nhận/i.test(line))ctx.fillStyle='#B91C1C';
-            else ctx.fillStyle=isHead?'#fff':'#243B4F';
-            ctx.fillText(line,x+pad,y+pad+fs+j*lh);
+            else ctx.fillStyle=staffTable?'#17445D':isHead?'#fff':'#243B4F';
+            ctx.fillText(line,centered?x+Math.max(pad,(widths[i]-ctx.measureText(line).width)/2):x+pad,y+pad+fs+j*lh);
           });
           x+=widths[i];
         }
@@ -252,7 +253,7 @@
           const fit=Math.floor((bottom-y-2*pad)/lh);
           if(fit<1){newPage();if(!isHead)repeatHeader();continue;}
           const n=Math.min(totalLines-at,fit);
-          draw(cells,at,n,isHead);at+=n;
+          draw(cells,at,n,isHead,ri);at+=n;
           if(at<totalLines){newPage();if(!isHead)repeatHeader();}
         }
       }
@@ -363,7 +364,7 @@
       }else if(block.kind==='paragraph'){
         paragraph(block.text,{size:compact?(readable?19:16):19,color:block.pending?'#B91C1C':'#273E52'});
       }else if(block.kind==='table'){
-        table(block.rows,block.header);
+        table(block.rows,block.header,block.staff);
       }else if(block.kind==='topic-frame'){
         topicFrame(block);
       }else if(block.kind==='image'){
@@ -402,23 +403,23 @@
     }));
     return pdfFromJpegs(jpegs,{orientation:'portrait'});
   }
-  function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false,compact=false}={}){
+  function paragraph(v,{bold=false,size=20,color='233B4D',breakBefore=false,compact=false,center=false}={}){
     const lines=String(v??'').split('\n');
     const run=lines.map((line,i)=>'<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>'+(bold?'<w:b/>':'')+'<w:color w:val="'+color+'"/><w:sz w:val="'+size+'"/></w:rPr>'+(i?'<w:br/>':'')+'<w:t xml:space="preserve">'+xml(line)+'</w:t></w:r>').join('');
-    return '<w:p><w:pPr><w:spacing w:before="'+(compact?(breakBefore?75:14):(breakBefore?180:50))+'" w:after="'+(compact?25:90)+'"/></w:pPr>'+run+'</w:p>';
+    return '<w:p><w:pPr>'+(center?'<w:jc w:val="center"/>':'')+'<w:spacing w:before="'+(compact?(breakBefore?75:14):(breakBefore?180:50))+'" w:after="'+(compact?25:90)+'"/></w:pPr>'+run+'</w:p>';
   }
-  function wordTable(rows,header,compact=false,readable=false){
+  function wordTable(rows,header,compact=false,readable=false,staffTable=false){
     if(!rows.length)return '';
     const cols=Math.max(1,...rows.map(x=>x.length));
     const control=cols===4&&/Đơn vị liên quan/i.test((rows[0]||[]).join(' '));
-    const widths=compact?(cols===2?[2900,7700]:cols===3?[2050,3750,4800]:cols===4?[1800,2600,4400,1800]:cols===5?[2350,1800,1800,2450,2200]:Array(cols).fill(Math.floor(10600/cols))):
+    const widths=staffTable&&cols===3?(compact?[1802,4399,4399]:[2499,6100,6101]):compact?(cols===2?[2900,7700]:cols===3?[2050,3750,4800]:cols===4?[1800,2600,4400,1800]:cols===5?[2350,1800,1800,2450,2200]:Array(cols).fill(Math.floor(10600/cols))):
       (cols===2?[3900,10800]:cols===3?[2800,5900,6000]:cols===4?(control?[2500,4100,6350,1750]:[2800,3150,4200,4550]):cols===5?[3550,2750,2500,3000,2900]:Array(cols).fill(Math.floor(14700/cols)));
     let table='<w:tbl><w:tblPr><w:tblW w:w="'+(compact?10600:14700)+'" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="5" w:color="B7CBD8"/><w:bottom w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideH w:val="single" w:sz="5" w:color="B7CBD8"/><w:insideV w:val="single" w:sz="5" w:color="B7CBD8"/></w:tblBorders></w:tblPr><w:tblGrid>'+widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join('')+'</w:tblGrid>';
     rows.forEach((r,ri)=>{
       table+='<w:tr>'+(Array.from({length:cols},(_,i)=>{
         const content=String(r[i]??''),isHead=header&&ri===0;
-        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/><w:left w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:right w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:bottom w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/></w:tcMar></w:tcPr>';
-        return '<w:tc>'+cellPr+paragraph(content,{size:compact?(readable?18:15):17,bold:isHead,color:isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B',compact})+'</w:tc>';
+        const cellPr='<w:tcPr><w:tcW w:w="'+widths[i]+'" w:type="dxa"/>'+(staffTable?'<w:shd w:fill="'+(isHead||i===0?'E9F1F5':ri%2===0?'F8FBFD':'FFFFFF')+'"/>':isHead?'<w:shd w:fill="194D6C"/>':'')+'<w:tcMar><w:top w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/><w:left w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:right w:w="'+(compact?(readable?65:40):90)+'" w:type="dxa"/><w:bottom w:w="'+(compact?(readable?60:35):90)+'" w:type="dxa"/></w:tcMar></w:tcPr>';
+        return '<w:tc>'+cellPr+paragraph(content,{size:compact?(readable?18:15):17,bold:isHead||(staffTable&&i===0),center:staffTable&&(isHead||i===0),color:staffTable?(/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'17445D'):isHead?'FFFFFF':/chờ xác nhận|chưa xác nhận/i.test(content)?'B91C1C':'213A4B',compact})+'</w:tc>';
       })).join('')+'</w:tr>';
     });
     return table+'</w:tbl>';
@@ -465,7 +466,7 @@
     for(const b of blocks){
       if(b.kind==='heading')body+=paragraph(b.text,{bold:true,size:compact?(readable?(b.level<=2?26:b.level===3?23:20):(b.level<=2?23:b.level===3?19:17)):(b.level<=2?29:b.level===3?24:21),color:'175478',breakBefore:true,compact});
       else if(b.kind==='paragraph')body+=paragraph(b.text,{size:compact?(readable?19:16):20,color:b.pending?'B91C1C':'233B4D',compact});
-      else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact,readable);
+      else if(b.kind==='table')body+=wordTable(b.rows,b.header,compact,readable,b.staff);
       else if(b.kind==='topic-frame')body+=wordTopicFrame(b,compact,readable);
       else if(b.kind==='image'){
         const img=await svgImage(b.svg,b.src),canvas=document.createElement('canvas');

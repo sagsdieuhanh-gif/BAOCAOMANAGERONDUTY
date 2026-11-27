@@ -342,3 +342,7 @@ Bấm XÓA XE. Nếu đã có số liệu, hệ thống liệt kê đơn vị v�
 
 ## V3.45 – Quân số theo ca trong báo cáo
 Bổ sung dòng Kho hàng từ Nhân sự Kho hàng theo ca (mã WAREHOUSE_CARGO). Lưu & xác nhận phòng trước khi xuất. Các nhóm nhân sự trong mỗi ca được trình bày từng dòng trên báo cáo xem trước, Word và PDF. Chưa có dữ liệu hiển thị CHỜ XÁC NHẬN; giữ đúng số 0 đã lưu.
+
+
+## V3.46 – Xuất báo cáo theo bản đang xem
+Xem báo cáo đúng ngày trước khi xuất. Bấm Word/PDF sẽ sử dụng chính nội dung bản xem trước; nếu chưa có bản đúng ngày thì tạo bản xem trước trước khi xuất. Nếu vừa cập nhật dữ liệu, hãy bấm xem lại báo cáo để cập nhật nội dung trước khi xuất. Bảng quân số giữ màu xanh nhạt và cấu trúc như web; số trang có thể thay đổi theo khổ A4 và Word.

@@ -1,3 +1,7 @@
+## V3.46 – Xuất theo bản xem trước
+
+Xuất trực tiếp bản xem trước đang hiển thị đúng ngày, không tự tải lại dữ liệu khi bấm Word/PDF. Đồng bộ bảng quân số theo ca với mẫu web: nền xanh nhạt, chữ xanh đậm, tiêu đề/cột đơn vị căn giữa, cột ca sáng và tối bằng nhau, từng nhóm xuống dòng. PDF và Word vẫn phân trang theo A4; Word giữ khả năng chỉnh sửa.
+
 ## V3.45 – Bổ sung quân số Kho hàng và trình bày từng dòng
 
 Bảng quân số Lần 1/Lần 2 gồm ĐH, PVHK, PVSĐ và Kho hàng. Kho hàng lấy đúng mã WAREHOUSE_CARGO đã xác nhận theo ca; ô chưa có số liệu là CHỜ XÁC NHẬN, số 0 được giữ nguyên. Mỗi nhóm nhân sự một dòng trong giao diện và Word/PDF; không gộp nhóm, không tự tính số người.
