@@ -2,6 +2,8 @@
    E-REPORT-SAGS V1.4 Premium source assets, NO duplicate banner/greeting layers.
    Seasonal rules scoped to login, workspace navigation and overview ONLY.
    Operational forms/tables/print remain unmodified. */
+/* Injected login branding is completely hidden outside the seasonal mode. */
+.sags-premium-login-brand{display:none}
 @media screen {
 html[data-sags-season] { --fest-gold:#efd09a; --fest-line:rgba(231,191,121,.35); }
 html[data-sags-season] body { background:#061427!important; }
