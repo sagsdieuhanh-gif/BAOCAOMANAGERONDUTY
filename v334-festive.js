@@ -20,6 +20,13 @@
   function decorate(){
     if(!season)return;
     const html=document.documentElement;
+    const headerLogo=document.querySelector('body>header .v23-site-brand img');
+    if(headerLogo){
+      if(!headerLogo.dataset.sagsNormalSrc)
+        headerLogo.dataset.sagsNormalSrc=headerLogo.getAttribute('src')||'./assets/logo-sags.png';
+      const next=active()?'./assets/branding/logo.png':headerLogo.dataset.sagsNormalSrc;
+      if(headerLogo.getAttribute('src')!==next)headerLogo.setAttribute('src',next);
+    }
     html.setAttribute('data-sags-season-window',season);
     if(active())html.setAttribute('data-sags-season',season);
     else html.removeAttribute('data-sags-season');
