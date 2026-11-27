@@ -322,3 +322,7 @@ Bộ mẫu được kiểm tra bằng 6 phiên bản nguồn L1/L2 ngày 31/10, 
 
 ## V3.40 – Reset mật khẩu tài khoản dùng chung
 ADMIN mở QUẢN LÝ TÀI KHOẢN, chọn RESET MK 123456 ngay trên hàng của tài khoản, xác nhận và nhập đúng email. Không yêu cầu quyền Manager/RNS đang hoạt động; không thay đổi quyền. Với tài khoản ADMIN hoặc tài khoản ngoài Manager, cần quyền ADMIN cả hai ứng dụng; email đích phải đã xác minh. Sau reset, người dùng đăng nhập RNS bằng mật khẩu tạm và đổi sang mật khẩu riêng trước khi dùng Manager. Không gửi mật khẩu tạm vào nhóm chat. Chỉ reset từng tài khoản khi cần, không reset hàng loạt. Chức năng tạo mới giữ mật khẩu ngẫu nhiên.
+
+
+## V3.41 – Khôi phục đăng nhập
+Sửa kiểm thử lệch phiên bản để GitHub Pages đóng gói thư viện Supabase đầy đủ. Sau cập nhật, tải lại trang nếu trình duyệt còn lưu bản cũ. Chức năng reset của V3.40 giữ nguyên.

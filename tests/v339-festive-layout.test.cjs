@@ -11,13 +11,14 @@ const work=read('v300-workspace.js');
 const preview=read('festive-preview-v339.html');
 const previewLegacy=read('festive-preview-v335.html');
 const readme=read('README.md');
-assert.match(index,/const APP_VERSION='V3\.39'/);
-assert.match(work,/id="v300Version">V3\.39/);
-assert.ok(readme.startsWith('## V3.39'));
+const release=index.match(/const APP_VERSION='(V\d+\.\d+)'/)?.[1];
+assert.ok(release,'Application version must be present');
+assert.ok(work.includes('id="v300Version">'+release),'Sidebar version must match release');
+assert.ok(readme.startsWith('## '+release),'README must track release');
 assert.ok(index.includes('v339-festive.css?v=3.39'));
 assert.ok(index.includes('v337-festive.js?v=3.39'));
 assert.ok(index.includes('v21-shuttle-export.js?v=3.39'));
-assert.ok(index.includes('v300-workspace.js?v=3.39'));
+assert.ok(index.includes('v300-workspace.js?v='+release.slice(1)));
 assert.ok(!index.includes('v334-festive.js')&&!index.includes('v335-ereport-premium.css'));
 assert.ok(!index.includes('v334-festive.css'));
 assert.ok(!preview.includes('sags-festive-banner'));
@@ -35,7 +36,7 @@ assert.ok(css.includes("url('./assets/branding/apron-night-v6494.webp') center c
 assert.ok(css.includes("url('./assets/holiday/banner.webp') right top/46% auto"),'Login retains E-Report Christmas greeting without a second HTML banner');
 assert.ok(css.includes('max-width:none!important'),'Old fixed 1680px cap removed');
 assert.ok(css.includes("url('./assets/holiday/banner.webp') right center"),'Home uses E-Report banner without old SAGS vehicle lettering');
-assert.ok(index.includes('./vendor/supabase.js?v=3.39'),'Login uses local pinned Supabase bundle, not external CDN');
+assert.ok(index.includes('./vendor/supabase.js?v='+release.slice(1)),'Login uses local pinned Supabase bundle, not external CDN');
 assert.ok(!index.includes('cdn.jsdelivr.net/npm/@supabase/supabase-js'),'External auth dependency removed');
 assert.ok(index.includes('function showLoginScreen()')&&index.includes("classList.remove('v300-ready')"),
   'Auth failures and logout recover the clean login layout');

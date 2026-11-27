@@ -1,3 +1,7 @@
+## V3.41 – Khắc phục tải thư viện đăng nhập
+
+Đồng bộ phiên bản ứng dụng, sidebar bên trái, tài nguyên cache và kiểm thử phát hành. Giữ chức năng RESET MK 123456 của V3.40. Thư viện Supabase UMD được đóng gói cục bộ trong GitHub Pages; không dùng CDN ngoài.
+
 ## V3.39 — Sửa màn hình đăng nhập, workspace toàn màn hình và ảnh SAGS cũ (HDSD)
 
 Bản V3.39 giải quyết ba lỗi được phản ánh ngày 27/11/2026:
