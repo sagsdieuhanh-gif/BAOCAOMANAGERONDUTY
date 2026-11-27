@@ -1,3 +1,25 @@
+## V3.39 — Sửa màn hình đăng nhập, workspace toàn màn hình và ảnh SAGS cũ (HDSD)
+
+Bản V3.39 giải quyết ba lỗi được phản ánh ngày 27/11/2026:
+1. **Màn hình đăng nhập không ổn định:** Lớp `v300-ready` của workspace được gỡ khi không có phiên đăng nhập hoặc tài khoản chưa đủ quyền; lớp này được tạo lại trên mỗi lần đăng nhập thành công, không chỉ lúc mở workspace lần đầu. Biểu mẫu đăng nhập được rút gọn nhãn và có kiểm tra ô trống, khóa nút khi đang gửi, thông báo mất kết nối rõ ràng.
+2. **Sau đăng nhập chưa đầy màn hình:** Bỏ giới hạn chiều rộng `1680px` của `body.v300-ready .layout`, cho `#app`, `#v300Root`, `.v300-shell` chiếm toàn bộ chiều rộng/chiều cao còn lại của trình duyệt. Hỗ trợ máy tính màn hình lớn 2560px, tablet, điện thoại; không cuộn ngang.
+3. **Chữ SAGS cũ trong ảnh:** Ảnh hero Tổng quan trước kia dùng `assets/holiday/apron-detail.webp` có sẵn dòng chữ **SAGS** trên xe phục vụ. V3.39 thay hero bằng **banner lễ hội nguyên gốc E-Report** `assets/holiday/banner.webp` không có chữ SAGS cũ, ẩn nhãn/lời chúc HTML trùng; giữ logo SAGS chuẩn ở phần điều hướng. Ảnh mẫu và ảnh xe giao ca nghiệp vụ vẫn giữ cấu trúc dữ liệu/giờ xe.
+
+### Đăng nhập không phụ thuộc CDN
+- Không tải `supabase-js` qua CDN jsDelivr khi mở ứng dụng. Gói GitHub Pages tự đóng bản `@supabase/supabase-js@2.50.0` từ npm vào `vendor/supabase.js` (cùng origin với ứng dụng), kiểm tra tồn tại trước khi deploy.
+- Vẫn dùng **Supabase Authentication chính thức**, publishable key hiện có; không thay đổi quyền/RLS, không sử dụng tài khoản mẫu hay lưu mật khẩu trong mã.
+- Nếu email/mật khẩu trống, hiển thị nhắc nhập; khi đăng nhập nút được khóa tạm để tránh gửi trùng; khi Supabase mất mạng hiển thị lỗi và cho thử lại. Đăng xuất vẫn dùng `sb.auth.signOut`.
+
+### Cách kiểm tra
+- Ứng dụng: `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/`, nhãn **V3.39**.
+- Bản xem trước (không cần đăng nhập/dữ liệu thật): `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/festive-preview-v339.html`.
+- Kiểm tra màn hình đăng nhập, đăng xuất, giao diện thường/lễ hội, Tổng quan full-width, các màn hình nghiệp vụ, ảnh xe giao ca, Word/PDF như trước. Các trường, thời gian xe, quân số và phương án vẫn giữ nguyên.
+
+### Kiểm thử/triển khai
+- CI tiếp tục chạy toàn bộ kiểm thử nghiệp vụ đã có, bổ sung static V3.39 và Chromium thật ở **2560×1440, 1440×900, 768×1024, 390×844, 320×640**.
+- Bộ kiểm thử Chromium dùng danh tính **giả lập trong bộ nhớ**, không yêu cầu tài khoản thật và **chặn yêu cầu mạng đến Supabase**, để kiểm tra giao diện thực sự chuyển trạng thái đăng nhập → workspace → đăng nhập; đo `getBoundingClientRect()` của `main.layout`, `.v300-shell` và tràn ngang màn hình. Kiểm tra thư viện Supabase được tải từ file cục bộ.
+- CI chụp ảnh lưu dưới artifact `ui-regression-v339`. Không thay đổi dữ liệu Supabase, không gửi Zalo. Kiểm thử đăng nhập bằng tài khoản thật chỉ xác nhận được trên hệ thống sản xuất với tài khoản được ủy quyền.
+
 ## V3.38 — Chỉnh lại khoảng cách trong ảnh xe sau khi xem ảnh chụp trình duyệt (HDSD)
 
 V3.38 kế thừa toàn bộ các sửa lỗi giao diện/đăng nhập/header/biểu mẫu của V3.37. **Đã xem trực tiếp ảnh chụp Chromium V3.37** ở PC và điện thoại, phát hiện dòng xác nhận **“ĐỦ 4/4 ĐƠN VỊ”** quá sát các con số nhân sự ở cạnh dưới của mỗi thẻ giờ xe. Đây là lỗi trình bày có thật mà bài test tràn ngang chưa phát hiện.
