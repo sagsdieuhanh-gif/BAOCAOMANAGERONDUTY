@@ -1,3 +1,27 @@
+## V3.35 — Đồng bộ giao diện lễ hội với E-Report Premium V1.4 (HDSD)
+
+V3.35 **thay thế giao diện Giáng sinh V3.34**, khắc phục tình trạng khác hẳn E-Report. **Nguồn tham chiếu trực tiếp:** repository `sagsdieuhanh-gif/E-REPORT-SAGS`, giao diện **V1.4 — CHRISTMAS & NEW YEAR PREMIUM** ngày 27/11/2026.
+
+### Tài nguyên và kiểu thiết kế được dùng đúng từ E-Report
+- Đã sao chép **nguyên bản** 6 file, kiểm tra SHA giống nguồn: `assets/holiday/apron.webp`, `assets/holiday/apron-detail.webp`, `assets/holiday/mobile.webp`, `assets/holiday/banner.webp`, `assets/branding/apron-night-v6494.webp`, `assets/branding/logo.png`.
+- CSS `v335-ereport-premium.css` lấy trực tiếp hệ màu E-Report Premium (navy `#071528`, vàng champagne `#efd09a`, viền vàng mờ `rgba(231,191,121,.35)`), ảnh sân đỗ được dùng cho giao diện đăng nhập và thẻ hero trang chủ; bảng điều khiển nền tối, menu chọn màu vàng. Logo chuẩn, hình PC/mobile và nền sân đỗ đúng tài nguyên gốc.
+- Giữ nguyên giao diện nhập nghiệp vụ, bảng dữ liệu và bản báo cáo in khi ở chế độ thường; giao diện Premium không thay đổi số liệu, phân quyền, phép tính hoặc biểu mẫu.
+- Đồng bộ với E-Report: **Giáng sinh 27/11–26/12/2026**, **Tết Dương lịch 27/12/2026–03/01/2027**. Tự ngắt sau giai đoạn này. Nút **GIAO DIỆN THƯỜNG / BẬT LỄ HỘI** còn hoạt động trên từng trình duyệt.
+
+### Ảnh xe giao ca
+- **XE GIAO CA → XEM TRƯỚC ẢNH / XUẤT PNG / PDF**: khi lễ hội bật, phần đầu ảnh dùng trực tiếp `apron-detail.webp`, card giờ xe xanh navy, viền champagne và chữ trắng/vàng giống kiểu E-Report Premium. **Không tô/che giá trị trong bảng**; các mốc 07:00, 17:30, 19:30, 16:30, 18:30, 02:00, 08:15 vẫn giữ nguyên và không có +1 trên mốc chuẩn.
+- Khi người dùng tắt chủ đề, ảnh quay lại mẫu bình thường của V3.33; nguồn và kết quả phép tính không thay đổi.
+- Trong ảnh có đúng 4 cột đơn vị ĐH/PVHK/PVSĐ/QA & IT, số người, trạng thái xác nhận, gợi ý xe ngắn và phân biệt chưa có dữ liệu.
+
+### Xem trước chính thức trước khi dùng số liệu thật
+- Mở **`https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/festive-preview-v335.html`**.
+- Trang này là **mẫu độc lập không cần đăng nhập và không kết nối Supabase**. Cho phép đổi giữa **ĐĂNG NHẬP / TRANG CHỦ / ẢNH XE GIAO CA**; đổi qua **GIÁNG SINH / TẾT DƯƠNG LỊCH / GIAO DIỆN THƯỜNG**.
+- Mẫu ảnh xe dùng số liệu **minh họa có đánh dấu rõ**. Nút `XEM MẪU ẢNH XE` trong ứng dụng vẫn hoạt động theo dữ liệu mẫu, không tải/ghi dữ liệu nghiệp vụ.
+
+### Kiểm tra
+- Đã kiểm tra mã JavaScript, đường dẫn asset, lịch và cơ chế bật/tắt chủ đề, 7 giờ xe chuẩn, số lượng 4 đơn vị, các trạng thái nguồn và phép vẽ ảnh thật theo đường dẫn `apron-detail.webp` bằng mô phỏng canvas. Không thực hiện cập nhật dữ liệu Supabase hoặc gửi Zalo.
+- **Chưa xác minh thực địa bản triển khai GitHub Pages hoặc mở ảnh PNG/PDF bằng trình duyệt thực tế trên thiết bị người dùng**.
+
 ## V3.34 — Giao diện Giáng sinh/Năm mới giống E-Report và ảnh xe giao ca mùa lễ hội (HDSD)
 
 V3.34 kế thừa màu sắc và thời gian hiển thị từ **E-REPORT-SAGS V1.2** (chủ đề Giáng sinh & New Year 2027). Chỉ thay đổi cách trình bày, tuyệt đối không thay đổi dữ liệu nghiệp vụ, biểu mẫu, quyền, số người hay cách tính xe.
