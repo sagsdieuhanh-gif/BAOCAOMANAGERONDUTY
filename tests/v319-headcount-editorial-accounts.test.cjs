@@ -76,7 +76,12 @@ assert.ok(admin.includes("closeReset();")&&admin.includes("selected")===false ||
 assert.ok(edge.includes('membership?.unit!=="ADMIN"')&&edge.includes('existing?.unit==="ADMIN"'));
 assert.ok(edge.includes('targetId===requester.id'));
 assert.ok(edge.includes('rns_must_change_password:true')&&edge.includes('getRandomValues'));
-assert.ok(!edge.includes('password="123456"')&&!edge.includes('body.action==="reset"?"123456"'));
+assert.ok(edge.includes('const password = "123456";'),'Reset uses the requested temporary password');
+assert.ok(edge.includes('EMAIL_CONFIRMATION_MISMATCH')&&edge.includes('BOTH_ADMIN_ROLES_REQUIRED'));
+assert.ok(!admin.includes('resetPasswordForEmail('),'Reset is not gated by RNS activation');
+assert.ok(admin.includes('RESET MK 123456')&&admin.includes('resetAccount(reset.dataset.rnsReset)'));
+assert.ok(!edge.includes('RNS_ACCESS_INACTIVE')&&!edge.includes('if(!existing.active)return fail("ACCOUNT_INACTIVE"'));
+
 assert.ok(edge.includes('if(body.action==="update"||body.action==="reset_password")'));
 assert.ok(!edge.includes('service_role key in browser'));
 console.log('PASS V3.22: whole DH staff, deterministic aviation briefing for L1/L2, admin edit/reset authorization boundaries');

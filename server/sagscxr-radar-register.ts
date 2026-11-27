@@ -160,11 +160,11 @@ Deno.serve(async(req:Request)=>{
         rns_active:rnsActive,rns_role:rnsActive?rnsRole:null,
         message:"Đã lưu quyền truy cập RNS và Báo cáo khai thác độc lập."});
     }
-    // Existing shared account management is Manager-ADMIN only. Never allow
-    // editing own access, changing another ADMIN, or escalating to ADMIN.
+    // Profile changes retain ADMIN protection. Credential reset is separate:
+    // no membership mutation, and cross-app privileged targets require dual ADMIN.
     if(body.action==="update"||body.action==="reset_password"){
       const targetId=String(body.user_id||"").trim();
-      if(!UUID.test(targetId)||targetId===requester.id)return fail("INVALID_TARGET",403);
+      if(!UUID.test(targetId)||(body.action==="update"&&targetId===requester.id))return fail("INVALID_TARGET",403);
       if(body.confirm!==true)return fail("CONFIRMATION_REQUIRED",400);
       const {data:target,error:targetErr}=await admin.auth.admin.getUserById(targetId);
       if(targetErr||!target?.user)return fail("USER_NOT_FOUND",404);
@@ -173,9 +173,9 @@ Deno.serve(async(req:Request)=>{
       const {data:rnsAccount,error:rnsErr}=await admin.from("sags_docs_members")
         .select("role,active").eq("user_id",targetId).maybeSingle();
       if(memberErr||rnsErr)return fail("LOOKUP_FAILED",500);
-      if(existing?.unit==="ADMIN"||rnsAccount?.role==="admin")return fail("PROTECTED_ACCOUNT",403);
-      if(!existing)return fail("MANAGER_MEMBER_NOT_FOUND",404);
       if(body.action==="update"){
+        if(existing?.unit==="ADMIN"||rnsAccount?.role==="admin")return fail("PROTECTED_ACCOUNT",403);
+        if(!existing)return fail("MANAGER_MEMBER_NOT_FOUND",404);
         const newName=String(body.display_name||"").trim();
         const newUnit=String(body.unit||"").trim().toUpperCase();
         const newEmail=String(body.email||"").trim().toLowerCase();
@@ -206,19 +206,17 @@ Deno.serve(async(req:Request)=>{
           display_name:newName,manager_unit:newUnit,manager_active:body.active,
           message:"Thông tin và quyền Manager đã được cập nhật; quyền RNS không thay đổi."});
       }
-      if(!existing.active)return fail("ACCOUNT_INACTIVE",409,
-        "Tài khoản Manager đang khóa, cần mở quyền trước khi cấp lại mật khẩu.");
-      if(!rnsAccount?.active)return fail("RNS_ACCESS_INACTIVE",409,
-        "RNS đang khóa quyền; nhân viên không thể thực hiện bước đổi mật khẩu tạm. Cần kiểm tra quyền RNS trước.");
-      if(!target.user.email_confirmed_at)return fail("EMAIL_NOT_VERIFIED",409);
-      const alphabet="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#";
-      const random:number[]=[],limit=Math.floor(256/alphabet.length)*alphabet.length;
-      while(random.length<20){
-        for(const b of crypto.getRandomValues(new Uint8Array(32))){
-          if(b<limit){random.push(b%alphabet.length);if(random.length===20)break;}
-        }
+      if(!target.user.email_confirmed_at)return fail("EMAIL_NOT_VERIFIED",409,
+        "Email chưa xác minh. Cần hoàn tất xác minh email trước khi reset mật khẩu.");
+      if(!target.user.email||String(body.confirm_email||"").trim().toLowerCase()!==target.user.email.toLowerCase())
+        return fail("EMAIL_CONFIRMATION_MISMATCH",400,"Email xác nhận không khớp.");
+      if(!existing||existing.unit==="ADMIN"||rnsAccount?.role==="admin"){
+        const {data:myRns,error:myRnsError}=await admin.from("sags_docs_members")
+          .select("role,active").eq("user_id",requester.id).maybeSingle();
+        if(myRnsError||myRns?.role!=="admin"||myRns.active!==true)
+          return fail("BOTH_ADMIN_ROLES_REQUIRED",403,"Tài khoản đặc quyền hoặc ngoài Manager cần ADMIN của cả hai ứng dụng.");
       }
-      const password=random.map(i=>alphabet[i]).join("");
+      const password = "123456";
       const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(password));
       const hash=Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,"0")).join("");
       const metadata={...(target.user.app_metadata||{}),
@@ -234,7 +232,7 @@ Deno.serve(async(req:Request)=>{
       if(auditErr)console.error("Manager credential audit:",auditErr.code);
       return reply({success:true,user_id:targetId,email:target.user.email,
         temporary_password:password,must_change_password:true,
-        message:"Đã đặt mật khẩu ngẫu nhiên một lần; nhân viên phải đổi trên RNS trước khi dùng Manager."});
+        message:"Đã reset về 123456; phải đổi mật khẩu trên RNS trước khi dùng Manager."});
     }
     if(body.action==="create"){
       const email=String(body.email||"").trim().toLowerCase();

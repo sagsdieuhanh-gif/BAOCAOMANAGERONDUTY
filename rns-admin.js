@@ -31,10 +31,8 @@
      '<td>'+((x.radar_unit==='ADMIN'||x.rns_role==='admin')?'—':
        '<button type="button" class="rnsPick rnsAccessButton" data-shared-access="'+esc(x.id)+'">PHÂN QUYỀN 2 ỨNG DỤNG</button>'+        '<button type="button" class="rnsPick rnsDeleteButton" data-shared-delete="'+esc(x.id)+'">XÓA TÀI KHOẢN</button>'+        '<button type="button" class="rnsPick" data-rns-existing="'+esc(x.email)+'" data-rns-role="'+esc(x.radar_unit||'VIEWER')+
        '" data-rns-name="'+esc(x.display_name||'')+'">CẤP QUYỀN</button>'+
-       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA HỒ SƠ</button>':'')+
-       (x.id&&x.radar_unit&&x.radar_active===true?
-         '<button type="button" class="rnsPick rnsResetQuick" data-rns-reset="'+esc(x.id)+'">'+
-         (x.rns_active===true?'ĐẶT LẠI MẬT KHẨU':'GỬI LINK ĐỔI MẬT KHẨU')+'</button>':'') )+'</td></tr>').join('');
+       (x.id&&x.radar_unit?'<button type="button" class="rnsPick" data-rns-edit="'+esc(x.id)+'">SỬA HỒ SƠ</button>':'') )+
+       (x.id?'<button type="button" class="rnsPick rnsResetQuick" data-rns-reset="'+esc(x.id)+'">RESET MK 123456</button>':'')+'</td></tr>').join('');
    div.innerHTML='<div class="rnsTableHead">'+visible.length+' / '+accounts.length+' tài khoản dùng chung RNS/Supabase</div>'+
      '<div class="tablewrap"><table class="rnsSharedTable"><thead><tr><th>EMAIL RNS</th><th>HỌ TÊN</th><th>QUYỀN RNS</th><th>QUYỀN RADAR</th><th>THAO TÁC</th></tr></thead><tbody>'+
      (rows||'<tr><td colspan="5">Không có tài khoản phù hợp.</td></tr>')+'</tbody></table></div>';
@@ -157,11 +155,9 @@
    $('rnsEditUnit').value=x.radar_unit;
    $('rnsEditActive').checked=x.radar_active===true;
    $('rnsEditSave').disabled=false;
-   $('rnsEditReset').disabled=x.radar_active!==true;
-   $('rnsEditReset').textContent=x.rns_active===true?'ĐẶT LẠI MẬT KHẨU TẠM':'GỬI LINK ĐỔI MẬT KHẨU';
-   mark('rnsEditStatus','Đang chọn '+x.email+'. '+
-     (x.rns_active===true?'ADMIN có thể đặt mật khẩu tạm.':
-       'Quyền RNS không hoạt động; dùng email khôi phục mật khẩu, không mở quyền RNS.'));
+   $('rnsEditReset').disabled=false;
+   $('rnsEditReset').textContent='RESET MK 123456';
+   mark('rnsEditStatus','Đang chọn '+x.email+'. Có thể reset mật khẩu, không thay đổi quyền.');
    $('rnsManagerEditPanel')?.scrollIntoView?.({behavior:'smooth',block:'start'});
  }
  async function editAccount(){
@@ -192,40 +188,32 @@
    }catch(err){mark('rnsEditStatus','Cập nhật chưa hoàn tất: '+err.message,true)}
    finally{accountBusy=false;$('rnsEditSave').disabled=!picked;}
  }
- async function resetAccount(){
-   if(!picked||accountBusy)return;
-   const u=accounts.find(a=>a.id===picked);
-   if(!u||!u.radar_active)return;
-   const useEmail=u.rns_active!==true;
-   if(useEmail){
-     if(!confirm('GỬI LIÊN KẾT KHÔI PHỤC MẬT KHẨU cho '+u.email+
-       '?\n\nTài khoản hiện không có quyền RNS hoạt động. Nhân viên sẽ nhận email để tự đổi mật khẩu đăng nhập dùng chung; quyền RNS giữ nguyên, không tự mở khóa.'))return;
-   }else{
-     if(!confirm('ĐẶT LẠI MẬT KHẨU cho '+u.email+
-       '?\nMật khẩu cũ sẽ hết hiệu lực. Mật khẩu tạm mới được sinh ngẫu nhiên và chỉ hiển thị một lần.'))return;
-   }
-   accountBusy=true;$('rnsEditReset').disabled=true;closeReset();
-   mark('rnsEditStatus',useEmail?'Đang đề nghị gửi email khôi phục mật khẩu…':'Đang tạo mật khẩu tạm mới…');
+ async function resetAccount(id=picked){
+   if(!id||accountBusy)return;
+   const u=accounts.find(a=>a.id===id);
+   if(!u)return;
+   if(!confirm('RESET MẬT KHẨU VỀ 123456 cho '+u.email+'?\n\nMật khẩu cũ sẽ hết hiệu lực. Người dùng phải đổi mật khẩu ngay tại RNS. Quyền của cả hai ứng dụng giữ nguyên.'))return;
+   const email=prompt('Nhập chính xác email tài khoản cần reset để xác nhận:', '');
+   if(email===null)return;
+   if(email.trim().toLowerCase()!==u.email.toLowerCase())return mark('rnsSharedStatus','Email xác nhận không khớp. Chưa reset.',true);
+   accountBusy=true;
+   $('rnsEditReset').disabled=true;closeReset();
+   mark('rnsSharedStatus','Đang reset mật khẩu cho '+u.email+'…');
+   mark('rnsEditStatus','Đang reset mật khẩu cho '+u.email+'…');
    try{
-     if(useEmail){
-       if(typeof sb==='undefined'||!sb)throw Error('Chưa có kết nối Supabase Auth.');
-       const {error}=await sb.auth.resetPasswordForEmail(u.email,{
-         redirectTo:'https://sagsdieuhanh-gif.github.io/SAGSCXR-RNS/secure.html'
-       });
-       if(error)throw error;
-       mark('rnsEditStatus','Supabase đã tiếp nhận yêu cầu khôi phục cho '+u.email+
-         '. Nhân viên kiểm tra email và mở liên kết để đặt mật khẩu mới, rồi đăng nhập Manager. Chưa thể xác nhận email đã được phát tới hộp thư. Quyền RNS không thay đổi.');
-       return;
+     const changed=await invoke('reset_password',{user_id:id,confirm:true,confirm_email:email.trim().toLowerCase()});
+     if(changed.temporary_password!=='123456'||changed.must_change_password!==true)throw Error('Máy chủ chưa xác nhận reset 123456. Kiểm tra lại trước khi thao tác tiếp.');
+     const msg='Đã reset mật khẩu '+u.email+' về 123456. Phải đổi mật khẩu tại RNS; quyền giữ nguyên.';
+     mark('rnsSharedStatus',msg);mark('rnsEditStatus',msg);
+     if(typeof me!=='undefined'&&me?.id===id){
+       alert(msg+' Bạn cần đăng nhập lại.');
+       await sb.auth.signOut();location.reload();return;
      }
-     const changed=await invoke('reset_password',{user_id:picked,confirm:true});
-     if(!changed.temporary_password)throw Error('Máy chủ chưa trả về mật khẩu tạm, cần kiểm tra trạng thái tài khoản.');
      $('rnsResetSecret').value=changed.temporary_password;
      $('rnsResetSecretPanel').classList.remove('hidden');
-     mark('rnsEditStatus','Đã đặt lại mật khẩu cho '+u.email+
-       '. Bàn giao riêng; nhân viên phải đổi tại RNS trước khi dùng Manager.');
-     $('rnsResetSecretPanel')?.scrollIntoView?.({behavior:'smooth',block:'center'});
    }catch(err){
-     mark('rnsEditStatus',(useEmail?'Chưa gửi được yêu cầu khôi phục: ':'Reset mật khẩu chưa thành công: ')+err.message,true);
+     const msg='Reset mật khẩu chưa thành công: '+err.message;
+     mark('rnsSharedStatus',msg,true);mark('rnsEditStatus',msg,true);
    }finally{
      accountBusy=false;$('rnsEditReset').disabled=!picked;
    }
@@ -343,7 +331,7 @@
    $('rnsCreateDismiss').onclick=dismissSecret;
    $('rnsSharedReload').onclick=loadShared;
    $('rnsEditSave').onclick=editAccount;
-   $('rnsEditReset').onclick=resetAccount;
+   $('rnsEditReset').onclick=()=>resetAccount();
    $('rnsEditClear').onclick=deselect;
    $('rnsResetCopy').onclick=copyReset;
    $('rnsResetDismiss').onclick=closeReset;
@@ -355,7 +343,7 @@
      const access=e.target.closest('[data-shared-access]');
      if(access){openSharedAccess(access.dataset.sharedAccess);return;}
      const reset=e.target.closest('[data-rns-reset]');
-     if(reset){selectAccount(reset.dataset.rnsReset);resetAccount();return;}
+     if(reset){resetAccount(reset.dataset.rnsReset);return;}
      const edit=e.target.closest('[data-rns-edit]');
      if(edit){selectAccount(edit.dataset.rnsEdit);return}
      const b=e.target.closest('[data-rns-existing]');

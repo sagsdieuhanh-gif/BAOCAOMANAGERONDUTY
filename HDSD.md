@@ -318,3 +318,7 @@ Bộ mẫu được kiểm tra bằng 6 phiên bản nguồn L1/L2 ngày 31/10, 
 - Nếu nguồn nghiệp vụ của **một chuyến không phải Charter** xác nhận ferry thì đánh giá ferry độc lập theo trường dữ liệu đó, không suy ra ferry từ `##`. Cũng không mặc định mọi charter đều có yêu cầu đặc biệt; chỉ thực hiện nếu hãng thông báo yêu cầu cụ thể.
 - Ví dụ `##QQE530` được nhận diện Charter; không tự hiện cảnh báo `Charter/Ferry chưa thống nhất`, không tự yêu cầu ĐH xác minh loại hình chỉ vì ký hiệu `##`.
 - Đã giữ ẩn các chú thích kỹ thuật về nguồn quân số và tên file Excel trong bản trình Ban TGĐ; thông tin nguồn vẫn lưu trong hồ sơ để truy vết. Bộ kiểm thử hồi quy giữ các tình huống Lần 1/Lần 2 của 31/10, 01/11 và 02/11.
+
+
+## V3.40 – Reset mật khẩu tài khoản dùng chung
+ADMIN mở QUẢN LÝ TÀI KHOẢN, chọn RESET MK 123456 ngay trên hàng của tài khoản, xác nhận và nhập đúng email. Không yêu cầu quyền Manager/RNS đang hoạt động; không thay đổi quyền. Với tài khoản ADMIN hoặc tài khoản ngoài Manager, cần quyền ADMIN cả hai ứng dụng; email đích phải đã xác minh. Sau reset, người dùng đăng nhập RNS bằng mật khẩu tạm và đổi sang mật khẩu riêng trước khi dùng Manager. Không gửi mật khẩu tạm vào nhóm chat. Chỉ reset từng tài khoản khi cần, không reset hàng loạt. Chức năng tạo mới giữ mật khẩu ngẫu nhiên.
