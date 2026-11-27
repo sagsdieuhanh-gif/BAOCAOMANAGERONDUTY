@@ -59,9 +59,13 @@ globalThis.document={createElement(tag){if(tag==='canvas')return {width:0,height
 const png=e.draw({date:'2026-10-31',rows:[normalized]},{naturalWidth:80,naturalHeight:80,kind:'logo'},
   {small:{naturalWidth:100,naturalHeight:75,kind:'29'},big:{naturalWidth:100,naturalHeight:75,kind:'45'}});
 assert.ok(png.width>1000);
-assert.ok(draws.some(x=>x.includes('GỢI Ý: 2 XE: 45C + 29C')));
-assert.ok(draws.some(x=>x.includes('74 ghế · dư 0 ghế')));
-assert.ok(draws.some(x=>x==='IMAGE:29')&&draws.some(x=>x==='IMAGE:45'));
+assert.ok(draws.some(x=>x.includes('GỢI Ý XE: '+m.suggestVehicles(74).label)),
+ 'Accurate 45C+29C advice appears on its own compact trip card');
+assert.ok(draws.includes('74'),'Total headcount remains visible without a seat-surplus paragraph');
+assert.ok(!draws.some(x=>x.includes('74 ghế · dư 0 ghế')),
+ 'No redundant seat-surplus text in user-requested compact image');
+assert.ok(!draws.some(x=>x==='IMAGE:29'||x==='IMAGE:45'),
+ 'Decorative bus images were intentionally removed from PNG in V3.33');
 const exportCode=fs.readFileSync('v21-shuttle-export.js','utf8');
 const gridCode=fs.readFileSync('v24-shuttle-grid.js','utf8');
 assert.ok(exportCode.includes('model().suggestVehicles(total)'));
@@ -69,4 +73,4 @@ assert.ok(gridCode.includes('model().suggestVehicles(row.total)')&&gridCode.incl
  'Keep historical confirmed plan and new provisional plan calculations');
 assert.ok(gridCode.includes('plan.note'),'UI must include available seats, spare seats, and confirmation status');
 assert.ok(gridCode.includes("shuttle-'+item.seats+'.webp"),'UI must show each vehicle type in plan');
-console.log('PASS V2.21: optimize 29C/45C combinations, preserve four-unit confirmation, consistent PNG/PDF and UI plans');
+console.log('PASS V2.21: optimize 29C/45C combinations, preserve four-unit confirmation, correct concise PNG/PDF and UI coach plans');
