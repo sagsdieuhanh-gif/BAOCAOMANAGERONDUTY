@@ -5,7 +5,7 @@ const ws=fs.readFileSync('v300-workspace.js','utf8');
 const grid=fs.readFileSync('v24-shuttle-grid.js','utf8');
 const model=fs.readFileSync('v21-shuttle-model.js','utf8');
 assert.match(html,/MANAGER ON DUTY/);
-assert.ok(html.includes('v24-shuttle-grid.js?v=3.11'), 'New grid code must bypass cached old grid');
+assert.ok(/v24-shuttle-grid\.js\?v=3\.(?:1[1-9]|[2-9]\d|\d{3,})\b/.test(html), 'New grid code must bypass cached old grid');
 assert.ok(html.includes('v300-workspace.js?v='), 'New workspace code must bypass cached old UI');
 assert.ok(ws.includes("['shuttle','Xe giao ca','bus-front','Nhập số người và xuất bảng xe'"),'Shuttle navigation must be obvious');
 assert.ok(ws.includes("['analysis','report','shuttle'].filter(canOpen)"),'XE GIAO CA belongs to the main left rail');

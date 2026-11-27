@@ -44,7 +44,7 @@ assert.ok(!paint.some(p=>p.kind==='image'&&(p.image==='29'||p.image==='45')),
  'Do not draw decorative vehicle icons in compact report');
 const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes('v21-shuttle-model.js?v=3.11'));
-assert.ok(index.includes('v24-shuttle-grid.js?v=3.11'));
+assert.ok(/v24-shuttle-grid\.js\?v=3\.(?:1[1-9]|[2-9]\d|\d{3,})\b/.test(index));
 assert.ok(index.includes('v21-shuttle-export.js?v='));
 assert.ok(index.includes("APP_VERSION='V3."));
 console.log('PASS V3.36: accurate coach advice in compact cards, no redundant banner/icons, exact fixed clocks, partial vs confirmed');
