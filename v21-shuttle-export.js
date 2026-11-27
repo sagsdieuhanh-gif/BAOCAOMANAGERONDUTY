@@ -57,7 +57,20 @@
    }).catch(e=>{logoPromise=null;throw e});
    return logoPromise;
  }
- function draw(input,logo,overrideSeason){
+ let premiumArtPromise=null;
+ function loadPremiumArt(force=false){
+   if(!force&&!root.SagsFestiveThemeV334?.currentSeason?.())return Promise.resolve(null);
+   if(!premiumArtPromise){
+     premiumArtPromise=new Promise(resolve=>{
+       const image=new Image();
+       image.onload=()=>resolve(image.naturalWidth>0?image:null);
+       image.onerror=()=>resolve(null);
+       image.src='./assets/holiday/apron-detail.webp';
+     });
+   }
+   return premiumArtPromise;
+ }
+ function draw(input,logo,overrideSeason,art){
    // V3.34: exactly the same event/window toggle as E-REPORT. Normal mode is intact.
    const season=overrideSeason||root.SagsFestiveThemeV334?.currentSeason?.()||'';
    const festive=season==='christmas'||season==='newyear';
@@ -97,13 +110,27 @@
    };
    const rule=(x,y,x2)=>{c.beginPath();c.strokeStyle=C.line;c.lineWidth=1;c.moveTo(x,y);c.lineTo(x2,y);c.stroke();};
    const day=input.date?input.date.slice(8,10)+'/'+input.date.slice(5,7)+'/'+input.date.slice(0,4):'—';
-   c.fillStyle='#F1F6F9';c.fillRect(0,0,W,H);
-   shape(13,13,W-26,H-26,13,C.white,festive?'#D7B477':C.line);
+   c.fillStyle=festive?'#071528':'#F1F6F9';c.fillRect(0,0,W,H);
+   shape(13,13,W-26,H-26,13,festive?'#0b1f36':C.white,festive?'#caa265':C.line);
    if(festive){
+     // Premium E-REPORT V1.4 holiday apron artwork, copied from the source repo.
      shape(14,14,W-28,108,11,'#0A2138','#BE9B61');
-     // Restrained golden lights: intentionally no ornaments over data.
+     if(art?.naturalWidth>0&&art?.naturalHeight>0){
+       c.save();c.beginPath();c.rect(15,15,W-30,106);c.clip();
+       const dw=W-30,dh=106;
+       const scale=Math.max(dw/art.naturalWidth,dh/art.naturalHeight);
+       const sw=dw/scale,sh=dh/scale;
+       const sx=(art.naturalWidth-sw)/2,sy=(art.naturalHeight-sh)/2;
+       c.drawImage(art,sx,sy,sw,sh,15,15,dw,dh);
+       c.restore();
+       const gradient=c.createLinearGradient(15,0,W-15,0);
+       gradient.addColorStop(0,'rgba(3,13,30,.93)');
+       gradient.addColorStop(.54,'rgba(5,20,38,.77)');
+       gradient.addColorStop(1,'rgba(7,24,44,.28)');
+       c.fillStyle=gradient;c.fillRect(15,15,W-30,106);
+     }
      c.fillStyle='#F4D895';
-     for(let x=31;x<W-20;x+=70)c.fillRect(x,19,4,4);
+     for(let x=31;x<W-20;x+=65)c.fillRect(x,17,3,3);
      shape(outer,27,76,76,9,'#FFFFFF','#E2C185');
    }else shape(13,13,W-26,6,3,C.blue);
    const logoRatio=Math.min(74/logo.naturalWidth,74/logo.naturalHeight);
@@ -111,7 +138,7 @@
      logo.naturalWidth*logoRatio,logo.naturalHeight*logoRatio);
    t('XE GIAO CA · SAGS CXR',outer+96,53,31,festive?'#FFE9BD':C.navy,true);
    t(festive?(season==='newyear'?'HAPPY NEW YEAR 2027 · SAGS CXR':'MERRY CHRISTMAS · HAPPY NEW YEAR 2027'):
-     'Lịch xe và quân số các đơn vị',outer+96,92,festive?16:16,festive?'#E7C584':C.muted,true);
+     'Lịch xe và quân số các đơn vị',outer+96,92,16,festive?'#efd09a':C.muted,true);
    shape(W-outer-245,28,245,73,9,festive?'#193650':C.soft,festive?'#CEAA71':C.line);
    t('NGÀY KHAI THÁC',W-outer-122,49,13,festive?'#DCC89F':C.muted,true,'center');
    t(day,W-outer-122,78,25,festive?'#FFF0D0':C.navy,true,'center');
@@ -128,30 +155,35 @@
    function card(v,x,y){
      const total=Number(v.total)||0,any=v.confirmed>0,complete=v.confirmed===UNITS.length;
      const extra=!!(v.is_custom||Number(v.line_no||0)>0);
-     shape(x,y,col,cardH,8,extra?C.pale:(festive?'#FFFEFB':C.white),
-       extra?'#D8B17D':festive?'#DDC9A4':C.line);
-     shape(x,y,5,cardH,2,extra?C.orange:complete?C.green:festive?'#C39B63':C.blue);
+     shape(x,y,col,cardH,8,festive?(extra?'#314259':'#263650'):(extra?C.pale:C.white),
+       festive?'#d2ae75':extra?'#D8B17D':C.line);
+     shape(x,y,5,cardH,2,festive?(extra?'#E6B76F':complete?'#8CD9B5':'#c3944e'):
+       extra?C.orange:complete?C.green:C.blue);
      // Biggest visual anchors: bus time and confirmed/partial headcount.
-     t(model().clock(v.departure_min),x+18,y+31,31,C.navy,true);
-     if(extra)t('GIỜ BỔ SUNG',x+181,y+29,12,C.orange,true);
-     t(any?String(total):'—',x+col-18,y+30,40,complete?C.navy:any?C.orange:C.muted,true,'right');
-     t(any?'NGƯỜI':'CHƯA NHẬP',x+col-18,y+59,12,any?C.muted:C.red,true,'right');
-     rule(x+16,y+67,x+col-16);
+     t(model().clock(v.departure_min),x+18,y+31,31,festive?'#fff7e8':C.navy,true);
+     if(extra)t('GIỜ BỔ SUNG',x+181,y+29,12,festive?'#efd09a':C.orange,true);
+     t(any?String(total):'—',x+col-18,y+30,40,festive?(complete?'#fff6e8':'#f5ce8a'):
+       complete?C.navy:any?C.orange:C.muted,true,'right');
+     t(any?'NGƯỜI':'CHƯA NHẬP',x+col-18,y+59,12,festive?'#e6cca1':any?C.muted:C.red,true,'right');
+     if(festive){c.beginPath();c.strokeStyle='#53657c';c.lineWidth=1;c.moveTo(x+16,y+67);c.lineTo(x+col-16,y+67);c.stroke();}
+     else rule(x+16,y+67,x+col-16);
      // Four unit figures are operational inputs, not four separate paragraphs.
      const band=(col-32)/4;
      for(let i=0;i<4;i++){
        const unit=v.units[i],ux=x+16+i*band;
-       t(UNIT_LABELS[i],ux,y+82,12,C.muted,true);
-       t(unit?String(unit.quantity):'—',ux,y+108,24,unit?C.ink:C.muted,!!unit);
+       t(UNIT_LABELS[i],ux,y+82,12,festive?'#f2d098':C.muted,true);
+       t(unit?String(unit.quantity):'—',ux,y+108,24,festive?(unit?'#fff6e8':'#aebed0'):
+         unit?C.ink:C.muted,!!unit);
      }
      const status=complete?'ĐỦ 4/4 ĐƠN VỊ':any?'TẠM TÍNH '+v.confirmed+'/4':'CHỜ 4 ĐƠN VỊ';
-     t(status,x+16,y+127,12,complete?C.green:any?C.orange:C.red,true);
+     t(status,x+16,y+127,12,festive?(complete?'#8CD9B5':any?'#f5ce8a':'#f5b4b4'):
+       complete?C.green:any?C.orange:C.red,true);
      if(any){
        const plan=model().suggestVehicles(total);
        if(plan){
          // The vehicle is a capacity suggestion, not proof that a coach is available.
          const label='GỢI Ý XE: '+plan.label;
-         t(label,x+col-16,y+127,12,C.blue,true,'right',col-210);
+         t(label,x+col-16,y+127,12,festive?'#f5d49d':C.blue,true,'right',col-210);
        }
      }
    }
@@ -169,7 +201,7 @@
  }
  // Standalone visual preview. Intentionally uses DEMO values, never live database data.
  async function previewSeasonalSample(){
-   const logo=await loadLogo();
+   const [logo,art]=await Promise.all([loadLogo(),loadPremiumArt(true)]);
    const modelApi=model();
    if(!modelApi)throw Error('Chưa tải được mô hình giờ xe.');
    const base=modelApi.defaults.map(x=>({...x,line_no:0,units:[null,null,null,null],
@@ -183,7 +215,7 @@
    });
    const day=new Date(Date.now()+7*60*60*1000).toISOString().slice(0,10);
    const theme=root.SagsFestiveThemeV334?.windowSeason?.()||'christmas';
-   const imageCanvas=draw({date:day,rows:base},logo,theme);
+   const imageCanvas=draw({date:day,rows:base},logo,theme,art);
    // Prominent watermark prevents demo figures being mistaken for an actual report.
    const ctx=imageCanvas.getContext('2d');
    ctx.save();
@@ -240,8 +272,8 @@
    buttons.forEach(b=>b.disabled=true);
    if(status)status.textContent='Đang tạo '+type.toUpperCase()+'…';
    try{
-     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
-     const img=draw(data,logo),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
+     const [data,logo,art]=await Promise.all([fetchData(),loadLogo(),loadPremiumArt()]);
+     const img=draw(data,logo,undefined,art),base='SAGS_CXR_XE_GIAO_CA_'+data.date.replaceAll('-','');
      if(type==='png'){
        const blob=await new Promise((resolve,reject)=>{if(typeof img.toBlob!=='function')return reject(Error('Trình duyệt không hỗ trợ xuất ảnh PNG.'));img.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh PNG.')),'image/png');});
        const url=URL.createObjectURL(blob);try{download(url,base+'.png');}finally{setTimeout(()=>URL.revokeObjectURL(url),15000);}
@@ -283,8 +315,8 @@
    const el=$('v21ShuttlePreview');if(!el)return;
    el.innerHTML='<p class="v21-report-loading">Đang tạo ảnh xem trước từ dữ liệu đã xác nhận…</p>';
    try{
-     const [data,logo]=await Promise.all([fetchData(),loadLogo()]);
-     const canvas=draw(data,logo);
+     const [data,logo,art]=await Promise.all([fetchData(),loadLogo(),loadPremiumArt()]);
+     const canvas=draw(data,logo,undefined,art);
      const image=document.createElement('img');
      image.alt='Bảng tổng hợp xe giao ca đúng bản xuất PNG/PDF, gồm ĐH, PVHK, PVSĐ, QA & IT.';
      const blob=await new Promise((resolve,reject)=>{if(typeof canvas.toBlob!=='function')return reject(Error('Thiết bị không hỗ trợ ảnh PNG.'));canvas.toBlob(x=>x?resolve(x):reject(Error('Không tạo được ảnh xem trước.')),'image/png');});
