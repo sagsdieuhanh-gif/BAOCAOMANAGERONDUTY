@@ -24,7 +24,7 @@ const index=fs.readFileSync('index.html','utf8');
 assert.ok(index.includes("APP_VERSION='V3."));
 for(const file of ['v21-shuttle-model.js','v24-shuttle-grid.js'])
  assert.ok(index.includes(file+'?v=3.11'),'Core shuttle model/grid retain the original data contract');
-assert.ok(index.includes('v21-shuttle-export.js?v=3.37'),'Updated seasonal/compact image exporter must bypass old browser cache');
+assert.ok(index.includes('v21-shuttle-export.js?v=3.38'),'Updated seasonal/compact image exporter must bypass old browser cache');
 const migration=fs.readFileSync('server/v311-shuttle-0815-not-0830.sql','utf8');
 assert.ok(migration.includes('(990,1110,1560,1935)')&&migration.includes('departure_min=1935'));
 console.log('PASS V3.11 phantom 08:30 removed; confirmed 08:15 kept; seven protected official slots');
