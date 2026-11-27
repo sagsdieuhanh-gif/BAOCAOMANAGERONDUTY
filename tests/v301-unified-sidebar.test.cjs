@@ -18,11 +18,17 @@ assert.match(tablet[1],/#v300Root \.v300-nav-folder\[open\]>div\s*\{\s*display:g
 assert.match(unified,/@media\(max-width:540px\)\{\s*#v300Root \.v300-shell\{grid-template-columns:82px minmax\(0,1fr\)/);
 assert.match(unified,/@media\(max-width:360px\)\{\s*#v300Root \.v300-shell\{grid-template-columns:74px minmax\(0,1fr\)/);
 assert.match(css,/#v300Root \.v300-main \.tablewrap,[\s\S]*?overflow-x:auto/,'Wide tables scroll inside content instead of moving page');
-assert.match(index,/Báo cáo điều hành V3\.26/);
-assert.match(index,/const APP_VERSION='V3\.26'/);
-assert.match(js,/id="v300Version">V3\.26/);
-assert.ok(index.indexOf('v300-workspace.css?v=3.24')>index.indexOf('v225-role-access.css'),'Unified layout stylesheet must load last');
-assert.ok(index.includes('v300-workspace.js?v=3.26'));
-assert.ok(js.includes('v300-cta')&&js.includes('XEM BÁO CÁO TGĐ'),'Existing CTA must survive the layout change');
-assert.ok(readme.includes('V3.26')&&readme.includes('bên trái'),'HDSD must track changed navigation');
+
+const release=index.match(/const APP_VERSION='(V\\d+\\.\\d+)'/)?.[1];
+assert.ok(release,'Application version must be present');
+assert.match(index,/MANAGER ON DUTY/);
+assert.ok(js.includes('id="v300Version">'+release),'Sidebar version matches app release');
+assert.ok(index.indexOf('v300-workspace.css?v=')>index.indexOf('v225-role-access.css'),
+  'Unified layout stylesheet must load after legacy style');
+assert.ok(index.includes('v300-workspace.js?v='+release.slice(1)),
+  'Workspace cache-bust must match current release');
+assert.ok(js.includes('v300-cta')&&js.includes('XEM BÁO CÁO TGĐ'),
+  'Existing report CTA must survive the layout change');
+assert.ok(readme.includes(release)&&readme.includes('bên trái'),
+  'README tracks latest release and sidebar workflow');
 console.log('PASS V3.10: sidebar left and workspace right on PC, tablet and mobile; stacked phone navigation, exports/CTA retained');
