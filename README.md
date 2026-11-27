@@ -1,3 +1,26 @@
+## V3.34 — Giao diện Giáng sinh/Năm mới giống E-Report và ảnh xe giao ca mùa lễ hội (HDSD)
+
+V3.34 kế thừa màu sắc và thời gian hiển thị từ **E-REPORT-SAGS V1.2** (chủ đề Giáng sinh & New Year 2027). Chỉ thay đổi cách trình bày, tuyệt đối không thay đổi dữ liệu nghiệp vụ, biểu mẫu, quyền, số người hay cách tính xe.
+
+### Thời gian áp dụng và bật/tắt
+- **27/11–26/12/2026:** Giáng sinh, lời chúc **Merry Christmas & Happy New Year 2027**.
+- **27/12/2026–03/01/2027:** Tết Dương lịch, lời chúc **Happy New Year 2027**.
+- Sau 03/01/2027: tự trở lại giao diện thường, không cần sửa ứng dụng. Ngày được tính theo giờ Việt Nam.
+- Trong giai đoạn lễ hội, giao diện mặc định BẬT. Ở thanh trên có nút **☀ GIAO DIỆN THƯỜNG / 🎄 BẬT LỄ HỘI** để mỗi người tự chọn. Lựa chọn chỉ lưu trên chính trình duyệt đang dùng, không thay đổi người khác và không lưu vào database.
+
+### Giao diện
+- Màu xanh navy, vàng champagne, đèn trang trí nhẹ và banner chúc mừng; giữ logo SAGS gốc.
+- Màn hình đăng nhập có lời chúc và tuyết nhẹ trên nền, chỉ khi ở giao diện mùa lễ hội. Hỗ trợ chế độ giảm chuyển động, màn hình điện thoại.
+- Trang chủ và khu vực điều hướng có viền, nhấn màu vàng; không đưa hình trang trí đè lên trường nhập liệu, dữ liệu, bảng theo dõi, nội dung báo cáo và bản in nghiệp vụ.
+
+### Ảnh xe giao ca PNG/PDF
+- Vào **XE GIAO CA** rồi chọn **XEM TRƯỚC / XUẤT PNG / XUẤT PDF** như trước. Khi giao diện lễ hội đang bật, ảnh sử dụng nền đầu/cuối navy, điểm nhấn vàng champagne, lời chúc Giáng sinh hoặc Năm mới, nhưng vẫn **giữ rõ 2 tuyến, 7 giờ xe, 4 đơn vị, quân số, trạng thái xác nhận và gợi ý sức chứa**.
+- Khi người dùng tắt lễ hội thì ảnh xuất trở lại giao diện V3.33 thông thường.
+- Đặc biệt có nút **🚌 XEM MẪU ẢNH XE** trên thanh trên, chỉ hiện trong mùa lễ hội. Nút này mở ảnh mẫu dựng bằng **dữ liệu minh họa** với watermark “BẢN XEM TRƯỚC · SỐ LIỆU MINH HỌA”, không truy cập Supabase và không tải/ghi dữ liệu thật. Chỉ để duyệt hình thức trước khi xuất ảnh chính thức.
+- Ảnh PNG và PDF vẫn lấy từ cùng bộ vẽ, nội dung nghiệp vụ không bị suy đoán hay thay đổi. Không mở tính năng gửi Zalo tự động.
+
+**Kiểm tra:** cú pháp JS, lịch kích hoạt, bật/tắt, việc giữ nguyên thông tin ca xe, màu ảnh PNG và không đọc nguồn trong bản xem trước được kiểm tra bằng mock. Chưa xác nhận hiển thị thực tế trên mọi thiết bị hoặc PDF đã mở thủ công.
+
 ## V3.33 — Ảnh xe giao ca tối giản, dễ đọc (HDSD)
 
 Bản cập nhật V3.33 chỉ tinh gọn **ảnh/PDF tổng hợp XE GIAO CA** và phần xem trước ảnh tương ứng. Không thay đổi giờ xe, số lượng nhân sự, dữ liệu nguồn, cách tính gợi ý sức chứa, phân quyền hoặc thông tin được lưu.
