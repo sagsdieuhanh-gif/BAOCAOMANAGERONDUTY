@@ -48,6 +48,6 @@ const assert=require('node:assert/strict');
  assert.ok(gcode.includes('v28-extra-slot'));
  const index=require('node:fs').readFileSync('index.html','utf8');
  assert.ok(index.includes('v24-shuttle-grid.js?v=3.11'));
- assert.ok(index.includes('v21-shuttle-export.js?v=3.38'));
+ assert.ok(index.includes('v21-shuttle-export.js?v=3.39'));
  console.log('PASS V3.36: extra bus reason retained in source, compact export shows provisional status and short vehicle suggestion');
 })().catch(e=>{console.error(e);process.exitCode=1});
