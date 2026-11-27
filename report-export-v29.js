@@ -5,6 +5,10 @@
  const $=id=>document.getElementById(id);
  const base=root.SagsReportV19;
  if(!base)return;
+ function filenameFor(date,format){
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!['docx','pdf'].includes(format))throw Error('Ngày khai thác hoặc định dạng file không hợp lệ.');
+   return 'DỰ BÁO KHAI THÁC NGÀY '+date.split('-').reverse().join('.')+'.'+format;
+ }
  async function exportMain(format){
    if(!['ADMIN','DH'].includes(unit)){alert('Chỉ ĐH/ADMIN được xuất báo cáo.');return;}
    const buttons=[...document.querySelectorAll(format==='docx'?'[data-v19-export]':'[data-main-pdf]')];
@@ -20,7 +24,7 @@
        node=$('v19ReportPreview')?.querySelector('.v19-report-sheet');
      }
      if(!node||node.dataset.reportDate!==date)throw Error('Chưa có bản xem trước cho ngày đã chọn.');
-     const filename='SAGS_CXR_DU_BAO_LAN_'+(node.dataset.reportRevision==='2'?'2':'1')+'_'+date.replaceAll('-','')+'.'+format;
+     const filename=filenameFor(node.dataset.reportDate,format);
      const hidePendingWarnings=format==='pdf'&&$('v315PdfHidePending')?.checked===true;
      const result=await root.SagsOfficeExportV29.exportElement(
        node,format,filename,{hidePendingWarnings});
@@ -36,5 +40,5 @@
  base.exportOne=word;base.exportPdf=pdf;
  document.querySelectorAll('[data-v19-export]').forEach(b=>b.onclick=word);
  document.querySelectorAll('[data-main-pdf]').forEach(b=>b.onclick=pdf);
- root.SagsMainReportV29={exportWord:word,exportPdf:pdf};
+ root.SagsMainReportV29={exportWord:word,exportPdf:pdf,filenameFor};
 })(window);

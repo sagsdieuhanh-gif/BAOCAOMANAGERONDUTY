@@ -346,3 +346,7 @@ Bổ sung dòng Kho hàng từ Nhân sự Kho hàng theo ca (mã WAREHOUSE_CARGO
 
 ## V3.46 – Xuất báo cáo theo bản đang xem
 Xem báo cáo đúng ngày trước khi xuất. Bấm Word/PDF sẽ sử dụng chính nội dung bản xem trước; nếu chưa có bản đúng ngày thì tạo bản xem trước trước khi xuất. Nếu vừa cập nhật dữ liệu, hãy bấm xem lại báo cáo để cập nhật nội dung trước khi xuất. Bảng quân số giữ màu xanh nhạt và cấu trúc như web; số trang có thể thay đổi theo khổ A4 và Word.
+
+
+## V3.47 – Tên file xuất
+Tên Word/PDF tự động là DỰ BÁO KHAI THÁC NGÀY DD.MM.YYYY theo ngày khai thác lịch bay. Dùng dấu chấm thay dấu gạch chéo để tên file hợp lệ. Nếu xuất lại cùng ngày, trình duyệt có thể thêm số thứ tự để tránh trùng file.

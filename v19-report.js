@@ -632,7 +632,7 @@
      const blob=await D.Packer.toBlob(word(data,D));
      if(!blob||blob.size<3000)throw Error('File Word không hợp lệ.');
      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-     a.download='SAGS_CXR_DU_BAO_LAN_1_'+data.c.date.replaceAll('-','')+'.docx';
+     a.download='DỰ BÁO KHAI THÁC NGÀY '+data.c.date.split('-').reverse().join('.')+'.docx';
      document.body.appendChild(a);a.click();a.remove();
      setTimeout(()=>URL.revokeObjectURL(a.href),3000);
      const status=document.getElementById('v19ExportMessage');

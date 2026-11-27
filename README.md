@@ -1,3 +1,7 @@
+## V3.47 – Tên file báo cáo theo ngày khai thác
+
+Word/PDF có tên DỰ BÁO KHAI THÁC NGÀY DD.MM.YYYY.docx/pdf, lấy ngày khai thác từ bản xem trước đúng lịch bay đã chọn, không dùng ngày hiện tại. Lần 1/Lần 2 vẫn ghi trong báo cáo; tên file không thêm hậu tố lần. Sửa hai kiểm thử phát hành V3.46 còn ràng buộc cách đặt tên/cache cũ.
+
 ## V3.46 – Xuất theo bản xem trước
 
 Xuất trực tiếp bản xem trước đang hiển thị đúng ngày, không tự tải lại dữ liệu khi bấm Word/PDF. Đồng bộ bảng quân số theo ca với mẫu web: nền xanh nhạt, chữ xanh đậm, tiêu đề/cột đơn vị căn giữa, cột ca sáng và tối bằng nhau, từng nhóm xuống dòng. PDF và Word vẫn phân trang theo A4; Word giữ khả năng chỉnh sửa.
