@@ -1,0 +1,268 @@
+/* V3.36 — single authoritative festive presentation layer.
+   E-REPORT-SAGS V1.4 Premium source assets, NO duplicate banner/greeting layers.
+   Seasonal rules scoped to login, workspace navigation and overview ONLY.
+   Operational forms/tables/print remain unmodified. */
+@media screen {
+html[data-sags-season] { --fest-gold:#efd09a; --fest-line:rgba(231,191,121,.35); }
+html[data-sags-season] body { background:#061427!important; }
+/* E-REPORT modal-like login occupies the viewport. Existing application header
+   is not rendered here; this is the primary fix for stacked old/new headers. */
+html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready)>header {display:none!important}
+html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout {
+ position:relative;isolation:isolate;display:flex;align-items:center;justify-content:flex-start;
+ width:100%;max-width:none;min-height:100svh;margin:0!important;
+ padding:clamp(25px,5vh,72px) clamp(24px,9vw,155px)!important;
+ background:
+  linear-gradient(90deg,transparent 50%,#122239 56%,transparent 65%),
+  url('./assets/holiday/apron.webp') right center/46% 100% no-repeat,
+  linear-gradient(100deg,#0c192ce6,#192d46a8),
+  url('./assets/branding/apron-night-v6494.webp') left center/cover no-repeat!important;
+ overflow:hidden;
+}
+html[data-sags-season="newyear"] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout {
+ background:
+  linear-gradient(90deg,transparent 50%,#122239 56%,transparent 65%),
+  url('./assets/holiday/apron-detail.webp') right center/46% 100% no-repeat,
+  linear-gradient(100deg,#0c192ce6,#192d46a8),
+  url('./assets/branding/apron-night-v6494.webp') left center/cover no-repeat!important;
+}
+html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout::before {
+ content:"";position:absolute;inset:0 0 auto;height:75px;z-index:1;pointer-events:none;
+ background:radial-gradient(circle,#fff2c8 0 2px,transparent 4px) 9px 14px/65px 64px repeat-x,
+  radial-gradient(circle,#d8a64c 0 3px,transparent 5px) 41px 12px/95px 64px repeat-x,
+  linear-gradient(180deg,rgba(2,11,28,.66),transparent);
+ filter:drop-shadow(0 0 7px rgba(245,191,100,.82));
+}
+html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout::after{
+ content:"";position:absolute;inset:-100% 0 0;pointer-events:none;z-index:0;opacity:.21;
+ background-image:radial-gradient(2px 2px at 28px 30px,#fff 70%,transparent),
+  radial-gradient(2px 2px at 90px 80px,#fff 65%,transparent),
+  radial-gradient(1px 1px at 140px 55px,#fff 65%,transparent);
+ background-size:165px 173px,225px 217px,120px 145px;
+ animation:sagsMODSnowV336 30s linear infinite;
+}
+@keyframes sagsMODSnowV336{to{transform:translate3d(0,49%,0)}}
+html[data-sags-season] body #authpanel.loginbox{
+ position:relative;z-index:2;flex:0 0 auto;width:min(100%,438px)!important;max-width:438px!important;
+ margin:0!important;padding:29px 30px!important;
+ border:1px solid rgba(236,197,128,.58)!important;border-radius:24px!important;
+ background:linear-gradient(145deg,rgba(74,84,107,.87),rgba(19,36,61,.92) 55%,rgba(57,64,83,.89))!important;
+ color:#fff7e8!important;box-shadow:0 25px 65px rgba(0,5,18,.60),
+ inset 0 1px 0 rgba(255,245,220,.12),0 0 36px rgba(229,170,85,.10)!important;
+}
+html[data-sags-season] body #authpanel .sags-premium-login-brand{
+ display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 13px;
+}
+html[data-sags-season] body #authpanel .sags-premium-login-brand img {
+ display:block;width:44px;height:44px;object-fit:contain;background:white;padding:3px;border-radius:9px;
+}
+html[data-sags-season] body #authpanel .sags-premium-login-brand b {
+ font-size:16px;color:#f8dda6;letter-spacing:.03em;
+}
+html[data-sags-season] body #authpanel h2 {
+ margin:4px 0 18px!important;text-align:center!important;color:#fff6e5!important;
+ font-size:clamp(22px,3vw,27px)!important;letter-spacing:-.02em!important;
+}
+html[data-sags-season] body #authpanel .muted {color:#d3d9e6!important}
+html[data-sags-season] body #authpanel label {color:#e8d6b8!important;font-size:12px!important}
+html[data-sags-season] body #authpanel input {
+ min-height:49px!important;height:49px!important;padding:0 13px!important;
+ border:1px solid rgba(198,166,120,.40)!important;border-radius:11px!important;
+ background:#35425b!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+ box-shadow:inset 0 1px 3px #0003!important;font-size:16px!important;
+}
+html[data-sags-season] body #authpanel input::placeholder{color:#a9b8c9!important;-webkit-text-fill-color:#a9b8c9!important}
+html[data-sags-season] body #authpanel #signin{
+ min-height:49px!important;margin:10px 0 0!important;
+ border:1px solid #f7dcaa!important;border-radius:11px!important;
+ background:linear-gradient(115deg,#bc8d4a,#fae1a9 48%,#c3944e)!important;
+ color:#142136!important;-webkit-text-fill-color:#142136!important;
+ font-size:13px!important;font-weight:900!important;letter-spacing:.07em!important;
+}
+/* Optional toggle embedded inside login card, rather than another top banner. */
+html[data-sags-season-window] body #authpanel .sags-festive-toggle {
+ display:block;width:100%;margin-top:12px!important;
+ background:rgba(18,40,61,.95)!important;border:1px solid rgba(236,195,125,.55)!important;
+ color:#ffdfa4!important;padding:10px 12px;border-radius:11px;
+}
+/* Authenticated workspace: E-REPORT premium navy + champagne. */
+html[data-sags-season] body.v300-ready>header {
+ background:#081b2d!important;color:#fff6e8!important;border-bottom:1px solid var(--fest-line)!important;
+ padding-block:11px!important;
+}
+html[data-sags-season] body.v300-ready>header .v23-site-brand img{
+ background:#fff!important;border-radius:9px;padding:3px;object-fit:contain;
+}
+html[data-sags-season] body.v300-ready>header h1{color:#fff6e8!important}
+html[data-sags-season] body.v300-ready>header .v220-company-name{color:#e6cca1!important}
+html[data-sags-season] body.v300-ready .subtitle{color:#c9d8e1!important}
+html[data-sags-season] body.v300-ready #v300Root{
+ --v300-ink:#f6f7fb;--v300-muted:#b7bfd0;--v300-line:rgba(228,188,124,.27);
+ --v300-brand:#0e293f;--v300-teal:#e7c487;--v300-orange:#e2ae61;
+ background:#061427!important;color:#f7f9fc!important;
+}
+html[data-sags-season] #v300Root .v300-sidebar{
+ background:linear-gradient(165deg,#0a1d32,#061423 79%)!important;
+ border-right:1px solid rgba(231,192,127,.31)!important;
+}
+html[data-sags-season] #v300Root .v300-logo{border-bottom:1px solid var(--fest-line)!important}
+html[data-sags-season] #v300Root .v300-logo strong{color:#fff!important}
+html[data-sags-season] #v300Root .v300-logo small{color:#e6cca1!important}
+html[data-sags-season] #v300Root .v300-emblem{
+ font-size:0!important;width:46px;height:46px;border-radius:10px!important;
+ background:#fff!important;padding:4px;
+}
+.sags-premium-emblem{display:none}
+html[data-sags-season] #v300Root .sags-premium-emblem{
+ display:block;width:100%;height:100%;object-fit:contain;
+}
+html[data-sags-season] #v300Root .v300-side-caption{color:#e7c487!important}
+html[data-sags-season] #v300Root #v300Nav button{
+ color:#d2deec!important;background:transparent!important;border:1px solid transparent!important;
+}
+html[data-sags-season] #v300Root #v300Nav button .v300-nav-icon{color:#edcf94!important}
+html[data-sags-season] #v300Root #v300Nav button:hover{
+ background:#182f47!important;color:#fff!important;border-color:rgba(239,195,122,.45)!important;
+}
+html[data-sags-season] #v300Root #v300Nav button.on{
+ background:linear-gradient(90deg,rgba(230,182,97,.25),rgba(15,37,60,.75))!important;
+ border:1px solid rgba(238,197,126,.60)!important;border-left:3px solid #f3ce8a!important;
+ color:#fff!important;
+}
+html[data-sags-season] #v300Root #v300Nav button.on small{color:#f5deb7!important}
+html[data-sags-season] #v300Root .v300-side-bottom{border-top:1px solid var(--fest-line)!important}
+html[data-sags-season] #v300Root .v300-side-bottom b{color:#efd19c!important}
+html[data-sags-season] body.v300-ready #v300Root .v300-main{
+ background:radial-gradient(circle at 82% 0%,rgba(223,171,82,.08),transparent 39%),
+ linear-gradient(155deg,#071427,#091e32 64%,#061526)!important;
+}
+/* Single seasonal hero, only on overview. No standalone banner strips. */
+html[data-sags-season] #v300Root .sags-premium-hero{
+ display:none;position:relative;isolation:isolate;overflow:hidden;
+ min-height:210px;padding:27px 30px;margin:2px 0 21px;
+ border:1px solid rgba(235,195,123,.53);border-radius:16px;
+ background:linear-gradient(90deg,rgba(3,13,30,.91) 0%,rgba(5,20,38,.74) 47%,rgba(7,24,44,.24)),
+ url('./assets/holiday/apron-detail.webp') center 55%/cover no-repeat;
+ box-shadow:0 14px 32px rgba(0,8,22,.28);
+}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .sags-premium-hero {
+ display:flex;align-items:center;
+}
+html[data-sags-season] #v300Root .sags-premium-hero::before{
+ content:"";position:absolute;inset:0 0 auto;height:26px;pointer-events:none;
+ background:radial-gradient(circle,#ffe6b0 0 2px,transparent 4px) 12px 1px/55px 25px repeat-x;
+ filter:drop-shadow(0 0 5px #ecb96f);opacity:.75;
+}
+html[data-sags-season] #v300Root .sags-premium-hero>*{position:relative;z-index:1}
+html[data-sags-season] #v300Root .sags-premium-hero small{display:block;color:#ead3a9;letter-spacing:.08em;font-size:12px;font-weight:800}
+html[data-sags-season] #v300Root .sags-premium-hero h2{color:#fff8e9!important;font-size:clamp(27px,3vw,40px)!important;margin:9px 0}
+html[data-sags-season] #v300Root .sags-premium-hero h2 span{color:#f3d398}
+html[data-sags-season] #v300Root .sags-premium-hero p{color:#e8eef9;font-size:13px;margin:0}
+html[data-sags-season] #v300Root .v300-kicker{color:#e7c487!important}
+html[data-sags-season] #v300Root .v300-top h1{color:#fff4dd!important}
+html[data-sags-season] #v300Root .v300-top p{color:#b9c5d3!important}
+html[data-sags-season] #v300Root .v300-tools button{
+ background:#1b3449!important;color:#f7deb0!important;
+ border:1px solid rgba(232,194,128,.46)!important;
+}
+html[data-sags-season] #v300Root #v300DaySlot label{color:#ead4aa!important}
+html[data-sags-season] #v300Root #v300DaySlot input{color:#fff!important;background:#263c50!important;border-color:#b79a6c!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-stat{
+ border:1px solid rgba(231,190,121,.32)!important;
+ background:linear-gradient(145deg,#3b4962,#1b2b43 68%,#2e3748)!important;
+ color:#f5f7ff!important;box-shadow:0 6px 15px rgba(0,8,20,.17)!important;
+}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-stat span{color:#f2d098!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-stat strong{color:#fff6e8!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-stat small{color:#c5d1dd!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-card{
+ border:1px solid rgba(235,194,126,.32)!important;
+ background:linear-gradient(145deg,#253650,#101f33)!important;color:#eef5fa!important;
+}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-card-head h2,
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-alert strong{color:#fff0d4!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-alert p{color:#eaf1f8!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-action-note{
+ color:#f6e7cb!important;background:#172f43!important;border-left-color:#e3bc7d!important;
+}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-step{
+ background:#102b44!important;border:1px solid rgba(231,188,121,.34)!important;color:#fff!important;
+}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-step b{background:#263c53!important;color:#f0ce90!important}
+html[data-sags-season] #v300Root .v300-main:has(.v300-stats) .v300-step small{color:#c4cfdd!important}
+html[data-sags-season] #v300Root .v300-cta{
+ background:linear-gradient(120deg,#0b253c,#1f3851)!important;
+ border:1px solid rgba(231,191,127,.38)!important;
+}
+html[data-sags-season] #v300Root .v300-cta-btn{
+ background:linear-gradient(120deg,#bd914e,#f1d398)!important;color:#0e2340!important;
+}
+html[data-sags-season] #v300Root .v300-foot{color:#b7c6d5!important}
+/* Do not darken data-entry cards; contrast stays as baseline. */
+html[data-sags-season] #v300Root .v300-main:not(:has(.v300-stats)) .v300-card{
+ background:#fff;color:#203748;
+}
+/* One season toggle in the workspace header. */
+html[data-sags-season-window] .sags-festive-toggle{
+ cursor:pointer;border:1px solid rgba(236,195,125,.55)!important;border-radius:11px!important;
+ background:#172940!important;color:#ffdfa4!important;min-height:38px;
+ padding:7px 11px;font:750 11px/1.25 system-ui,sans-serif!important;
+}
+html[data-sags-season-window] .sags-festive-preview-button{
+ cursor:pointer;border:1px solid rgba(236,195,125,.55)!important;border-radius:11px!important;
+ background:linear-gradient(115deg,#bc8d4a,#fae1a9 48%,#c3944e)!important;
+ color:#142136!important;min-height:38px;padding:7px 11px;
+ font:800 11px/1.25 system-ui,sans-serif!important;
+}
+html[data-sags-season-window] :is(.sags-festive-toggle,.sags-festive-preview-button):focus-visible{
+ outline:3px solid #fff0cb!important;outline-offset:3px;
+}
+@media(max-width:767px){
+ html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout{
+  min-height:100svh;align-items:flex-end;justify-content:center;
+  padding:clamp(170px,28svh,300px) 14px calc(15px + env(safe-area-inset-bottom))!important;
+  background:url('./assets/holiday/mobile.webp') center top/100% auto no-repeat,#0b192c!important;
+  overflow:visible;
+ }
+ html[data-sags-season] body #authpanel.loginbox{
+  width:100%!important;max-width:100%!important;padding:17px 19px!important;
+  border-radius:18px!important;max-height:min(74svh,610px);overflow-y:auto;
+ }
+ html[data-sags-season] body #authpanel h2{font-size:23px!important;margin-bottom:10px!important}
+ html[data-sags-season] body #authpanel input{height:44px!important;min-height:44px!important}
+ html[data-sags-season] #v300Root .sags-premium-hero{min-height:155px;padding:16px}
+ html[data-sags-season] #v300Root .sags-premium-hero h2{font-size:25px!important}
+ html[data-sags-season] #v300Root .sags-premium-hero p{font-size:11px!important}
+ html[data-sags-season-window] :is(.sags-festive-toggle,.sags-festive-preview-button){
+  padding:6px!important;min-height:35px;font-size:9px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-sags-season] body:has(#authpanel:not(.hidden)) main.layout::after{animation:none!important}
+}
+}
+.sags-festive-preview-wrap{
+ position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;
+ background:rgba(3,12,26,.83);backdrop-filter:blur(6px);padding:16px;
+}
+.sags-festive-preview-wrap[hidden]{display:none!important}
+.sags-festive-preview-panel{
+ width:min(1250px,100%);max-height:94dvh;display:flex;flex-direction:column;
+ overflow:hidden;background:#0b1f36;border:1px solid #cfb47f;border-radius:14px;
+ box-shadow:0 22px 65px #0008;
+}
+.sags-festive-preview-head{
+ display:flex;justify-content:space-between;align-items:center;gap:14px;
+ padding:13px 16px;background:#081b2d;border-bottom:1px solid #cfb47f;
+}
+.sags-festive-preview-head h2{font-size:16px;color:#f9dfa8;margin:0}
+.sags-festive-preview-head button{
+ background:#f5dda8;border:1px solid #eac688;color:#183045;border-radius:8px;cursor:pointer;
+}
+.sags-festive-preview-panel>p{background:#132a42;color:#f9dfad;padding:10px 15px;margin:0;font-size:12px}
+.sags-festive-preview-scroll{padding:14px;overflow:auto;background:#071427}
+.sags-festive-preview-image{display:block;width:100%;height:auto;max-width:1300px;margin:auto}
+@media print {
+ .sags-premium-hero,.sags-festive-toggle,.sags-festive-preview-button,
+ .sags-festive-preview-wrap,.sags-premium-login-brand{display:none!important}
+}
