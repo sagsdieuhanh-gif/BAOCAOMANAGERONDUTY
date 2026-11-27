@@ -21,44 +21,13 @@ jobs:
       - name: Check syntax
         run: |
           for f in ./*.js; do node --check "$f"; done
-          node tests/manager-root.test.cjs
-          node tests/v301-unified-sidebar.test.cjs
-          node tests/v336-festive-layout.test.cjs
-          node tests/v303-direct-register.test.cjs
-          node tests/v304-shuttle-input.test.cjs
-          node tests/v305-shuttle-chronology.test.cjs
-          node tests/v306-shuttle-vehicle-recommendations.test.cjs
-          node tests/v307-shuttle-compact-order.test.cjs
-          node tests/v308-shuttle-eight-staff-vehicles.test.cjs
-          node tests/v309-shuttle-export-coach-banner.test.cjs
-          node tests/v310-shuttle-capacity-match.test.cjs
-          node tests/v311-report-shuttle-simple.test.cjs
-          node tests/v312-pvhk-report-language.test.cjs
-          node tests/v313-report-pdf-portrait.test.cjs
-          node tests/v314-report-staff-visibility.test.cjs
-          node tests/v315-staff-count-only-report.test.cjs
-          node tests/v316-l2-report-complete.test.cjs
-          node tests/v317-compact-pvsd-staff.test.cjs
-          node tests/v318-shift-staff-cells.test.cjs
-          node tests/v319-headcount-editorial-accounts.test.cjs
-          node tests/v320-real-pvhk-pvsd-roster.test.cjs
-          node tests/v320-cargo-direction-units.test.cjs
-          node tests/v321-executive-report-three-days.test.cjs
-          node tests/v322-compact-charter-a4.test.cjs
-          node tests/v29-office-export.test.cjs
-          node tests/v212-personnel-human-report.test.cjs
-          node tests/v213-shuttle-reasons.test.cjs
-          node tests/v216-shuttle-export.test.cjs
-          node tests/v217-second-forecast.test.cjs
-          node tests/v218-shuttle-l2-report.test.cjs
-          node tests/v219-peak-capacity.test.cjs
-          node tests/v220-friendly-ui.test.cjs
-          node tests/v221-shuttle-planner.test.cjs
-          node tests/v222-shuttle-layout.test.cjs
-          node tests/v223-daily-brief.test.cjs
-          node tests/v224-staff-ui.test.cjs
-          node tests/v225-role-permissions.test.cjs
-          node tests/v227-shuttle-seven-fixed.test.cjs
+          fail=0
+          for test in tests/manager-root.test.cjs tests/v301-unified-sidebar.test.cjs tests/v336-festive-layout.test.cjs tests/v303-direct-register.test.cjs tests/v304-shuttle-input.test.cjs tests/v305-shuttle-chronology.test.cjs tests/v306-shuttle-vehicle-recommendations.test.cjs tests/v307-shuttle-compact-order.test.cjs tests/v308-shuttle-eight-staff-vehicles.test.cjs tests/v309-shuttle-export-coach-banner.test.cjs tests/v310-shuttle-capacity-match.test.cjs tests/v311-report-shuttle-simple.test.cjs tests/v312-pvhk-report-language.test.cjs tests/v313-report-pdf-portrait.test.cjs tests/v314-report-staff-visibility.test.cjs tests/v315-staff-count-only-report.test.cjs tests/v316-l2-report-complete.test.cjs tests/v317-compact-pvsd-staff.test.cjs tests/v318-shift-staff-cells.test.cjs tests/v319-headcount-editorial-accounts.test.cjs tests/v320-real-pvhk-pvsd-roster.test.cjs tests/v320-cargo-direction-units.test.cjs tests/v321-executive-report-three-days.test.cjs tests/v322-compact-charter-a4.test.cjs tests/v29-office-export.test.cjs tests/v212-personnel-human-report.test.cjs tests/v213-shuttle-reasons.test.cjs tests/v216-shuttle-export.test.cjs tests/v217-second-forecast.test.cjs tests/v218-shuttle-l2-report.test.cjs tests/v219-peak-capacity.test.cjs tests/v220-friendly-ui.test.cjs tests/v221-shuttle-planner.test.cjs tests/v222-shuttle-layout.test.cjs tests/v223-daily-brief.test.cjs tests/v224-staff-ui.test.cjs tests/v225-role-permissions.test.cjs tests/v227-shuttle-seven-fixed.test.cjs; do
+            echo "::group::$test"
+            if node "$test"; then echo "PASS: $test"; else echo "::error title=Regression failed::$test"; fail=$((fail+1)); fi
+            echo "::endgroup::"
+          done
+          if [ "$fail" -ne 0 ]; then echo "::error title=Regression suite::$fail tests failed"; exit 1; fi
       - name: Stage Manager On Duty
         run: |
           mkdir -p _site/assets/holiday _site/assets/branding
