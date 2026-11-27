@@ -33,10 +33,14 @@ const assert=require('node:assert/strict');
  globalThis.document={createElement:tag=>{assert.equal(tag,'canvas');canvas={width:0,height:0,getContext:()=>ctx};return canvas;}};
  const image=exp.draw({date:'2026-10-30',rows:all},{naturalWidth:200,naturalHeight:100});
  assert.equal(image,canvas);
- assert.ok(outputs.some(x=>x.text.includes('CHƯA XÁC NHẬN: PVSĐ, QA & IT')));
- assert.ok(outputs.some(x=>x.text.includes('LÝ DO THÊM XE: Xe hỗ trợ họp chuyên môn')));
- assert.ok(outputs.some(x=>x.text==='GIỜ THÊM'));
- assert.ok(outputs.filter(x=>x.text.includes('LÝ DO THÊM XE')).every(x=>/^#B16D26$/i.test(x.color)),'reason must use orange-highlight color');
+ assert.ok(outputs.some(x=>x.text==='TẠM TÍNH 2/4'),
+  'New compact export must clearly mark partially confirmed extra trip');
+ assert.ok(outputs.some(x=>x.text==='GIỜ BỔ SUNG'),
+  'Extra bus marker is visible without large reason paragraphs');
+ assert.ok(outputs.some(x=>x.text.startsWith('GỢI Ý XE: ')),
+  'Capacity suggestion is concise on the card');
+ assert.ok(!outputs.some(x=>x.text.startsWith('LÝ DO THÊM XE: ')),
+  'Detailed extra-bus reason is stored in source data, not repeated on simplified image');
  const gcode=require('node:fs').readFileSync('v24-shuttle-grid.js','utf8');
  assert.ok(gcode.includes('data-v28-custom-reason'));
  assert.ok(gcode.includes('data-v24-save-all'));
@@ -44,6 +48,6 @@ const assert=require('node:assert/strict');
  assert.ok(gcode.includes('v28-extra-slot'));
  const index=require('node:fs').readFileSync('index.html','utf8');
  assert.ok(index.includes('v24-shuttle-grid.js?v=3.11'));
- assert.ok(index.includes('v21-shuttle-export.js?v=3.11'));
- console.log('PASS V2.13 missing-unit roster, extra bus reason, orange highlight and export canvas');
+ assert.ok(index.includes('v21-shuttle-export.js?v=3.36'));
+ console.log('PASS V3.36: extra bus reason retained in source, compact export shows provisional status and short vehicle suggestion');
 })().catch(e=>{console.error(e);process.exitCode=1});
