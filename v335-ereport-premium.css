@@ -321,3 +321,22 @@ html[data-sags-season] .sags-festive-identity small{
  html[data-sags-season] .sags-festive-identity{display:none}
  html[data-sags-season] .sags-festive-banner-logo{width:28px;height:27px}
 }
+
+/* E-REPORT premium's New Year art switch and Christmas mobile banner. */
+@media screen and (min-width:768px){
+ html[data-sags-season="newyear"] body:has(#authpanel:not(.hidden)) .layout {
+  background:linear-gradient(90deg,transparent 50%,#122239 56%,transparent 65%),
+  url('./assets/holiday/apron-detail.webp') right center/46% 100% no-repeat,
+  linear-gradient(100deg,#0c192ce6,#192d46a8),
+  url('./assets/branding/apron-night-v6494.webp') left center/cover no-repeat!important;
+ }
+}
+@media screen and (max-width:767px){
+ html[data-sags-season="christmas"] body.v300-ready .sags-festive-banner {
+  background:url('./assets/holiday/banner.webp') center/cover no-repeat!important;
+  aspect-ratio:549/167;min-height:65px!important;padding:0!important;
+ }
+ html[data-sags-season="christmas"] body.v300-ready .sags-festive-banner>*{
+  visibility:hidden!important;
+ }
+}
