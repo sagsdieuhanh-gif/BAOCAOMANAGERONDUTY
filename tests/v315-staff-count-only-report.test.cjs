@@ -64,7 +64,7 @@ assert.ok(files.office.includes("format==='pdf'?exportOptions:{}"),'Word should 
 assert.ok(files.native.includes("$('v315PdfHidePending')?.checked===true"));
 assert.ok(files.workspace.includes("$('v315WorkspaceHidePending')?.checked===true"));
 assert.ok(files.index.includes('id="v315PdfHidePending"'));
-assert.ok(files.index.includes("APP_VERSION='V3.'"));
+assert.ok(files.index.includes("APP_VERSION='V3."));
 assert.ok(files.index.includes('office-export-v29.js?v='));
 assert.ok(files.index.includes('report-export-v29.js?v=3.15'));
 console.log('PASS V3.15: report shows only confirmed headcounts; PDF-only optional hide warnings leaves Word and preview untouched');
