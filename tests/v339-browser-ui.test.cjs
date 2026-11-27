@@ -155,7 +155,7 @@ const dir=path.join(root,'tests','ui-artifacts');fs.mkdirSync(dir,{recursive:tru
      loginShown:getComputedStyle(document.querySelector('body>header')).display==='none',
      cardColor:getComputedStyle(document.querySelector('#v300Root .v300-main')).color,
      loginLayerHidden:getComputedStyle(document.querySelector('main.layout')).display==='none',
-     oldAuthHidden:getComputedStyle(document.getElementById('authpanel')).display==='none',
+     oldAuthHidden:document.getElementById('authpanel').getClientRects().length===0,
      overflow:document.documentElement.scrollWidth-window.innerWidth
    }));
    if(!home.visible||home.hero==='none'||home.loginShown||!home.loginLayerHidden||!home.oldAuthHidden)
