@@ -69,7 +69,7 @@
  }
  function layout(){
    return '<div class="v300-shell"><aside class="v300-sidebar">'+
-      '<div class="v300-logo"><span class="v300-emblem">S</span><div><strong>MANAGER ON DUTY</strong><small>SAGS · CXR</small></div></div>'+
+      '<div class="v300-logo"><span class="v300-emblem">S<img class="sags-premium-emblem" src="./assets/branding/logo.png" alt="" loading="lazy"></span><div><strong>MANAGER ON DUTY</strong><small>SAGS · CXR</small></div></div>'+
       '<div class="v300-side-caption">KHÔNG GIAN DỰ BÁO</div><nav id="v300Nav" aria-label="Chức năng dự báo">'+
       (()=>{const button=([k,label,ico,sub])=>'<button type="button" data-v300-route="'+k+'" aria-label="'+H(label)+'">'+
        '<span class="v300-nav-icon">'+keyCode(ico)+'</span><span><strong>'+H(label)+'</strong><small>'+H(sub)+'</small></span></button>';
