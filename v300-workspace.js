@@ -81,7 +81,7 @@
        (canOpen('admin')?button(main.admin):'')+
        (canOpen('norms')?'<details class="v300-nav-folder v300-nav-tools"><summary>⚙ &nbsp; CÔNG CỤ PHỤ</summary><div>'+button(main.norms)+'</div></details>':'');
       })()+
-      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.38</b></div></aside>'+
+      '</nav><div class="v300-side-bottom"><span>Quy trình: dữ liệu → nguy cơ → phương án</span><b id="v300Version">V3.39</b></div></aside>'+
       '<div class="v300-main"><div class="v300-top"><div><span class="v300-kicker">DỰ BÁO ĐIỀU HÀNH · D+1</span>'+
       '<h1 id="v300Heading">Tổng quan ngày khai thác</h1><p id="v300Subheading">Thông tin cần chuẩn bị trước ngày khai thác.</p></div>'+
       '<div class="v300-tools"><div id="v300DaySlot"></div><button type="button" data-v300-command="refresh" class="v300-outline">↻ Đồng bộ</button></div></div>'+
@@ -111,9 +111,12 @@
        if(event.target.matches('[data-v329-issue-picker]'))loadIssueEditor(event.target.value);
        if(event.target.closest('#v300Page'))updateUnitPreview();
      });
-     mounted=true;document.body.classList.add('v300-ready');
+     mounted=true;
      $('day')?.addEventListener('change',()=>{draftReset();refresh()});
    }
+   // Restore the full-width workspace on every login, not only initial mount.
+   document.body.classList.add('v300-ready');
+   root.SagsFestiveThemeV337?.refresh?.();
    refresh();return true;
  }
  function draftReset(){const node=$('v300Page');if(node)node.innerHTML='';}
