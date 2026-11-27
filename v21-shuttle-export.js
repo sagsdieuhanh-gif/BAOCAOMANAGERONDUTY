@@ -57,7 +57,10 @@
    }).catch(e=>{logoPromise=null;throw e});
    return logoPromise;
  }
- function draw(input,logo){
+ function draw(input,logo,overrideSeason){
+   // V3.34: exactly the same event/window toggle as E-REPORT. Normal mode is intact.
+   const season=overrideSeason||root.SagsFestiveThemeV334?.currentSeason?.()||'';
+   const festive=season==='christmas'||season==='newyear';
    if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
    const rows=input.rows||[];
    const go=rows.filter(x=>x.direction==='NHA_CXR');
@@ -95,30 +98,39 @@
    const rule=(x,y,x2)=>{c.beginPath();c.strokeStyle=C.line;c.lineWidth=1;c.moveTo(x,y);c.lineTo(x2,y);c.stroke();};
    const day=input.date?input.date.slice(8,10)+'/'+input.date.slice(5,7)+'/'+input.date.slice(0,4):'—';
    c.fillStyle='#F1F6F9';c.fillRect(0,0,W,H);
-   shape(13,13,W-26,H-26,13,C.white,C.line);
-   shape(13,13,W-26,6,3,C.blue);
+   shape(13,13,W-26,H-26,13,C.white,festive?'#D7B477':C.line);
+   if(festive){
+     shape(14,14,W-28,108,11,'#0A2138','#BE9B61');
+     // Restrained golden lights: intentionally no ornaments over data.
+     c.fillStyle='#F4D895';
+     for(let x=31;x<W-20;x+=70)c.fillRect(x,19,4,4);
+     shape(outer,27,76,76,9,'#FFFFFF','#E2C185');
+   }else shape(13,13,W-26,6,3,C.blue);
    const logoRatio=Math.min(74/logo.naturalWidth,74/logo.naturalHeight);
    c.drawImage(logo,outer+(74-logo.naturalWidth*logoRatio)/2,27+(74-logo.naturalHeight*logoRatio)/2,
      logo.naturalWidth*logoRatio,logo.naturalHeight*logoRatio);
-   t('XE GIAO CA · SAGS CXR',outer+96,53,31,C.navy,true);
-   t('Lịch xe và quân số các đơn vị',outer+96,92,16,C.muted);
-   shape(W-outer-245,28,245,73,9,C.soft,C.line);
-   t('NGÀY KHAI THÁC',W-outer-122,49,13,C.muted,true,'center');
-   t(day,W-outer-122,78,25,C.navy,true,'center');
-   rule(outer,116,W-outer);
+   t('XE GIAO CA · SAGS CXR',outer+96,53,31,festive?'#FFE9BD':C.navy,true);
+   t(festive?(season==='newyear'?'HAPPY NEW YEAR 2027 · SAGS CXR':'MERRY CHRISTMAS · HAPPY NEW YEAR 2027'):
+     'Lịch xe và quân số các đơn vị',outer+96,92,festive?16:16,festive?'#E7C584':C.muted,true);
+   shape(W-outer-245,28,245,73,9,festive?'#193650':C.soft,festive?'#CEAA71':C.line);
+   t('NGÀY KHAI THÁC',W-outer-122,49,13,festive?'#DCC89F':C.muted,true,'center');
+   t(day,W-outer-122,78,25,festive?'#FFF0D0':C.navy,true,'center');
+   if(festive){c.beginPath();c.strokeStyle='#D8B477';c.lineWidth=1;c.moveTo(outer,116);c.lineTo(W-outer,116);c.stroke();}
+   else rule(outer,116,W-outer);
    const header=(x,title,sub,count)=>{
-     shape(x,130,col,49,7,C.soft,C.line);
-     shape(x,130,5,49,2,C.blue);
-     t(title,x+18,147,19,C.navy,true);
-     t(sub+' · '+count+' mốc',x+18,167,13,C.muted);
+     shape(x,130,col,49,7,festive?'#132F49':C.soft,festive?'#BFA06C':C.line);
+     shape(x,130,5,49,2,festive?'#E7C584':C.blue);
+     t(title,x+18,147,19,festive?'#FFEDCA':C.navy,true);
+     t(sub+' · '+count+' mốc',x+18,167,13,festive?'#E6D0A7':C.muted);
    };
    header(outer,'NHA TRANG → CAM RANH','XE ĐI LÀM',go.length);
    header(outer+col+gap,'CAM RANH → NHA TRANG','XE VỀ',back.length);
    function card(v,x,y){
      const total=Number(v.total)||0,any=v.confirmed>0,complete=v.confirmed===UNITS.length;
      const extra=!!(v.is_custom||Number(v.line_no||0)>0);
-     shape(x,y,col,cardH,8,extra?C.pale:C.white,extra?'#D8B17D':C.line);
-     shape(x,y,5,cardH,2,extra?C.orange:complete?C.green:C.blue);
+     shape(x,y,col,cardH,8,extra?C.pale:(festive?'#FFFEFB':C.white),
+       extra?'#D8B17D':festive?'#DDC9A4':C.line);
+     shape(x,y,5,cardH,2,extra?C.orange:complete?C.green:festive?'#C39B63':C.blue);
      // Biggest visual anchors: bus time and confirmed/partial headcount.
      t(model().clock(v.departure_min),x+18,y+31,31,C.navy,true);
      if(extra)t('GIỜ BỔ SUNG',x+181,y+29,12,C.orange,true);
@@ -146,11 +158,64 @@
    go.forEach((v,i)=>card(v,outer,top+i*step));
    back.forEach((v,i)=>card(v,outer+col+gap,top+i*step));
    const confirmed=rows.filter(x=>x.confirmed===UNITS.length).length;
-   rule(outer,bottom+4,W-outer);
+   if(festive){
+     shape(outer,bottom+7,W-outer*2,41,7,'#142F49','#CFB47F');
+   }else rule(outer,bottom+4,W-outer);
    t(rows.length+' MỐC XE  ·  '+confirmed+' ĐỦ XÁC NHẬN  ·  '+(rows.length-confirmed)+' CHỜ XÁC NHẬN',
-     outer,bottom+29,14,C.muted,true);
-   t('Gợi ý xe theo sức chứa; chưa xác nhận xe khả dụng.',W-outer,bottom+29,13,C.muted,false,'right');
+     outer+(festive?11:0),bottom+29,14,festive?'#F4E2BC':C.muted,true);
+   t('Gợi ý sức chứa; chưa xác nhận xe khả dụng.',W-outer-(festive?11:0),bottom+29,13,
+     festive?'#ECD4A7':C.muted,false,'right');
    return canvas;
+ }
+ // Standalone visual preview. Intentionally uses DEMO values, never live database data.
+ async function previewSeasonalSample(){
+   const logo=await loadLogo();
+   const modelApi=model();
+   if(!modelApi)throw Error('Chưa tải được mô hình giờ xe.');
+   const base=modelApi.defaults.map(x=>({...x,line_no:0,units:[null,null,null,null],
+     confirmed:0,total:0,is_custom:false}));
+   const samples=[[2,7,5,1],[3,9,4,2],[1,6,3,1],[4,8,6,2],[2,9,5,2],[2,5,4,1],[1,4,3,1]];
+   base.forEach((x,i)=>{
+     const list=samples[i%samples.length];
+     x.units=list.map((quantity,index)=>({unit:UNITS[index],quantity}));
+     x.total=list.reduce((sum,value)=>sum+value,0);
+     x.confirmed=4;
+   });
+   const day=new Date(Date.now()+7*60*60*1000).toISOString().slice(0,10);
+   const theme=root.SagsFestiveThemeV334?.windowSeason?.()||'christmas';
+   const imageCanvas=draw({date:day,rows:base},logo,theme);
+   // Prominent watermark prevents demo figures being mistaken for an actual report.
+   const ctx=imageCanvas.getContext('2d');
+   ctx.save();
+   ctx.globalAlpha=.96;
+   ctx.fillStyle='#FFF0CB';ctx.fillRect(375,3,540,23);
+   ctx.fillStyle='#7C3D24';ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.font='700 15px Arial, sans-serif';
+   ctx.fillText('BẢN XEM TRƯỚC · SỐ LIỆU MINH HỌA',650,14);
+   ctx.restore();
+   const old=document.getElementById('sagsFestiveDemoV334');
+   if(old)old.remove();
+   const screen=document.createElement('div');
+   screen.id='sagsFestiveDemoV334';screen.className='sags-festive-preview-wrap';
+   screen.setAttribute('role','dialog');screen.setAttribute('aria-modal','true');
+   screen.setAttribute('aria-label','Bản xem trước ảnh xe giao ca mùa lễ hội');
+   const panel=document.createElement('div');panel.className='sags-festive-preview-panel';
+   const head=document.createElement('div');head.className='sags-festive-preview-head';
+   const title=document.createElement('h2');title.textContent='🚌 XEM TRƯỚC · ẢNH XE GIAO CA MÙA LỄ HỘI';
+   const close=document.createElement('button');close.type='button';close.textContent='ĐÓNG ✕';
+   close.onclick=()=>screen.remove();
+   head.append(title,close);panel.appendChild(head);
+   const note=document.createElement('p');
+   note.textContent='Ảnh minh họa giao diện lễ hội. Tất cả quân số trong ảnh là dữ liệu mẫu, KHÔNG lấy từ hệ thống.';
+   panel.appendChild(note);
+   const scroll=document.createElement('div');scroll.className='sags-festive-preview-scroll';
+   const img=document.createElement('img');
+   img.className='sags-festive-preview-image';img.alt='Ảnh xe giao ca Giáng sinh mẫu, không phải số liệu thực tế.';
+   img.src=imageCanvas.toDataURL('image/png');
+   scroll.appendChild(img);panel.appendChild(scroll);screen.appendChild(panel);
+   screen.addEventListener('click',event=>{if(event.target===screen)screen.remove()});
+   document.body.appendChild(screen);close.focus();
+   return screen;
  }
  function download(url,filename){
    const a=document.createElement('a');a.href=url;a.download=filename;
@@ -240,5 +305,5 @@
      b.dataset.v21Bound='1';b.onclick=()=>exportFile(b.dataset.v21Export);
    });
  }
- root.SagsShuttleExport={exportFile,bind,renderPreview,_test:{normalize,draw}};
+ root.SagsShuttleExport={exportFile,bind,renderPreview,previewSeasonalSample,_test:{normalize,draw}};
 })(typeof window!=='undefined'?window:globalThis);
