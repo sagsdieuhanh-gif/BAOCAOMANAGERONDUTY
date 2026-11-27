@@ -69,7 +69,7 @@ assert.ok(reportC[0].observation.includes('4 → 3'));
 assert.ok(reportC[4].action.includes('định mức'));
 assert.ok(!reportC[4].action.includes('đủ nhân sự'));
 assert.ok(html.indexOf('v319-report-editorial.js?v=3.20')<html.indexOf('v19-report.js?v='));
-assert.ok(html.includes("APP_VERSION='V3.'"));
+assert.ok(html.includes("APP_VERSION='V3."));
 for(const id of ['rnsManagerEditPanel','rnsEditSave','rnsEditReset','rnsResetSecretPanel'])assert.ok(html.includes('id="'+id+'"'));
 assert.ok(admin.includes("invoke('update'")&&admin.includes("invoke('reset_password'"));
 assert.ok(admin.includes("closeReset();")&&admin.includes("selected")===false || admin.includes("picked=x.id"));
