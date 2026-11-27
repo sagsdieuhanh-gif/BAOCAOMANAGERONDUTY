@@ -835,8 +835,8 @@ body:not(.v300-ready) .loginbox{max-width:440px;margin:10vh auto 0;border-radius
 .v19-report-sheet.v322-two-page table.v322-coord-table th:first-child{width:20%}
 .v19-report-sheet.v322-two-page table.v322-coord-table th:nth-child(2){width:47%}
 .v19-report-sheet.v322-two-page table.v322-coord-table th:nth-child(3){width:33%}
-.v19-report-sheet.v322-two-page table.v318-staff-by-shift .v320-staff-line{display:inline;margin:0;line-height:1.32;font-size:10.2px}
-.v19-report-sheet.v322-two-page table.v318-staff-by-shift .v320-staff-line:not(:last-child):after{content:" · ";white-space:pre}
+.v19-report-sheet.v322-two-page table.v318-staff-by-shift .v320-staff-line{display:block;margin:0 0 3px;line-height:1.5;font-size:12px}
+.v19-report-sheet.v322-two-page table.v318-staff-by-shift .v320-staff-line:not(:last-child):after{content:none}
 .v19-report-sheet.v322-two-page .v219-hourly-chart{max-height:175px;overflow:hidden;margin:4px 0}
 .v19-report-sheet.v322-two-page .v219-hourly-chart svg{max-height:170px;width:100%;height:auto}
 .v19-report-sheet.v322-two-page .v216-report-brand{margin-bottom:4px}

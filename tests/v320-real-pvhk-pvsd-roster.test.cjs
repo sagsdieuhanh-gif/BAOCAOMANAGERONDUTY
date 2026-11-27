@@ -5,7 +5,7 @@ globalThis.prevDate=d=>{let x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate
 require('../v320-staff-roster.js');require('../v212-personnel.js');require('../v19-report.js');
 const schema=globalThis.SagsStaffRosterV320;
 const raw=[
- ['PVHK','PVHK_OFFICE',1,null],['PVHK','PVHK_DEPARTURE_TEAM',33,33],
+ ['KHO','WAREHOUSE_CARGO',5,null],['PVHK','PVHK_OFFICE',1,null],['PVHK','PVHK_DEPARTURE_TEAM',33,33],
  ['PVHK','PVHK_ARRIVAL_TEAM',14,15],['KTS','KTS_OFFICE',1,1],
  ['KTS','KTS_RAMP_TEAM',18,16],['KTS','BAGGAGE',9,7],
  ['KTS','KTS_HLSD_SKO',9,11],['KTS','TERMINAL_BAGGAGE',11,10],
@@ -45,7 +45,8 @@ for(const rev of [1,2]){
  const html=window.SagsReportV19.renderHtml(data);
  const table=html.match(/<table class="v318-staff-by-shift">([\s\S]*?)<\/table>/)?.[1];
  assert.ok(table);
- assert.equal((table.match(/<tr><th scope="row">/g)||[]).length,3,'Only DH/PVHK/PVSD three room rows');
+ const kho=data.staffByShift.find(x=>x.label==='Kho hàng');assert.equal(kho.groups[0].morning,5);assert.equal(kho.groups[0].night,null);
+ assert.equal((table.match(/<tr><th scope="row">/g)||[]).length,4,'Four department rows including Kho hàng');
  for(const v of ['HLSĐ','HLNG','PVTT','SKO','13 + 3 TC + 3 SKO','Cán bộ Phòng']){
   assert.ok(table.includes(v),'Missing '+v);
  }
@@ -77,3 +78,9 @@ for(const code of ['KTS_RAMP_TEAM','KTS_HLSD_SKO','KTS_HLNG_SKO','KTS_PVTT_TC','
  assert.ok(ktUi.includes(code+'|SÁNG')&&ktUi.includes(code+'|ĐÊM'));
 assert.ok(ktUi.includes('dữ liệu cũ'),'Keep legacy specialty counts editable');
 console.log('PASS V3.22: precise PVHK/PVSĐ staff groups by two shifts; SKYONE and TC independent; no write of examples');
+
+const ex=fs.readFileSync('office-export-v29.js','utf8');
+assert.ok(ex.includes("staffLines.map(inner).join('\\n')"),'Word/PDF must preserve explicit staff line separators');
+assert.ok(ex.includes('.map(tableCellText)'));
+const style=fs.readFileSync('v300-workspace.css','utf8');
+assert.ok(style.includes('table.v318-staff-by-shift .v320-staff-line{display:block'));

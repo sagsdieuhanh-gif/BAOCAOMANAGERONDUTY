@@ -338,3 +338,7 @@ ADMIN/ĐH chọn ngày khai thác, vào XE GIAO CA, bấm XÓA XE ngay dưới m
 
 ## V3.44 – Xác nhận xóa xe bổ sung có số liệu
 Bấm XÓA XE. Nếu đã có số liệu, hệ thống liệt kê đơn vị và số người, yêu cầu gõ XÓA. Nhập sai hoặc hủy không xóa. Số 0 đã xác nhận cũng là dữ liệu. Xe chưa có số liệu dùng xác nhận thông thường. Nếu có số liệu mới phát sinh, máy chủ từ chối xóa thiếu xác nhận và yêu cầu thao tác lại.
+
+
+## V3.45 – Quân số theo ca trong báo cáo
+Bổ sung dòng Kho hàng từ Nhân sự Kho hàng theo ca (mã WAREHOUSE_CARGO). Lưu & xác nhận phòng trước khi xuất. Các nhóm nhân sự trong mỗi ca được trình bày từng dòng trên báo cáo xem trước, Word và PDF. Chưa có dữ liệu hiển thị CHỜ XÁC NHẬN; giữ đúng số 0 đã lưu.

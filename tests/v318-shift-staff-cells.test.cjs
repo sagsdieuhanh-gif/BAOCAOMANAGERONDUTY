@@ -4,7 +4,7 @@ globalThis.window=globalThis;globalThis.staff=[];globalThis.gse=[];globalThis.GS
 globalThis.prevDate=x=>{const d=new Date(x+'T00:00:00Z');d.setUTCDate(d.getUTCDate()-1);return d.toISOString().slice(0,10)};
 require('../v212-personnel.js');require('../v19-report.js');
 const raw=[
- ['DH','COORD',8,8],['PVHK','PVHK_ARRIVAL_TEAM',16,16],
+ ['KHO','WAREHOUSE_CARGO',7,0],['DH','COORD',8,8],['PVHK','PVHK_ARRIVAL_TEAM',16,16],
  ['PVHK','PVHK_DEPARTURE_TEAM',43,59],['KTS','BAGGAGE',8,7],
  ['KTS','TERMINAL_BAGGAGE',15,15],['KTS','SKYONE_BAGGAGE',0,11],
  ['KTS','GSE_DRIVER',18,18],['KTS','COBUS_DRIVER',0,0]
@@ -21,19 +21,20 @@ const base={date:'2026-11-01',author:'ĐH',arrivals:1,departures:1,domestic:2,in
 function rows(html){
  const table=html.match(/<table class="v318-staff-by-shift">([\s\S]*?)<\/table>/)?.[1];
  assert.ok(table);const titles=[...table.matchAll(/<tr><th scope="row">(.*?)<\/th>/g)].map(x=>x[1]);
- assert.deepEqual(titles,['ĐH','PVHK','PVSĐ']);
+ assert.deepEqual(titles,['ĐH','PVHK','PVSĐ','Kho hàng']);
  const out={};for(const unit of titles){
   const row=table.match(new RegExp('<tr><th scope="row">'+unit+'</th>([\\s\\S]*?)</tr>'))?.[1];
   const cells=row.match(/<td class="v318-staff-shift-cell">[\s\S]*?<\/td>/g);
   assert.equal(cells?.length,2,'Each department has exactly 2 shift cells: '+unit);
   out[unit]=cells;
  }
- assert.equal((table.match(/<td class="v318-staff-shift-cell">/g)||[]).length,6);
+ assert.equal((table.match(/<td class="v318-staff-shift-cell">/g)||[]).length,8);
  return out;
 }
 for(const revision of [1,2]){
  const data=window.SagsReportV19.build({...base,revision});
  const table=rows(window.SagsReportV19.renderHtml(data));
+ assert.ok(table['Kho hàng'][0].includes('7 người')&&table['Kho hàng'][1].includes('0 người'));
  assert.ok(table['ĐH'][0].includes('8 người')&&table['ĐH'][1].includes('8 người'));
  assert.ok(table.PVHK[0].includes('Đội đến:')&&table.PVHK[0].includes('Đội đi:'));
  assert.ok(table.PVHK[0].includes('16 người')&&table.PVHK[0].includes('43 người'));

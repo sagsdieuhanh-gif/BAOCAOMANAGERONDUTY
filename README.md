@@ -1,3 +1,7 @@
+## V3.45 – Bổ sung quân số Kho hàng và trình bày từng dòng
+
+Bảng quân số Lần 1/Lần 2 gồm ĐH, PVHK, PVSĐ và Kho hàng. Kho hàng lấy đúng mã WAREHOUSE_CARGO đã xác nhận theo ca; ô chưa có số liệu là CHỜ XÁC NHẬN, số 0 được giữ nguyên. Mỗi nhóm nhân sự một dòng trong giao diện và Word/PDF; không gộp nhóm, không tự tính số người.
+
 ## V3.44 – Xác nhận xóa xe đã có dữ liệu
 
 Khi ADMIN/ĐH xóa xe bổ sung đã có số liệu của bất kỳ đơn vị nào (kể cả số 0), phải nhập XÓA. Xe chưa có số liệu chỉ cần xác nhận thông thường. Máy chủ kiểm tra lại và từ chối nếu thiếu xác nhận; giữ nhật ký xóa và bảy giờ cố định. Bản này không tự xóa dữ liệu.

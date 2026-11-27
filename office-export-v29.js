@@ -29,6 +29,10 @@
     return new Blob([...locals,central,end],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
   }
   const inner=el=>text(el.innerText??el.textContent);
+  const tableCellText=el=>{
+    const staffLines=el.classList?.contains('v318-staff-shift-cell')?[...el.querySelectorAll('.v320-staff-line')]:[];
+    return staffLines.length?staffLines.map(inner).join('\n'):inner(el);
+  };
   function blocksFromDOM(rootEl,options={}){
     const result=[];
     function visit(el){
@@ -58,7 +62,7 @@
       }
       if(tag==='IMG'){const src=el.currentSrc||el.getAttribute('src');if(src)result.push({kind:'image',src,logo:el.classList?.contains('v216-report-logo')});return;}
       if(tag==='TABLE'){
-        const rows=[...el.querySelectorAll('tr')].map(r=>[...r.children].filter(x=>x.tagName==='TH'||x.tagName==='TD').map(inner)).filter(x=>x.length);
+        const rows=[...el.querySelectorAll('tr')].map(r=>[...r.children].filter(x=>x.tagName==='TH'||x.tagName==='TD').map(tableCellText)).filter(x=>x.length);
         if(rows.length)result.push({kind:'table',rows,header:!!el.querySelector('th')});return;
       }
       if(['H1','H2','H3','H4'].includes(tag)){const t=inner(el);if(t)result.push({kind:'heading',level:Number(tag.slice(1)),text:t});return}

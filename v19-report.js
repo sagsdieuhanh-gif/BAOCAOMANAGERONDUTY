@@ -115,16 +115,16 @@
    const comparison=priorL1?(l2Delta+(priorTotal==null?'':'\n'+previousDayComparison)):previousDayComparison;
    const w=wide(c.rows),p=peaks(c.rows),short=lowGround(c.rows);
    const staffDetails=(()=> {
-     const units=[['DH','ĐH'],['PVHK','PVHK'],['KTS','PVSĐ']];
+     const units=[['DH','ĐH'],['PVHK','PVHK'],['KTS','PVSĐ'],['KHO','Kho hàng']];
      const roles={
-       COORD:'Điều phối',PVHK_DEPARTURE_TEAM:'Đội khách đi / làm thủ tục',
+       WAREHOUSE_CARGO:'Nhân viên kho/hàng',COORD:'Điều phối',PVHK_DEPARTURE_TEAM:'Đội khách đi / làm thủ tục',
        PVHK_ARRIVAL_TEAM:'Đội khách đến',
        BAGGAGE:'Bốc xếp',GSE_DRIVER:'Lái xe GSE',COBUS_DRIVER:'Lái xe Cobus',
        SKYONE_BAGGAGE:'SKYONE (thuê ngoài)',TERMINAL_BAGGAGE:'Hành lý nhà ga',
        GATE:'Cửa boarding',BUSGATE:'Busgate',AIRCRAFT_BOARDING:'Phục vụ tại tàu',ARRIVAL:'Đón khách đến'
      };
      const records=(c.staff||[]).filter(x=>x.confirmed_at&&
-       ['DH','PVHK','KTS'].includes(x.unit)&&['SÁNG','ĐÊM'].includes(x.shift)&&
+       ['DH','PVHK','KTS','KHO'].includes(x.unit)&&['SÁNG','ĐÊM'].includes(x.shift)&&x.quantity!=null&&String(x.quantity).trim()!==''&&
        Number.isInteger(Number(x.quantity))&&Number(x.quantity)>=0);
      const output=[];
      for(const [unit,label] of units){
@@ -161,7 +161,7 @@
      {name:'SKYONE',morning:pvsdByRole('SKYONE (thuê ngoài)')?.morning??null,
        night:pvsdByRole('SKYONE (thuê ngoài)')?.night??null}
    ];
-   // Three department rows only: one verified morning cell + one evening cell.
+   // Four department rows: one verified morning cell + one evening cell.
    // PVHK and PVSĐ groups stay separate *inside* each shift cell. Never add
    // PVSĐ subgroups to its confirmed departmental total.
    const deptRole=(unit,name)=>staffDetails.find(x=>x.unit===unit&&x.role===name);
@@ -176,7 +176,8 @@
        {name:'Đội đi',morning:deptRole('PVHK','Đội khách đi / làm thủ tục')?.morning??null,
          night:deptRole('PVHK','Đội khách đi / làm thủ tục')?.night??null}
      ]},
-     {label:'PVSĐ',groups:pvsdSummary}
+     {label:'PVSĐ',groups:pvsdSummary},
+     {label:'Kho hàng',groups:[{name:'Nhân sự',morning:deptRole('KHO','Nhân viên kho/hàng')?.morning??null,night:deptRole('KHO','Nhân viên kho/hàng')?.night??null}]}
    ];
    const roster=window.SagsStaffRosterV320;
    if(roster){
@@ -544,7 +545,7 @@
          (data.operational.hours.unverified.length?'; '+data.operational.hours.unverified.length+' lượt chưa đủ chặng/giờ để phân loại.':'.')+'</p>'+
        '<div class="r28-chart v219-hourly-chart">'+window.SagsOpsForecastV219.svg(data.operational.hours)+'</div>':'')+
     '<h3>II. NHẬN ĐỊNH VÀ PHƯƠNG ÁN TỔ CHỨC PHỤC VỤ</h3>'+topicsTable+
-    '<h4>QUÂN SỐ THEO CA ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ</h4>'+
+    '<h4>QUÂN SỐ THEO CA ĐÃ XÁC NHẬN – ĐH / PVHK / PVSĐ / KHO HÀNG</h4>'+
     '<table class="v318-staff-by-shift"><thead><tr><th>Bộ phận</th><th>CA SÁNG</th><th>CA TỐI</th></tr></thead><tbody>'+
       (data.staffByShift||[]).map(x=>'<tr><th scope="row">'+esc(x.label)+'</th>'+
         ['morning','night'].map(shift=>'<td class="v318-staff-shift-cell">'+
