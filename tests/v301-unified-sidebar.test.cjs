@@ -19,7 +19,7 @@ assert.match(unified,/@media\(max-width:540px\)\{\s*#v300Root \.v300-shell\{grid
 assert.match(unified,/@media\(max-width:360px\)\{\s*#v300Root \.v300-shell\{grid-template-columns:74px minmax\(0,1fr\)/);
 assert.match(css,/#v300Root \.v300-main \.tablewrap,[\s\S]*?overflow-x:auto/,'Wide tables scroll inside content instead of moving page');
 
-const release=index.match(/const APP_VERSION='(V\\d+\\.\\d+)'/)?.[1];
+const release=index.match(/const APP_VERSION='(V\d+\.\d+)'/)?.[1];
 assert.ok(release,'Application version must be present');
 assert.match(index,/MANAGER ON DUTY/);
 assert.ok(js.includes('id="v300Version">'+release),'Sidebar version matches app release');
