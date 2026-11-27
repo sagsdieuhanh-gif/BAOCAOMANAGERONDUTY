@@ -426,3 +426,31 @@ html[data-sags-season] #v300Root .sags-premium-hero small{display:none!important
  body.v300-ready>main.layout{display:block!important}
  body.v300-ready #app{display:block!important}
 }
+
+/* V3.39 QA correction: native [hidden] must always win over full-width flex.
+   Without this, the preview kept the old login panel visible above Home. */
+body.v300-ready>main.layout[hidden],
+body.v300-ready #app.hidden,
+body.v300-ready #v300Root[hidden]{
+ display:none!important;
+}
+/* E-REPORT source imagery, but without old SAGS lettering burned into the
+   vehicle photo. The unbranded apron-night photo is reused with the original
+   Christmas/New Year banner on top. No new decorations or duplicate text. */
+@media screen and (min-width:768px) {
+ html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout,
+ html[data-sags-season="newyear"] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout{
+  background:
+   linear-gradient(90deg,rgba(5,15,31,.96) 0%,rgba(9,26,44,.81) 44%,rgba(8,24,41,.18) 75%,rgba(8,24,41,.02) 100%),
+   url('./assets/holiday/banner.webp') right top/46% auto no-repeat,
+   url('./assets/branding/apron-night-v6494.webp') center center/cover no-repeat!important;
+ }
+}
+@media screen and (max-width:767px) {
+ html[data-sags-season] body:has(#authpanel:not(.hidden)):not(.v300-ready) main.layout{
+  background:
+   url('./assets/holiday/banner.webp') center top/100% auto no-repeat,
+   linear-gradient(180deg,rgba(4,15,30,.08),rgba(5,17,32,.68) 67%,#071a2e),
+   url('./assets/branding/apron-night-v6494.webp') center/cover no-repeat!important;
+ }
+}
