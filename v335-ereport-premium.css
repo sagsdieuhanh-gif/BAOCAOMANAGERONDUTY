@@ -268,3 +268,32 @@ html[data-sags-season] .sags-festive-preview-panel p{
  .sags-premium-hero,.sags-festive-banner,.sags-festive-login-greet,
  .sags-festive-toggle,.sags-festive-preview-button{display:none!important}
 }
+
+/* Shared modal/preview primitives replace V3.34's discarded presentation. */
+html:not([data-sags-season]) :is(.sags-festive-login-greet,.sags-festive-banner){display:none!important}
+.sags-festive-banner[hidden]{display:none!important}
+.sags-premium-hero{display:none}
+.sags-festive-preview-wrap{
+ position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;
+ background:rgba(3,12,26,.82);backdrop-filter:blur(6px);padding:20px
+}
+.sags-festive-preview-wrap[hidden]{display:none!important}
+.sags-festive-preview-panel{
+ width:min(1250px,100%);max-height:95dvh;display:flex;flex-direction:column;
+ overflow:hidden;background:#fff;border:1px solid #cfb47f;border-radius:16px;
+ box-shadow:0 22px 65px rgba(0,0,0,.52)
+}
+.sags-festive-preview-head{
+ display:flex;justify-content:space-between;align-items:center;gap:14px;
+ padding:13px 16px;background:#081b2d;border-bottom:1px solid #cfb47f
+}
+.sags-festive-preview-head h2{font-size:16px;color:#f9dfa8;margin:0}
+.sags-festive-preview-head button{
+ background:#f5dda8;border:1px solid #eac688;color:#183045;border-radius:8px;cursor:pointer
+}
+.sags-festive-preview-panel>p{
+ background:#fff7e7;color:#694b25;padding:10px 15px;margin:0;font-size:12px
+}
+.sags-festive-preview-scroll{padding:14px;overflow:auto;background:#e7edf2}
+.sags-festive-preview-image{display:block;width:100%;height:auto;max-width:1300px;margin:auto}
+@media(max-width:767px){.sags-festive-preview-wrap{padding:8px}}
