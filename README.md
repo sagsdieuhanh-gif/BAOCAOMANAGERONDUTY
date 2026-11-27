@@ -1,3 +1,20 @@
+## V3.38 — Chỉnh lại khoảng cách trong ảnh xe sau khi xem ảnh chụp trình duyệt (HDSD)
+
+V3.38 kế thừa toàn bộ các sửa lỗi giao diện/đăng nhập/header/biểu mẫu của V3.37. **Đã xem trực tiếp ảnh chụp Chromium V3.37** ở PC và điện thoại, phát hiện dòng xác nhận **“ĐỦ 4/4 ĐƠN VỊ”** quá sát các con số nhân sự ở cạnh dưới của mỗi thẻ giờ xe. Đây là lỗi trình bày có thật mà bài test tràn ngang chưa phát hiện.
+
+### Thay đổi
+- Ảnh xe giao ca có thẻ giờ xe cao từ **135px → 155px**, khoảng cách giữa hai thẻ từ **145px → 165px**; chiều cao toàn ảnh tự giãn theo số mốc xe. Không nới bề ngang, không thêm nội dung.
+- Dòng tình trạng xác nhận (`ĐỦ 4/4`, `TẠM TÍNH`, `CHỜ 4 ĐƠN VỊ`) và gợi ý xe được đưa xuống **y+141** thay vì **y+127**, tạo một dòng chân thẻ riêng, không đè lên các trị số ở `y+108`.
+- Giữ nguyên 7 mốc xe cố định, đúng tên 4 đơn vị, số người từng đơn vị, tính toán gợi ý sức chứa và phân biệt đủ/chưa đủ xác nhận. Dữ liệu không thay đổi.
+- Cả ảnh **PNG/PDF** và **XEM MẪU ẢNH XE** sử dụng chung bộ vẽ. Khi tắt giao diện lễ hội, mẫu ảnh tự về màu thường.
+
+### Cách kiểm tra
+- Mở **ứng dụng chính** `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/` và kiểm tra nhãn `V3.38`. Sau khi đăng nhập, vào **XE GIAO CA → XEM TRƯỚC / XUẤT PNG / PDF** để xem ảnh với đúng dữ liệu của các đơn vị.
+- Có thể kiểm tra **bản xem trước an toàn, không kết nối Supabase** tại `https://sagsdieuhanh-gif.github.io/BAOCAOMANAGERONDUTY/festive-preview-v338.html`; số liệu trong đây chỉ minh họa.
+- CI kiểm thử cú pháp, 38 bài nghiệp vụ/UI và Chromium ở 4 kích thước PC/tablet/điện thoại. Bổ sung kiểm tra chiều cao ảnh xe ít nhất 915px khi có 4 hàng và kiểm riêng dòng chân thẻ, lưu screenshot `ui-regression-v338` để duyệt thị giác.
+
+**Giới hạn:** Kiểm thử Chromium chạy với Supabase bị chặn, không sử dụng dữ liệu cá nhân/khai thác thực tế. Các nghiệp vụ yêu cầu tài khoản thật cần được kiểm tra trong môi trường người dùng được ủy quyền; không đánh đồng kiểm thử giao diện với toàn bộ quy trình sản xuất.
+
 ## V3.37 — Audit toàn dự án, sửa giao diện và kiểm thử bằng Chromium thật (HDSD)
 
 Bản V3.37 tiếp tục dùng 6 ảnh gốc E-Report Premium V1.4, **không thay đổi nghiệp vụ dữ liệu**, và thay thế các tài nguyên giao diện V3.36 bằng `v337-festive.css`, `v337-festive.js`. Chỉ khi toàn bộ kiểm thử và deploy đều đạt mới dùng bản phát hành mới.
