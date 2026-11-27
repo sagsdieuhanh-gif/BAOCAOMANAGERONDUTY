@@ -59,7 +59,7 @@
  }
  let premiumArtPromise=null;
  function loadPremiumArt(force=false){
-   if(!force&&!root.SagsFestiveThemeV334?.currentSeason?.())return Promise.resolve(null);
+   if(!force&&!root.SagsFestiveThemeV336?.currentSeason?.())return Promise.resolve(null);
    if(!premiumArtPromise){
      premiumArtPromise=new Promise(resolve=>{
        const image=new Image();
@@ -72,7 +72,7 @@
  }
  function draw(input,logo,overrideSeason,art){
    // V3.34: exactly the same event/window toggle as E-REPORT. Normal mode is intact.
-   const season=overrideSeason||root.SagsFestiveThemeV334?.currentSeason?.()||'';
+   const season=overrideSeason||root.SagsFestiveThemeV336?.currentSeason?.()||'';
    const festive=season==='christmas'||season==='newyear';
    if(!logo||!logo.naturalWidth)throw Error('Chưa có logo SAGS để xuất bảng xe giao ca.');
    const rows=input.rows||[];
@@ -214,7 +214,7 @@
      x.confirmed=4;
    });
    const day=new Date(Date.now()+7*60*60*1000).toISOString().slice(0,10);
-   const theme=root.SagsFestiveThemeV334?.windowSeason?.()||'christmas';
+   const theme=root.SagsFestiveThemeV336?.windowSeason?.()||'christmas';
    const imageCanvas=draw({date:day,rows:base},logo,theme,art);
    // Prominent watermark prevents demo figures being mistaken for an actual report.
    const ctx=imageCanvas.getContext('2d');
