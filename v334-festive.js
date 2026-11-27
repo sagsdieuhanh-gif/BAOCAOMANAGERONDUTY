@@ -36,6 +36,15 @@
       header.insertAdjacentElement('afterend',banner);
     }
     if(banner)banner.hidden=!active();
+    const login=document.getElementById('authpanel');
+    if(login&&!document.getElementById('sagsFestiveLoginGreetV334')){
+      const greet=el('div','sags-festive-login-greet');
+      greet.id='sagsFestiveLoginGreetV334';
+      greet.setAttribute('aria-hidden','true');
+      greet.appendChild(el('strong','',title));
+      greet.appendChild(el('span','',subtitle));
+      login.parentElement?.appendChild(greet);
+    }
     const account=document.getElementById('accountVersionRow')||header;
     if(account&&!account.querySelector('[data-sags-festive-toggle]')){
       const button=el('button','sags-festive-toggle');
