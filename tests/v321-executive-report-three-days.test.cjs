@@ -64,7 +64,7 @@ function data(day,revision){
 for(const day of Object.keys(schedule))for(const rev of [1,2]){
  const obj=data(day,rev),r=mod.build(obj),html=mod.renderHtml(r),cfg=schedule[day];
  assert.equal(r.topics.length,10,'All ten subjects present');
- assert.ok(html.includes('v322-two-page')&&html.includes('v322-topic-table'),'Compact executive report restored');
+ assert.ok(html.includes('v330-readable')&&html.includes('v330-topic-block'),'Readable executive report retains ten framed topics');
  assert.ok(!html.includes('Nguồn: quân số xác nhận')&&!html.includes('Nguồn Lần 2: Book4.xlsx'));
  assert.ok(!html.includes('Lần 1 được giữ làm mốc so sánh'),'Hidden raw source only');
  assert.ok(!html.includes('II. BẢNG KIỂM SOÁT'),'Dense four-column analysis removed');
