@@ -43,7 +43,7 @@ const source=fs.readFileSync('v300-workspace.js','utf8');
 assert.ok(source.includes("if(u==='KHO')return cargoUnitTables()"));
 assert.ok(source.includes("const kg=model.toKg(entered,unit)"),'Persist normalized kilograms only');
 assert.ok(source.includes("if(hasSchedule&&matched!==side)"),'Flight number checked against direction');
-assert.ok(source.includes('updateCargoTotals();return;'));
+assert.ok(source.includes('updateCargoTotals();updateUnitPreview();return;')&&source.includes("rootNode.addEventListener('input'"),'Cargo totals and preview both update after input');
 assert.ok(source.includes("rootNode.addEventListener('input'"),'Live totals on input');
 const injected=source.replace(' root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:',
  ' root.__v320CargoTest={setState:v=>{state=v},cargoUnitTables,cargoEntryRow};\n root.SagsWorkspaceV300={mount,refresh,go,forecast,highlights,_test:');
